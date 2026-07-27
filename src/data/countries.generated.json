@@ -1,0 +1,2237 @@
+[
+  {
+    "code": "AW",
+    "nameZh": "阿鲁巴",
+    "continent": "Americas",
+    "capital": [
+      12.52,
+      -70.03
+    ]
+  },
+  {
+    "code": "MW",
+    "nameZh": "马拉维",
+    "continent": "Africa",
+    "capital": [
+      -13.97,
+      33.78
+    ]
+  },
+  {
+    "code": "MY",
+    "nameZh": "马来西亚",
+    "continent": "Asia",
+    "capital": [
+      3.17,
+      101.7
+    ]
+  },
+  {
+    "code": "YT",
+    "nameZh": "马约特",
+    "continent": "Africa",
+    "capital": [
+      -12.78,
+      45.22
+    ]
+  },
+  {
+    "code": "NA",
+    "nameZh": "纳米比亚",
+    "continent": "Africa",
+    "capital": [
+      -22.57,
+      17.08
+    ]
+  },
+  {
+    "code": "NC",
+    "nameZh": "新喀里多尼亚",
+    "continent": "Oceania",
+    "capital": [
+      -22.27,
+      166.45
+    ]
+  },
+  {
+    "code": "NE",
+    "nameZh": "尼日尔",
+    "continent": "Africa",
+    "capital": [
+      13.52,
+      2.12
+    ]
+  },
+  {
+    "code": "NF",
+    "nameZh": "诺福克岛",
+    "continent": "Oceania",
+    "capital": [
+      -29.05,
+      167.97
+    ]
+  },
+  {
+    "code": "NG",
+    "nameZh": "尼日利亚",
+    "continent": "Africa",
+    "capital": [
+      9.08,
+      7.53
+    ]
+  },
+  {
+    "code": "NI",
+    "nameZh": "尼加拉瓜",
+    "continent": "Americas",
+    "capital": [
+      12.13,
+      -86.25
+    ]
+  },
+  {
+    "code": "NU",
+    "nameZh": "纽埃",
+    "continent": "Oceania",
+    "capital": [
+      -19.02,
+      -169.92
+    ]
+  },
+  {
+    "code": "NL",
+    "nameZh": "荷兰",
+    "continent": "Europe",
+    "capital": [
+      52.35,
+      4.92
+    ]
+  },
+  {
+    "code": "NO",
+    "nameZh": "挪威",
+    "continent": "Europe",
+    "capital": [
+      59.92,
+      10.75
+    ]
+  },
+  {
+    "code": "NP",
+    "nameZh": "尼泊尔",
+    "continent": "Asia",
+    "capital": [
+      27.72,
+      85.32
+    ]
+  },
+  {
+    "code": "NR",
+    "nameZh": "瑙鲁",
+    "continent": "Oceania",
+    "capital": [
+      -0.55,
+      166.92
+    ]
+  },
+  {
+    "code": "NZ",
+    "nameZh": "新西兰",
+    "continent": "Oceania",
+    "capital": [
+      -41.3,
+      174.78
+    ]
+  },
+  {
+    "code": "OM",
+    "nameZh": "阿曼",
+    "continent": "Asia",
+    "capital": [
+      23.62,
+      58.58
+    ]
+  },
+  {
+    "code": "PK",
+    "nameZh": "巴基斯坦",
+    "continent": "Asia",
+    "capital": [
+      33.68,
+      73.05
+    ]
+  },
+  {
+    "code": "PA",
+    "nameZh": "巴拿马",
+    "continent": "Americas",
+    "capital": [
+      8.97,
+      -79.53
+    ]
+  },
+  {
+    "code": "PN",
+    "nameZh": "皮特凯恩群岛",
+    "continent": "Oceania",
+    "capital": [
+      -25.07,
+      -130.08
+    ]
+  },
+  {
+    "code": "PE",
+    "nameZh": "秘鲁",
+    "continent": "Americas",
+    "capital": [
+      -12.05,
+      -77.05
+    ]
+  },
+  {
+    "code": "PH",
+    "nameZh": "菲律宾",
+    "continent": "Asia",
+    "capital": [
+      14.6,
+      120.97
+    ]
+  },
+  {
+    "code": "PW",
+    "nameZh": "帕劳",
+    "continent": "Oceania",
+    "capital": [
+      7.5,
+      134.62
+    ]
+  },
+  {
+    "code": "PG",
+    "nameZh": "巴布亚新几内亚",
+    "continent": "Oceania",
+    "capital": [
+      -9.45,
+      147.18
+    ]
+  },
+  {
+    "code": "PL",
+    "nameZh": "波兰",
+    "continent": "Europe",
+    "capital": [
+      52.25,
+      21.0
+    ]
+  },
+  {
+    "code": "PR",
+    "nameZh": "波多黎各",
+    "continent": "Americas",
+    "capital": [
+      18.47,
+      -66.12
+    ]
+  },
+  {
+    "code": "KP",
+    "nameZh": "朝鲜",
+    "continent": "Asia",
+    "capital": [
+      39.02,
+      125.75
+    ]
+  },
+  {
+    "code": "PT",
+    "nameZh": "葡萄牙",
+    "continent": "Europe",
+    "capital": [
+      38.72,
+      -9.13
+    ]
+  },
+  {
+    "code": "MU",
+    "nameZh": "毛里求斯",
+    "continent": "Africa",
+    "capital": [
+      -20.15,
+      57.48
+    ]
+  },
+  {
+    "code": "PY",
+    "nameZh": "巴拉圭",
+    "continent": "Americas",
+    "capital": [
+      -25.28,
+      -57.57
+    ]
+  },
+  {
+    "code": "MQ",
+    "nameZh": "马提尼克",
+    "continent": "Americas",
+    "capital": [
+      14.6,
+      -61.08
+    ]
+  },
+  {
+    "code": "MR",
+    "nameZh": "毛里塔尼亚",
+    "continent": "Africa",
+    "capital": [
+      18.07,
+      -15.97
+    ]
+  },
+  {
+    "code": "LB",
+    "nameZh": "黎巴嫩",
+    "continent": "Asia",
+    "capital": [
+      33.87,
+      35.5
+    ]
+  },
+  {
+    "code": "LR",
+    "nameZh": "利比里亚",
+    "continent": "Africa",
+    "capital": [
+      6.3,
+      -10.8
+    ]
+  },
+  {
+    "code": "LY",
+    "nameZh": "利比亚",
+    "continent": "Africa",
+    "capital": [
+      32.88,
+      13.17
+    ]
+  },
+  {
+    "code": "LC",
+    "nameZh": "圣卢西亚",
+    "continent": "Americas",
+    "capital": [
+      14.0,
+      -61.0
+    ]
+  },
+  {
+    "code": "LI",
+    "nameZh": "列支敦士登",
+    "continent": "Europe",
+    "capital": [
+      47.13,
+      9.52
+    ]
+  },
+  {
+    "code": "LK",
+    "nameZh": "斯里兰卡",
+    "continent": "Asia",
+    "capital": [
+      6.89,
+      79.9
+    ]
+  },
+  {
+    "code": "LS",
+    "nameZh": "莱索托",
+    "continent": "Africa",
+    "capital": [
+      -29.32,
+      27.48
+    ]
+  },
+  {
+    "code": "LT",
+    "nameZh": "立陶宛",
+    "continent": "Europe",
+    "capital": [
+      54.68,
+      25.32
+    ]
+  },
+  {
+    "code": "LU",
+    "nameZh": "卢森堡",
+    "continent": "Europe",
+    "capital": [
+      49.6,
+      6.12
+    ]
+  },
+  {
+    "code": "LV",
+    "nameZh": "拉脱维亚",
+    "continent": "Europe",
+    "capital": [
+      56.95,
+      24.1
+    ]
+  },
+  {
+    "code": "MO",
+    "nameZh": "澳门",
+    "continent": "Asia",
+    "capital": null
+  },
+  {
+    "code": "MF",
+    "nameZh": "圣马丁",
+    "continent": "Americas",
+    "capital": [
+      18.07,
+      -63.08
+    ]
+  },
+  {
+    "code": "MA",
+    "nameZh": "摩洛哥",
+    "continent": "Africa",
+    "capital": [
+      34.02,
+      -6.82
+    ]
+  },
+  {
+    "code": "MC",
+    "nameZh": "摩纳哥",
+    "continent": "Europe",
+    "capital": [
+      43.73,
+      7.42
+    ]
+  },
+  {
+    "code": "MD",
+    "nameZh": "摩尔多瓦",
+    "continent": "Europe",
+    "capital": [
+      47.01,
+      28.9
+    ]
+  },
+  {
+    "code": "MG",
+    "nameZh": "马达加斯加",
+    "continent": "Africa",
+    "capital": [
+      -18.92,
+      47.52
+    ]
+  },
+  {
+    "code": "MV",
+    "nameZh": "马尔代夫",
+    "continent": "Asia",
+    "capital": [
+      4.17,
+      73.51
+    ]
+  },
+  {
+    "code": "MX",
+    "nameZh": "墨西哥",
+    "continent": "Americas",
+    "capital": [
+      19.43,
+      -99.13
+    ]
+  },
+  {
+    "code": "MH",
+    "nameZh": "马绍尔群岛",
+    "continent": "Oceania",
+    "capital": [
+      7.1,
+      171.38
+    ]
+  },
+  {
+    "code": "MK",
+    "nameZh": "北馬其頓",
+    "continent": "Europe",
+    "capital": [
+      42.0,
+      21.43
+    ]
+  },
+  {
+    "code": "ML",
+    "nameZh": "马里",
+    "continent": "Africa",
+    "capital": [
+      12.65,
+      -8.0
+    ]
+  },
+  {
+    "code": "MT",
+    "nameZh": "马耳他",
+    "continent": "Europe",
+    "capital": [
+      35.88,
+      14.5
+    ]
+  },
+  {
+    "code": "MM",
+    "nameZh": "缅甸",
+    "continent": "Asia",
+    "capital": [
+      19.76,
+      96.07
+    ]
+  },
+  {
+    "code": "ME",
+    "nameZh": "黑山",
+    "continent": "Europe",
+    "capital": [
+      42.43,
+      19.27
+    ]
+  },
+  {
+    "code": "MN",
+    "nameZh": "蒙古",
+    "continent": "Asia",
+    "capital": [
+      47.92,
+      106.91
+    ]
+  },
+  {
+    "code": "MP",
+    "nameZh": "北马里亚纳群岛",
+    "continent": "Oceania",
+    "capital": [
+      15.2,
+      145.75
+    ]
+  },
+  {
+    "code": "MZ",
+    "nameZh": "莫桑比克",
+    "continent": "Africa",
+    "capital": [
+      -25.95,
+      32.58
+    ]
+  },
+  {
+    "code": "MS",
+    "nameZh": "蒙特塞拉特",
+    "continent": "Americas",
+    "capital": [
+      16.7,
+      -62.22
+    ]
+  },
+  {
+    "code": "PS",
+    "nameZh": "巴勒斯坦",
+    "continent": "Asia",
+    "capital": [
+      31.9,
+      35.2
+    ]
+  },
+  {
+    "code": "PF",
+    "nameZh": "法属波利尼西亚",
+    "continent": "Oceania",
+    "capital": [
+      -17.53,
+      -149.56
+    ]
+  },
+  {
+    "code": "QA",
+    "nameZh": "卡塔尔",
+    "continent": "Asia",
+    "capital": [
+      25.28,
+      51.53
+    ]
+  },
+  {
+    "code": "TK",
+    "nameZh": "托克劳",
+    "continent": "Oceania",
+    "capital": [
+      -9.38,
+      -171.22
+    ]
+  },
+  {
+    "code": "TM",
+    "nameZh": "土库曼斯坦",
+    "continent": "Asia",
+    "capital": [
+      37.95,
+      58.38
+    ]
+  },
+  {
+    "code": "TL",
+    "nameZh": "东帝汶",
+    "continent": "Asia",
+    "capital": [
+      -8.58,
+      125.6
+    ]
+  },
+  {
+    "code": "TO",
+    "nameZh": "汤加",
+    "continent": "Oceania",
+    "capital": [
+      -21.13,
+      -175.2
+    ]
+  },
+  {
+    "code": "TT",
+    "nameZh": "特立尼达和多巴哥",
+    "continent": "Americas",
+    "capital": [
+      10.65,
+      -61.52
+    ]
+  },
+  {
+    "code": "TN",
+    "nameZh": "突尼斯",
+    "continent": "Africa",
+    "capital": [
+      36.8,
+      10.18
+    ]
+  },
+  {
+    "code": "TR",
+    "nameZh": "土耳其",
+    "continent": "Asia",
+    "capital": [
+      39.93,
+      32.87
+    ]
+  },
+  {
+    "code": "TV",
+    "nameZh": "图瓦卢",
+    "continent": "Oceania",
+    "capital": [
+      -8.52,
+      179.22
+    ]
+  },
+  {
+    "code": "TW",
+    "nameZh": "台灣",
+    "continent": "Asia",
+    "capital": [
+      25.03,
+      121.52
+    ]
+  },
+  {
+    "code": "TZ",
+    "nameZh": "坦桑尼亚",
+    "continent": "Africa",
+    "capital": [
+      -6.16,
+      35.75
+    ]
+  },
+  {
+    "code": "UG",
+    "nameZh": "乌干达",
+    "continent": "Africa",
+    "capital": [
+      0.32,
+      32.55
+    ]
+  },
+  {
+    "code": "UA",
+    "nameZh": "乌克兰",
+    "continent": "Europe",
+    "capital": [
+      50.43,
+      30.52
+    ]
+  },
+  {
+    "code": "UM",
+    "nameZh": "美国本土外小岛屿",
+    "continent": "Americas",
+    "capital": null
+  },
+  {
+    "code": "UY",
+    "nameZh": "乌拉圭",
+    "continent": "Americas",
+    "capital": [
+      -34.85,
+      -56.17
+    ]
+  },
+  {
+    "code": "US",
+    "nameZh": "美国",
+    "continent": "Americas",
+    "capital": [
+      38.89,
+      -77.05
+    ]
+  },
+  {
+    "code": "UZ",
+    "nameZh": "乌兹别克斯坦",
+    "continent": "Asia",
+    "capital": [
+      41.32,
+      69.25
+    ]
+  },
+  {
+    "code": "VA",
+    "nameZh": "梵蒂冈",
+    "continent": "Europe",
+    "capital": [
+      41.9,
+      12.45
+    ]
+  },
+  {
+    "code": "VC",
+    "nameZh": "圣文森特和格林纳丁斯",
+    "continent": "Americas",
+    "capital": [
+      13.13,
+      -61.22
+    ]
+  },
+  {
+    "code": "VE",
+    "nameZh": "委内瑞拉",
+    "continent": "Americas",
+    "capital": [
+      10.48,
+      -66.87
+    ]
+  },
+  {
+    "code": "VG",
+    "nameZh": "英属维尔京群岛",
+    "continent": "Americas",
+    "capital": [
+      18.42,
+      -64.62
+    ]
+  },
+  {
+    "code": "VI",
+    "nameZh": "美属维尔京群岛",
+    "continent": "Americas",
+    "capital": [
+      18.35,
+      -64.93
+    ]
+  },
+  {
+    "code": "VN",
+    "nameZh": "越南",
+    "continent": "Asia",
+    "capital": [
+      21.03,
+      105.85
+    ]
+  },
+  {
+    "code": "VU",
+    "nameZh": "瓦努阿图",
+    "continent": "Oceania",
+    "capital": [
+      -17.73,
+      168.32
+    ]
+  },
+  {
+    "code": "WF",
+    "nameZh": "瓦利斯和富图纳群岛",
+    "continent": "Oceania",
+    "capital": [
+      -13.95,
+      -171.93
+    ]
+  },
+  {
+    "code": "WS",
+    "nameZh": "萨摩亚",
+    "continent": "Oceania",
+    "capital": [
+      -13.82,
+      -171.77
+    ]
+  },
+  {
+    "code": "YE",
+    "nameZh": "也门",
+    "continent": "Asia",
+    "capital": [
+      15.37,
+      44.19
+    ]
+  },
+  {
+    "code": "ZA",
+    "nameZh": "南非",
+    "continent": "Africa",
+    "capital": [
+      -25.7,
+      28.22
+    ]
+  },
+  {
+    "code": "TJ",
+    "nameZh": "塔吉克斯坦",
+    "continent": "Asia",
+    "capital": [
+      38.55,
+      68.77
+    ]
+  },
+  {
+    "code": "TH",
+    "nameZh": "泰国",
+    "continent": "Asia",
+    "capital": [
+      13.75,
+      100.52
+    ]
+  },
+  {
+    "code": "TG",
+    "nameZh": "多哥",
+    "continent": "Africa",
+    "capital": [
+      6.14,
+      1.21
+    ]
+  },
+  {
+    "code": "TD",
+    "nameZh": "乍得",
+    "continent": "Africa",
+    "capital": [
+      12.1,
+      15.03
+    ]
+  },
+  {
+    "code": "RE",
+    "nameZh": "留尼旺岛",
+    "continent": "Africa",
+    "capital": [
+      -20.88,
+      55.45
+    ]
+  },
+  {
+    "code": "RO",
+    "nameZh": "罗马尼亚",
+    "continent": "Europe",
+    "capital": [
+      44.43,
+      26.1
+    ]
+  },
+  {
+    "code": "RU",
+    "nameZh": "俄罗斯",
+    "continent": "Europe",
+    "capital": [
+      55.75,
+      37.6
+    ]
+  },
+  {
+    "code": "RW",
+    "nameZh": "卢旺达",
+    "continent": "Africa",
+    "capital": [
+      -1.95,
+      30.05
+    ]
+  },
+  {
+    "code": "SA",
+    "nameZh": "沙特阿拉伯",
+    "continent": "Asia",
+    "capital": [
+      24.65,
+      46.7
+    ]
+  },
+  {
+    "code": "SD",
+    "nameZh": "苏丹",
+    "continent": "Africa",
+    "capital": [
+      15.6,
+      32.53
+    ]
+  },
+  {
+    "code": "SN",
+    "nameZh": "塞内加尔",
+    "continent": "Africa",
+    "capital": [
+      14.73,
+      -17.63
+    ]
+  },
+  {
+    "code": "SG",
+    "nameZh": "新加坡",
+    "continent": "Asia",
+    "capital": [
+      1.28,
+      103.85
+    ]
+  },
+  {
+    "code": "GS",
+    "nameZh": "南乔治亚",
+    "continent": "Antarctic",
+    "capital": [
+      -54.28,
+      -36.5
+    ]
+  },
+  {
+    "code": "SJ",
+    "nameZh": "斯瓦尔巴特",
+    "continent": "Europe",
+    "capital": [
+      78.22,
+      15.63
+    ]
+  },
+  {
+    "code": "SB",
+    "nameZh": "所罗门群岛",
+    "continent": "Oceania",
+    "capital": [
+      -9.43,
+      159.95
+    ]
+  },
+  {
+    "code": "SL",
+    "nameZh": "塞拉利昂",
+    "continent": "Africa",
+    "capital": [
+      8.48,
+      -13.23
+    ]
+  },
+  {
+    "code": "SV",
+    "nameZh": "萨尔瓦多",
+    "continent": "Americas",
+    "capital": [
+      13.7,
+      -89.2
+    ]
+  },
+  {
+    "code": "LA",
+    "nameZh": "老挝",
+    "continent": "Asia",
+    "capital": [
+      17.97,
+      102.6
+    ]
+  },
+  {
+    "code": "SM",
+    "nameZh": "圣马力诺",
+    "continent": "Europe",
+    "capital": [
+      43.94,
+      12.45
+    ]
+  },
+  {
+    "code": "PM",
+    "nameZh": "圣皮埃尔和密克隆",
+    "continent": "Americas",
+    "capital": [
+      46.77,
+      -56.18
+    ]
+  },
+  {
+    "code": "RS",
+    "nameZh": "塞尔维亚",
+    "continent": "Europe",
+    "capital": [
+      44.83,
+      20.5
+    ]
+  },
+  {
+    "code": "SS",
+    "nameZh": "南苏丹",
+    "continent": "Africa",
+    "capital": [
+      4.85,
+      31.62
+    ]
+  },
+  {
+    "code": "ST",
+    "nameZh": "圣多美和普林西比",
+    "continent": "Africa",
+    "capital": [
+      0.34,
+      6.73
+    ]
+  },
+  {
+    "code": "SR",
+    "nameZh": "苏里南",
+    "continent": "Americas",
+    "capital": [
+      5.83,
+      -55.17
+    ]
+  },
+  {
+    "code": "SK",
+    "nameZh": "斯洛伐克",
+    "continent": "Europe",
+    "capital": [
+      48.15,
+      17.12
+    ]
+  },
+  {
+    "code": "SI",
+    "nameZh": "斯洛文尼亚",
+    "continent": "Europe",
+    "capital": [
+      46.05,
+      14.52
+    ]
+  },
+  {
+    "code": "SE",
+    "nameZh": "瑞典",
+    "continent": "Europe",
+    "capital": [
+      59.33,
+      18.05
+    ]
+  },
+  {
+    "code": "SZ",
+    "nameZh": "斯威士兰",
+    "continent": "Africa",
+    "capital": [
+      -26.32,
+      31.13
+    ]
+  },
+  {
+    "code": "SX",
+    "nameZh": "圣马丁岛",
+    "continent": "Americas",
+    "capital": [
+      18.02,
+      -63.03
+    ]
+  },
+  {
+    "code": "SC",
+    "nameZh": "塞舌尔",
+    "continent": "Africa",
+    "capital": [
+      -4.62,
+      55.45
+    ]
+  },
+  {
+    "code": "SY",
+    "nameZh": "叙利亚",
+    "continent": "Asia",
+    "capital": [
+      33.5,
+      36.3
+    ]
+  },
+  {
+    "code": "TC",
+    "nameZh": "特克斯和凯科斯群岛",
+    "continent": "Americas",
+    "capital": [
+      21.46,
+      -71.14
+    ]
+  },
+  {
+    "code": "SO",
+    "nameZh": "索马里",
+    "continent": "Africa",
+    "capital": [
+      2.07,
+      45.33
+    ]
+  },
+  {
+    "code": "KW",
+    "nameZh": "科威特",
+    "continent": "Asia",
+    "capital": [
+      29.37,
+      47.97
+    ]
+  },
+  {
+    "code": "XK",
+    "nameZh": "科索沃",
+    "continent": "Europe",
+    "capital": [
+      42.67,
+      21.17
+    ]
+  },
+  {
+    "code": "KR",
+    "nameZh": "韩国",
+    "continent": "Asia",
+    "capital": [
+      37.55,
+      126.98
+    ]
+  },
+  {
+    "code": "BR",
+    "nameZh": "巴西",
+    "continent": "Americas",
+    "capital": [
+      -15.79,
+      -47.88
+    ]
+  },
+  {
+    "code": "BB",
+    "nameZh": "巴巴多斯",
+    "continent": "Americas",
+    "capital": [
+      13.1,
+      -59.62
+    ]
+  },
+  {
+    "code": "BN",
+    "nameZh": "文莱",
+    "continent": "Asia",
+    "capital": [
+      4.88,
+      114.93
+    ]
+  },
+  {
+    "code": "BT",
+    "nameZh": "不丹",
+    "continent": "Asia",
+    "capital": [
+      27.47,
+      89.63
+    ]
+  },
+  {
+    "code": "BV",
+    "nameZh": "布维岛",
+    "continent": "Antarctic",
+    "capital": null
+  },
+  {
+    "code": "BW",
+    "nameZh": "博茨瓦纳",
+    "continent": "Africa",
+    "capital": [
+      -24.63,
+      25.9
+    ]
+  },
+  {
+    "code": "CF",
+    "nameZh": "中非共和国",
+    "continent": "Africa",
+    "capital": [
+      4.37,
+      18.58
+    ]
+  },
+  {
+    "code": "CA",
+    "nameZh": "加拿大",
+    "continent": "Americas",
+    "capital": [
+      45.42,
+      -75.7
+    ]
+  },
+  {
+    "code": "CC",
+    "nameZh": "科科斯",
+    "continent": "Oceania",
+    "capital": [
+      -12.17,
+      96.83
+    ]
+  },
+  {
+    "code": "CH",
+    "nameZh": "瑞士",
+    "continent": "Europe",
+    "capital": [
+      46.92,
+      7.47
+    ]
+  },
+  {
+    "code": "CL",
+    "nameZh": "智利",
+    "continent": "Americas",
+    "capital": [
+      -33.45,
+      -70.67
+    ]
+  },
+  {
+    "code": "CN",
+    "nameZh": "中国",
+    "continent": "Asia",
+    "capital": [
+      39.92,
+      116.38
+    ]
+  },
+  {
+    "code": "CI",
+    "nameZh": "科特迪瓦",
+    "continent": "Africa",
+    "capital": [
+      6.82,
+      -5.27
+    ]
+  },
+  {
+    "code": "CM",
+    "nameZh": "喀麦隆",
+    "continent": "Africa",
+    "capital": [
+      3.85,
+      11.5
+    ]
+  },
+  {
+    "code": "CD",
+    "nameZh": "民主刚果",
+    "continent": "Africa",
+    "capital": [
+      -4.32,
+      15.3
+    ]
+  },
+  {
+    "code": "CG",
+    "nameZh": "刚果",
+    "continent": "Africa",
+    "capital": [
+      -4.25,
+      15.28
+    ]
+  },
+  {
+    "code": "CK",
+    "nameZh": "库克群岛",
+    "continent": "Oceania",
+    "capital": [
+      -21.2,
+      -159.77
+    ]
+  },
+  {
+    "code": "CO",
+    "nameZh": "哥伦比亚",
+    "continent": "Americas",
+    "capital": [
+      4.71,
+      -74.07
+    ]
+  },
+  {
+    "code": "KM",
+    "nameZh": "科摩罗",
+    "continent": "Africa",
+    "capital": [
+      -11.7,
+      43.23
+    ]
+  },
+  {
+    "code": "CV",
+    "nameZh": "佛得角",
+    "continent": "Africa",
+    "capital": [
+      14.92,
+      -23.52
+    ]
+  },
+  {
+    "code": "CR",
+    "nameZh": "哥斯达黎加",
+    "continent": "Americas",
+    "capital": [
+      9.93,
+      -84.09
+    ]
+  },
+  {
+    "code": "CU",
+    "nameZh": "古巴",
+    "continent": "Americas",
+    "capital": [
+      23.12,
+      -82.35
+    ]
+  },
+  {
+    "code": "CW",
+    "nameZh": "库拉索",
+    "continent": "Americas",
+    "capital": [
+      12.1,
+      -68.92
+    ]
+  },
+  {
+    "code": "CX",
+    "nameZh": "圣诞岛",
+    "continent": "Oceania",
+    "capital": [
+      -10.42,
+      105.68
+    ]
+  },
+  {
+    "code": "KY",
+    "nameZh": "开曼群岛",
+    "continent": "Americas",
+    "capital": [
+      19.3,
+      -81.38
+    ]
+  },
+  {
+    "code": "CY",
+    "nameZh": "塞浦路斯",
+    "continent": "Europe",
+    "capital": [
+      35.17,
+      33.37
+    ]
+  },
+  {
+    "code": "CZ",
+    "nameZh": "捷克",
+    "continent": "Europe",
+    "capital": [
+      50.08,
+      14.47
+    ]
+  },
+  {
+    "code": "BQ",
+    "nameZh": "荷蘭加勒比區",
+    "continent": "Americas",
+    "capital": [
+      12.14,
+      -68.27
+    ]
+  },
+  {
+    "code": "BO",
+    "nameZh": "玻利维亚",
+    "continent": "Americas",
+    "capital": [
+      -19.02,
+      -65.26
+    ]
+  },
+  {
+    "code": "BM",
+    "nameZh": "百慕大",
+    "continent": "Americas",
+    "capital": [
+      32.28,
+      -64.78
+    ]
+  },
+  {
+    "code": "BZ",
+    "nameZh": "伯利兹",
+    "continent": "Americas",
+    "capital": [
+      17.25,
+      -88.77
+    ]
+  },
+  {
+    "code": "AF",
+    "nameZh": "阿富汗",
+    "continent": "Asia",
+    "capital": [
+      34.52,
+      69.18
+    ]
+  },
+  {
+    "code": "AO",
+    "nameZh": "安哥拉",
+    "continent": "Africa",
+    "capital": [
+      -8.83,
+      13.22
+    ]
+  },
+  {
+    "code": "AI",
+    "nameZh": "安圭拉",
+    "continent": "Americas",
+    "capital": [
+      18.22,
+      -63.05
+    ]
+  },
+  {
+    "code": "AX",
+    "nameZh": "奥兰群岛",
+    "continent": "Europe",
+    "capital": [
+      60.12,
+      19.9
+    ]
+  },
+  {
+    "code": "AL",
+    "nameZh": "阿尔巴尼亚",
+    "continent": "Europe",
+    "capital": [
+      41.32,
+      19.82
+    ]
+  },
+  {
+    "code": "AD",
+    "nameZh": "安道尔",
+    "continent": "Europe",
+    "capital": [
+      42.5,
+      1.52
+    ]
+  },
+  {
+    "code": "AE",
+    "nameZh": "阿拉伯联合酋长国",
+    "continent": "Asia",
+    "capital": [
+      24.47,
+      54.37
+    ]
+  },
+  {
+    "code": "AR",
+    "nameZh": "阿根廷",
+    "continent": "Americas",
+    "capital": [
+      -34.58,
+      -58.67
+    ]
+  },
+  {
+    "code": "AM",
+    "nameZh": "亚美尼亚",
+    "continent": "Asia",
+    "capital": [
+      40.17,
+      44.5
+    ]
+  },
+  {
+    "code": "AS",
+    "nameZh": "美属萨摩亚",
+    "continent": "Oceania",
+    "capital": [
+      -14.27,
+      -170.7
+    ]
+  },
+  {
+    "code": "AQ",
+    "nameZh": "南极洲",
+    "continent": "Antarctic",
+    "capital": null
+  },
+  {
+    "code": "TF",
+    "nameZh": "法国南部和南极土地",
+    "continent": "Antarctic",
+    "capital": [
+      48.81,
+      -1.4
+    ]
+  },
+  {
+    "code": "AG",
+    "nameZh": "安提瓜和巴布达",
+    "continent": "Americas",
+    "capital": [
+      17.12,
+      -61.85
+    ]
+  },
+  {
+    "code": "DE",
+    "nameZh": "德国",
+    "continent": "Europe",
+    "capital": [
+      52.52,
+      13.4
+    ]
+  },
+  {
+    "code": "AU",
+    "nameZh": "澳大利亚",
+    "continent": "Oceania",
+    "capital": [
+      -35.27,
+      149.13
+    ]
+  },
+  {
+    "code": "AZ",
+    "nameZh": "阿塞拜疆",
+    "continent": "Asia",
+    "capital": [
+      40.38,
+      49.87
+    ]
+  },
+  {
+    "code": "BI",
+    "nameZh": "布隆迪",
+    "continent": "Africa",
+    "capital": [
+      -3.43,
+      29.93
+    ]
+  },
+  {
+    "code": "BE",
+    "nameZh": "比利时",
+    "continent": "Europe",
+    "capital": [
+      50.83,
+      4.33
+    ]
+  },
+  {
+    "code": "BJ",
+    "nameZh": "贝宁",
+    "continent": "Africa",
+    "capital": [
+      6.48,
+      2.62
+    ]
+  },
+  {
+    "code": "BF",
+    "nameZh": "布基纳法索",
+    "continent": "Africa",
+    "capital": [
+      12.37,
+      -1.52
+    ]
+  },
+  {
+    "code": "BD",
+    "nameZh": "孟加拉国",
+    "continent": "Asia",
+    "capital": [
+      23.72,
+      90.4
+    ]
+  },
+  {
+    "code": "BG",
+    "nameZh": "保加利亚",
+    "continent": "Europe",
+    "capital": [
+      42.68,
+      23.32
+    ]
+  },
+  {
+    "code": "BH",
+    "nameZh": "巴林",
+    "continent": "Asia",
+    "capital": [
+      26.23,
+      50.57
+    ]
+  },
+  {
+    "code": "BS",
+    "nameZh": "巴哈马",
+    "continent": "Americas",
+    "capital": [
+      25.08,
+      -77.35
+    ]
+  },
+  {
+    "code": "BA",
+    "nameZh": "波斯尼亚和黑塞哥维那",
+    "continent": "Europe",
+    "capital": [
+      43.87,
+      18.42
+    ]
+  },
+  {
+    "code": "BL",
+    "nameZh": "圣巴泰勒米",
+    "continent": "Americas",
+    "capital": [
+      17.88,
+      -62.85
+    ]
+  },
+  {
+    "code": "SH",
+    "nameZh": "圣赫勒拿、阿森松和特里斯坦-达库尼亚",
+    "continent": "Africa",
+    "capital": [
+      -15.93,
+      -5.72
+    ]
+  },
+  {
+    "code": "BY",
+    "nameZh": "白俄罗斯",
+    "continent": "Europe",
+    "capital": [
+      53.9,
+      27.57
+    ]
+  },
+  {
+    "code": "AT",
+    "nameZh": "奥地利",
+    "continent": "Europe",
+    "capital": [
+      48.2,
+      16.37
+    ]
+  },
+  {
+    "code": "ZM",
+    "nameZh": "赞比亚",
+    "continent": "Africa",
+    "capital": [
+      -15.42,
+      28.28
+    ]
+  },
+  {
+    "code": "DJ",
+    "nameZh": "吉布提",
+    "continent": "Africa",
+    "capital": [
+      11.58,
+      43.15
+    ]
+  },
+  {
+    "code": "DK",
+    "nameZh": "丹麦",
+    "continent": "Europe",
+    "capital": [
+      55.67,
+      12.58
+    ]
+  },
+  {
+    "code": "GY",
+    "nameZh": "圭亚那",
+    "continent": "Americas",
+    "capital": [
+      6.8,
+      -58.15
+    ]
+  },
+  {
+    "code": "HK",
+    "nameZh": "香港",
+    "continent": "Asia",
+    "capital": [
+      22.267,
+      114.188
+    ]
+  },
+  {
+    "code": "HM",
+    "nameZh": "赫德岛和麦当劳群岛",
+    "continent": "Antarctic",
+    "capital": null
+  },
+  {
+    "code": "HN",
+    "nameZh": "洪都拉斯",
+    "continent": "Americas",
+    "capital": [
+      14.1,
+      -87.22
+    ]
+  },
+  {
+    "code": "HR",
+    "nameZh": "克罗地亚",
+    "continent": "Europe",
+    "capital": [
+      45.8,
+      16.0
+    ]
+  },
+  {
+    "code": "HT",
+    "nameZh": "海地",
+    "continent": "Americas",
+    "capital": [
+      18.53,
+      -72.33
+    ]
+  },
+  {
+    "code": "HU",
+    "nameZh": "匈牙利",
+    "continent": "Europe",
+    "capital": [
+      47.5,
+      19.08
+    ]
+  },
+  {
+    "code": "ID",
+    "nameZh": "印度尼西亚",
+    "continent": "Asia",
+    "capital": [
+      -6.17,
+      106.82
+    ]
+  },
+  {
+    "code": "IM",
+    "nameZh": "马恩岛",
+    "continent": "Europe",
+    "capital": [
+      54.15,
+      -4.48
+    ]
+  },
+  {
+    "code": "IN",
+    "nameZh": "印度",
+    "continent": "Asia",
+    "capital": [
+      28.6,
+      77.2
+    ]
+  },
+  {
+    "code": "IO",
+    "nameZh": "英属印度洋领地",
+    "continent": "Africa",
+    "capital": [
+      -7.3,
+      72.4
+    ]
+  },
+  {
+    "code": "IE",
+    "nameZh": "爱尔兰",
+    "continent": "Europe",
+    "capital": [
+      53.32,
+      -6.23
+    ]
+  },
+  {
+    "code": "IR",
+    "nameZh": "伊朗",
+    "continent": "Asia",
+    "capital": [
+      35.7,
+      51.42
+    ]
+  },
+  {
+    "code": "IQ",
+    "nameZh": "伊拉克",
+    "continent": "Asia",
+    "capital": [
+      33.33,
+      44.4
+    ]
+  },
+  {
+    "code": "IS",
+    "nameZh": "冰岛",
+    "continent": "Europe",
+    "capital": [
+      64.15,
+      -21.95
+    ]
+  },
+  {
+    "code": "IL",
+    "nameZh": "以色列",
+    "continent": "Asia",
+    "capital": [
+      31.77,
+      35.23
+    ]
+  },
+  {
+    "code": "IT",
+    "nameZh": "意大利",
+    "continent": "Europe",
+    "capital": [
+      41.9,
+      12.48
+    ]
+  },
+  {
+    "code": "JM",
+    "nameZh": "牙买加",
+    "continent": "Americas",
+    "capital": [
+      17.99702,
+      -76.79358
+    ]
+  },
+  {
+    "code": "JE",
+    "nameZh": "泽西岛",
+    "continent": "Europe",
+    "capital": [
+      49.18,
+      -2.1
+    ]
+  },
+  {
+    "code": "JO",
+    "nameZh": "约旦",
+    "continent": "Asia",
+    "capital": [
+      31.95,
+      35.93
+    ]
+  },
+  {
+    "code": "JP",
+    "nameZh": "日本",
+    "continent": "Asia",
+    "capital": [
+      35.68,
+      139.75
+    ]
+  },
+  {
+    "code": "KZ",
+    "nameZh": "哈萨克斯坦",
+    "continent": "Asia",
+    "capital": [
+      51.16,
+      71.45
+    ]
+  },
+  {
+    "code": "KE",
+    "nameZh": "肯尼亚",
+    "continent": "Africa",
+    "capital": [
+      -1.28,
+      36.82
+    ]
+  },
+  {
+    "code": "KG",
+    "nameZh": "吉尔吉斯斯坦",
+    "continent": "Asia",
+    "capital": [
+      42.87,
+      74.6
+    ]
+  },
+  {
+    "code": "KH",
+    "nameZh": "柬埔寨",
+    "continent": "Asia",
+    "capital": [
+      11.55,
+      104.92
+    ]
+  },
+  {
+    "code": "KI",
+    "nameZh": "基里巴斯",
+    "continent": "Oceania",
+    "capital": [
+      1.33,
+      172.98
+    ]
+  },
+  {
+    "code": "KN",
+    "nameZh": "圣基茨和尼维斯",
+    "continent": "Americas",
+    "capital": [
+      17.3,
+      -62.72
+    ]
+  },
+  {
+    "code": "GU",
+    "nameZh": "关岛",
+    "continent": "Oceania",
+    "capital": [
+      13.48,
+      144.75
+    ]
+  },
+  {
+    "code": "GF",
+    "nameZh": "法属圭亚那",
+    "continent": "Americas",
+    "capital": [
+      4.94,
+      -52.33
+    ]
+  },
+  {
+    "code": "GT",
+    "nameZh": "危地马拉",
+    "continent": "Americas",
+    "capital": [
+      14.62,
+      -90.52
+    ]
+  },
+  {
+    "code": "GL",
+    "nameZh": "格陵兰",
+    "continent": "Americas",
+    "capital": [
+      64.18,
+      -51.75
+    ]
+  },
+  {
+    "code": "DO",
+    "nameZh": "多明尼加",
+    "continent": "Americas",
+    "capital": [
+      18.47,
+      -69.9
+    ]
+  },
+  {
+    "code": "DZ",
+    "nameZh": "阿尔及利亚",
+    "continent": "Africa",
+    "capital": [
+      36.75,
+      3.05
+    ]
+  },
+  {
+    "code": "EC",
+    "nameZh": "厄瓜多尔",
+    "continent": "Americas",
+    "capital": [
+      -0.22,
+      -78.5
+    ]
+  },
+  {
+    "code": "EG",
+    "nameZh": "埃及",
+    "continent": "Africa",
+    "capital": [
+      30.05,
+      31.25
+    ]
+  },
+  {
+    "code": "ER",
+    "nameZh": "厄立特里亚",
+    "continent": "Africa",
+    "capital": [
+      15.33,
+      38.93
+    ]
+  },
+  {
+    "code": "EH",
+    "nameZh": "西撒哈拉",
+    "continent": "Africa",
+    "capital": [
+      -13.28,
+      27.14
+    ]
+  },
+  {
+    "code": "ES",
+    "nameZh": "西班牙",
+    "continent": "Europe",
+    "capital": [
+      40.4,
+      -3.68
+    ]
+  },
+  {
+    "code": "EE",
+    "nameZh": "爱沙尼亚",
+    "continent": "Europe",
+    "capital": [
+      59.43,
+      24.72
+    ]
+  },
+  {
+    "code": "ET",
+    "nameZh": "埃塞俄比亚",
+    "continent": "Africa",
+    "capital": [
+      9.03,
+      38.7
+    ]
+  },
+  {
+    "code": "FI",
+    "nameZh": "芬兰",
+    "continent": "Europe",
+    "capital": [
+      60.17,
+      24.93
+    ]
+  },
+  {
+    "code": "FJ",
+    "nameZh": "斐济",
+    "continent": "Oceania",
+    "capital": [
+      -18.13,
+      178.42
+    ]
+  },
+  {
+    "code": "FK",
+    "nameZh": "福克兰群岛",
+    "continent": "Americas",
+    "capital": [
+      -51.7,
+      -57.85
+    ]
+  },
+  {
+    "code": "FR",
+    "nameZh": "法国",
+    "continent": "Europe",
+    "capital": [
+      48.87,
+      2.33
+    ]
+  },
+  {
+    "code": "DM",
+    "nameZh": "多米尼加",
+    "continent": "Americas",
+    "capital": [
+      15.3,
+      -61.4
+    ]
+  },
+  {
+    "code": "FO",
+    "nameZh": "法罗群岛",
+    "continent": "Europe",
+    "capital": [
+      62.01,
+      -6.77
+    ]
+  },
+  {
+    "code": "GA",
+    "nameZh": "加蓬",
+    "continent": "Africa",
+    "capital": [
+      0.38,
+      9.45
+    ]
+  },
+  {
+    "code": "GB",
+    "nameZh": "英国",
+    "continent": "Europe",
+    "capital": [
+      51.5,
+      -0.08
+    ]
+  },
+  {
+    "code": "GE",
+    "nameZh": "格鲁吉亚",
+    "continent": "Asia",
+    "capital": [
+      41.68,
+      44.83
+    ]
+  },
+  {
+    "code": "GG",
+    "nameZh": "根西岛",
+    "continent": "Europe",
+    "capital": [
+      49.45,
+      -2.54
+    ]
+  },
+  {
+    "code": "GH",
+    "nameZh": "加纳",
+    "continent": "Africa",
+    "capital": [
+      5.55,
+      -0.22
+    ]
+  },
+  {
+    "code": "GI",
+    "nameZh": "直布罗陀",
+    "continent": "Europe",
+    "capital": [
+      36.13,
+      -5.35
+    ]
+  },
+  {
+    "code": "GN",
+    "nameZh": "几内亚",
+    "continent": "Africa",
+    "capital": [
+      9.5,
+      -13.7
+    ]
+  },
+  {
+    "code": "GP",
+    "nameZh": "瓜德罗普岛",
+    "continent": "Americas",
+    "capital": [
+      16.03,
+      -61.73
+    ]
+  },
+  {
+    "code": "GM",
+    "nameZh": "冈比亚",
+    "continent": "Africa",
+    "capital": [
+      13.45,
+      -16.57
+    ]
+  },
+  {
+    "code": "GW",
+    "nameZh": "几内亚比绍",
+    "continent": "Africa",
+    "capital": [
+      11.85,
+      -15.58
+    ]
+  },
+  {
+    "code": "GQ",
+    "nameZh": "赤道几内亚",
+    "continent": "Africa",
+    "capital": [
+      1.35,
+      10.49
+    ]
+  },
+  {
+    "code": "GR",
+    "nameZh": "希腊",
+    "continent": "Europe",
+    "capital": [
+      37.98,
+      23.73
+    ]
+  },
+  {
+    "code": "GD",
+    "nameZh": "格林纳达",
+    "continent": "Americas",
+    "capital": [
+      32.38,
+      -64.68
+    ]
+  },
+  {
+    "code": "FM",
+    "nameZh": "密克罗尼西亚",
+    "continent": "Oceania",
+    "capital": [
+      6.92,
+      158.15
+    ]
+  },
+  {
+    "code": "ZW",
+    "nameZh": "津巴布韦",
+    "continent": "Africa",
+    "capital": [
+      -17.82,
+      31.03
+    ]
+  }
+]
