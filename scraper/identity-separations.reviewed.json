@@ -1,0 +1,128 @@
+[
+  {
+    "left": {
+      "source": "liquipedia",
+      "external_id": "Robo"
+    },
+    "right": {
+      "source": "pandascore",
+      "external_id": "19636"
+    },
+    "basis": "Nikita Dushin is a Russian player, while Vladimir ROBO Neskey is a Belarusian player; the matching nickname and Nemiga tenure do not represent one identity.",
+    "evidence": [
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/robo-nikita-dushin"
+      },
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/robo-cs-go"
+      }
+    ]
+  },
+  {
+    "left": {
+      "source": "pandascore",
+      "external_id": "34589"
+    },
+    "right": {
+      "source": "pandascore",
+      "external_id": "18305"
+    },
+    "basis": "Mateusz MonsteR Mnich is Polish, while Qingyu Monster Deng is Chinese; their legal names and countries are distinct.",
+    "evidence": [
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/monster"
+      },
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/monster-qingyu-deng"
+      }
+    ]
+  },
+  {
+    "left": {
+      "source": "pandascore",
+      "external_id": "26346"
+    },
+    "right": {
+      "source": "pandascore",
+      "external_id": "56073"
+    },
+    "basis": "Yerbol yoki Altaiuly is Kazakh, while Danil Yoki Istomin is Ukrainian; their legal names and countries are distinct.",
+    "evidence": [
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/yoki"
+      },
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/yoki-ua"
+      }
+    ]
+  },
+  {
+    "left": {
+      "source": "pandascore",
+      "external_id": "28265"
+    },
+    "right": {
+      "source": "pandascore",
+      "external_id": "32011"
+    },
+    "basis": "Matt MT Fisher is British, while Martin MT Sandvik is Norwegian; their legal names and countries are distinct.",
+    "evidence": [
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/mt"
+      },
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/mt-martin-sandvik"
+      }
+    ]
+  },
+  {
+    "left": {
+      "source": "pandascore",
+      "external_id": "25790"
+    },
+    "right": {
+      "source": "pandascore",
+      "external_id": "42312"
+    },
+    "basis": "Yevgeniy dreaM Bogatyrev is Kazakh, while Patrik DreaM Móczár is Hungarian; their legal names and countries are distinct.",
+    "evidence": [
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/dream-yevgeniy-bogatyrev"
+      },
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/dream-cs-go"
+      }
+    ]
+  },
+  {
+    "left": {
+      "source": "pandascore",
+      "external_id": "24660"
+    },
+    "right": {
+      "source": "liquipedia",
+      "external_id": "Rage (Chinese player)"
+    },
+    "basis": "Dmitry rAge Bolotov is Ukrainian, while Yu rage Hao is Chinese; their legal names and countries are distinct.",
+    "evidence": [
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/rage"
+      },
+      {
+        "source": "liquipedia",
+        "url": "https://liquipedia.net/counterstrike/Rage_(Chinese_player)"
+      }
+    ]
+  }
+]

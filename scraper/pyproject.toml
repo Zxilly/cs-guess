@@ -1,0 +1,25 @@
+[project]
+name = "cs-guess-scraper"
+version = "0.1.0"
+description = "Data collection pipeline for CS Guess"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pycountry>=24.6.1",
+]
+
+[project.scripts]
+cs-guess-scraper = "cs_guess_scraper.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

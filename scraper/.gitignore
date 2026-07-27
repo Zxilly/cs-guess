@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local credentials live in the repository parent, but ignore defensive copies.
+.env
+.env.*
+!.env.example
+
+# Full snapshots and raw provider payloads are generated locally.
+data/
+*.sqlite
+*.sqlite3

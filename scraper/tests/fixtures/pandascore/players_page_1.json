@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "alpha",
+    "first_name": "Alice",
+    "last_name": "Able",
+    "nationality": "SE",
+    "active": true,
+    "current_team": null,
+    "modified_at": "2026-07-20T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "bravo",
+    "first_name": "Bob",
+    "last_name": "Baker",
+    "nationality": "US",
+    "active": true,
+    "current_team": null,
+    "modified_at": "2026-07-20T11:00:00Z"
+  }
+]

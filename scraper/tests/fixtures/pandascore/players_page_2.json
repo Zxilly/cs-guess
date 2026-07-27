@@ -1,0 +1,12 @@
+[
+  {
+    "id": 3,
+    "name": "charlie",
+    "first_name": null,
+    "last_name": null,
+    "nationality": null,
+    "active": false,
+    "current_team": null,
+    "modified_at": "2026-07-20T12:00:00Z"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "hltv_id": "11893",
+    "slug": "zywoo",
+    "match_source": "liquipedia",
+    "match_external_id": "ZywOo"
+  },
+  {
+    "hltv_id": "7998",
+    "slug": "s1mple",
+    "match_source": "liquipedia",
+    "match_external_id": "S1mple"
+  },
+  {
+    "hltv_id": "7592",
+    "slug": "device",
+    "match_source": "liquipedia",
+    "match_external_id": "device"
+  },
+  {
+    "hltv_id": "21167",
+    "slug": "donk",
+    "match_source": "liquipedia",
+    "match_external_id": "Donk"
+  },
+  {
+    "hltv_id": "19230",
+    "slug": "m0nesy",
+    "match_source": "liquipedia",
+    "match_external_id": "M0NESY"
+  },
+  {
+    "hltv_id": "7528",
+    "slug": "krimz",
+    "match_source": "liquipedia",
+    "match_external_id": "KRIMZ"
+  }
+]

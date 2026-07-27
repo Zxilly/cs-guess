@@ -1,0 +1,20 @@
+[
+  {
+    "target": {
+      "source": "balldontlie",
+      "external_id": "4535"
+    },
+    "canonical": {
+      "source": "pandascore",
+      "external_id": "33530"
+    },
+    "reason": "BALLDONTLIE mixed the Saudi player Fahad Khaled Alkadyan's legal name into the Brazilian player Koala's provider-linked record.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "20729",
+        "url": "https://www.hltv.org/player/20729/koala"
+      }
+    ]
+  }
+]

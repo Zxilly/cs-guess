@@ -1,0 +1,587 @@
+[
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "0SAMAS"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "44168"
+    },
+    "basis": "HLTV profile confirms the same nickname and legal identity despite a provider country-code disagreement.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "22419",
+        "url": "https://www.hltv.org/player/22419/0samas"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "DAVEN"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "27263"
+    },
+    "basis": "HLTV profile confirms the same nickname and legal identity despite a provider country-code disagreement.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "20326",
+        "url": "https://www.hltv.org/player/20326/daven"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Woozzzi"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "42305"
+    },
+    "basis": "HLTV profile confirms the Liquipedia and PandaScore records are the same player.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "23469",
+        "url": "https://www.hltv.org/player/23469/woozzzi"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "ZAAz"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "20353"
+    },
+    "basis": "HLTV profile confirms the Liquipedia and PandaScore records are the same player.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "1646",
+        "url": "https://www.hltv.org/player/1646/zaaz"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Cbass"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "40364"
+    },
+    "basis": "HLTV resolves the incorrect Liquipedia legal-name field.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "21749",
+        "url": "https://www.hltv.org/player/21749/cbass"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Stx"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "44595"
+    },
+    "basis": "HLTV resolves the incorrect PandaScore legal-name field.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "16581",
+        "url": "https://www.hltv.org/player/16581/stx"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Supra"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "23236"
+    },
+    "basis": "HLTV confirms the two legal-name variants belong to the same player.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "16415",
+        "url": "https://www.hltv.org/player/16415/supra"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Demente"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "55595"
+    },
+    "basis": "HLTV confirms the two records are Danial Ismailov on Rune Eaters; Liquipedia independently confirms the January 15, 2004 birth date.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "23543",
+        "url": "https://www.hltv.org/stats/players/career/23543/demente"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "SaVage"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "32315"
+    },
+    "basis": "HLTV confirms the duplicate provider records are the Australian player James Savage.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "20244",
+        "url": "https://www.hltv.org/player/20244/savage"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "S1zzi"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "62201"
+    },
+    "basis": "HLTV confirms the Danylo/Daniil Vinnyk transliteration variants are the same B8 player.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "25619",
+        "url": "https://www.hltv.org/player/25619/s1zzi"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Nikitea"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "46281"
+    },
+    "basis": "HLTV confirms the two Ukrainian legal-name transliterations belong to the same Lazer Cats player.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "23151",
+        "url": "https://www.hltv.org/player/23151/nikitea"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Ct0m"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "43389"
+    },
+    "basis": "HLTV confirms the Maksimov/Maximov variants are Artem ct0m Maximov.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "22350",
+        "url": "https://www.hltv.org/player/22350/ct0m"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Kyousuke"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "54512"
+    },
+    "basis": "HLTV confirms the Maxim/Maksim Lukin variants are the same Falcons player.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "24177",
+        "url": "https://www.hltv.org/player/24177/kyousuke"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Ckanic"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "55434"
+    },
+    "basis": "HLTV confirms the accented and ASCII legal names are the same Turkish player.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "24841",
+        "url": "https://www.hltv.org/stats/players/24841/ckanic"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Hitori"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "55532"
+    },
+    "basis": "HLTV confirms the incomplete PandaScore record is Artur hitori Palyants.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "23544",
+        "url": "https://www.hltv.org/player/23544/hitori"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Cmtry"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "48568"
+    },
+    "basis": "HLTV confirms the Mykyta/Nikita transliteration variants are the same FUT player.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "22674",
+        "url": "https://www.hltv.org/player/22674/cmtry"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Pump"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "49403"
+    },
+    "basis": "HLTV confirms the Daniiar/Daniyar Buldybaev variants are the same NOVAQ player.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "23292",
+        "url": "https://www.hltv.org/player/23292/pump"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Clouden"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "26740"
+    },
+    "basis": "HLTV confirms both Mongolian legal-name variants are Gerelt-Od clouden Jargal.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "18150",
+        "url": "https://www.hltv.org/player/18150/clouden"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Plushax"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "63138"
+    },
+    "basis": "HLTV confirms the Jandos/Zhandos Akataev variants are the same Game Point player.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "21695",
+        "url": "https://www.hltv.org/player/21695/plushax"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Tasman"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "53392"
+    },
+    "basis": "HLTV confirms the accented and ASCII legal names are Alisher tasman Marat.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "23541",
+        "url": "https://www.hltv.org/stats/players/23541/tasman"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Laxiee"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "50078"
+    },
+    "basis": "HLTV confirms the reversed provider name is Maks laxiee Andryei.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "23458",
+        "url": "https://www.hltv.org/player/23458/laxiee"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "pandascore",
+      "external_id": "44254"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "58379"
+    },
+    "basis": "HLTV confirms the same-provider duplicate is the American player Waseem HodorS Nowyhed.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "15551",
+        "url": "https://www.hltv.org/stats/players/15551/hodors"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Schwarz"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "54147"
+    },
+    "basis": "HLTV confirms the incomplete PandaScore record is Giorgi Schwarz Gakhokidze on ENCE.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "24149",
+        "url": "https://www.hltv.org/player/24149/schwarz"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Mawth"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "24734"
+    },
+    "basis": "HLTV confirms both records are the Brazilian player Matheus mawth Gonçalves; independent profile data resolves the provider birth-date disagreement.",
+    "overrides": {
+      "birth_date": "1998-12-27"
+    },
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "10838",
+        "url": "https://www.hltv.org/player/10838/mawth"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Alpha"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "30531"
+    },
+    "basis": "HLTV confirms the two CYBERSHOKE records are Daniil alpha Demin; Liquipedia and independent profile data resolve the provider birth date.",
+    "overrides": {
+      "birth_date": "2004-10-12",
+      "country_code": "RU"
+    },
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "20430",
+        "url": "https://www.hltv.org/player/20430/alpha"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "ArT"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "19665"
+    },
+    "basis": "HLTV confirms both Legacy records are Andrei arT Piovezan; the established birth year resolves the provider discrepancy.",
+    "overrides": {
+      "birth_date": "1996-03-27"
+    },
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "12521",
+        "url": "https://www.hltv.org/player/12521/art"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "AidKiT"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "27683"
+    },
+    "basis": "HLTV confirms both BRUTE records are Jane aidKiT Apostoloski; Liquipedia resolves the two-day provider birth-date discrepancy.",
+    "overrides": {
+      "birth_date": "2001-06-13"
+    },
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "20066",
+        "url": "https://www.hltv.org/player/20066/aidkit"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Leomonster"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "27435"
+    },
+    "basis": "HLTV confirms both records are the Brazilian player Leonardo Leomonster Enrique; Liquipedia resolves the one-day birth-date discrepancy.",
+    "overrides": {
+      "birth_date": "2003-02-22"
+    },
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "17132",
+        "url": "https://www.hltv.org/player/17132/leomonster"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Zorte"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "23853"
+    },
+    "basis": "HLTV confirms both BetBoom records are Aleksandr zorte Zagodyrenko; Liquipedia resolves the one-day birth-date discrepancy.",
+    "overrides": {
+      "birth_date": "1998-05-27"
+    },
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "15662",
+        "url": "https://www.hltv.org/player/15662/zorte"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "pita"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "17655"
+    },
+    "basis": "HLTV confirms the player and coach records are Faruk pita Pita and lists Bosnia and Herzegovina as his nationality and coach as his current primary role.",
+    "overrides": {
+      "country_code": "BA",
+      "is_coach": true
+    },
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "434",
+        "url": "https://www.hltv.org/player/434/pita"
+      }
+    ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Marix"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "28382"
+    },
+    "basis": "HLTV confirms both FAVBET records are Max Marix Kugener; Liquipedia resolves the nationality and birth-year discrepancies.",
+    "overrides": {
+      "birth_date": "2003-07-30",
+      "country_code": "LU"
+    },
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "20110",
+        "url": "https://www.hltv.org/player/20110/marix"
+      }
+    ]
+  }
+]

@@ -1,0 +1,32 @@
+{{for|the Indian player|Ace}}
+{{Liquipedia links|apexlegends=Ace}}
+{{Person Tabs|player=1}}
+{{Infobox player
+|id=-Ace
+|ids=aceu, acesu
+|image=-Ace DHATX18.jpg
+|name=Brandon Winn
+|birth_date=1995-4-7
+|country=United States
+|status=Retired
+|years_active=2016 – 2019
+|roles=AWP
+|csgo=y
+|twitter=aceu
+|facebook=
+|instagram=nrg.aceu
+|youtube=Acesu
+|twitch=aceu
+|esea=1071508
+|faceitdb=41ec623a-57c6-44fe-b7e2-f41d7ab8f07a
+|steam64ID=76561198007303542
+|team_history=
+{{TH|2016-??-?? — 2017-05-20|Eclipse (American team)}}
+{{TH|2017-05-20 — 2018-03-05|Rise Nation}}
+{{TH|2018-03-05 — 2018-10-23|eUnited}}
+{{TH|2018-10-23 — 2019-01-03|eUnited|inactive}}
+{{TH|2018-11-01 — 2018-12-09|Swole Patrol|loan}}
+}}
+
+
+Brandon "'''-Ace'''" Winn {{born}} is a [[retired]] [[:Category:United States|American]] professional ''[[Counter-Strike: Global Offensive]]'' player.

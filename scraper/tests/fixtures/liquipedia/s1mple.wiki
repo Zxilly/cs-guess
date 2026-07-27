@@ -1,0 +1,55 @@
+{{Person Tabs|player=1}}
+{{Infobox player
+|id=s1mple
+|image=S1mple at IEM Kraków 2026.jpg
+|name=Олександр Олегович Костилєв
+|romanized_name=Oleksandr Olehovych Kostyliev
+|birth_date=1997-10-02
+|country=Ukraine
+|status=Active
+|years_active=2013 – '''Present'''
+|team=BC.Game Esports
+|roles=rifle,awp
+|nicknames=The Undertaker, s1s1
+|csgo=y
+|cs2=y
+|twitter=s1mpleO
+|facebook=s1mpleon
+|instagram=s1mpleo
+|reddit=reals1mplereal
+|youtube=@s1mplecsgod945
+|twitch=s1mple
+|esea=636916
+|gamersclub=2234577
+|esl=7574927
+|faceitdb=ac71ba3c-d3d4-45e7-8be2-26aa3986867d
+|steam64ID=76561198034202275
+|telegram=s1mplegod123
+|team_history=
+'''Counter-Strike: Global Offensive'''
+{{TH|2013-??-?? — 2014-??-??|LAN DODGERS}}
+{{TH|2014-02-12 — 2014-04-13|Courage Gaming}}
+{{TH|2014-04-14 — 2014-04-29|Hashtag}}
+{{TH|2014-04-29 — 2014-??-??|LAN DODGERS}}
+{{TH|2014-??-?? — 2014-09-09|Amazing Gaming}}
+{{TH|2014-09-17 — 2015-01-14|HellRaisers}}
+{{TH|2015-01-15 — 2015-02-01|dAT Team}}
+{{TH|2015-02-01 — 2015-07-17|FlipSid3 Tactics}}
+{{TH|2015-07-17 — 2015-10-23|FlipSid3 Tactics|Inactive}}
+{{TH|2015-07-20 — 2015-07-26|Evolution|link=Evolution (Belarusian team)|Loan}}
+{{TH|2015-07-26 — 2015-08-25|Evolution.Dark|Loan}}
+{{TH|2015-08-25 — 2015-09-10|Worst Players|Loan}}
+{{TH|2015-09-13 — 2015-10-22|HellRaisers|Stand-in}}
+{{TH|2016-01-02 — 2016-04-21|Team Liquid}}
+{{TH|2016-05-08 — 2016-06-06|Worst Players|Loan}}
+{{TH|2016-04-21 — 2016-08-04|Team Liquid|Inactive}}
+{{TH|2016-08-04 — 2023-10-26|Natus Vincere}}<br>
+'''Counter-Strike 2'''<!--
+-->{{TH|2023-10-26 — 2025-07-28|Natus Vincere|Inactive}}
+{{TH|2024-09-27 — 2024-11-21|Team Falcons|Loan}}
+{{TH|2025-05-05 — 2025-07-09|FaZe Clan|Loan}}
+{{TH|2025-07-28 — '''Present'''|BC.Game Esports}}
+}}
+
+
+Oleksandr "'''s1mple'''" Kostyliev {{born}} is a [[:Category:Ukraine|Ukrainian]] professional ''[[Counter-Strike 2]]'' player and a former professional ''[[Counter-Strike: Global Offensive]]'' player.

@@ -1,0 +1,37 @@
+{{DISPLAYTITLE:Valve Major Championships: Player Database}}
+{| class="wikitable collapsible collapsed" style="width:398px;" data-filter-hideable-group data-filter-hidden-class="filter-category--hidden" data-filter-count="kazakhstan"
+! colspan="2" style="text-align: left;"|{{player|flag=kz|AdreN|link=AdreN (Kazakh player)}}
+|-
+! style="width:75%;"| Tournament
+! style="width:25%;"| Place
+|- data-filter-group="major-players-filters" data-filter-categories="csgo,top-16"
+|[[DreamHack/2013/Winter|DreamHack Winter 2013]] {{TeamPart|astana dragons|2013-11-28}} || {{Placement|5-8}}
+|- data-filter-group="major-players-filters" data-filter-categories="csgo,top-16"
+|[[PGL/2017/Krakow|PGL Krakow 2017]] {{TeamPart|gambit|2017-07-16}} || {{Placement|1}}
+|}
+{| class="wikitable collapsible collapsed" style="width:398px;" data-filter-hideable-group data-filter-hidden-class="filter-category--hidden" data-filter-count="russia"
+! colspan="2" style="text-align: left;"|{{player|flag=ru|Jame}}
+|-
+! style="width:75%;"| Tournament
+! style="width:25%;"| Place
+|- data-filter-group="major-players-filters" data-filter-categories="csgo,top-24"
+|[[ELEAGUE/2018/Major|ELEAGUE Boston 2018]] {{TeamPart|avangar|2018-01-12}} ||
+|- data-filter-group="major-players-filters" data-filter-categories="csgo,top-16"
+|[[Intel Extreme Masters/Season XIII/World Championship|IEM Katowice 2019]] {{TeamPart|avangar|2019-02-13}} ||
+|- data-filter-group="major-players-filters" data-filter-categories="csgo,top-16"
+|[[StarLadder/2019/Major|StarLadder Berlin 2019]] {{TeamPart|avangar|2019-08-23}} || {{Placement|2}}
+|- data-filter-group="major-players-filters" data-filter-categories="csgo,top-16"
+|[[PGL/2021/Stockholm|PGL Stockholm 2021]] {{TeamPart|virtus.pro|2021-10-26}} || {{Placement|5-8}}
+|- data-filter-group="major-players-filters" data-filter-categories="csgo,top-16"
+|[[PGL/2022/Antwerp|PGL Antwerp 2022]] {{TeamPart|outsiders|2022-05-09}} ||
+|- data-filter-group="major-players-filters" data-filter-categories="csgo,top-16"
+|[[Intel_Extreme_Masters/2022/Rio|IEM Rio 2022]] {{TeamPart|outsiders|2022-10-31}} || {{Placement|1}}
+|- data-filter-group="major-players-filters" data-filter-categories="cs2,top-16"
+|[[PGL/2024/Copenhagen|PGL Copenhagen 2024]] {{TeamPart|virtus.pro|2024-03-17}} ||
+|- data-filter-group="major-players-filters" data-filter-categories="cs2,top-24"
+|[[Perfect World/Major/2024/Shanghai|Perfect World Shanghai 2024]] {{TeamPart|virtus.pro|2024-11-30}} ||
+|- data-filter-group="major-players-filters" data-filter-categories="cs2,top-16"
+|[[StarLadder/2025/Major|StarLadder Budapest 2025]] {{TeamPart|parivision|2025-11-24}} ||
+|- data-filter-group="major-players-filters" data-filter-categories="cs2,top-16"
+|[[Intel_Extreme_Masters/2026/Cologne|IEM Cologne 2026]] {{TeamPart|parivision|2026-06-02}} ||
+|}

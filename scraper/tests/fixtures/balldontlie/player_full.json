@@ -1,0 +1,16 @@
+{
+  "id": 294,
+  "nickname": "ZywOo",
+  "first_name": "Mathieu",
+  "last_name": "Herbaut",
+  "full_name": "Mathieu Herbaut",
+  "team": {
+    "id": 650,
+    "name": "Vitality",
+    "short_name": "VIT"
+  },
+  "age": 25,
+  "birthday": "2000-11-09",
+  "steam_id": "18452",
+  "is_active": true
+}

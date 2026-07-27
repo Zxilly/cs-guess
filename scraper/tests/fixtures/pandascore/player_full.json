@@ -1,0 +1,23 @@
+{
+  "active": true,
+  "id": 18452,
+  "name": "ZywOo",
+  "role": null,
+  "slug": "zywoo",
+  "modified_at": "2026-07-17T19:47:19Z",
+  "first_name": "Mathieu",
+  "last_name": "Herbaut",
+  "nationality": "fr",
+  "image_url": "https://cdn-api.pandascore.co/images/player/image/18452/zywoo.png",
+  "birthday": "2000-11-09",
+  "age": 25,
+  "current_team": {
+    "id": 3455,
+    "name": "Vitality",
+    "location": "FR",
+    "slug": "vitality-cs-go",
+    "modified_at": "2026-07-17T19:47:19Z",
+    "acronym": "VIT",
+    "image_url": "https://cdn-api.pandascore.co/images/team/image/3455/vitality.png"
+  }
+}
