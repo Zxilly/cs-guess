@@ -19,6 +19,7 @@ import {
   cancelQuickMatch,
   clearCredentials,
   loadCredentials,
+  playingCountFor,
   queueCountFor,
   readNumber,
   readRecords,
@@ -46,6 +47,11 @@ export function MatchmakingPage() {
     partySize,
     bestOf === 1 || bestOf === 5 ? bestOf : 3,
     visibility === "open" ? "open" : "hidden",
+  );
+  const selectedPlaying = playingCountFor(
+    queue.counts,
+    partySize,
+    bestOf === 1 || bestOf === 5 ? bestOf : 3,
   );
   const joinedPlayerCount =
     readRecords(realtime.snapshot, "players").length +
@@ -145,6 +151,11 @@ export function MatchmakingPage() {
                 option,
                 visibility === "open" ? "open" : "hidden",
               );
+              const playing = playingCountFor(
+                queue.counts,
+                partySize,
+                option,
+              );
               const selected = option === bestOf;
               return (
                 <div
@@ -159,23 +170,41 @@ export function MatchmakingPage() {
                       <SpinnerGapIcon className="animate-spin motion-reduce:animate-none" />
                     ) : null}
                   </div>
-                  <p className="mt-7 font-mono text-3xl font-semibold">{count}</p>
-                  <p
-                    className={`mt-1 text-xs ${
-                      selected
-                        ? "text-primary-foreground/75"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    当前等待人数
-                  </p>
+                  <div className="mt-7 grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="font-mono text-3xl font-semibold">{count}</p>
+                      <p
+                        className={`mt-1 text-xs ${
+                          selected
+                            ? "text-primary-foreground/75"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        等待匹配
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-mono text-3xl font-semibold">
+                        {playing}
+                      </p>
+                      <p
+                        className={`mt-1 text-xs ${
+                          selected
+                            ? "text-primary-foreground/75"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        游戏中
+                      </p>
+                    </div>
+                  </div>
                 </div>
               );
             })}
           </div>
 
           <div
-            className="grid grid-cols-2 border-t border-foreground/20 xl:grid-cols-[repeat(4,1fr)_auto]"
+            className="grid grid-cols-2 border-t border-foreground/20 xl:grid-cols-5"
             aria-live="polite"
           >
             {[
@@ -192,13 +221,15 @@ export function MatchmakingPage() {
                 <p className="mt-2 font-mono text-sm font-semibold">{value}</p>
               </div>
             ))}
-            <div className="col-span-2 flex items-center gap-3 px-4 py-4 text-sm text-primary xl:col-span-1">
+            <div className="col-span-2 flex min-w-0 items-center justify-center gap-3 px-4 py-4 text-sm text-primary xl:col-span-1">
               <UsersThreeIcon className="size-5" />
               <Badge
                 variant={queue.live ? "default" : "outline"}
-                className="rounded-none"
+                className="min-w-0 rounded-none text-center whitespace-normal"
               >
-                {queue.live ? `本队列 ${selectedWaiting} 人` : "连接队列中"}
+                {queue.live
+                  ? `${selectedWaiting} 人等待 · ${selectedPlaying} 人游戏中`
+                  : "连接队列中"}
               </Badge>
             </div>
           </div>

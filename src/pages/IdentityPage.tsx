@@ -15,6 +15,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { IdentityDrawDialog } from "@/components/IdentityDrawDialog";
 import { InfoTip } from "@/components/InfoTip";
 import { PageIntro } from "@/components/PageIntro";
+import { PanelHeader } from "@/components/PanelHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -288,30 +289,28 @@ export function IdentityPage() {
           </Card>
 
           <Card className="gap-0 rounded-none border-foreground/25 bg-transparent py-0 shadow-none">
-            <div className="flex items-center justify-between border-b border-foreground/20 px-5 py-4">
-              <div className="flex items-center gap-2">
-                <DiceFiveIcon className="size-5 text-primary" />
-                <h2 className="font-semibold">
-                  {onboarding ? "初始选手池" : "选择选手池"}
-                </h2>
-              </div>
-              <InfoTip label="查看抽取说明" side="left" className="size-10">
-                <p>
-                  {onboarding
-                    ? "首次只能从 Major 参赛池抽取，确认后身份会固定保留。"
-                    : "抽取会更换当前身份，并消耗一次机会。"}
-                </p>
-                <p className="mt-1">
-                  <strong>Major 参赛池：</strong>参加过 1–4 次且未夺冠。
-                </p>
-                <p className="mt-1">
-                  <strong>Major 资深池：</strong>参加过至少 5 次且未夺冠。
-                </p>
-                <p className="mt-1">
-                  <strong>Major 冠军池：</strong>至少赢得过一次冠军。
-                </p>
-              </InfoTip>
-            </div>
+            <PanelHeader
+              title={onboarding ? "初始选手池" : "选择选手池"}
+              icon={<DiceFiveIcon className="size-5 text-primary" />}
+              action={
+                <InfoTip label="查看抽取说明" side="left" className="size-10">
+                  <p>
+                    {onboarding
+                      ? "首次只能从 Major 参赛池抽取，确认后身份会固定保留。"
+                      : "抽取会更换当前身份，并消耗一次机会。"}
+                  </p>
+                  <p className="mt-1">
+                    <strong>Major 参赛池：</strong>参加过 1–4 次且未夺冠。
+                  </p>
+                  <p className="mt-1">
+                    <strong>Major 资深池：</strong>参加过至少 5 次且未夺冠。
+                  </p>
+                  <p className="mt-1">
+                    <strong>Major 冠军池：</strong>至少赢得过一次冠军。
+                  </p>
+                </InfoTip>
+              }
+            />
 
             <div className="grid flex-1 auto-rows-fr">
               {visiblePools.map((pool) => {

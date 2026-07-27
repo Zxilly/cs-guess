@@ -6,10 +6,12 @@ import {
   EyeIcon,
   EyeSlashIcon,
 } from "@phosphor-icons/react";
+import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { InfoTip } from "@/components/InfoTip";
+import { PlayerRoleIcon } from "@/components/PlayerRoleLabel";
 import { TeamLogo } from "@/components/TeamLogo";
 import {
   Table,
@@ -19,7 +21,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { players as catalogPlayers, type Player } from "@/data/players";
+import {
+  playerRoleNameZh,
+  players as catalogPlayers,
+  type Player,
+} from "@/data/players";
 import {
   compareCountries,
   countryContinentZh,
@@ -74,9 +80,11 @@ function compareNumber(guess: number, target: number): Comparison {
 function ComparisonValue({
   value,
   comparison,
+  valueIcon,
 }: {
   value: string | number;
   comparison: Comparison;
+  valueIcon?: ReactNode;
 }) {
   const Icon =
     comparison === "match"
@@ -99,17 +107,22 @@ function ComparisonValue({
     <span
       className={cn(
         "inline-flex max-w-full items-center justify-center gap-1 font-mono text-xs",
-        comparison === "match"
-          ? "font-semibold text-primary"
-          : "text-muted-foreground",
+        comparison === "match" && "font-semibold text-primary",
+        comparison === "higher" &&
+          "font-semibold text-comparison-higher",
+        comparison === "lower" &&
+          "font-semibold text-comparison-lower",
+        comparison === "miss" && "text-muted-foreground",
       )}
       title={comparisonLabel}
       aria-label={`${value}，${comparisonLabel}`}
     >
-      <Icon
-        className="size-3"
-        weight={comparison === "miss" ? "light" : "bold"}
-      />
+      {valueIcon ?? (
+        <Icon
+          className="size-3"
+          weight={comparison === "miss" ? "light" : "bold"}
+        />
+      )}
       <span className="max-w-22 truncate">{value}</span>
     </span>
   );
@@ -169,7 +182,7 @@ function CountryComparisonValue({
       className={cn(
         "inline-flex max-w-full flex-col items-center justify-center",
         comparison.relation === "match" && "text-primary",
-        comparison.relation === "near" && "text-primary/85",
+        comparison.relation === "near" && "text-comparison-near",
         comparison.relation === "miss" && "text-muted-foreground",
       )}
       title={comparisonLabel}
@@ -320,7 +333,16 @@ function GuessBoard({
                         />
                       ) : (
                         <ComparisonValue
-                          value={player[attribute[1]]}
+                          value={
+                            attribute[1] === "role"
+                              ? playerRoleNameZh(player.role)
+                              : player[attribute[1]]
+                          }
+                          valueIcon={
+                            attribute[1] === "role" ? (
+                              <PlayerRoleIcon role={player.role} />
+                            ) : undefined
+                          }
                           comparison={comparisonFor(
                             player,
                             mysteryPlayer,
@@ -482,7 +504,16 @@ function OpponentBoard({
                               />
                             ) : (
                               <ComparisonValue
-                                value={player[attribute[1]]}
+                                value={
+                                  attribute[1] === "role"
+                                    ? playerRoleNameZh(player.role)
+                                    : player[attribute[1]]
+                                }
+                                valueIcon={
+                                  attribute[1] === "role" ? (
+                                    <PlayerRoleIcon role={player.role} />
+                                  ) : undefined
+                                }
                                 comparison={comparisonFor(
                                   player,
                                   mysteryPlayer,

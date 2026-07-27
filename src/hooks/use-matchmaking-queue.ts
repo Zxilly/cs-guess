@@ -27,6 +27,13 @@ const EMPTY_COUNTS: MatchmakingQueueCounts = {
   group_bo5_hidden: 0,
   group_bo5_open: 0,
   group_total: 0,
+  playing_bo1: 0,
+  playing_bo3: 0,
+  playing_bo5: 0,
+  playing_group_bo1: 0,
+  playing_group_bo3: 0,
+  playing_group_bo5: 0,
+  playing_total: 0,
 };
 
 function isQueueCounts(value: unknown): value is MatchmakingQueueCounts {
@@ -53,6 +60,13 @@ function isQueueCounts(value: unknown): value is MatchmakingQueueCounts {
     counts.group_bo5_hidden,
     counts.group_bo5_open,
     counts.group_total,
+    counts.playing_bo1,
+    counts.playing_bo3,
+    counts.playing_bo5,
+    counts.playing_group_bo1,
+    counts.playing_group_bo3,
+    counts.playing_group_bo5,
+    counts.playing_total,
   ].every(
     (count) => typeof count === "number" && Number.isFinite(count) && count >= 0,
   );
@@ -71,13 +85,23 @@ export function useMatchmakingQueue() {
     let socket: WebSocket | undefined;
 
     function connect() {
-      if (closed) return;
-      socket = new WebSocket(resolveQueueWebSocketUrl());
-      socket.addEventListener("open", () => {
+      if (
+        closed ||
+        document.hidden ||
+        socket?.readyState === WebSocket.CONNECTING ||
+        socket?.readyState === WebSocket.OPEN
+      ) {
+        return;
+      }
+      const nextSocket = new WebSocket(resolveQueueWebSocketUrl());
+      socket = nextSocket;
+      nextSocket.addEventListener("open", () => {
+        if (socket !== nextSocket) return;
         attempts = 0;
         setLive(true);
       });
-      socket.addEventListener("message", (message) => {
+      nextSocket.addEventListener("message", (message) => {
+        if (socket !== nextSocket) return;
         try {
           const payload = JSON.parse(String(message.data)) as {
             type?: string;
@@ -90,20 +114,42 @@ export function useMatchmakingQueue() {
           // Ignore malformed public telemetry and wait for the next broadcast.
         }
       });
-      socket.addEventListener("close", () => {
+      nextSocket.addEventListener("close", () => {
+        if (socket !== nextSocket) return;
+        socket = undefined;
         setLive(false);
-        if (closed) return;
-        const delay = Math.min(10_000, 500 * 2 ** attempts);
+        if (closed || document.hidden || !navigator.onLine) return;
+        const baseDelay = Math.min(10_000, 500 * 2 ** attempts);
+        const delay = baseDelay * (0.75 + Math.random() * 0.5);
         attempts += 1;
         retryRef.current = window.setTimeout(connect, delay);
       });
-      socket.addEventListener("error", () => socket?.close());
+      nextSocket.addEventListener("error", () => nextSocket.close());
     }
 
+    function handleVisibilityChange() {
+      window.clearTimeout(retryRef.current);
+      if (document.hidden) {
+        socket?.close(1000, "page-hidden");
+        setLive(false);
+      } else {
+        connect();
+      }
+    }
+
+    function handleOnline() {
+      attempts = 0;
+      connect();
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("online", handleOnline);
     connect();
     return () => {
       closed = true;
       window.clearTimeout(retryRef.current);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("online", handleOnline);
       socket?.close(1000, "page-unmounted");
     };
   }, []);

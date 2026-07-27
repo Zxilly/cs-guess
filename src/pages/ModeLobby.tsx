@@ -14,12 +14,12 @@ import { Link } from "react-router";
 import { AppHeader } from "@/components/AppHeader";
 import { InfoTip } from "@/components/InfoTip";
 import { PageIntro } from "@/components/PageIntro";
+import { PanelHeader } from "@/components/PanelHeader";
 import { PlayerIdentity } from "@/components/PlayerIdentity";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { players } from "@/data/players";
 import { useAnonymousProfile } from "@/hooks/use-anonymous-profile";
-import { dailyChallenge } from "@/lib/daily-challenge";
+import { useDailyChallenge } from "@/hooks/use-daily-challenge";
 
 interface ModeOptionProps {
   to: string;
@@ -57,7 +57,7 @@ function ModeOption({
 }
 
 export function ModeLobby() {
-  const challenge = dailyChallenge(players);
+  const { challenge } = useDailyChallenge();
   const identity = useAnonymousProfile();
 
   return (
@@ -67,9 +67,11 @@ export function ModeLobby() {
         action={
           <div className="flex items-center gap-4">
             <div className="hidden text-right font-mono text-[11px] uppercase tracking-[0.08em] sm:block">
-              <p className="text-muted-foreground">{challenge.date}</p>
+              <p className="text-muted-foreground">
+                {challenge?.date ?? "载入中"}
+              </p>
               <p className="mt-1 text-primary">
-                Round #{challenge.roundNumber}
+                Round #{challenge?.roundNumber ?? "—"}
               </p>
             </div>
             <Button asChild variant="ghost" size="sm" className="rounded-none">
@@ -115,24 +117,24 @@ export function ModeLobby() {
             className="flex min-h-80 flex-col gap-0 rounded-none border border-foreground/25 bg-transparent py-0 shadow-none ring-0"
           >
             <section>
-              <div className="flex items-center justify-between border-b border-foreground/20 px-5 py-4">
-                <div className="flex items-center gap-2">
-                  <CalendarDotsIcon className="size-5 text-primary" />
-                  <h2 className="font-semibold">今日挑战</h2>
-                </div>
-                <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-primary">
-                  每日刷新
-                </span>
-              </div>
+              <PanelHeader
+                title="今日挑战"
+                icon={<CalendarDotsIcon className="size-5 text-primary" />}
+                action={
+                  <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-primary">
+                    每日刷新
+                  </span>
+                }
+              />
 
               <div className="flex flex-1 flex-col justify-between p-6 sm:p-8">
                 <div>
                   <p className="font-mono text-6xl font-medium tracking-[-0.08em] text-primary">
-                    #{challenge.roundNumber}
+                    #{challenge?.roundNumber ?? "—"}
                   </p>
                   <p className="mt-5 text-2xl font-semibold">今日神秘选手</p>
                   <p className="mt-3 text-sm text-muted-foreground">
-                    3 分钟 · 6 次尝试 · 全服同题
+                    3 分钟 · 8 次尝试 · 全服同题
                   </p>
                 </div>
                 <Link
@@ -151,36 +153,36 @@ export function ModeLobby() {
             className="grid grid-rows-[auto_repeat(3,1fr)] gap-0 rounded-none border border-foreground/25 bg-transparent py-0 shadow-none ring-0"
           >
             <section>
-              <div className="flex items-center justify-between border-b border-foreground/20 px-5 py-3">
-                <div className="flex items-center gap-2">
-                  <SwordIcon className="size-5 text-primary" />
-                  <h2 className="font-semibold">对战模式</h2>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
-                    选择玩法
-                  </span>
-                  <InfoTip
-                    label="了解对战模式"
-                    side="bottom"
-                    align="end"
-                    className="size-10"
-                  >
-                    <p>
-                      <strong>实时 1v1：</strong>
-                      双方同题竞速，先猜中者获胜。
-                    </p>
-                    <p className="mt-1">
-                      <strong>4 人乱斗：</strong>
-                      四人同题竞速，率先猜中者获胜。
-                    </p>
-                    <p className="mt-1">
-                      <strong>好友房间：</strong>
-                      使用房间号加入，或创建 2–8 人房间。
-                    </p>
-                  </InfoTip>
-                </div>
-              </div>
+              <PanelHeader
+                title="对战模式"
+                icon={<SwordIcon className="size-5 text-primary" />}
+                action={
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                      选择玩法
+                    </span>
+                    <InfoTip
+                      label="了解对战模式"
+                      side="bottom"
+                      align="end"
+                      className="size-10"
+                    >
+                      <p>
+                        <strong>实时 1v1：</strong>
+                        双方同题竞速，先猜中者获胜。
+                      </p>
+                      <p className="mt-1">
+                        <strong>4 人乱斗：</strong>
+                        四人同题竞速，率先猜中者获胜。
+                      </p>
+                      <p className="mt-1">
+                        <strong>好友房间：</strong>
+                        使用房间号加入，或创建 2–8 人房间。
+                      </p>
+                    </InfoTip>
+                  </div>
+                }
+              />
 
               <ModeOption
                 to="/quick"

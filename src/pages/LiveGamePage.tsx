@@ -11,6 +11,7 @@ import { CelebrationOverlay } from "@/components/CelebrationOverlay";
 import { GuessTable } from "@/components/GuessTable";
 import { InfoTip } from "@/components/InfoTip";
 import { ModeSidebar } from "@/components/ModeSidebar";
+import { PlayerRoleLabel } from "@/components/PlayerRoleLabel";
 import { PlayerSearch } from "@/components/PlayerSearch";
 import { Timer } from "@/components/Timer";
 import { Button } from "@/components/ui/button";
@@ -27,12 +28,13 @@ import {
 } from "@/lib/realtime";
 import { currentRoundHistory } from "@/lib/live-round";
 import { countryNameZh } from "@/lib/country-geography";
-import type {
-  CountryHint,
-  CountryRelation,
-  GameMode,
-  OpponentGuessProgress,
-  OpponentVisibility,
+import {
+  MAX_GUESSES,
+  type CountryHint,
+  type CountryRelation,
+  type GameMode,
+  type OpponentGuessProgress,
+  type OpponentVisibility,
 } from "@/types/game";
 
 interface LiveGamePageProps {
@@ -263,7 +265,8 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
     opponentPlayer?.guessCount ?? 0,
     opponentBoards[0]?.progress.length ?? 0,
   );
-  const maxGuesses = readNumber(snapshot, "max_guesses") ?? 6;
+  const maxGuesses =
+    readNumber(snapshot, "max_guesses") ?? MAX_GUESSES;
   const mysteryPlayer =
     players.find((player) => player.id === mysteryId) ?? players[0];
   const answerDetails = [
@@ -271,7 +274,10 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
     ["战队", mysteryPlayer.team],
     ["国籍", countryNameZh(mysteryPlayer.countryCode)],
     ["年龄", mysteryPlayer.age],
-    ["位置", mysteryPlayer.role],
+    [
+      "位置",
+      <PlayerRoleLabel key="role" role={mysteryPlayer.role} />,
+    ],
   ] as const;
   const availablePlayers = players.filter(
     (player) => !ownGuesses.some((guess) => guess.id === player.id),
@@ -423,7 +429,17 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
         secondsLeft={secondsLeft}
         guesses={selfGuessCount}
         maxGuesses={maxGuesses}
-        timerActive={phase === "playing"}
+        status={
+          phase === "waiting"
+            ? "waiting"
+            : phase === "playing"
+              ? "playing"
+              : resultOutcome === "win"
+                ? "won"
+                : resultOutcome === "loss"
+                  ? "lost"
+                  : "draw"
+        }
         roundNumber={roundNumber}
         bestOf={bestOf}
         modeLabel={
@@ -487,7 +503,15 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
             {phase === "playing" ? (
               <Timer seconds={secondsLeft} className="text-lg text-primary" />
             ) : (
-              <span className="font-mono text-xs uppercase">{phase}</span>
+              <span className="font-mono text-xs font-semibold text-primary">
+                {phase === "waiting"
+                  ? "等待开始"
+                  : resultOutcome === "win"
+                    ? "本局胜利"
+                    : resultOutcome === "loss"
+                      ? "本局失利"
+                      : "本局平局"}
+              </span>
             )}
             <span className="font-mono text-xs">
               {selfGuessCount} / {maxGuesses}

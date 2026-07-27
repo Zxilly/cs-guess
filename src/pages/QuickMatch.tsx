@@ -21,6 +21,7 @@ import {
   ApiError,
   createQuickMatch,
   loadCredentials,
+  playingCountFor,
   queueCountFor,
   readString,
   saveCredentials,
@@ -92,6 +93,11 @@ export function QuickMatch() {
     3: queueCountFor(queue.counts, partySize, 3, visibility),
     5: queueCountFor(queue.counts, partySize, 5, visibility),
   };
+  const playingCounts: Record<BestOf, number> = {
+    1: playingCountFor(queue.counts, partySize, 1),
+    3: playingCountFor(queue.counts, partySize, 3),
+    5: playingCountFor(queue.counts, partySize, 5),
+  };
 
   return (
     <div className="min-h-svh bg-background text-foreground">
@@ -115,7 +121,7 @@ export function QuickMatch() {
                 className={`size-1.5 ${queue.live ? "bg-primary" : "bg-muted-foreground/40"}`}
               />
               {queue.live
-                ? `${queue.counts.total} 人等待`
+                ? `${queue.counts.total} 人等待 · ${queue.counts.playing_total} 人游戏中`
                 : "连接队列中"}
             </Badge>
           }
@@ -177,7 +183,7 @@ export function QuickMatch() {
                   </InfoTip>
                 </div>
                 <p className="font-mono text-xs text-primary">
-                  当前 {waitingCounts[bestOf]} 人
+                  {waitingCounts[bestOf]} 人等待 · {playingCounts[bestOf]} 人游戏中
                 </p>
               </div>
               <div className="mt-5">

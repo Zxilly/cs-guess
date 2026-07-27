@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { Player } from "@/data/players";
+import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { countryNameZh } from "@/lib/country-geography";
 import { cn } from "@/lib/utils";
 
@@ -98,6 +99,11 @@ export function IdentityDrawDialog({
                     revealed && index === winnerIndex && "is-winner",
                   )}
                 >
+                  <PlayerAvatar
+                    player={player}
+                    className="mx-auto mb-2 size-14"
+                    eager
+                  />
                   <p className="truncate text-lg font-semibold tracking-[-0.03em]">
                     {player.nickname}
                   </p>
@@ -124,10 +130,13 @@ export function IdentityDrawDialog({
           {revealed ? (
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
-                <CheckCircleIcon
-                  className="size-7 shrink-0 text-primary"
-                  weight="fill"
-                />
+                <div className="relative shrink-0">
+                  <PlayerAvatar player={winner} className="size-14" eager />
+                  <CheckCircleIcon
+                    className="absolute -right-1 -bottom-1 size-5 bg-background text-primary"
+                    weight="fill"
+                  />
+                </div>
                 <div className="min-w-0">
                   <p className="truncate text-xl font-semibold">
                     {winner.nickname}

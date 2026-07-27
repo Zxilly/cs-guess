@@ -1,27 +1,38 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { Player } from "@/data/players";
-import { dailyChallenge, dailySecondsLeft } from "@/lib/daily-challenge";
+import {
+  dailySecondsLeft,
+  loadDailyProgress,
+  saveDailyProgress,
+} from "@/lib/daily-challenge";
 
-const catalog = [
-  { id: "alpha" },
-  { id: "bravo" },
-  { id: "charlie" },
-] as Player[];
+class MemoryStorage {
+  private values = new Map<string, string>();
 
-describe("dailyChallenge", () => {
-  it("returns the same challenge for the same Shanghai date", () => {
-    const morning = dailyChallenge(
-      catalog,
-      new Date("2026-07-27T00:30:00+08:00"),
-    );
-    const evening = dailyChallenge(
-      catalog,
-      new Date("2026-07-27T23:30:00+08:00"),
-    );
+  getItem(key: string) {
+    return this.values.get(key) ?? null;
+  }
 
-    expect(morning.date).toBe("2026-07-27");
-    expect(evening).toEqual(morning);
+  setItem(key: string, value: string) {
+    this.values.set(key, value);
+  }
+}
+
+describe("daily progress", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("starts once when the daily page is first entered", () => {
+    vi.stubGlobal("localStorage", new MemoryStorage());
+    const challenge = { date: "2026-07-27" };
+
+    const initial = loadDailyProgress(challenge, [], 1_000);
+    expect(initial.deadline).toBe(181_000);
+    saveDailyProgress(initial);
+
+    const reloaded = loadDailyProgress(challenge, [], 10_000);
+    expect(reloaded.deadline).toBe(181_000);
   });
 
   it("uses an absolute deadline instead of resetting on reload", () => {

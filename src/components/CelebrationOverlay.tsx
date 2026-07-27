@@ -1,7 +1,6 @@
 import {
   ArrowRightIcon,
   CalendarDotsIcon,
-  CrosshairIcon,
   GlobeHemisphereWestIcon,
   MedalIcon,
   ScalesIcon,
@@ -12,6 +11,7 @@ import {
 import { useRef } from "react";
 
 import { Button } from "@/components/ui/button";
+import { PlayerAvatar } from "@/components/PlayerAvatar";
 import {
   Dialog,
   DialogContent,
@@ -20,8 +20,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { Player, PlayerRole } from "@/data/players";
+import { playerRoleNameZh, type Player } from "@/data/players";
 import { countryNameZh } from "@/lib/country-geography";
+import { playerRoleIcon } from "@/lib/player-role-icons";
 
 type ResultOutcome = "win" | "loss" | "draw";
 
@@ -30,19 +31,30 @@ interface CelebrationOverlayProps {
   seriesComplete: boolean;
   score: string;
   mysteryPlayer: Player;
+  context?: "battle" | "daily";
   nextRoundSeconds?: number;
   onClose: () => void;
-  onExit: () => void;
+  onExit?: () => void;
 }
 
-const roleNames: Record<PlayerRole, string> = {
-  AWPer: "狙击手",
-  Rifler: "步枪手",
-  IGL: "指挥",
-  Entry: "突破手",
-};
-
-function resultCopy(outcome: ResultOutcome, seriesComplete: boolean) {
+function resultCopy(
+  outcome: ResultOutcome,
+  seriesComplete: boolean,
+  context: "battle" | "daily",
+) {
+  if (context === "daily") {
+    return outcome === "win"
+      ? {
+          eyebrow: "Daily complete",
+          title: "今日挑战完成",
+          summary: "你成功锁定了今日的神秘选手。",
+        }
+      : {
+          eyebrow: "Daily complete",
+          title: "今日挑战结束",
+          summary: "今天未能锁定答案，明日可以再次挑战。",
+        };
+  }
   if (seriesComplete) {
     if (outcome === "win") {
       return {
@@ -85,12 +97,13 @@ export function CelebrationOverlay({
   seriesComplete,
   score,
   mysteryPlayer,
+  context = "battle",
   nextRoundSeconds,
   onClose,
   onExit,
 }: CelebrationOverlayProps) {
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const copy = resultCopy(outcome, seriesComplete);
+  const copy = resultCopy(outcome, seriesComplete, context);
   const ResultIcon =
     outcome === "win"
       ? TrophyIcon
@@ -106,8 +119,8 @@ export function CelebrationOverlay({
     },
     {
       label: "位置",
-      value: roleNames[mysteryPlayer.role],
-      icon: CrosshairIcon,
+      value: playerRoleNameZh(mysteryPlayer.role),
+      icon: playerRoleIcon(mysteryPlayer.role),
     },
     { label: "年龄", value: mysteryPlayer.age, icon: CalendarDotsIcon },
     {
@@ -150,7 +163,9 @@ export function CelebrationOverlay({
           </DialogTitle>
           <DialogDescription className="mt-3 max-w-full text-sm leading-6">
             {copy.summary}
-            {!seriesComplete && nextRoundSeconds !== undefined ? (
+            {context === "battle" &&
+            !seriesComplete &&
+            nextRoundSeconds !== undefined ? (
               <span className="mt-1 block sm:mt-0 sm:ml-1 sm:inline">
                 下一局{" "}
                 <span
@@ -166,7 +181,7 @@ export function CelebrationOverlay({
           </DialogDescription>
           <div className="mt-4 flex items-center gap-3 font-mono">
             <span className="text-xs uppercase tracking-[0.08em] text-muted-foreground">
-              当前比分
+              {context === "daily" ? "已用尝试" : "当前比分"}
             </span>
             <strong className="text-xl tracking-[-0.04em] text-foreground">
               {score}
@@ -175,16 +190,23 @@ export function CelebrationOverlay({
         </DialogHeader>
 
         <div className="px-5 py-5 sm:px-10 sm:py-6">
-          <div className="mb-3">
-            <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
-              本局答案
-            </p>
-            <h3 className="mt-1.5 text-2xl font-bold tracking-[-0.03em]">
-              {mysteryPlayer.nickname}
-              <span className="ml-2 text-base font-normal text-muted-foreground">
+          <div className="mb-4 flex min-w-0 items-center gap-4">
+            <PlayerAvatar
+              player={mysteryPlayer}
+              className="size-20"
+              eager
+            />
+            <div className="min-w-0">
+              <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                {context === "daily" ? "今日答案" : "本局答案"}
+              </p>
+              <h3 className="mt-1.5 truncate text-2xl font-bold tracking-[-0.03em]">
+                {mysteryPlayer.nickname}
+              </h3>
+              <p className="mt-1 truncate text-sm text-muted-foreground">
                 {mysteryPlayer.name}
-              </span>
-            </h3>
+              </p>
+            </div>
           </div>
 
           <dl className="border-y border-foreground/20">
@@ -208,9 +230,19 @@ export function CelebrationOverlay({
         <DialogFooter className="m-0 flex-row justify-center rounded-none border-t border-foreground/15 bg-transparent px-5 py-4 sm:justify-center sm:px-10">
           <Button
             className="w-full rounded-none sm:w-auto"
-            onClick={seriesComplete ? onExit : onClose}
+            onClick={
+              context === "daily"
+                ? onClose
+                : seriesComplete
+                  ? (onExit ?? onClose)
+                  : onClose
+            }
           >
-            {seriesComplete ? "返回模式大厅" : "查看对局"}
+            {context === "daily"
+              ? "查看结果"
+              : seriesComplete
+                ? "返回模式大厅"
+                : "查看对局"}
             <ArrowRightIcon />
           </Button>
         </DialogFooter>

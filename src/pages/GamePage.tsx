@@ -1,27 +1,31 @@
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 import { BattleContext } from "@/components/BattleContext";
+import { CelebrationOverlay } from "@/components/CelebrationOverlay";
 import { GuessTable } from "@/components/GuessTable";
 import { InfoTip } from "@/components/InfoTip";
 import { ModeSidebar } from "@/components/ModeSidebar";
 import { PlayerSearch } from "@/components/PlayerSearch";
 import { Timer } from "@/components/Timer";
-import { players, type Player } from "@/data/players";
-import { useAnonymousProfile } from "@/hooks/use-anonymous-profile";
+import { Button } from "@/components/ui/button";
 import {
-  dailyChallenge,
+  players,
+  type Player,
+} from "@/data/players";
+import { useAnonymousProfile } from "@/hooks/use-anonymous-profile";
+import { useDailyChallenge } from "@/hooks/use-daily-challenge";
+import {
   dailySecondsLeft,
   loadDailyProgress,
   saveDailyProgress,
   type DailyProgress,
 } from "@/lib/daily-challenge";
-import { countryNameZh } from "@/lib/country-geography";
-import type {
-  GameMode,
-  OpponentVisibility,
+import type { ServerDailyChallenge } from "@/lib/daily-challenge-api";
+import {
+  MAX_GUESSES,
+  type GameMode,
+  type OpponentVisibility,
 } from "@/types/game";
-
-const MAX_GUESSES = 6;
 
 type GameState = DailyProgress;
 
@@ -69,7 +73,7 @@ const modeContent: Record<
   daily: {
     eyebrow: "今日神秘选手",
     title: "根据对比，锁定神秘选手。",
-    description: "所有玩家共享今日答案，在六次机会内完成挑战。",
+    description: "所有玩家共享今日答案，在八次机会内完成挑战。",
     round: "DAILY",
   },
   quick: {
@@ -91,8 +95,45 @@ interface GamePageProps {
 }
 
 export function GamePage({ mode }: GamePageProps) {
+  const { challenge, error, retry } = useDailyChallenge();
+
+  if (!challenge) {
+    return (
+      <div className="grid min-h-svh place-items-center bg-background px-5 text-foreground">
+        <div
+          className="w-full max-w-md border border-foreground/25 p-6"
+          role={error ? "alert" : "status"}
+        >
+          <p className="font-mono text-xs uppercase tracking-[0.08em] text-primary">
+            DAILY CHALLENGE
+          </p>
+          <h1 className="mt-3 text-2xl font-bold">
+            {error ? "每日挑战载入失败" : "正在载入今日题目"}
+          </h1>
+          {error ? (
+            <Button
+              onClick={retry}
+              variant="outline"
+              className="mt-6 rounded-none"
+            >
+              重新载入
+            </Button>
+          ) : (
+            <div className="mt-6 h-1 w-full animate-pulse bg-primary motion-reduce:animate-none" />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return <DailyGame mode={mode} challenge={challenge} />;
+}
+
+function DailyGame({
+  mode,
+  challenge,
+}: GamePageProps & { challenge: ServerDailyChallenge }) {
   const { recordRound } = useAnonymousProfile();
-  const challenge = useMemo(() => dailyChallenge(players), []);
   const [game, dispatch] = useReducer(
     gameReducer,
     challenge,
@@ -100,6 +141,7 @@ export function GamePage({ mode }: GamePageProps) {
   );
   const [selectedId, setSelectedId] = useState<string>();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [resultDismissed, setResultDismissed] = useState(false);
   const [now, setNow] = useState(Date.now);
   const [opponentVisibility, setOpponentVisibility] =
     useState<OpponentVisibility>("hidden");
@@ -118,15 +160,8 @@ export function GamePage({ mode }: GamePageProps) {
   const content = modeContent[mode];
   const roundLabel = `DAILY · ROUND #${challenge.roundNumber}`;
   const isFinished = game.status !== "playing";
+  const resultOpen = isFinished && !resultDismissed;
   const secondsLeft = dailySecondsLeft(game, now);
-  const answerDetails = [
-    ["选手", mysteryPlayer.nickname],
-    ["战队", mysteryPlayer.team],
-    ["国籍", countryNameZh(mysteryPlayer.countryCode)],
-    ["年龄", mysteryPlayer.age],
-    ["位置", mysteryPlayer.role],
-  ] as const;
-
   useEffect(() => {
     if (game.status !== "playing" || game.deadline === null) return;
     const deadline = game.deadline;
@@ -194,6 +229,7 @@ export function GamePage({ mode }: GamePageProps) {
         secondsLeft={secondsLeft}
         guesses={game.guessedIds.length}
         maxGuesses={MAX_GUESSES}
+        status={game.status}
         roundNumber={challenge.roundNumber}
         bestOf={1}
       />
@@ -227,11 +263,19 @@ export function GamePage({ mode }: GamePageProps) {
           </header>
 
           <div className="mb-5 flex items-center justify-between border-y border-foreground/15 py-3 lg:hidden">
-            <span className="text-xs text-muted-foreground">剩余时间</span>
+            <span className="text-xs text-muted-foreground">
+              {isFinished ? "挑战结果" : "剩余时间"}
+            </span>
+            {isFinished ? (
+              <span className="font-mono text-xs font-semibold text-primary">
+                {game.status === "won" ? "挑战完成" : "挑战结束"}
+              </span>
+            ) : (
               <Timer
                 seconds={secondsLeft}
-              className="text-lg text-primary"
-            />
+                className="text-lg text-primary"
+              />
+            )}
             <span className="font-mono text-xs">
               {game.guessedIds.length} / {MAX_GUESSES}
             </span>
@@ -273,56 +317,6 @@ export function GamePage({ mode }: GamePageProps) {
             />
           </div>
 
-          <section className="mt-7 border border-foreground/35">
-            <div className="grid min-h-28 grid-cols-[140px_1fr] sm:grid-cols-[150px_repeat(5,1fr)]">
-              <div className="flex flex-col justify-center border-r border-foreground/20 px-5">
-                <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-primary">
-                  神秘选手
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {isFinished ? "答案已揭晓" : "答案在此"}
-                </p>
-              </div>
-
-              {answerDetails.map(([label, value]) => (
-                <div
-                  key={label}
-                  className="hidden flex-col justify-center border-r border-foreground/15 px-4 last:border-r-0 sm:flex"
-                >
-                  <p className="text-xs text-muted-foreground">{label}</p>
-                  <p
-                    className={
-                      isFinished
-                        ? "mt-2 font-mono text-sm font-semibold text-primary"
-                        : "mt-2 font-mono text-sm font-semibold text-primary"
-                    }
-                  >
-                    {isFinished ? value : "?????"}
-                  </p>
-                </div>
-              ))}
-
-              <div className="grid grid-cols-2 gap-x-5 gap-y-3 px-5 py-4 sm:hidden">
-                {isFinished ? (
-                  answerDetails.map(([label, value]) => (
-                    <div key={label}>
-                      <p className="text-[10px] text-muted-foreground">
-                        {label}
-                      </p>
-                      <p className="mt-1 truncate font-mono text-xs font-semibold text-primary">
-                        {value}
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <p className="col-span-2 font-mono text-sm font-semibold text-primary">
-                    ?????
-                  </p>
-                )}
-              </div>
-            </div>
-          </section>
-
           <div className="mt-5 flex flex-col gap-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-1">
               <span>结果图例</span>
@@ -331,15 +325,31 @@ export function GamePage({ mode }: GamePageProps) {
               </InfoTip>
             </div>
             {isFinished ? (
-              <p className="font-mono text-foreground">
-                {game.status === "won" ? "DAILY COMPLETE" : "明日再来"}
-              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-none"
+                onClick={() => setResultDismissed(false)}
+              >
+                查看结果
+              </Button>
             ) : (
               <p className="font-mono">每日题目 · 上海时间刷新</p>
             )}
           </div>
         </div>
       </main>
+      {resultOpen ? (
+        <CelebrationOverlay
+          context="daily"
+          outcome={game.status === "won" ? "win" : "loss"}
+          seriesComplete
+          score={`${game.guessedIds.length} / ${MAX_GUESSES}`}
+          mysteryPlayer={mysteryPlayer}
+          onClose={() => setResultDismissed(true)}
+        />
+      ) : null}
     </div>
   );
 }

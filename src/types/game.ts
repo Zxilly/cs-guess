@@ -1,3 +1,5 @@
+export const MAX_GUESSES = 8;
+
 export type GameMode = "daily" | "quick" | "room";
 
 export type GameStatus = "playing" | "won" | "lost";

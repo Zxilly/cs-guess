@@ -2,7 +2,6 @@ import {
   ChartLineUpIcon,
   DiceFiveIcon,
   FireIcon,
-  IdentificationCardIcon,
   TrophyIcon,
 } from "@phosphor-icons/react";
 import { Link } from "react-router";
@@ -10,6 +9,7 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { InfoTip } from "@/components/InfoTip";
+import { PlayerAvatar } from "@/components/PlayerAvatar";
 import type { Player } from "@/data/players";
 import {
   IDENTITY_POOLS,
@@ -49,10 +49,7 @@ export function PlayerIdentity({
     <section className="border border-foreground/25" aria-label="我的身份">
       <div className="grid sm:grid-cols-[minmax(0,1fr)_auto]">
         <div className="flex min-w-0 items-center gap-4 px-4 py-4 sm:px-5">
-          <IdentificationCardIcon
-            className="size-7 shrink-0 text-primary"
-            weight="light"
-          />
+          <PlayerAvatar player={player} className="size-14" eager />
           <div className="min-w-0">
             <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
               我的身份 · {

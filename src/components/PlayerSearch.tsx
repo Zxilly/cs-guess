@@ -19,6 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { PlayerAvatar } from "@/components/PlayerAvatar";
 import type { Player } from "@/data/players";
 import { countryNameZh } from "@/lib/country-geography";
 
@@ -116,7 +117,8 @@ export function PlayerSearch({
                     onSelect={() => onSelect(player.id)}
                     className="min-h-13 rounded-none px-3 py-2.5"
                   >
-                    <span className="w-16 truncate text-xs text-muted-foreground">
+                    <PlayerAvatar player={player} className="size-9" />
+                    <span className="w-14 truncate text-xs text-muted-foreground">
                       {countryNameZh(player.countryCode)}
                     </span>
                     <span className="min-w-0 flex-1">
@@ -136,12 +138,15 @@ export function PlayerSearch({
       </Popover>
 
       <Button
-        className="h-16 rounded-none px-8 font-semibold shadow-none"
+        className="relative h-16 min-w-30 rounded-none px-8 text-center font-semibold shadow-none"
         onClick={onSubmit}
         disabled={!selectedPlayer || disabled}
       >
-        <CrosshairSimpleIcon data-icon="inline-start" />
-        提交猜测
+        <CrosshairSimpleIcon
+          className="absolute left-4 size-4"
+          aria-hidden="true"
+        />
+        <span className="w-full text-center">提交猜测</span>
       </Button>
     </div>
   );

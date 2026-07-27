@@ -62,6 +62,13 @@ export interface MatchmakingQueueCounts {
   group_bo5_hidden: number;
   group_bo5_open: number;
   group_total: number;
+  playing_bo1: number;
+  playing_bo3: number;
+  playing_bo5: number;
+  playing_group_bo1: number;
+  playing_group_bo3: number;
+  playing_group_bo5: number;
+  playing_total: number;
 }
 
 export function queueCountFor(
@@ -73,6 +80,16 @@ export function queueCountFor(
   const prefix = partySize === 4 ? "group_" : "";
   const key =
     `${prefix}bo${bestOf}_${visibility}` as keyof MatchmakingQueueCounts;
+  return counts[key];
+}
+
+export function playingCountFor(
+  counts: MatchmakingQueueCounts,
+  partySize: 2 | 4,
+  bestOf: BestOf,
+) {
+  const prefix = partySize === 4 ? "playing_group_" : "playing_";
+  const key = `${prefix}bo${bestOf}` as keyof MatchmakingQueueCounts;
   return counts[key];
 }
 

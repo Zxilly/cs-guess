@@ -12,6 +12,8 @@ import { AppHeader } from "@/components/AppHeader";
 import { GuessTable } from "@/components/GuessTable";
 import { InfoTip } from "@/components/InfoTip";
 import { PageIntro } from "@/components/PageIntro";
+import { PanelHeader } from "@/components/PanelHeader";
+import { PlayerRoleLabel } from "@/components/PlayerRoleLabel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -31,6 +33,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { players } from "@/data/players";
+import { MAX_GUESSES } from "@/types/game";
 import {
   type MatchHistoryEntry,
   useAnonymousProfile,
@@ -125,17 +128,15 @@ export function StatsPage() {
         </div>
 
         <Card className="mt-5 gap-0 overflow-hidden rounded-none border-foreground/25 bg-transparent py-0 shadow-none">
-          <div className="flex items-center justify-between border-b border-foreground/20 px-5 py-4">
-            <div>
-              <h2 className="font-semibold">最近对局</h2>
-              <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
-                平均胜局猜数 · {identity.averageWinningGuesses || "—"}
-              </p>
-            </div>
-            <Badge variant="outline" className="rounded-none">
-              {history.length} 局
-            </Badge>
-          </div>
+          <PanelHeader
+            title="最近对局"
+            description={`平均胜局猜数 · ${identity.averageWinningGuesses || "—"}`}
+            action={
+              <Badge variant="outline" className="rounded-none">
+                {history.length} 局
+              </Badge>
+            }
+          />
 
           {history.length ? (
             <div>
@@ -252,7 +253,8 @@ export function StatsPage() {
                 <div className="font-mono text-xs sm:text-right">
                   <p>{answer.team}</p>
                   <p className="mt-1 text-muted-foreground">
-                    {countryNameZh(answer.countryCode)} · {answer.role} ·{" "}
+                    {countryNameZh(answer.countryCode)} ·{" "}
+                    <PlayerRoleLabel role={answer.role} /> ·{" "}
                     {answer.age}
                   </p>
                 </div>
@@ -263,7 +265,7 @@ export function StatsPage() {
                 opponentVisibility="hidden"
                 mysteryPlayer={answer}
                 mode="daily"
-                maxGuesses={6}
+                maxGuesses={MAX_GUESSES}
               />
             </div>
           ) : null}

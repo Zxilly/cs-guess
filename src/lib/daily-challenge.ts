@@ -1,15 +1,8 @@
-import type { Player } from "@/data/players";
-import type { GameStatus } from "@/types/game";
+import { MAX_GUESSES, type GameStatus } from "@/types/game";
 
-const SHANGHAI_TIME_ZONE = "Asia/Shanghai";
 const ROUND_SECONDS = 180;
-const STORAGE_PREFIX = "cs-guess:daily:v1:";
-
-export interface DailyChallenge {
-  date: string;
-  roundNumber: number;
-  mysteryPlayer: Player;
-}
+const ROUND_MILLISECONDS = ROUND_SECONDS * 1_000;
+const STORAGE_PREFIX = "cs-guess:daily:v2:";
 
 export interface DailyProgress {
   date: string;
@@ -18,63 +11,33 @@ export interface DailyProgress {
   status: GameStatus;
 }
 
-function fnv1a(value: string) {
-  let hash = 0x811c9dc5;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return hash >>> 0;
-}
-
-function shanghaiDate(now = new Date()) {
-  return new Intl.DateTimeFormat("sv-SE", {
-    timeZone: SHANGHAI_TIME_ZONE,
-  }).format(now);
-}
-
-export function dailyChallenge(
-  catalog: readonly Player[],
-  now = new Date(),
-): DailyChallenge {
-  if (catalog.length === 0) {
-    throw new Error("职业选手目录为空");
-  }
-  const date = shanghaiDate(now);
-  const [year, month, day] = date.split("-").map(Number);
-  const startOfYear = Date.UTC(year, 0, 1);
-  const currentDay = Date.UTC(year, month - 1, day);
-  const roundNumber =
-    Math.floor((currentDay - startOfYear) / (24 * 60 * 60 * 1000)) + 1;
-  const catalogSignature = `${catalog.length}:${catalog[0]?.id}:${catalog.at(-1)?.id}`;
-  const index = fnv1a(`${date}:${catalogSignature}`) % catalog.length;
-  return { date, roundNumber, mysteryPlayer: catalog[index] };
-}
-
 function storageKey(date: string) {
   return `${STORAGE_PREFIX}${date}`;
 }
 
 function createDailyProgress(
-  challenge: DailyChallenge,
+  challenge: { date: string },
+  now: number,
 ): DailyProgress {
   return {
     date: challenge.date,
-    deadline: null,
+    deadline: now + ROUND_MILLISECONDS,
     guessedIds: [],
     status: "playing",
   };
 }
 
 export function loadDailyProgress(
-  challenge: DailyChallenge,
-  catalog: readonly Player[],
+  challenge: { date: string },
+  catalog: readonly { id: string }[],
   now = Date.now(),
 ): DailyProgress {
   try {
     const raw = localStorage.getItem(storageKey(challenge.date));
-    if (!raw) return createDailyProgress(challenge);
+    if (!raw) return createDailyProgress(challenge, now);
     const stored = JSON.parse(raw) as Partial<DailyProgress>;
+    const deadline =
+      stored.deadline === null ? now + ROUND_MILLISECONDS : stored.deadline;
     const guessedIds = Array.isArray(stored.guessedIds)
       ? stored.guessedIds.filter(
           (id): id is string =>
@@ -83,29 +46,28 @@ export function loadDailyProgress(
         )
       : [];
     const status =
-      stored.status === "won" || stored.status === "lost"
-        ? stored.status
-        : typeof stored.deadline === "number" && stored.deadline <= now
+      stored.status === "won"
+        ? "won"
+        : typeof deadline === "number" && deadline <= now
           ? "lost"
-          : "playing";
+          : stored.status === "lost" && guessedIds.length >= MAX_GUESSES
+            ? "lost"
+            : "playing";
     if (
       stored.date !== challenge.date ||
-      !(
-        stored.deadline === null ||
-        (typeof stored.deadline === "number" &&
-          Number.isFinite(stored.deadline))
-      )
+      typeof deadline !== "number" ||
+      !Number.isFinite(deadline)
     ) {
-      return createDailyProgress(challenge);
+      return createDailyProgress(challenge, now);
     }
     return {
       date: challenge.date,
-      deadline: stored.deadline,
+      deadline,
       guessedIds,
       status,
     };
   } catch {
-    return createDailyProgress(challenge);
+    return createDailyProgress(challenge, now);
   }
 }
 

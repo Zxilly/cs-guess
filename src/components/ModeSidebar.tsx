@@ -2,7 +2,11 @@ import {
   ArrowLeftIcon,
   ClockIcon,
   CrosshairIcon,
+  HourglassMediumIcon,
   InfoIcon,
+  ScalesIcon,
+  TrophyIcon,
+  XCircleIcon,
 } from "@phosphor-icons/react";
 import { Link } from "react-router";
 
@@ -26,7 +30,7 @@ interface ModeSidebarProps {
   secondsLeft: number;
   guesses: number;
   maxGuesses: number;
-  timerActive?: boolean;
+  status?: "waiting" | "playing" | "won" | "lost" | "draw";
   roundNumber?: number;
   bestOf?: number;
   modeLabel?: string;
@@ -38,7 +42,7 @@ export function ModeSidebar({
   secondsLeft,
   guesses,
   maxGuesses,
-  timerActive = true,
+  status = "playing",
   roundNumber,
   bestOf,
   modeLabel,
@@ -47,6 +51,29 @@ export function ModeSidebar({
   const today = new Intl.DateTimeFormat("sv-SE", {
     timeZone: "Asia/Shanghai",
   }).format(new Date());
+  const finishedStatus = {
+    waiting: {
+      label: "等待开局",
+      detail: "玩家就位后开始",
+      icon: HourglassMediumIcon,
+    },
+    won: {
+      label: mode === "daily" ? "挑战完成" : "本局胜利",
+      detail: `已提交 ${guesses} 次猜测`,
+      icon: TrophyIcon,
+    },
+    lost: {
+      label: mode === "daily" ? "挑战结束" : "本局失利",
+      detail: `已提交 ${guesses} 次猜测`,
+      icon: XCircleIcon,
+    },
+    draw: {
+      label: "本局平局",
+      detail: `已提交 ${guesses} 次猜测`,
+      icon: ScalesIcon,
+    },
+  }[status === "playing" ? "waiting" : status];
+  const FinishedStatusIcon = finishedStatus.icon;
 
   return (
     <aside className="border-b border-foreground/20 bg-sidebar lg:sticky lg:top-0 lg:h-screen lg:border-r lg:border-b-0">
@@ -112,29 +139,43 @@ export function ModeSidebar({
           </div>
         </div>
 
-        <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
-          <div className="flex items-center gap-2 text-sm">
-            <ClockIcon className="size-4" />
-            <span>剩余时间</span>
-          </div>
-          {timerActive ? (
-            <Timer
-              seconds={secondsLeft}
-              className="mt-3 text-4xl text-primary"
-            />
-          ) : (
-            <p className="mt-3 font-mono text-3xl text-muted-foreground">
-              --:--
-            </p>
-          )}
-        </div>
+        {status === "playing" ? (
+          <>
+            <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
+              <div className="flex items-center gap-2 text-sm">
+                <ClockIcon className="size-4" />
+                <span>剩余时间</span>
+              </div>
+              <Timer
+                seconds={secondsLeft}
+                className="mt-3 text-4xl text-primary"
+              />
+            </div>
 
-        <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
-          <p className="text-sm">尝试次数</p>
-          <p className="mt-2 font-mono text-3xl font-medium">
-            {guesses} / {maxGuesses}
-          </p>
-        </div>
+            <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
+              <p className="text-sm">猜测进度</p>
+              <p className="mt-2 font-mono text-3xl font-medium">
+                {guesses} / {maxGuesses}
+              </p>
+            </div>
+          </>
+        ) : (
+          <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
+            <p className="text-xs text-muted-foreground">对局状态</p>
+            <div className="mt-3 flex items-start gap-3">
+              <FinishedStatusIcon
+                className="mt-0.5 size-5 shrink-0 text-primary"
+                weight="regular"
+              />
+              <div>
+                <p className="font-semibold">{finishedStatus.label}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {finishedStatus.detail}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
           <Popover>
@@ -155,7 +196,7 @@ export function ModeSidebar({
               <ul className="space-y-1 leading-5">
                 <li>搜索职业选手并提交猜测。</li>
                 <li>蓝色代表完全一致，箭头表示数值方向。</li>
-                <li>在六次机会与三分钟内锁定答案。</li>
+                <li>在八次机会与三分钟内锁定答案。</li>
               </ul>
             </PopoverContent>
           </Popover>
