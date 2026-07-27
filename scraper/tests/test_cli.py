@@ -1,7 +1,6 @@
 import json
 
 import pytest
-
 from cs_guess_scraper.cli import main
 from cs_guess_scraper.config import SettingsError
 from cs_guess_scraper.store import PlayerStore

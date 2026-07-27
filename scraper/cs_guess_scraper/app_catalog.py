@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import re
 import json
+import re
 import unicodedata
 from collections import Counter
 from collections.abc import Iterable, Mapping
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -65,7 +65,7 @@ def build_app_catalog(
     duplicate_bases = {
         base for base, count in Counter(bases).items() if count > 1
     }
-    effective_today = today or date.today()
+    effective_today = today or datetime.now(timezone.utc).date()
     catalog: list[dict[str, Any]] = []
     used_ids: set[str] = set()
     for record, base in zip(source, bases, strict=True):
@@ -131,5 +131,5 @@ def read_previous_catalog(path: Path) -> list[Mapping[str, Any]]:
         return []
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, list):
-        raise ValueError("existing app catalog must contain a JSON list")
+        raise TypeError("existing app catalog must contain a JSON list")
     return [record for record in payload if isinstance(record, Mapping)]

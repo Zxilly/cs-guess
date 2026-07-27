@@ -5,7 +5,6 @@ import unicodedata
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-
 DEFAULT_SOURCE_PRIORITY = (
     "manual",
     "liquipedia",

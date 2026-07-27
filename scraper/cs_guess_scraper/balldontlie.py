@@ -10,7 +10,6 @@ from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-
 API_URL = "https://api.balldontlie.io/cs/v1/players"
 JsonObject = Mapping[str, Any]
 HttpResponse = tuple[int, Mapping[str, str], bytes]

@@ -12,7 +12,6 @@ from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-
 API_URL = "https://api.pandascore.co/csgo/players"
 
 JsonObject = Mapping[str, Any]

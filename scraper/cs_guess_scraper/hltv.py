@@ -6,15 +6,14 @@ import re
 import time
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from html.parser import HTMLParser
-from urllib.parse import urljoin, urlparse
 from urllib.error import HTTPError
+from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
 
 from .merge import normalize_identity_text, person_name_token_signature
 from .normalization import normalize_country_code
-
 
 BASE_URL = "https://www.hltv.org"
 MAX_RETRIES = 2
@@ -205,7 +204,9 @@ def _current_team(root: _Node) -> dict[str, object] | None:
 
 
 def _month_value(value: str) -> str:
-    return datetime.strptime(value, "%b %Y").strftime("%Y-%m")
+    return datetime.strptime(value, "%b %Y").replace(tzinfo=timezone.utc).strftime(
+        "%Y-%m"
+    )
 
 
 def _team_history(root: _Node) -> list[dict[str, object]]:

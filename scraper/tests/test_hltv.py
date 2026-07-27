@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-
 from cs_guess_scraper.hltv import (
     HltvClient,
     HltvError,
@@ -9,7 +8,6 @@ from cs_guess_scraper.hltv import (
     known_profile_mismatches,
     parse_player_profile,
 )
-
 
 FIXTURES = Path(__file__).parent / "fixtures" / "hltv"
 

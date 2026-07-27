@@ -6,12 +6,11 @@ import gzip
 import json
 import re
 import time
-from html import unescape
 from collections.abc import Callable, Iterator, Mapping
+from html import unescape
 from typing import Any
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
-
 
 API_URL = "https://liquipedia.net/counterstrike/api.php"
 

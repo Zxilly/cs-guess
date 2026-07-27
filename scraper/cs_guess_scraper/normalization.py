@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import pycountry
 
-
 _COUNTRY_ALIASES = {
     "bosnia": "BA",
     "bolivia": "BO",

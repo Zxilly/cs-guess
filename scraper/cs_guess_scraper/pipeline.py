@@ -19,7 +19,6 @@ from .merge import (
 )
 from .store import PlayerStore
 
-
 Progress = Callable[[str], None]
 
 

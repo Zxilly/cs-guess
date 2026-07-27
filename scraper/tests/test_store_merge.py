@@ -3,7 +3,6 @@ from pathlib import Path
 
 from cs_guess_scraper.store import PlayerStore
 
-
 SCHEMA_PATH = Path(__file__).parents[1] / "schema.sql"
 
 

@@ -7,7 +7,6 @@ from cs_guess_scraper.liquipedia import (
     parse_player_page,
 )
 
-
 FIXTURES = Path(__file__).parent / "fixtures" / "liquipedia"
 
 

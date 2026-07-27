@@ -8,7 +8,6 @@ from cs_guess_scraper.pipeline import (
 )
 from cs_guess_scraper.store import PlayerStore
 
-
 FIXTURES = Path(__file__).parent / "fixtures"
 SCHEMA_PATH = Path(__file__).parents[1] / "schema.sql"
 

@@ -5,7 +5,6 @@ from urllib.parse import parse_qs, urlparse
 
 from cs_guess_scraper.balldontlie import BallDontLieClient, parse_player
 
-
 FIXTURES = Path(__file__).parent / "fixtures" / "balldontlie"
 
 

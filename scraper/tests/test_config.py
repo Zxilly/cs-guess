@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-
 from cs_guess_scraper.config import Settings, SettingsError
 
 
@@ -10,14 +9,10 @@ def test_settings_load_required_credentials_without_leaking_token(
 ) -> None:
     env_file = tmp_path / ".env"
     env_file.write_text(
-        "\n".join(
-            [
-                "PANDASCORE_API_TOKEN=test-secret-token",
-                "BALLDONTLIE_API_TOKEN=bdl-secret-token",
-                "LIQUIPEDIA_USER_AGENT=CSGuessTest/1.0 (test@example.com)",
-                "ALLOW_HLTV_FALLBACK=true",
-            ]
-        ),
+        "PANDASCORE_API_TOKEN=test-secret-token\n"
+        "BALLDONTLIE_API_TOKEN=bdl-secret-token\n"
+        "LIQUIPEDIA_USER_AGENT=CSGuessTest/1.0 (test@example.com)\n"
+        "ALLOW_HLTV_FALLBACK=true",
         encoding="utf-8",
     )
 
@@ -49,12 +44,8 @@ def test_settings_discover_environment_file_in_parent(
 ) -> None:
     env_file = tmp_path / ".env"
     env_file.write_text(
-        "\n".join(
-            [
-                "PANDASCORE_API_TOKEN=parent-token",
-                "LIQUIPEDIA_USER_AGENT=CSGuessTest/1.0 (test@example.com)",
-            ]
-        ),
+        "PANDASCORE_API_TOKEN=parent-token\n"
+        "LIQUIPEDIA_USER_AGENT=CSGuessTest/1.0 (test@example.com)",
         encoding="utf-8",
     )
     nested = tmp_path / "scraper" / "tests"

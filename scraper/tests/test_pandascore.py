@@ -4,13 +4,11 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 import pytest
-
 from cs_guess_scraper.pandascore import (
     PandaScoreAPIError,
     PandaScoreClient,
     parse_player,
 )
-
 
 FIXTURES = Path(__file__).parent / "fixtures" / "pandascore"
 

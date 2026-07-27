@@ -1,5 +1,4 @@
 import pytest
-
 from cs_guess_scraper.normalization import normalize_country_code
 
 

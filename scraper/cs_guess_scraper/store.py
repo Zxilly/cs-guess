@@ -4,13 +4,15 @@ import hashlib
 import json
 import sqlite3
 import uuid
+from collections.abc import Mapping
 from datetime import date, datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping
+from types import TracebackType
+from typing import Any, Self
 
 from .merge import (
-    choose_evidence,
     choose_display_casing,
+    choose_evidence,
     derive_game_role,
     normalize_identity_text,
     person_name_token_signature,
@@ -63,7 +65,7 @@ class PlayerStore:
         self._connection: sqlite3.Connection | None = None
         self.init()
 
-    def init(self) -> PlayerStore:
+    def init(self) -> Self:
         if self._connection is None:
             self._connection = sqlite3.connect(self.db_path)
             self._connection.row_factory = sqlite3.Row
@@ -98,10 +100,15 @@ class PlayerStore:
 
     initialize = init
 
-    def __enter__(self) -> PlayerStore:
+    def __enter__(self) -> Self:
         return self.init()
 
-    def __exit__(self, exc_type: Any, exc: Any, traceback: Any) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         if self._connection is not None:
             if exc_type is None:
                 self._connection.commit()
@@ -483,7 +490,7 @@ class PlayerStore:
                     duplicate_ref,
                     Mapping,
                 ):
-                    raise ValueError(
+                    raise TypeError(
                         "reviewed identity mapping requires survivor and "
                         "duplicate provider references"
                     )
@@ -503,7 +510,7 @@ class PlayerStore:
 
                 raw_overrides = mapping.get("overrides") or {}
                 if not isinstance(raw_overrides, Mapping):
-                    raise ValueError(
+                    raise TypeError(
                         "reviewed identity mapping overrides must be an object"
                     )
                 overrides = dict(raw_overrides)
@@ -590,7 +597,7 @@ class PlayerStore:
                     canonical_ref,
                     Mapping,
                 ):
-                    raise ValueError(
+                    raise TypeError(
                         "reviewed source quarantine requires target and "
                         "canonical provider references"
                     )
@@ -709,7 +716,7 @@ class PlayerStore:
                     right_ref,
                     Mapping,
                 ):
-                    raise ValueError(
+                    raise TypeError(
                         "reviewed identity separation requires left and right "
                         "provider references"
                     )
@@ -2589,10 +2596,8 @@ class PlayerStore:
                 values.clear()
             for alias in aliases:
                 alias_evidence = evidence_by_team.get(str(alias["id"]), {})
-                for field_name in evidence_by_field:
-                    evidence_by_field[field_name].extend(
-                        alias_evidence.get(field_name, [])
-                    )
+                for field_name, field_evidence in evidence_by_field.items():
+                    field_evidence.extend(alias_evidence.get(field_name, []))
             selected_name, _ = choose_evidence(
                 "canonical_name",
                 evidence_by_field["canonical_name"],

@@ -4,13 +4,11 @@ from __future__ import annotations
 
 import json
 import time
-from collections.abc import Mapping
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Mapping
 from typing import Any
 from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
-
 
 API_BASE_URL = "https://api.bo3.gg/api/v1"
 MAX_RETRIES = 3

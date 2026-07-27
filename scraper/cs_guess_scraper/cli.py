@@ -5,8 +5,8 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from .app_catalog import build_app_catalog, read_previous_catalog
 from .balldontlie import BallDontLieClient
@@ -322,12 +322,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.env_file
         else Settings.discover()
     )
-    if args.command in {"hltv", "hltv-batch"}:
-        if not settings.allow_hltv_fallback:
-            raise SettingsError(
-                "HLTV fallback is disabled; explicitly enable it in .env "
-                "only after reviewing the known target"
-            )
+    if (
+        args.command in {"hltv", "hltv-batch"}
+        and not settings.allow_hltv_fallback
+    ):
+        raise SettingsError(
+            "HLTV fallback is disabled; explicitly enable it in .env "
+            "only after reviewing the known target"
+        )
     if args.command == "hltv":
         with PlayerStore(args.db) as store:
             player_id = _ingest_known_hltv_profile(
