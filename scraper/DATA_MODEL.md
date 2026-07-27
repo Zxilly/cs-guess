@@ -131,6 +131,7 @@ interface PlayerGameRecord {
   id: string;
   nickname: string;
   fullName: string;
+  imageUrl?: string;
   countryCode: string;
   birthDate: string;
   currentTeam: {

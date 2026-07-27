@@ -51,6 +51,31 @@ def build_parser() -> argparse.ArgumentParser:
         help="optional compact JSON shared by the frontend and game server",
     )
     sync.add_argument(
+        "--reviewed-major-winners",
+        type=Path,
+        help="optional reviewed Major winner corrections",
+    )
+    sync.add_argument(
+        "--reviewed-major-appearances",
+        type=Path,
+        help="optional reviewed Major roster corrections",
+    )
+    sync.add_argument(
+        "--reviewed-identity-merges",
+        type=Path,
+        help="optional reviewed cross-source identity mappings",
+    )
+    sync.add_argument(
+        "--reviewed-source-quarantines",
+        type=Path,
+        help="optional reviewed provider records to detach",
+    )
+    sync.add_argument(
+        "--reviewed-identity-separations",
+        type=Path,
+        help="optional reviewed identity pairs to keep separate",
+    )
+    sync.add_argument(
         "--source",
         choices=("all", "liquipedia", "pandascore", "balldontlie", "bo3"),
         default="all",
@@ -95,6 +120,22 @@ def build_parser() -> argparse.ArgumentParser:
     audit.add_argument("--db", type=Path, default=Path("data/cs_guess.sqlite"))
     audit.add_argument("--player-id")
 
+    quality = subparsers.add_parser(
+        "quality",
+        help="validate canonical data and report non-blocking coverage gaps",
+    )
+    quality.add_argument(
+        "--db",
+        type=Path,
+        default=Path("data/cs_guess.sqlite"),
+    )
+    quality.add_argument("--output", type=Path)
+    quality.add_argument(
+        "--fail-on-critical",
+        action="store_true",
+        help="exit with status 1 when integrity failures are present",
+    )
+
     export = subparsers.add_parser("export", help="export game records")
     export.add_argument("--db", type=Path, default=Path("data/cs_guess.sqlite"))
     export.add_argument(
@@ -106,6 +147,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--catalog-output",
         type=Path,
         help="optional compact JSON shared by the frontend and game server",
+    )
+    export.add_argument(
+        "--reviewed-major-winners",
+        type=Path,
+        help="optional reviewed Major winner corrections",
+    )
+    export.add_argument(
+        "--reviewed-major-appearances",
+        type=Path,
+        help="optional reviewed Major roster corrections",
     )
     export.add_argument(
         "--include-incomplete",
@@ -164,7 +215,55 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _print_json(value: object) -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     print(json.dumps(value, ensure_ascii=False, indent=2))
+
+
+def _read_reviewed_major_winners(
+    path: Path | None,
+) -> list[dict[str, object]]:
+    if path is None:
+        return []
+    loaded = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(loaded, list) or not all(
+        isinstance(item, dict) for item in loaded
+    ):
+        raise ValueError(
+            "reviewed Major winners file must contain a JSON list of objects"
+        )
+    return loaded
+
+
+def _read_reviewed_major_appearances(
+    path: Path | None,
+) -> list[dict[str, object]]:
+    if path is None:
+        return []
+    loaded = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(loaded, list) or not all(
+        isinstance(item, dict) for item in loaded
+    ):
+        raise ValueError(
+            "reviewed Major appearances file must contain a JSON list "
+            "of objects"
+        )
+    return loaded
+
+
+def _read_object_list(
+    path: Path | None,
+    *,
+    label: str,
+) -> list[dict[str, object]]:
+    if path is None:
+        return []
+    loaded = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(loaded, list) or not all(
+        isinstance(item, dict) for item in loaded
+    ):
+        raise ValueError(f"{label} file must contain a JSON list of objects")
+    return loaded
 
 
 def _ingest_known_hltv_profile(
@@ -227,8 +326,36 @@ def main(argv: Sequence[str] | None = None) -> int:
             _print_json(store.audit(args.player_id))
         return 0
 
-    if args.command == "export":
+    if args.command == "quality":
         with PlayerStore(args.db) as store:
+            report = store.data_quality_report()
+        if args.output is not None:
+            _write_json(args.output, report)
+        _print_json(report)
+        if args.fail_on_critical and report["criticalIssues"]:
+            return 1
+        return 0
+
+    if args.command == "export":
+        reviewed_major_winners = _read_reviewed_major_winners(
+            args.reviewed_major_winners
+        )
+        reviewed_major_appearances = _read_reviewed_major_appearances(
+            args.reviewed_major_appearances
+        )
+        with PlayerStore(args.db) as store:
+            reviewed = (
+                store.apply_reviewed_major_winners(reviewed_major_winners)
+                if reviewed_major_winners
+                else {"events": 0, "appearances": 0}
+            )
+            reviewed_appearances = (
+                store.apply_reviewed_major_appearances(
+                    reviewed_major_appearances
+                )
+                if reviewed_major_appearances
+                else {"reviewed": 0, "created": 0, "updated": 0}
+            )
             records = store.export_game_records(
                 guessable_only=not args.include_incomplete
             )
@@ -253,6 +380,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "output": str(args.output.resolve()),
                 "exportedRecords": len(records),
                 "catalogRecords": len(catalog_records),
+                "reviewedMajorWinners": reviewed,
+                "reviewedMajorAppearances": reviewed_appearances,
             }
         )
         return 0
@@ -443,6 +572,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         else None
     )
     args.db.parent.mkdir(parents=True, exist_ok=True)
+    reviewed_major_winners = _read_reviewed_major_winners(
+        args.reviewed_major_winners
+    )
+    reviewed_major_appearances = _read_reviewed_major_appearances(
+        args.reviewed_major_appearances
+    )
+    reviewed_identity_merges = _read_object_list(
+        args.reviewed_identity_merges,
+        label="reviewed identity mappings",
+    )
+    reviewed_source_quarantines = _read_object_list(
+        args.reviewed_source_quarantines,
+        label="reviewed source quarantines",
+    )
+    reviewed_identity_separations = _read_object_list(
+        args.reviewed_identity_separations,
+        label="reviewed identity separations",
+    )
     with PlayerStore(args.db) as store:
         report = run_sync(
             store,
@@ -455,6 +602,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             output_path=args.output,
             catalog_output_path=args.catalog_output,
             report_path=args.report,
+            reviewed_identity_merges=reviewed_identity_merges,
+            reviewed_source_quarantines=reviewed_source_quarantines,
+            reviewed_identity_separations=reviewed_identity_separations,
+            reviewed_major_winners=reviewed_major_winners,
+            reviewed_major_appearances=reviewed_major_appearances,
             progress=lambda message: print(message, file=sys.stderr, flush=True),
         )
     _print_json(report)

@@ -120,6 +120,13 @@ def build_app_catalog(
         team_logo_url = current_team.get("logoUrl")
         if team_logo_url:
             catalog_record["teamLogoUrl"] = str(team_logo_url)
+        image_url = record.get("imageUrl") or (
+            previous_record.get("imageUrl")
+            if previous_record is not None
+            else None
+        )
+        if image_url:
+            catalog_record["imageUrl"] = str(image_url)
         catalog.append(catalog_record)
     if len({record["id"] for record in catalog}) != len(catalog):
         raise ValueError("app catalog generated duplicate public player IDs")

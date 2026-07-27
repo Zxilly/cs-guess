@@ -14,6 +14,7 @@ from .merge import (
     choose_display_casing,
     choose_evidence,
     derive_game_role,
+    nickname_identity_signature,
     normalize_identity_text,
     person_name_token_signature,
     person_name_tokens_compatible,
@@ -581,6 +582,305 @@ class PlayerStore:
                     resolved_value=survivor_id,
                     status="manual",
                 )
+        return result
+
+    def apply_reviewed_major_winners(
+        self,
+        winners: list[Mapping[str, Any]],
+    ) -> dict[str, int]:
+        """Apply externally verified Major winners to every roster member.
+
+        Major participation tables do not always publish placements. Provider
+        references keep the correction replayable after rebuilding the local
+        database, while manual evidence remains visible to the normal merge and
+        audit machinery.
+        """
+
+        result = {"events": 0, "appearances": 0}
+        with self.connection:
+            for winner in winners:
+                major_ref = winner.get("major")
+                team_ref = winner.get("team")
+                if not isinstance(major_ref, Mapping) or not isinstance(
+                    team_ref,
+                    Mapping,
+                ):
+                    raise TypeError(
+                        "reviewed Major winner requires major and team "
+                        "provider references"
+                    )
+
+                major_row = self.connection.execute(
+                    """
+                    SELECT DISTINCT fe.entity_id
+                    FROM source_records sr
+                    JOIN field_evidence fe ON fe.source_record_id = sr.id
+                    WHERE sr.source = ?
+                      AND sr.record_type = 'major'
+                      AND sr.external_id = ?
+                      AND fe.entity_type = 'major'
+                    ORDER BY fe.id
+                    LIMIT 1
+                    """,
+                    (
+                        str(major_ref["source"]),
+                        str(major_ref["external_id"]),
+                    ),
+                ).fetchone()
+                team_row = self.connection.execute(
+                    """
+                    SELECT team_id
+                    FROM team_source_ids
+                    WHERE source = ? AND external_id = ?
+                    """,
+                    (
+                        str(team_ref["source"]),
+                        str(team_ref["external_id"]),
+                    ),
+                ).fetchone()
+                if major_row is None or team_row is None:
+                    raise ValueError(
+                        "reviewed Major winner references are unresolved"
+                    )
+
+                major_id = str(major_row["entity_id"])
+                team_id = str(team_row["team_id"])
+                conflicting_winner = self.connection.execute(
+                    """
+                    SELECT team_id
+                    FROM major_appearances
+                    WHERE major_id = ? AND placement = '1'
+                      AND team_id IS NOT ?
+                    LIMIT 1
+                    """,
+                    (major_id, team_id),
+                ).fetchone()
+                if conflicting_winner is not None:
+                    raise ValueError(
+                        "reviewed Major winner conflicts with an existing "
+                        "winning team"
+                    )
+
+                appearances = list(
+                    self.connection.execute(
+                        """
+                        SELECT player_id
+                        FROM major_appearances
+                        WHERE major_id = ? AND team_id = ?
+                        ORDER BY player_id
+                        """,
+                        (major_id, team_id),
+                    )
+                )
+                if not appearances:
+                    raise ValueError(
+                        "reviewed Major winner has no linked roster"
+                    )
+
+                observed_at = _now()
+                for appearance in appearances:
+                    player_id = str(appearance["player_id"])
+                    audit_payload = {
+                        "major": dict(major_ref),
+                        "team": dict(team_ref),
+                        "player_id": player_id,
+                        "placement": "1",
+                        "basis": winner.get("basis"),
+                    }
+                    source_record_id, is_new = self._upsert_source_record(
+                        source="manual",
+                        record_type="major_appearance",
+                        external_id=(
+                            "reviewed-major-winner:"
+                            f"{major_ref['source']}:"
+                            f"{major_ref['external_id']}:"
+                            f"{player_id}"
+                        ),
+                        raw_metadata={"payload": audit_payload},
+                        parsed=audit_payload,
+                        source_url=winner.get("source_url"),
+                        fetched_at=observed_at,
+                    )
+                    if is_new:
+                        self._insert_evidence(
+                            entity_type="major_appearance",
+                            entity_id=f"{player_id}:{major_id}",
+                            field_name="placement",
+                            source_record_id=source_record_id,
+                            value="1",
+                            observed_at=observed_at,
+                        )
+
+                self._merge_major_appearances()
+                result["events"] += 1
+                result["appearances"] += len(appearances)
+        return result
+
+    def apply_reviewed_major_appearances(
+        self,
+        appearances: list[Mapping[str, Any]],
+    ) -> dict[str, int]:
+        """Add or correct Major roster rows using reviewed provider refs."""
+
+        allowed_fields = {
+            "participation_kind",
+            "placement",
+            "stage_reached",
+            "matches_played",
+            "counts_toward_total",
+        }
+        result = {"reviewed": 0, "created": 0, "updated": 0}
+        with self.connection:
+            for review in appearances:
+                major_ref = review.get("major")
+                player_ref = review.get("player")
+                team_ref = review.get("team")
+                overrides = review.get("overrides") or {}
+                if (
+                    not isinstance(major_ref, Mapping)
+                    or not isinstance(player_ref, Mapping)
+                    or not isinstance(team_ref, Mapping)
+                    or not isinstance(overrides, Mapping)
+                ):
+                    raise TypeError(
+                        "reviewed Major appearance requires major, player, "
+                        "team, and overrides objects"
+                    )
+                unknown_fields = set(overrides) - allowed_fields
+                if unknown_fields:
+                    raise ValueError(
+                        "unsupported reviewed Major appearance fields: "
+                        + ", ".join(sorted(unknown_fields))
+                    )
+
+                major_row = self.connection.execute(
+                    """
+                    SELECT DISTINCT fe.entity_id
+                    FROM source_records sr
+                    JOIN field_evidence fe ON fe.source_record_id = sr.id
+                    WHERE sr.source = ?
+                      AND sr.record_type = 'major'
+                      AND sr.external_id = ?
+                      AND fe.entity_type = 'major'
+                    ORDER BY fe.id
+                    LIMIT 1
+                    """,
+                    (
+                        str(major_ref["source"]),
+                        str(major_ref["external_id"]),
+                    ),
+                ).fetchone()
+                if major_row is None:
+                    raise ValueError(
+                        "reviewed Major appearance event is unresolved"
+                    )
+                major_id = str(major_row["entity_id"])
+                player_id = self.resolve_player_id(
+                    str(player_ref["source"]),
+                    str(player_ref["external_id"]),
+                )
+                team_row = self.connection.execute(
+                    """
+                    SELECT team_id
+                    FROM team_source_ids
+                    WHERE source = ? AND external_id = ?
+                    """,
+                    (
+                        str(team_ref["source"]),
+                        str(team_ref["external_id"]),
+                    ),
+                ).fetchone()
+                if team_row is None:
+                    raise ValueError(
+                        "reviewed Major appearance team is unresolved"
+                    )
+                team_id = str(team_row["team_id"])
+
+                existing = self.connection.execute(
+                    """
+                    SELECT 1
+                    FROM major_appearances
+                    WHERE player_id = ? AND major_id = ?
+                    """,
+                    (player_id, major_id),
+                ).fetchone()
+                observed_at = _now()
+                if existing is None:
+                    self.connection.execute(
+                        """
+                        INSERT INTO major_appearances (
+                            player_id, major_id, team_id,
+                            participation_kind, placement, stage_reached,
+                            matches_played, counts_toward_total,
+                            created_at, updated_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            player_id,
+                            major_id,
+                            team_id,
+                            str(
+                                overrides.get(
+                                    "participation_kind",
+                                    "participant",
+                                )
+                            ).casefold(),
+                            overrides.get("placement"),
+                            overrides.get("stage_reached"),
+                            overrides.get("matches_played"),
+                            int(
+                                bool(
+                                    overrides.get(
+                                        "counts_toward_total",
+                                        True,
+                                    )
+                                )
+                            ),
+                            observed_at,
+                            observed_at,
+                        ),
+                    )
+                    result["created"] += 1
+                else:
+                    result["updated"] += 1
+
+                evidence_values = {"team_id": team_id, **dict(overrides)}
+                audit_payload = {
+                    "major": dict(major_ref),
+                    "player": dict(player_ref),
+                    "team": dict(team_ref),
+                    "overrides": dict(overrides),
+                    "basis": review.get("basis"),
+                }
+                source_record_id, is_new = self._upsert_source_record(
+                    source="manual",
+                    record_type="major_appearance",
+                    external_id=(
+                        "reviewed-major-appearance:"
+                        f"{major_ref['source']}:"
+                        f"{major_ref['external_id']}:"
+                        f"{player_ref['source']}:"
+                        f"{player_ref['external_id']}"
+                    ),
+                    raw_metadata={"payload": audit_payload},
+                    parsed=audit_payload,
+                    source_url=review.get("source_url"),
+                    fetched_at=observed_at,
+                )
+                if is_new:
+                    entity_id = f"{player_id}:{major_id}"
+                    for field_name, value in evidence_values.items():
+                        self._insert_evidence(
+                            entity_type="major_appearance",
+                            entity_id=entity_id,
+                            field_name=field_name,
+                            source_record_id=source_record_id,
+                            value=value,
+                            observed_at=observed_at,
+                        )
+                result["reviewed"] += 1
+
+            self._merge_major_appearances()
         return result
 
     def apply_reviewed_source_quarantines(
@@ -1351,9 +1651,24 @@ class PlayerStore:
             )
             identity_merges += alias_merges
             conflicts_created += alias_conflicts
-            result["high_confidence_identity_merges"] = identity_merges
+            result["high_confidence_identity_merges"] += identity_merges
             result["players_merged"] += identity_merges
             result["conflicts_created"] += conflicts_created
+
+            nickname_merges, conflicts_created = (
+                self._merge_exact_nickname_birth_country_identities()
+            )
+            result["high_confidence_identity_merges"] += nickname_merges
+            result["players_merged"] += nickname_merges
+            result["conflicts_created"] += conflicts_created
+
+            biography_merges, conflicts_created = (
+                self._merge_exact_name_nickname_country_identities()
+            )
+            result["high_confidence_identity_merges"] += biography_merges
+            result["players_merged"] += biography_merges
+            result["conflicts_created"] += conflicts_created
+
             self._coalesce_current_tenures()
             result["conflicts_created"] += self._merge_major_appearances()
             for row in self.connection.execute("SELECT id FROM teams"):
@@ -1379,6 +1694,7 @@ class PlayerStore:
         override country conflicts or collapse two IDs from the same provider.
         Every decision is retained for audit.
         """
+        reviewed_separations = self._reviewed_identity_separation_pairs()
         grouped: dict[tuple[str, str], list[dict[str, Any]]] = {}
         for row in self.connection.execute(
             """
@@ -1481,6 +1797,13 @@ class PlayerStore:
 
             survivor = liquipedia[0]
             duplicate = pandascore[0]
+            if (
+                frozenset(
+                    (str(survivor["id"]), str(duplicate["id"]))
+                )
+                in reviewed_separations
+            ):
+                continue
             survivor_id = str(survivor["id"])
             audit_candidates = [
                 {
@@ -1508,6 +1831,331 @@ class PlayerStore:
             merges += 1
         return merges, conflicts_created
 
+    def _reviewed_identity_separation_pairs(
+        self,
+    ) -> set[frozenset[str]]:
+        """Resolve reviewed separation refs against the current identities.
+
+        Canonical player IDs can change after an unrelated provider half is
+        merged. The provider references recorded in the audit payload are
+        stable, so prefer them over the historical resolved ID list.
+        """
+
+        pairs: set[frozenset[str]] = set()
+        for row in self.connection.execute(
+            """
+            SELECT candidate_values_json, resolved_value_json
+            FROM merge_conflicts
+            WHERE field_name = 'identity:reviewed_separate'
+              AND resolution_status = 'manual'
+            """
+        ):
+            candidates = json.loads(row["candidate_values_json"])
+            audit = candidates[0] if isinstance(candidates, list) and candidates else {}
+            if isinstance(audit, Mapping):
+                references = (audit.get("left"), audit.get("right"))
+                try:
+                    resolved_ids = {
+                        self.resolve_player_id(
+                            str(reference["source"]),
+                            str(reference["external_id"]),
+                        )
+                        for reference in references
+                        if isinstance(reference, Mapping)
+                    }
+                except KeyError:
+                    resolved_ids = set()
+                if len(resolved_ids) == 2:
+                    pairs.add(frozenset(resolved_ids))
+                    continue
+
+            if row["resolved_value_json"] is None:
+                continue
+            player_ids = json.loads(row["resolved_value_json"])
+            if isinstance(player_ids, list) and len(player_ids) == 2:
+                existing_ids = {
+                    str(player_id)
+                    for player_id in player_ids
+                    if self.connection.execute(
+                        "SELECT 1 FROM players WHERE id = ?",
+                        (str(player_id),),
+                    ).fetchone()
+                    is not None
+                }
+                if len(existing_ids) == 2:
+                    pairs.add(frozenset(existing_ids))
+        return pairs
+
+    def _merge_exact_nickname_birth_country_identities(
+        self,
+    ) -> tuple[int, int]:
+        """Merge provider halves when three stable identity fields agree.
+
+        Current-team data becomes stale quickly and legal names vary by
+        transliteration or omitted middle names. An exact nickname, birth
+        date, and country match is stronger than current-team agreement, but
+        only when the provider split is one-to-one and neither side contains
+        contradictory date or country evidence.
+        """
+
+        reviewed_separations = self._reviewed_identity_separation_pairs()
+
+        grouped: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+        for row in self.connection.execute(
+            """
+            SELECT
+                player.id,
+                player.canonical_nickname,
+                player.full_name,
+                player.country_code,
+                player.birth_date,
+                GROUP_CONCAT(DISTINCT source_id.source) AS sources
+            FROM players player
+            LEFT JOIN player_source_ids source_id
+              ON source_id.player_id = player.id
+            WHERE player.canonical_nickname IS NOT NULL
+              AND trim(player.canonical_nickname) != ''
+              AND player.country_code IS NOT NULL
+              AND player.birth_date IS NOT NULL
+            GROUP BY player.id
+            ORDER BY player.id
+            """
+        ):
+            candidate = dict(row)
+            candidate["source_set"] = set(
+                str(candidate["sources"] or "").split(",")
+            )
+            key = (
+                nickname_identity_signature(
+                    candidate["canonical_nickname"]
+                ),
+                str(candidate["country_code"]),
+                str(candidate["birth_date"]),
+            )
+            grouped.setdefault(key, []).append(candidate)
+
+        merges = 0
+        conflicts_created = 0
+        for (
+            nickname,
+            country_code,
+            birth_date,
+        ), candidates in grouped.items():
+            if not nickname or len(candidates) != 2:
+                continue
+            survivor_candidates = [
+                candidate
+                for candidate in candidates
+                if "liquipedia" in candidate["source_set"]
+                and "pandascore" not in candidate["source_set"]
+            ]
+            duplicate_candidates = [
+                candidate
+                for candidate in candidates
+                if "pandascore" in candidate["source_set"]
+                and "liquipedia" not in candidate["source_set"]
+            ]
+            if (
+                len(survivor_candidates) != 1
+                or len(duplicate_candidates) != 1
+            ):
+                continue
+            survivor = survivor_candidates[0]
+            duplicate = duplicate_candidates[0]
+            pair = frozenset(
+                (str(survivor["id"]), str(duplicate["id"]))
+            )
+            if pair in reviewed_separations:
+                continue
+
+            evidence_is_consistent = True
+            for candidate in candidates:
+                player_id = str(candidate["id"])
+                dates = {
+                    str(evidence["value"])
+                    for evidence in self._latest_player_evidence(
+                        player_id,
+                        "birth_date",
+                    )
+                    if evidence["value"]
+                }
+                countries = {
+                    str(evidence["value"])
+                    for evidence in self._latest_player_evidence(
+                        player_id,
+                        "country_code",
+                    )
+                    if evidence["value"]
+                }
+                if (
+                    dates
+                    and dates != {birth_date}
+                    or countries
+                    and countries != {country_code}
+                ):
+                    evidence_is_consistent = False
+                    break
+            if not evidence_is_consistent:
+                continue
+
+            survivor_id = str(survivor["id"])
+            audit_candidates = [
+                {
+                    "player_id": str(candidate["id"]),
+                    "sources": sorted(candidate["source_set"]),
+                    "nickname": candidate["canonical_nickname"],
+                    "full_name": candidate["full_name"],
+                    "country_code": candidate["country_code"],
+                    "birth_date": candidate["birth_date"],
+                    "match_basis": (
+                        "exact_nickname_birth_date_and_country"
+                    ),
+                }
+                for candidate in candidates
+            ]
+            self._merge_player_into(survivor_id, str(duplicate["id"]))
+            conflicts_created += self._record_conflict(
+                entity_type="player",
+                entity_id=survivor_id,
+                field_name=(
+                    "identity:exact_nickname_birth_date_country"
+                ),
+                candidates=audit_candidates,
+                resolved_value=survivor_id,
+                status="automatic",
+            )
+            merges += 1
+
+        return merges, conflicts_created
+
+    def _merge_exact_name_nickname_country_identities(
+        self,
+    ) -> tuple[int, int]:
+        """Merge a one-to-one provider split despite a birth-date typo."""
+
+        reviewed_separations = self._reviewed_identity_separation_pairs()
+
+        grouped: dict[
+            tuple[str, str, tuple[str, ...]],
+            list[dict[str, Any]],
+        ] = {}
+        for row in self.connection.execute(
+            """
+            SELECT
+                player.id,
+                player.canonical_nickname,
+                player.full_name,
+                player.country_code,
+                player.birth_date,
+                GROUP_CONCAT(DISTINCT source_id.source) AS sources
+            FROM players player
+            LEFT JOIN player_source_ids source_id
+              ON source_id.player_id = player.id
+            WHERE player.canonical_nickname IS NOT NULL
+              AND player.full_name IS NOT NULL
+              AND trim(player.full_name) != ''
+              AND player.country_code IS NOT NULL
+            GROUP BY player.id
+            ORDER BY player.id
+            """
+        ):
+            candidate = dict(row)
+            candidate["source_set"] = set(
+                str(candidate["sources"] or "").split(",")
+            )
+            name_signature = person_name_token_signature(
+                candidate["full_name"]
+            )
+            key = (
+                nickname_identity_signature(
+                    candidate["canonical_nickname"]
+                ),
+                str(candidate["country_code"]),
+                name_signature,
+            )
+            grouped.setdefault(key, []).append(candidate)
+
+        merges = 0
+        conflicts_created = 0
+        for (
+            nickname,
+            country_code,
+            name_signature,
+        ), candidates in grouped.items():
+            if (
+                not nickname
+                or not name_signature
+                or len(candidates) != 2
+            ):
+                continue
+            survivor_candidates = [
+                candidate
+                for candidate in candidates
+                if "liquipedia" in candidate["source_set"]
+                and "pandascore" not in candidate["source_set"]
+            ]
+            duplicate_candidates = [
+                candidate
+                for candidate in candidates
+                if "pandascore" in candidate["source_set"]
+                and "liquipedia" not in candidate["source_set"]
+            ]
+            if (
+                len(survivor_candidates) != 1
+                or len(duplicate_candidates) != 1
+            ):
+                continue
+            survivor = survivor_candidates[0]
+            duplicate = duplicate_candidates[0]
+            pair = frozenset(
+                (str(survivor["id"]), str(duplicate["id"]))
+            )
+            if pair in reviewed_separations:
+                continue
+
+            country_evidence = set()
+            for candidate in candidates:
+                country_evidence.update(
+                    str(evidence["value"])
+                    for evidence in self._latest_player_evidence(
+                        str(candidate["id"]),
+                        "country_code",
+                    )
+                    if evidence["value"]
+                )
+            if country_evidence != {country_code}:
+                continue
+
+            survivor_id = str(survivor["id"])
+            audit_candidates = [
+                {
+                    "player_id": str(candidate["id"]),
+                    "sources": sorted(candidate["source_set"]),
+                    "nickname": candidate["canonical_nickname"],
+                    "full_name": candidate["full_name"],
+                    "country_code": candidate["country_code"],
+                    "birth_date": candidate["birth_date"],
+                    "match_basis": (
+                        "exact_name_nickname_and_country"
+                    ),
+                }
+                for candidate in candidates
+            ]
+            self._merge_player_into(survivor_id, str(duplicate["id"]))
+            conflicts_created += self._record_conflict(
+                entity_type="player",
+                entity_id=survivor_id,
+                field_name=(
+                    "identity:exact_name_nickname_country"
+                ),
+                candidates=audit_candidates,
+                resolved_value=survivor_id,
+                status="automatic",
+            )
+            merges += 1
+
+        return merges, conflicts_created
+
     def _merge_high_confidence_cross_source_identities(
         self,
     ) -> tuple[int, int]:
@@ -1519,6 +2167,7 @@ class PlayerStore:
         Liquipedia survives because it owns the richer biography and historical
         relationships in this dataset.
         """
+        reviewed_separations = self._reviewed_identity_separation_pairs()
         grouped: dict[tuple[str, str], list[dict[str, Any]]] = {}
         rows = self.connection.execute(
             """
@@ -1577,6 +2226,13 @@ class PlayerStore:
 
             survivor = liquipedia[0]
             duplicate = pandascore[0]
+            if (
+                frozenset(
+                    (str(survivor["id"]), str(duplicate["id"]))
+                )
+                in reviewed_separations
+            ):
+                continue
             survivor_source_values = self._latest_player_values_from_source(
                 str(survivor["id"]),
                 "liquipedia",
@@ -1696,6 +2352,7 @@ class PlayerStore:
 
     def _merge_hltv_alias_confirmed_identities(self) -> tuple[int, int]:
         """Merge a PandaScore nickname confirmed by HLTV and an LP alias."""
+        reviewed_separations = self._reviewed_identity_separation_pairs()
         rows = list(
             self.connection.execute(
                 """
@@ -1788,6 +2445,11 @@ class PlayerStore:
             if len(pandascore_candidates) != 1:
                 continue
             duplicate = pandascore_candidates[0]
+            if (
+                frozenset((survivor_id, str(duplicate["id"])))
+                in reviewed_separations
+            ):
+                continue
             if (
                 not survivor["country_code"]
                 or survivor["country_code"] != duplicate["country_code"]
@@ -2007,21 +2669,7 @@ class PlayerStore:
             """,
             (_now(),),
         )
-        reviewed_separations: set[frozenset[str]] = set()
-        for row in self.connection.execute(
-            """
-            SELECT resolved_value_json
-            FROM merge_conflicts
-            WHERE field_name = 'identity:reviewed_separate'
-              AND resolution_status = 'manual'
-              AND resolved_value_json IS NOT NULL
-            """
-        ):
-            player_ids = json.loads(row["resolved_value_json"])
-            if isinstance(player_ids, list) and len(player_ids) == 2:
-                reviewed_separations.add(
-                    frozenset(str(player_id) for player_id in player_ids)
-                )
+        reviewed_separations = self._reviewed_identity_separation_pairs()
         groups: dict[tuple[str, str], list[dict[str, str]]] = {}
         for row in self.connection.execute(
             """
@@ -2754,6 +3402,7 @@ class PlayerStore:
                     "majorWins": int(player["major_wins"]),
                     "teamHistory": team_history,
                     "updatedAt": player["updated_at"],
+                    "imageUrl": player["image_url"],
                 }
             )
         return records
@@ -3373,6 +4022,277 @@ class PlayerStore:
         ).fetchone()
         assert row is not None
         return int(row["id"]), existing is None
+
+    def data_quality_report(self) -> dict[str, Any]:
+        """Return actionable integrity failures and non-blocking coverage gaps."""
+
+        critical_issues: list[dict[str, Any]] = []
+        warnings: list[dict[str, Any]] = []
+
+        core_missing = int(
+            self.connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM players player
+                WHERE player.is_guessable = 1
+                  AND (
+                    player.full_name IS NULL
+                    OR trim(player.full_name) = ''
+                    OR player.country_code IS NULL
+                    OR player.birth_date IS NULL
+                    OR NOT EXISTS (
+                        SELECT 1
+                        FROM player_team_tenures tenure
+                        WHERE tenure.player_id = player.id
+                          AND tenure.is_current = 1
+                          AND tenure.is_primary = 1
+                    )
+                  )
+                """
+            ).fetchone()[0]
+        )
+        if core_missing:
+            critical_issues.append(
+                {
+                    "code": "guessable_player_missing_core_data",
+                    "count": core_missing,
+                }
+            )
+
+        open_conflicts = int(
+            self.connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM merge_conflicts
+                WHERE resolution_status = 'open'
+                """
+            ).fetchone()[0]
+        )
+        if open_conflicts:
+            critical_issues.append(
+                {
+                    "code": "open_merge_conflicts",
+                    "count": open_conflicts,
+                }
+            )
+
+        winner_rows = list(
+            self.connection.execute(
+                """
+                SELECT
+                    major.id,
+                    major.canonical_name,
+                    COUNT(
+                        DISTINCT CASE
+                            WHEN appearance.placement = '1'
+                            THEN appearance.team_id
+                        END
+                    ) AS winner_teams,
+                    SUM(
+                        CASE WHEN appearance.placement = '1' THEN 1 ELSE 0 END
+                    ) AS winner_players
+                FROM major_events major
+                LEFT JOIN major_appearances appearance
+                  ON appearance.major_id = major.id
+                GROUP BY major.id
+                ORDER BY major.starts_on
+                """
+            )
+        )
+        for row in winner_rows:
+            winner_teams = int(row["winner_teams"] or 0)
+            winner_players = int(row["winner_players"] or 0)
+            if winner_teams != 1:
+                critical_issues.append(
+                    {
+                        "code": "major_winner_team_count",
+                        "major": row["canonical_name"],
+                        "actual": winner_teams,
+                        "expected": 1,
+                    }
+                )
+            elif winner_players != 5:
+                critical_issues.append(
+                    {
+                        "code": "major_winner_roster_size",
+                        "major": row["canonical_name"],
+                        "actual": winner_players,
+                        "expected": 5,
+                    }
+                )
+
+        roster_rows = list(
+            self.connection.execute(
+                """
+                SELECT
+                    major.canonical_name AS major,
+                    team.canonical_name AS team,
+                    COUNT(*) AS players,
+                    SUM(
+                        CASE
+                            WHEN appearance.participation_kind != 'participant'
+                            THEN 1 ELSE 0
+                        END
+                    ) AS special_participants,
+                    GROUP_CONCAT(
+                        CASE
+                            WHEN appearance.participation_kind != 'participant'
+                            THEN player.canonical_nickname
+                                 || ':' || appearance.participation_kind
+                        END,
+                        ', '
+                    ) AS special_players
+                FROM major_appearances appearance
+                JOIN major_events major ON major.id = appearance.major_id
+                LEFT JOIN teams team ON team.id = appearance.team_id
+                JOIN players player ON player.id = appearance.player_id
+                GROUP BY appearance.major_id, appearance.team_id
+                ORDER BY major.starts_on, team.canonical_name
+                """
+            )
+        )
+        roster_exceptions: list[dict[str, Any]] = []
+        for row in roster_rows:
+            players = int(row["players"])
+            special = int(row["special_participants"] or 0)
+            details = {
+                "major": row["major"],
+                "team": row["team"],
+                "players": players,
+                "specialParticipants": special,
+                "specialPlayers": row["special_players"],
+            }
+            if row["team"] is None:
+                critical_issues.append(
+                    {"code": "major_roster_missing_team", **details}
+                )
+            elif players < 5:
+                critical_issues.append(
+                    {"code": "underfilled_major_roster", **details}
+                )
+            elif players > 6 or (players > 5 and special == 0):
+                critical_issues.append(
+                    {
+                        "code": "unclassified_oversized_major_roster",
+                        **details,
+                    }
+                )
+            elif players != 5:
+                roster_exceptions.append(details)
+
+        missing_avatar_players = [
+            {
+                "id": row["id"],
+                "nickname": row["canonical_nickname"],
+            }
+            for row in self.connection.execute(
+                """
+                SELECT id, canonical_nickname
+                FROM players
+                WHERE is_guessable = 1
+                  AND (image_url IS NULL OR trim(image_url) = '')
+                ORDER BY lower(canonical_nickname), id
+                """
+            )
+        ]
+        team_presentations = self._team_presentation_records()
+        current_team_rows = list(
+            self.connection.execute(
+                """
+                SELECT
+                    team.id,
+                    team.canonical_name,
+                    COUNT(DISTINCT tenure.player_id) AS players
+                FROM teams team
+                JOIN player_team_tenures tenure ON tenure.team_id = team.id
+                JOIN players player ON player.id = tenure.player_id
+                WHERE tenure.is_current = 1
+                  AND tenure.is_primary = 1
+                  AND player.is_guessable = 1
+                GROUP BY team.id
+                ORDER BY players DESC, lower(team.canonical_name)
+                """
+            )
+        )
+        teams_missing_logo = []
+        for row in current_team_rows:
+            presentation = team_presentations.get(str(row["id"]), {})
+            if presentation.get("logoUrl"):
+                continue
+            teams_missing_logo.append(
+                {
+                    "id": row["id"],
+                    "name": presentation.get(
+                        "name",
+                        row["canonical_name"],
+                    ),
+                    "players": int(row["players"]),
+                }
+            )
+        duplicate_nicknames = [
+            {
+                "nickname": row["nickname"],
+                "players": int(row["players"]),
+            }
+            for row in self.connection.execute(
+                """
+                SELECT
+                    lower(trim(canonical_nickname)) AS nickname,
+                    COUNT(*) AS players
+                FROM players
+                WHERE is_guessable = 1
+                GROUP BY lower(trim(canonical_nickname))
+                HAVING COUNT(*) > 1
+                ORDER BY nickname
+                """
+            )
+        ]
+        if missing_avatar_players:
+            warnings.append(
+                {
+                    "code": "missing_player_avatar",
+                    "count": len(missing_avatar_players),
+                }
+            )
+        if teams_missing_logo:
+            warnings.append(
+                {
+                    "code": "missing_current_team_logo",
+                    "count": len(teams_missing_logo),
+                }
+            )
+        if duplicate_nicknames:
+            warnings.append(
+                {
+                    "code": "duplicate_guessable_nickname",
+                    "count": len(duplicate_nicknames),
+                }
+            )
+
+        counts = self.audit()["counts"]
+        guessable_players = int(
+            self.connection.execute(
+                "SELECT COUNT(*) FROM players WHERE is_guessable = 1"
+            ).fetchone()[0]
+        )
+        return {
+            "generatedAt": _now(),
+            "summary": {
+                "players": counts["players"],
+                "guessablePlayers": guessable_players,
+                "teams": counts["teams"],
+                "majors": counts["major_events"],
+                "majorAppearances": counts["major_appearances"],
+                "criticalIssues": len(critical_issues),
+                "warnings": len(warnings),
+            },
+            "criticalIssues": critical_issues,
+            "warnings": warnings,
+            "majorRosterExceptions": roster_exceptions,
+            "duplicateNicknames": duplicate_nicknames,
+            "missingAvatarPlayers": missing_avatar_players,
+            "currentTeamsMissingLogo": teams_missing_logo,
+        }
 
     def audit(self, player_id: str | None = None) -> dict[str, Any]:
         if player_id is None:

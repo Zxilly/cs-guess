@@ -583,5 +583,203 @@
         "url": "https://www.hltv.org/player/20110/marix"
       }
     ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "PREDI"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "26614"
+    },
+    "basis": "One-to-one nickname, country, and legal-name match; Liquipedia resolves the provider birth-date discrepancy.",
+    "overrides": {
+      "birth_date": "1999-10-10"
+    }
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "SupLexN1"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "26679"
+    },
+    "basis": "One-to-one nickname, country, and legal-name match; Liquipedia resolves the provider birth-date discrepancy.",
+    "overrides": {
+      "birth_date": "1999-07-06"
+    }
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Reix"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "35140"
+    },
+    "basis": "One-to-one nickname, country, and legal-name match; Liquipedia resolves the provider birth-date discrepancy.",
+    "overrides": {
+      "birth_date": "2002-04-25"
+    }
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "DeniMM"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "19964"
+    },
+    "basis": "One-to-one nickname, country, and legal-name match; Liquipedia resolves the provider birth-date discrepancy.",
+    "overrides": {
+      "birth_date": "1993-09-15"
+    }
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "VLa"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "26640"
+    },
+    "basis": "One-to-one nickname, country, and legal-name match; Liquipedia resolves the provider birth-date discrepancy.",
+    "overrides": {
+      "birth_date": "1998-12-28"
+    }
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Markeloff"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "17610"
+    },
+    "basis": "Both records are Yegor markeloff Markelov; the PandaScore birth year is ten years late.",
+    "overrides": {
+      "birth_date": "1988-02-12"
+    }
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "KrizzeN"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "17797"
+    },
+    "basis": "One-to-one nickname, country, and legal-name match; Liquipedia resolves the provider birth-date discrepancy.",
+    "overrides": {
+      "birth_date": "1999-09-24"
+    }
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "1962"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "21428"
+    },
+    "basis": "One-to-one nickname, country, and legal-name match; Liquipedia resolves the provider birth-date discrepancy.",
+    "overrides": {
+      "birth_date": "1995-11-19"
+    }
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "CLASIA"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "26669"
+    },
+    "basis": "One-to-one nickname, country, and legal-name match; Liquipedia resolves the provider birth-date discrepancy.",
+    "overrides": {
+      "birth_date": "2002-09-17"
+    }
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Vegi"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "20489"
+    },
+    "basis": "One-to-one nickname, country, and legal-name match; Liquipedia resolves the provider birth-date discrepancy.",
+    "overrides": {
+      "birth_date": "2000-05-19"
+    }
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "ChrisJ"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "17629"
+    },
+    "basis": "Both records are Chris chrisJ de Jong; Liquipedia resolves the four-day provider birth-date discrepancy.",
+    "overrides": {
+      "birth_date": "1990-05-25"
+    }
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Aidy"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "29352"
+    },
+    "basis": "The nickname, country, and Spanish legal-name variants identify the same player; the provider half supplies the missing portrait."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "AquaRS"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "56821"
+    },
+    "basis": "Aleksandr and Alexander are transliterations of the same AquaRS identity; nickname and country also agree."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Miszary"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "61474"
+    },
+    "basis": "The Chinese legal name is represented in different token orders; nickname and country agree."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "ZEVES"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "17707"
+    },
+    "basis": "Both records are Norwegian player Morten zEVES Vollan; Liquipedia includes the additional surname Christensen."
   }
 ]

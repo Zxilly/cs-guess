@@ -754,6 +754,11 @@ def run_sync(
     output_path: str | Path | None = None,
     catalog_output_path: str | Path | None = None,
     report_path: str | Path | None = None,
+    reviewed_identity_merges: list[Mapping[str, Any]] | None = None,
+    reviewed_source_quarantines: list[Mapping[str, Any]] | None = None,
+    reviewed_identity_separations: list[Mapping[str, Any]] | None = None,
+    reviewed_major_winners: list[Mapping[str, Any]] | None = None,
+    reviewed_major_appearances: list[Mapping[str, Any]] | None = None,
     progress: Progress | None = None,
 ) -> dict[str, Any]:
     """Synchronize configured sources, merge identities, and export game data."""
@@ -767,6 +772,25 @@ def run_sync(
         },
         "sources": {},
         "merge": {},
+        "reviewedMajorWinners": {"events": 0, "appearances": 0},
+        "reviewedMajorAppearances": {
+            "reviewed": 0,
+            "created": 0,
+            "updated": 0,
+        },
+        "identityReview": {
+            "inconsistentBallDontLie": {
+                "quarantined": 0,
+                "already_quarantined": 0,
+            },
+            "quarantines": {
+                "quarantined": 0,
+                "already_quarantined": 0,
+            },
+            "merges": {"merged": 0, "already_merged": 0},
+            "separations": {"separated": 0, "already_separated": 0},
+        },
+        "dataQuality": {},
         "audit": {},
         "exportedRecords": 0,
         "catalogRecords": 0,
@@ -801,6 +825,26 @@ def run_sync(
             progress=progress,
         )
 
+    report["identityReview"]["inconsistentBallDontLie"] = (
+        store.quarantine_inconsistent_balldontlie_identities()
+    )
+    if reviewed_source_quarantines:
+        report["identityReview"]["quarantines"] = (
+            store.apply_reviewed_source_quarantines(
+                reviewed_source_quarantines
+            )
+        )
+    if reviewed_identity_merges:
+        report["identityReview"]["merges"] = (
+            store.apply_reviewed_identity_merges(reviewed_identity_merges)
+        )
+    if reviewed_identity_separations:
+        report["identityReview"]["separations"] = (
+            store.apply_reviewed_identity_separations(
+                reviewed_identity_separations
+            )
+        )
+
     merge_run_id = _begin_run(store, "merge")
     try:
         report["merge"] = store.merge_all()
@@ -822,7 +866,19 @@ def run_sync(
         changed=report["merge"].get("players_merged", 0),
     )
 
+    if reviewed_major_winners:
+        report["reviewedMajorWinners"] = (
+            store.apply_reviewed_major_winners(reviewed_major_winners)
+        )
+    if reviewed_major_appearances:
+        report["reviewedMajorAppearances"] = (
+            store.apply_reviewed_major_appearances(
+                reviewed_major_appearances
+            )
+        )
+
     records = store.export_game_records()
+    report["dataQuality"] = store.data_quality_report()
     report["audit"] = store.audit()
     report["exportedRecords"] = len(records)
     report["finishedAt"] = _now()

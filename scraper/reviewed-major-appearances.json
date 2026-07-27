@@ -1,0 +1,116 @@
+[
+  {
+    "major": {
+      "source": "liquipedia",
+      "external_id": "ESL/One/2016/Cologne"
+    },
+    "player": {
+      "source": "liquipedia",
+      "external_id": "KioShiMa"
+    },
+    "team": {
+      "source": "liquipedia",
+      "external_id": "faze"
+    },
+    "overrides": {
+      "placement": "9-12"
+    },
+    "basis": "HLTV records kioShiMa playing ESL One Cologne 2016 for FaZe, not EnVyUs.",
+    "source_url": "https://www.hltv.org/player/4959/kioshima"
+  },
+  {
+    "major": {
+      "source": "liquipedia",
+      "external_id": "ESL/One/2016/Cologne"
+    },
+    "player": {
+      "source": "liquipedia",
+      "external_id": "ChrisJ"
+    },
+    "team": {
+      "source": "liquipedia",
+      "external_id": "mousesports"
+    },
+    "overrides": {
+      "placement": "9-12"
+    },
+    "basis": "Liquipedia's individual results record chrisJ playing the event for mousesports.",
+    "source_url": "https://liquipedia.net/counterstrike/ChrisJ/Results"
+  },
+  {
+    "major": {
+      "source": "liquipedia",
+      "external_id": "ESL/One/2016/Cologne"
+    },
+    "player": {
+      "source": "liquipedia",
+      "external_id": "gla1ve"
+    },
+    "team": {
+      "source": "liquipedia",
+      "external_id": "astralis"
+    },
+    "overrides": {
+      "participation_kind": "standin"
+    },
+    "basis": "gla1ve stood in because Kjaerbye was ineligible.",
+    "source_url": "https://www.hltv.org/news/19029/gla1ve-joins-astralis"
+  },
+  {
+    "major": {
+      "source": "liquipedia",
+      "external_id": "ESL/One/2016/Cologne"
+    },
+    "player": {
+      "source": "liquipedia",
+      "external_id": "zonic"
+    },
+    "team": {
+      "source": "liquipedia",
+      "external_id": "astralis"
+    },
+    "overrides": {
+      "participation_kind": "substitute"
+    },
+    "basis": "Coach zonic substituted for the ill dupreeh in Astralis' final two matches.",
+    "source_url": "https://www.hltv.org/news/19029/gla1ve-joins-astralis"
+  },
+  {
+    "major": {
+      "source": "liquipedia",
+      "external_id": "ELEAGUE/2018/Major"
+    },
+    "player": {
+      "source": "liquipedia",
+      "external_id": "MaleK"
+    },
+    "team": {
+      "source": "liquipedia",
+      "external_id": "envyus"
+    },
+    "overrides": {
+      "participation_kind": "substitute"
+    },
+    "basis": "Coach maLeK replaced RpK after RpK became ill during the Challengers Stage.",
+    "source_url": "https://www.hltv.org/news/22482/rpk-unable-to-play-malek-to-step-in-at-the-major-qualifier"
+  },
+  {
+    "major": {
+      "source": "liquipedia",
+      "external_id": "Intel_Extreme_Masters/2022/Rio"
+    },
+    "player": {
+      "source": "liquipedia",
+      "external_id": "Nicoodoz"
+    },
+    "team": {
+      "source": "liquipedia",
+      "external_id": "fnatic"
+    },
+    "overrides": {
+      "placement": "5-8"
+    },
+    "basis": "HLTV records nicoodoz reaching the IEM Rio 2022 quarter-final with fnatic.",
+    "source_url": "https://www.hltv.org/player/13602/nicoodoz"
+  }
+]

@@ -12,6 +12,7 @@ def test_app_catalog_derives_age_country_name_and_stable_public_fields():
                 "fullName": "Mathieu Herbaut",
                 "countryCode": "FR",
                 "birthDate": "2000-11-09",
+                "imageUrl": "https://cdn.example/zywoo.png",
                 "currentTeam": {
                     "id": "team-id",
                     "name": "Team Vitality",
@@ -32,6 +33,7 @@ def test_app_catalog_derives_age_country_name_and_stable_public_fields():
             "name": "Mathieu Herbaut",
             "team": "Team Vitality",
             "teamLogoUrl": "https://cdn.example/vitality.png",
+            "imageUrl": "https://cdn.example/zywoo.png",
             "nationality": "France",
             "countryCode": "FR",
             "age": 25,

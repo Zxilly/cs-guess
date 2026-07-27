@@ -66,6 +66,17 @@ def normalize_identity_text(value: str | None) -> str:
     return " ".join((value or "").strip().casefold().split())
 
 
+def nickname_identity_signature(value: str | None) -> str:
+    """Return an accent- and punctuation-insensitive nickname signature."""
+
+    decomposed = unicodedata.normalize("NFKD", value or "")
+    return "".join(
+        character.casefold()
+        for character in decomposed
+        if character.isalnum()
+    )
+
+
 def choose_display_casing(
     selected_value: str,
     evidence: Iterable[Mapping[str, Any]],

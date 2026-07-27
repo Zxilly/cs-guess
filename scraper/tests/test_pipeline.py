@@ -219,6 +219,62 @@ def test_run_sync_uses_real_store_merges_sources_and_writes_auditable_report(
     assert json.loads(report_path.read_text(encoding="utf-8")) == report
 
 
+def test_run_sync_replays_reviewed_identity_separation_before_auto_merge(
+    tmp_path,
+):
+    with PlayerStore(
+        tmp_path / "players.sqlite3",
+        schema_path=SCHEMA_PATH,
+    ) as store:
+        left_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "Zero (Chinese player, born 1998)",
+                "nickname": "Zero",
+                "full_name": "Li Junqi",
+                "country_code": "CN",
+                "birth_date": "1998-08-13",
+            },
+        )
+        right_id = store.upsert_source_player(
+            "pandascore",
+            {
+                "source_id": "100",
+                "nickname": "Zero",
+                "full_name": "Li Junqi",
+                "country_code": "CN",
+                "birth_date": "1998-08-13",
+            },
+        )
+
+        report = run_sync(
+            store,
+            reviewed_identity_separations=[
+                {
+                    "left": {
+                        "source": "liquipedia",
+                        "external_id": "Zero (Chinese player, born 1998)",
+                    },
+                    "right": {
+                        "source": "pandascore",
+                        "external_id": "100",
+                    },
+                    "basis": "reviewed as different people",
+                }
+            ],
+        )
+
+        assert store.resolve_player_id(
+            "liquipedia",
+            "Zero (Chinese player, born 1998)",
+        ) == left_id
+        assert store.resolve_player_id("pandascore", "100") == right_id
+
+    assert left_id != right_id
+    assert report["identityReview"]["separations"]["separated"] == 1
+    assert report["merge"]["players_merged"] == 0
+
+
 def test_balldontlie_sync_links_verified_pandascore_id_and_fills_birth_date(
     tmp_path,
 ):

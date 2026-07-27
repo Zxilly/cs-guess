@@ -410,6 +410,369 @@ def test_major_total_is_derived_from_idempotent_appearance_records(tmp_path):
     ]
 
 
+def test_reviewed_major_winner_marks_every_player_on_winning_team(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        for external_id, nickname in (("NiKo", "NiKo"), ("m0NESY", "m0NESY")):
+            store.upsert_source_player(
+                "liquipedia",
+                {
+                    "external_id": external_id,
+                    "nickname": nickname,
+                    "full_name": nickname,
+                    "country_code": "BA",
+                    "birth_date": "1997-02-16",
+                    "current_team": {
+                        "external_id": "falcons",
+                        "name": "Falcons",
+                    },
+                    "roles": ["rifler"],
+                },
+            )
+        store.upsert_major_records(
+            "liquipedia",
+            [
+                {
+                    "external_id": "Intel_Extreme_Masters/2026/Cologne",
+                    "canonical_name": "IEM Cologne Major 2026",
+                    "game_title": "cs2",
+                    "starts_on": "2026-06-02",
+                    "appearances": [
+                        {
+                            "player_external_id": "NiKo",
+                            "team_external_id": "falcons",
+                        },
+                        {
+                            "player_external_id": "m0NESY",
+                            "team_external_id": "falcons",
+                        },
+                    ],
+                }
+            ],
+        )
+        store.merge_all()
+
+        first = store.apply_reviewed_major_winners(
+            [
+                {
+                    "major": {
+                        "source": "liquipedia",
+                        "external_id": "Intel_Extreme_Masters/2026/Cologne",
+                    },
+                    "team": {
+                        "source": "liquipedia",
+                        "external_id": "falcons",
+                    },
+                    "source_url": (
+                        "https://www.hltv.org/events/8301/"
+                        "iem-cologne-major-2026"
+                    ),
+                }
+            ]
+        )
+        second = store.apply_reviewed_major_winners(
+            [
+                {
+                    "major": {
+                        "source": "liquipedia",
+                        "external_id": "Intel_Extreme_Masters/2026/Cologne",
+                    },
+                    "team": {
+                        "source": "liquipedia",
+                        "external_id": "falcons",
+                    },
+                    "source_url": (
+                        "https://www.hltv.org/events/8301/"
+                        "iem-cologne-major-2026"
+                    ),
+                }
+            ]
+        )
+        records = {
+            record["nickname"]: record
+            for record in store.export_game_records()
+        }
+
+    assert first == {"events": 1, "appearances": 2}
+    assert second == first
+    assert records["NiKo"]["majorWins"] == 1
+    assert records["m0NESY"]["majorWins"] == 1
+
+
+def test_reviewed_major_appearance_can_add_and_correct_roster_rows(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        for external_id in ("chrisJ", "kioShiMa"):
+            store.upsert_source_player(
+                "liquipedia",
+                {
+                    "external_id": external_id,
+                    "nickname": external_id,
+                    "full_name": external_id,
+                    "birth_date": "1990-01-01",
+                },
+            )
+        store.upsert_major_records(
+            "liquipedia",
+            [
+                {
+                    "external_id": "ESL/One/2016/Cologne",
+                    "canonical_name": "ESL One Cologne 2016",
+                    "game_title": "csgo",
+                    "starts_on": "2016-07-05",
+                    "appearances": [
+                        {
+                            "player_external_id": "kioShiMa",
+                            "team": {
+                                "external_id": "envyus",
+                                "name": "EnVyUs",
+                            },
+                        }
+                    ],
+                }
+            ],
+        )
+        store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "team-link",
+                "nickname": "team-link",
+                "current_team": {
+                    "external_id": "faze",
+                    "name": "FaZe",
+                },
+            },
+        )
+        store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "team-link-2",
+                "nickname": "team-link-2",
+                "current_team": {
+                    "external_id": "mousesports",
+                    "name": "mousesports",
+                },
+            },
+        )
+        store.merge_all()
+
+        first = store.apply_reviewed_major_appearances(
+            [
+                {
+                    "major": {
+                        "source": "liquipedia",
+                        "external_id": "ESL/One/2016/Cologne",
+                    },
+                    "player": {
+                        "source": "liquipedia",
+                        "external_id": "kioShiMa",
+                    },
+                    "team": {
+                        "source": "liquipedia",
+                        "external_id": "faze",
+                    },
+                    "overrides": {"placement": "9-12"},
+                },
+                {
+                    "major": {
+                        "source": "liquipedia",
+                        "external_id": "ESL/One/2016/Cologne",
+                    },
+                    "player": {
+                        "source": "liquipedia",
+                        "external_id": "chrisJ",
+                    },
+                    "team": {
+                        "source": "liquipedia",
+                        "external_id": "mousesports",
+                    },
+                    "overrides": {"placement": "9-12"},
+                },
+            ]
+        )
+        second = store.apply_reviewed_major_appearances(
+            [
+                {
+                    "major": {
+                        "source": "liquipedia",
+                        "external_id": "ESL/One/2016/Cologne",
+                    },
+                    "player": {
+                        "source": "liquipedia",
+                        "external_id": "kioShiMa",
+                    },
+                    "team": {
+                        "source": "liquipedia",
+                        "external_id": "faze",
+                    },
+                    "overrides": {"placement": "9-12"},
+                },
+                {
+                    "major": {
+                        "source": "liquipedia",
+                        "external_id": "ESL/One/2016/Cologne",
+                    },
+                    "player": {
+                        "source": "liquipedia",
+                        "external_id": "chrisJ",
+                    },
+                    "team": {
+                        "source": "liquipedia",
+                        "external_id": "mousesports",
+                    },
+                    "overrides": {"placement": "9-12"},
+                },
+            ]
+        )
+        rows = list(
+            store.connection.execute(
+                """
+                SELECT player.canonical_nickname, team.canonical_name,
+                       appearance.placement
+                FROM major_appearances appearance
+                JOIN players player ON player.id = appearance.player_id
+                JOIN teams team ON team.id = appearance.team_id
+                ORDER BY player.canonical_nickname
+                """
+            )
+        )
+
+    assert first == {"reviewed": 2, "created": 1, "updated": 1}
+    assert second == {"reviewed": 2, "created": 0, "updated": 2}
+    assert [tuple(row) for row in rows] == [
+        ("chrisJ", "mousesports", "9-12"),
+        ("kioShiMa", "FaZe", "9-12"),
+    ]
+
+
+def test_data_quality_report_flags_incomplete_major_rosters(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        for index in range(4):
+            store.upsert_source_player(
+                "liquipedia",
+                {
+                    "external_id": f"player-{index}",
+                    "nickname": f"player-{index}",
+                    "full_name": f"Player {index}",
+                    "country_code": "DK",
+                    "birth_date": "2000-01-01",
+                    "current_team": {
+                        "external_id": "team-a",
+                        "name": "Team A",
+                    },
+                    "roles": ["rifler"],
+                },
+            )
+        store.upsert_major_records(
+            "liquipedia",
+            [
+                {
+                    "external_id": "major-a",
+                    "canonical_name": "Major A",
+                    "game_title": "cs2",
+                    "starts_on": "2026-01-01",
+                    "appearances": [
+                        {
+                            "player_external_id": f"player-{index}",
+                            "team_external_id": "team-a",
+                            "placement": "1",
+                        }
+                        for index in range(4)
+                    ],
+                }
+            ],
+        )
+        store.merge_all()
+        report = store.data_quality_report()
+
+    assert report["summary"]["guessablePlayers"] == 4
+    assert report["summary"]["criticalIssues"] == 2
+    assert {
+        issue["code"] for issue in report["criticalIssues"]
+    } == {
+        "major_winner_roster_size",
+        "underfilled_major_roster",
+    }
+
+
+def test_merge_matches_exact_nickname_birth_country_across_stale_teams(
+    tmp_path,
+):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        survivor_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "Snax",
+                "nickname": "Snax",
+                "full_name": "Janusz Andrzej Pogorzelski",
+                "country_code": "PL",
+                "birth_date": "1993-07-05",
+                "current_team": {
+                    "external_id": "g2",
+                    "name": "G2",
+                },
+            },
+        )
+        store.upsert_source_player(
+            "pandascore",
+            {
+                "external_id": "17502",
+                "nickname": "Snax-",
+                "full_name": "Janusz Pogorzelski",
+                "country_code": "PL",
+                "birth_date": "1993-07-05",
+                "image_url": "https://cdn.example/snax.png",
+                "current_team": {
+                    "external_id": "mouz",
+                    "name": "MOUZ",
+                },
+            },
+        )
+
+        result = store.merge_all()
+        players = list(store.connection.execute("SELECT * FROM players"))
+        pandascore_id = store.resolve_player_id("pandascore", "17502")
+
+    assert result["high_confidence_identity_merges"] == 1
+    assert len(players) == 1
+    assert pandascore_id == survivor_id
+    assert players[0]["image_url"] == "https://cdn.example/snax.png"
+
+
+def test_merge_accepts_exact_name_nickname_country_with_provider_date_typo(
+    tmp_path,
+):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        survivor_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "shox",
+                "nickname": "shox",
+                "full_name": "Richard Papillon",
+                "country_code": "FR",
+                "birth_date": "1992-05-27",
+            },
+        )
+        store.upsert_source_player(
+            "pandascore",
+            {
+                "external_id": "17513",
+                "nickname": "shox",
+                "full_name": "Richard Papillon",
+                "country_code": "FR",
+                "birth_date": "1997-05-27",
+            },
+        )
+
+        result = store.merge_all()
+        player = store.connection.execute(
+            "SELECT birth_date FROM players WHERE id = ?",
+            (survivor_id,),
+        ).fetchone()
+
+    assert result["high_confidence_identity_merges"] == 1
+    assert store.resolve_player_id("pandascore", "17513") == survivor_id
+    assert player["birth_date"] == "1992-05-27"
+
+
 def test_major_player_reference_matches_liquipedia_title_case_insensitively(
     tmp_path,
 ):
