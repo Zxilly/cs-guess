@@ -43,6 +43,17 @@ stale browser writes cannot replace newer state. Override the database location
 and pool size with `CS_GUESS_DATABASE_PATH` and
 `CS_GUESS_DATABASE_MAX_CONNECTIONS`.
 
+### Daily challenge persistence
+
+```http
+GET /v1/daily-challenges/current
+```
+
+The server derives the current date in `Asia/Shanghai`, selects a player from
+the versioned catalog, and inserts the challenge once using the date as the
+SQLite primary key. Later requests and process restarts return the stored player
+snapshot, so catalog refreshes cannot change an already published challenge.
+
 ### Create a friend room
 
 ```http
@@ -206,8 +217,10 @@ the mystery.
 - A single room actor is the authoritative state machine and ordering point.
 - The registry is a concurrent `DashMap`; matchmaking releases its queue lock
   before any actor await.
-- Public matchmaking counts use a Tokio `watch` channel, so one aggregate
-  snapshot is shared across all queue WebSocket subscribers.
+- Public matchmaking counts use a Tokio `watch` channel and share one
+  pre-serialized snapshot across all queue WebSocket subscribers. Bursts are
+  coalesced and each client receives at most one update per configured
+  broadcast interval.
 - All actor and socket queues are bounded. A client that cannot drain its
   outbound queue is detached rather than blocking the room.
 - Broadcast payloads are serialized from shared `Arc<ServerMessage>` values,
@@ -249,9 +262,13 @@ See [`.env.example`](.env.example). Important settings:
 | `CS_GUESS_DISCONNECT_FORFEIT_SECS` | In-round disconnect recovery window |
 | `CS_GUESS_HEARTBEAT_SECS` | Server ping interval |
 | `CS_GUESS_CLIENT_TIMEOUT_SECS` | Silent client timeout |
+| `CS_GUESS_QUEUE_BROADCAST_MS` | Minimum interval between public queue updates (default 1000 ms) |
 | `CS_GUESS_WS_QUEUE_CAPACITY` | Per-connection outbound buffer |
 | `CS_GUESS_ROOM_QUEUE_CAPACITY` | Per-room command buffer |
 | `CS_GUESS_HTTP_CONCURRENCY_LIMIT` | In-flight HTTP request ceiling |
+| `CS_GUESS_MAX_WEBSOCKET_CONNECTIONS` | Process-wide WebSocket ceiling |
+| `CS_GUESS_SESSION_RATE_CAPACITY` | Session endpoint token-bucket burst |
+| `CS_GUESS_SESSION_RATE_REFILL_PER_SECOND` | Session endpoint token refill rate |
 
 ## Verification
 

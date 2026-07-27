@@ -15,6 +15,7 @@ pub struct Config {
     pub disconnect_forfeit: Duration,
     pub heartbeat_interval: Duration,
     pub client_timeout: Duration,
+    pub queue_broadcast_interval: Duration,
     pub ws_queue_capacity: usize,
     pub room_queue_capacity: usize,
     pub http_concurrency_limit: usize,
@@ -63,6 +64,10 @@ impl Config {
             )?),
             heartbeat_interval: Duration::from_secs(parse_u64("CS_GUESS_HEARTBEAT_SECS", 15)?),
             client_timeout: Duration::from_secs(parse_u64("CS_GUESS_CLIENT_TIMEOUT_SECS", 45)?),
+            queue_broadcast_interval: Duration::from_millis(parse_nonzero_u64(
+                "CS_GUESS_QUEUE_BROADCAST_MS",
+                1_000,
+            )?),
             ws_queue_capacity: parse_usize("CS_GUESS_WS_QUEUE_CAPACITY", 64)?,
             room_queue_capacity: parse_usize("CS_GUESS_ROOM_QUEUE_CAPACITY", 256)?,
             http_concurrency_limit: parse_usize("CS_GUESS_HTTP_CONCURRENCY_LIMIT", 512)?,
@@ -91,6 +96,7 @@ impl Config {
             disconnect_forfeit: Duration::from_secs(10),
             heartbeat_interval: Duration::from_secs(1),
             client_timeout: Duration::from_secs(3),
+            queue_broadcast_interval: Duration::from_millis(25),
             ws_queue_capacity: 16,
             room_queue_capacity: 64,
             http_concurrency_limit: 32,
@@ -126,6 +132,15 @@ fn parse_nonzero_u32(name: &str, default: u32) -> Result<u32, AppError> {
         .map(|raw| raw.parse())
         .unwrap_or(Ok(default))
         .map_err(|error| AppError::Config(format!("invalid {name}: {error}")))?;
+    if value == 0 {
+        Err(AppError::Config(format!("{name} must be greater than 0")))
+    } else {
+        Ok(value)
+    }
+}
+
+fn parse_nonzero_u64(name: &str, default: u64) -> Result<u64, AppError> {
+    let value = parse_u64(name, default)?;
     if value == 0 {
         Err(AppError::Config(format!("{name} must be greater than 0")))
     } else {

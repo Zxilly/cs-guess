@@ -1,12 +1,13 @@
 use std::{
     collections::HashMap,
     sync::{
-        Arc,
+        Arc, Mutex as StdMutex,
         atomic::{AtomicBool, Ordering},
     },
     time::Instant,
 };
 
+use axum::body::Bytes;
 use dashmap::{DashMap, mapref::entry::Entry};
 use tokio::sync::{Mutex, OwnedSemaphorePermit, Semaphore, watch};
 use tokio_util::sync::CancellationToken;
@@ -14,7 +15,8 @@ use uuid::Uuid;
 
 use crate::{
     config::Config,
-    database::ProfileStore,
+    daily::DailyChallenge,
+    database::DatabaseStore,
     error::AppError,
     profile::ProfileState,
     protocol::{QueueCounts, RoomKind, SessionResponse, Snapshot, Visibility},
@@ -30,18 +32,102 @@ struct Inner {
     pub config: Config,
     rooms: DashMap<String, RoomHandle>,
     quick_queues: Mutex<HashMap<(u8, Visibility, u8), QuickQueue>>,
-    queue_counts: watch::Sender<QueueCounts>,
+    queue_telemetry: Arc<QueueTelemetry>,
     session_limiter: Mutex<SessionRateLimiter>,
     websocket_permits: Arc<Semaphore>,
     ready: AtomicBool,
     pub shutdown: CancellationToken,
-    profiles: ProfileStore,
+    database: DatabaseStore,
 }
 
 #[derive(Clone)]
 struct QuickQueue {
     room_code: String,
     players: u32,
+}
+
+pub(crate) struct QueueTelemetry {
+    counts: StdMutex<QueueCounts>,
+    sender: watch::Sender<Bytes>,
+}
+
+impl QueueTelemetry {
+    pub(crate) fn new() -> Self {
+        let counts = QueueCounts::default();
+        let (sender, _) = watch::channel(encode_queue_counts(counts));
+        Self {
+            counts: StdMutex::new(counts),
+            sender,
+        }
+    }
+
+    fn current(&self) -> QueueCounts {
+        *self
+            .counts
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+
+    fn subscribe(&self) -> watch::Receiver<Bytes> {
+        self.sender.subscribe()
+    }
+
+    fn publish_waiting(&self, mut waiting: QueueCounts) {
+        let mut counts = self
+            .counts
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        waiting.playing_bo1 = counts.playing_bo1;
+        waiting.playing_bo3 = counts.playing_bo3;
+        waiting.playing_bo5 = counts.playing_bo5;
+        waiting.playing_group_bo1 = counts.playing_group_bo1;
+        waiting.playing_group_bo3 = counts.playing_group_bo3;
+        waiting.playing_group_bo5 = counts.playing_group_bo5;
+        waiting.playing_total = counts.playing_total;
+        if *counts == waiting {
+            return;
+        }
+        *counts = waiting;
+        self.sender.send_replace(encode_queue_counts(waiting));
+    }
+
+    pub(crate) fn set_room_active(&self, party_size: u8, best_of: u8, active: bool) {
+        let mut counts = self
+            .counts
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let players = u32::from(party_size);
+        let previous = *counts;
+        let bucket = match (party_size, best_of) {
+            (2, 1) => &mut counts.playing_bo1,
+            (2, 3) => &mut counts.playing_bo3,
+            (2, 5) => &mut counts.playing_bo5,
+            (4, 1) => &mut counts.playing_group_bo1,
+            (4, 3) => &mut counts.playing_group_bo3,
+            (4, 5) => &mut counts.playing_group_bo5,
+            _ => return,
+        };
+        if active {
+            *bucket = bucket.saturating_add(players);
+            counts.playing_total = counts.playing_total.saturating_add(players);
+        } else {
+            *bucket = bucket.saturating_sub(players);
+            counts.playing_total = counts.playing_total.saturating_sub(players);
+        }
+        if *counts != previous {
+            self.sender.send_replace(encode_queue_counts(*counts));
+        }
+    }
+}
+
+fn encode_queue_counts(counts: QueueCounts) -> Bytes {
+    Bytes::from(
+        serde_json::to_vec(&serde_json::json!({
+            "type": "queue_counts",
+            "counts": counts,
+        }))
+        .expect("queue telemetry is always serializable"),
+    )
 }
 
 struct SessionRateLimiter {
@@ -77,24 +163,23 @@ impl SessionRateLimiter {
 
 impl AppState {
     pub fn new(config: Config) -> Self {
-        let (queue_counts, _) = watch::channel(QueueCounts::default());
         let websocket_permits = Arc::new(Semaphore::new(config.max_websocket_connections));
         let session_limiter = Mutex::new(SessionRateLimiter::new(
             config.session_rate_capacity,
             config.session_rate_refill_per_second,
         ));
-        let profiles = ProfileStore::new(&config);
+        let database = DatabaseStore::new(&config);
         Self {
             inner: Arc::new(Inner {
                 config,
                 rooms: DashMap::new(),
                 quick_queues: Mutex::new(HashMap::new()),
-                queue_counts,
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
                 session_limiter,
                 websocket_permits,
                 ready: AtomicBool::new(false),
                 shutdown: CancellationToken::new(),
-                profiles,
+                database,
             }),
         }
     }
@@ -104,7 +189,7 @@ impl AppState {
     }
 
     pub async fn initialize(&self) -> Result<(), AppError> {
-        self.inner.profiles.initialize().await
+        self.inner.database.initialize().await
     }
 
     pub async fn load_profile(
@@ -112,7 +197,10 @@ impl AppState {
         anonymous_id: &str,
         sync_token: &str,
     ) -> Result<ProfileState, AppError> {
-        self.inner.profiles.load(anonymous_id, sync_token).await
+        self.inner
+            .database
+            .load_profile(anonymous_id, sync_token)
+            .await
     }
 
     pub async fn save_profile(
@@ -120,7 +208,11 @@ impl AppState {
         profile: ProfileState,
         sync_token: &str,
     ) -> Result<ProfileState, AppError> {
-        self.inner.profiles.save(profile, sync_token).await
+        self.inner.database.save_profile(profile, sync_token).await
+    }
+
+    pub async fn current_daily_challenge(&self) -> Result<DailyChallenge, AppError> {
+        self.inner.database.current_daily_challenge().await
     }
 
     pub fn set_ready(&self, value: bool) {
@@ -137,11 +229,11 @@ impl AppState {
     }
 
     pub fn queue_counts(&self) -> QueueCounts {
-        *self.inner.queue_counts.borrow()
+        self.inner.queue_telemetry.current()
     }
 
-    pub fn subscribe_queue_counts(&self) -> watch::Receiver<QueueCounts> {
-        self.inner.queue_counts.subscribe()
+    pub fn subscribe_queue_counts(&self) -> watch::Receiver<Bytes> {
+        self.inner.queue_telemetry.subscribe()
     }
 
     pub async fn admit_session_request(&self) -> Result<(), AppError> {
@@ -359,7 +451,7 @@ impl AppState {
         }
         counts.group_total = counts.group_bo1 + counts.group_bo3 + counts.group_bo5;
         counts.total = counts.bo1 + counts.bo3 + counts.bo5 + counts.group_total;
-        self.inner.queue_counts.send_replace(counts);
+        self.inner.queue_telemetry.publish_waiting(counts);
     }
 
     fn create_room_entry(
@@ -390,6 +482,7 @@ impl AppState {
                         max_players,
                         best_of,
                         host: host.clone(),
+                        queue_telemetry: Arc::clone(&self.inner.queue_telemetry),
                     },
                     self.inner.config.clone(),
                     self.inner.shutdown.child_token(),

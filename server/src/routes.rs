@@ -60,6 +60,7 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/matches/quick/{code}", delete(cancel_quick_match))
         .route("/v1/matches/queue", get(queue_counts))
         .route("/v1/matches/queue/ws", get(queue_counts_websocket))
+        .route("/v1/daily-challenges/current", get(current_daily_challenge))
         .route(
             "/v1/profiles/{anonymous_id}",
             get(load_profile).put(save_profile),
@@ -153,6 +154,12 @@ async fn queue_counts(State(state): State<AppState>) -> Json<QueueCounts> {
     Json(state.queue_counts())
 }
 
+async fn current_daily_challenge(
+    State(state): State<AppState>,
+) -> Result<Json<crate::daily::DailyChallenge>, AppError> {
+    Ok(Json(state.current_daily_challenge().await?))
+}
+
 async fn load_profile(
     State(state): State<AppState>,
     Path(anonymous_id): Path<String>,
@@ -203,24 +210,36 @@ async fn queue_counts_websocket(
         return Err(AppError::Unauthorized);
     }
     let receiver = state.subscribe_queue_counts();
+    let broadcast_interval = config.queue_broadcast_interval;
     let permit = state.acquire_websocket()?;
     Ok(ws
         .max_message_size(1024)
         .max_frame_size(1024)
         .on_upgrade(move |socket| async move {
             let _permit = permit;
-            serve_queue_counts(socket, receiver).await;
+            serve_queue_counts(socket, receiver, broadcast_interval).await;
         }))
 }
 
-async fn serve_queue_counts(mut socket: WebSocket, mut receiver: watch::Receiver<QueueCounts>) {
-    let initial_counts = *receiver.borrow_and_update();
-    if send_queue_counts(&mut socket, initial_counts)
+async fn serve_queue_counts(
+    mut socket: WebSocket,
+    mut receiver: watch::Receiver<Bytes>,
+    broadcast_interval: std::time::Duration,
+) {
+    let initial_payload = receiver.borrow_and_update().clone();
+    if send_queue_counts(&mut socket, initial_payload.clone())
         .await
         .is_err()
     {
         return;
     }
+    let mut pending_payload = None;
+    let mut last_sent = initial_payload;
+    let mut broadcast_tick = tokio::time::interval_at(
+        tokio::time::Instant::now() + broadcast_interval,
+        broadcast_interval,
+    );
+    broadcast_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
     let mut heartbeat = tokio::time::interval(std::time::Duration::from_secs(15));
     heartbeat.set_missed_tick_behavior(MissedTickBehavior::Delay);
     loop {
@@ -229,9 +248,16 @@ async fn serve_queue_counts(mut socket: WebSocket, mut receiver: watch::Receiver
                 if changed.is_err() {
                     break;
                 }
-                let counts = *receiver.borrow_and_update();
-                if send_queue_counts(&mut socket, counts).await.is_err() {
-                    break;
+                pending_payload = Some(receiver.borrow_and_update().clone());
+            }
+            _ = broadcast_tick.tick() => {
+                if let Some(payload) = pending_payload.take()
+                    && payload != last_sent
+                {
+                    last_sent = payload.clone();
+                    if send_queue_counts(&mut socket, payload).await.is_err() {
+                        break;
+                    }
                 }
             }
             inbound = socket.recv() => {
@@ -254,12 +280,10 @@ async fn serve_queue_counts(mut socket: WebSocket, mut receiver: watch::Receiver
     }
 }
 
-async fn send_queue_counts(socket: &mut WebSocket, counts: QueueCounts) -> Result<(), axum::Error> {
-    let message = serde_json::json!({
-        "type": "queue_counts",
-        "counts": counts,
-    });
-    socket.send(Message::Text(message.to_string().into())).await
+async fn send_queue_counts(socket: &mut WebSocket, payload: Bytes) -> Result<(), axum::Error> {
+    let text = axum::extract::ws::Utf8Bytes::try_from(payload)
+        .expect("serialized queue telemetry is valid UTF-8");
+    socket.send(Message::Text(text)).await
 }
 
 #[derive(Deserialize)]
@@ -474,6 +498,7 @@ mod tests {
                 .unwrap();
         let room_code = create_body["room_code"].as_str().unwrap();
         assert_eq!(create_body["snapshot"]["phase"], "waiting");
+        assert_eq!(create_body["snapshot"]["max_guesses"], 8);
         assert!(create_body["snapshot"].get("mystery_id").is_none());
 
         let join = service
@@ -709,7 +734,14 @@ mod tests {
                 "group_bo3_open": 0,
                 "group_bo5_hidden": 0,
                 "group_bo5_open": 0,
-                "group_total": 0
+                "group_total": 0,
+                "playing_bo1": 0,
+                "playing_bo3": 0,
+                "playing_bo5": 0,
+                "playing_group_bo1": 0,
+                "playing_group_bo3": 0,
+                "playing_group_bo5": 0,
+                "playing_total": 0
             })
         );
 
@@ -762,7 +794,14 @@ mod tests {
                 "group_bo3_open": 0,
                 "group_bo5_hidden": 0,
                 "group_bo5_open": 0,
-                "group_total": 0
+                "group_total": 0,
+                "playing_bo1": 0,
+                "playing_bo3": 0,
+                "playing_bo5": 0,
+                "playing_group_bo1": 0,
+                "playing_group_bo3": 0,
+                "playing_group_bo5": 0,
+                "playing_total": 0
             })
         );
 
@@ -812,7 +851,14 @@ mod tests {
                 "group_bo3_open": 0,
                 "group_bo5_hidden": 0,
                 "group_bo5_open": 0,
-                "group_total": 0
+                "group_total": 0,
+                "playing_bo1": 0,
+                "playing_bo3": 0,
+                "playing_bo5": 0,
+                "playing_group_bo1": 0,
+                "playing_group_bo3": 0,
+                "playing_group_bo5": 0,
+                "playing_total": 0
             })
         );
         assert!(first["session_token"].is_string());

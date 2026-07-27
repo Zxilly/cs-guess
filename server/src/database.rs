@@ -10,18 +10,19 @@ use tracing::error;
 
 use crate::{
     config::Config,
+    daily::{CatalogPlayer, DailyChallenge, DailyChallengeCandidate, catalog_player_by_id},
     error::AppError,
     profile::{ProfileState, validate_anonymous_id, validate_sync_token},
 };
 
 #[derive(Clone)]
-pub struct ProfileStore {
+pub struct DatabaseStore {
     pool: SqlitePool,
     path: PathBuf,
     in_memory: bool,
 }
 
-impl ProfileStore {
+impl DatabaseStore {
     pub fn new(config: &Config) -> Self {
         let in_memory = config.database_path.as_os_str() == ":memory:";
         let journal_mode = if in_memory {
@@ -63,6 +64,10 @@ impl ProfileStore {
             .execute(&self.pool)
             .await
             .map_err(database_error)?;
+        sqlx::raw_sql(include_str!("../migrations/0002_daily_challenges.sql"))
+            .execute(&self.pool)
+            .await
+            .map_err(database_error)?;
         sqlx::query("PRAGMA wal_autocheckpoint = 1000")
             .execute(&self.pool)
             .await
@@ -80,7 +85,7 @@ impl ProfileStore {
         Ok(())
     }
 
-    pub async fn load(
+    pub async fn load_profile(
         &self,
         anonymous_id: &str,
         sync_token: &str,
@@ -103,7 +108,7 @@ impl ProfileStore {
         })
     }
 
-    pub async fn save(
+    pub async fn save_profile(
         &self,
         profile: ProfileState,
         sync_token: &str,
@@ -138,7 +143,71 @@ impl ProfileStore {
         .await
         .map_err(database_error)?;
 
-        self.load(&profile.anonymous_id, sync_token).await
+        self.load_profile(&profile.anonymous_id, sync_token).await
+    }
+
+    pub async fn current_daily_challenge(&self) -> Result<DailyChallenge, AppError> {
+        let candidate = DailyChallengeCandidate::current()?;
+        let created_at = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs() as i64;
+        sqlx::query(
+            "INSERT INTO daily_challenges (
+                challenge_date, round_number, player_id, player_snapshot_json,
+                catalog_version, created_at
+             ) VALUES (?, ?, ?, ?, ?, ?)
+             ON CONFLICT(challenge_date) DO NOTHING",
+        )
+        .bind(&candidate.challenge.date)
+        .bind(i64::from(candidate.challenge.round_number))
+        .bind(&candidate.challenge.mystery_player_id)
+        .bind(&candidate.player_snapshot_json)
+        .bind(&candidate.challenge.catalog_version)
+        .bind(created_at)
+        .execute(&self.pool)
+        .await
+        .map_err(database_error)?;
+
+        let row: (i64, String, String, String) = sqlx::query_as(
+            "SELECT round_number, player_id, player_snapshot_json, catalog_version
+             FROM daily_challenges
+             WHERE challenge_date = ?",
+        )
+        .bind(&candidate.challenge.date)
+        .fetch_one(&self.pool)
+        .await
+        .map_err(database_error)?;
+        let mut mystery_player: CatalogPlayer = serde_json::from_str(&row.2).map_err(|error| {
+            error!(%error, date = %candidate.challenge.date, "stored daily player is invalid");
+            AppError::Internal
+        })?;
+        if mystery_player.image_url.is_none()
+            && let Some(current_player) = catalog_player_by_id(&row.1)
+            && current_player.image_url.is_some()
+        {
+            mystery_player.image_url = current_player.image_url.clone();
+            let enriched_snapshot =
+                serde_json::to_string(&mystery_player).map_err(|_| AppError::Internal)?;
+            sqlx::query(
+                "UPDATE daily_challenges
+                 SET player_snapshot_json = ?
+                 WHERE challenge_date = ? AND player_id = ?",
+            )
+            .bind(enriched_snapshot)
+            .bind(&candidate.challenge.date)
+            .bind(&row.1)
+            .execute(&self.pool)
+            .await
+            .map_err(database_error)?;
+        }
+        Ok(DailyChallenge {
+            date: candidate.challenge.date,
+            round_number: u16::try_from(row.0).map_err(|_| AppError::Internal)?,
+            mystery_player_id: row.1,
+            mystery_player,
+            catalog_version: row.3,
+        })
     }
 }
 
@@ -194,7 +263,7 @@ mod tests {
         let mut config = Config::for_test();
         config.database_path = path.clone();
         config.database_max_connections = 4;
-        let store = ProfileStore::new(&config);
+        let store = DatabaseStore::new(&config);
         store.initialize().await.unwrap();
 
         let journal_mode: String = sqlx::query_scalar("PRAGMA journal_mode")
@@ -204,11 +273,14 @@ mod tests {
         assert_eq!(journal_mode.to_ascii_lowercase(), "wal");
 
         let token = "profile_sync_token_abcdefghijklmnopqrstuvwxyz";
-        let saved = store.save(test_profile(200, "donk"), token).await.unwrap();
+        let saved = store
+            .save_profile(test_profile(200, "donk"), token)
+            .await
+            .unwrap();
         assert_eq!(saved.player_id, "donk");
 
         let stale = store
-            .save(test_profile(100, "s1mple"), token)
+            .save_profile(test_profile(100, "s1mple"), token)
             .await
             .unwrap();
         assert_eq!(stale.player_id, "donk");
@@ -216,7 +288,7 @@ mod tests {
 
         assert!(matches!(
             store
-                .save(
+                .save_profile(
                     test_profile(300, "s1mple"),
                     "different_profile_sync_token_abcdefghijkl"
                 )
@@ -225,7 +297,7 @@ mod tests {
         ));
         assert_eq!(
             store
-                .load("anonymous-profile-test-0001", token)
+                .load_profile("anonymous-profile-test-0001", token)
                 .await
                 .unwrap(),
             saved

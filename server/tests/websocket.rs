@@ -62,6 +62,55 @@ async fn queue_counts_are_broadcast_when_players_join_and_cancel() {
 }
 
 #[tokio::test]
+async fn queue_count_bursts_are_coalesced_into_the_latest_snapshot() {
+    let mut config = Config::for_test();
+    config.queue_broadcast_interval = Duration::from_secs(1);
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let address = listener.local_addr().unwrap();
+    config.public_base_url = format!("http://{address}");
+    let state = AppState::new(config);
+    state.set_ready(true);
+
+    let server = tokio::spawn(async move {
+        axum::serve(listener, app(state)).await.unwrap();
+    });
+    let (mut queue_ws, _) = connect_async(format!("ws://{address}/v1/matches/queue/ws"))
+        .await
+        .unwrap();
+    let _ = read_until(&mut queue_ws, "queue_counts").await;
+    let client = reqwest::Client::new();
+
+    let requests = [1, 3, 5].map(|best_of| {
+        client
+            .post(format!("http://{address}/v1/matches/quick"))
+            .json(&json!({
+                "identity_id": "0samas",
+                "visibility": "hidden",
+                "best_of": best_of
+            }))
+            .send()
+    });
+    let responses = futures_util::future::join_all(requests).await;
+    for response in responses {
+        let response = response.unwrap();
+        assert!(
+            response.status().is_success(),
+            "quick match failed with {}: {}",
+            response.status(),
+            response.text().await.unwrap()
+        );
+    }
+
+    let counts = read_until(&mut queue_ws, "queue_counts").await;
+    assert_eq!(counts["counts"]["bo1"], 1);
+    assert_eq!(counts["counts"]["bo3"], 1);
+    assert_eq!(counts["counts"]["bo5"], 1);
+    assert_eq!(counts["counts"]["total"], 3);
+
+    server.abort();
+}
+
+#[tokio::test]
 async fn four_player_queue_broadcasts_waiting_players_and_clears_when_full() {
     let mut config = Config::for_test();
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -127,6 +176,10 @@ async fn quick_match_redacts_hidden_progress_and_restores_history_on_reconnect()
         axum::serve(listener, app(state)).await.unwrap();
     });
 
+    let (mut queue_ws, _) = connect_async(format!("ws://{address}/v1/matches/queue/ws"))
+        .await
+        .unwrap();
+    let _ = read_until(&mut queue_ws, "queue_counts").await;
     let client = reqwest::Client::new();
     let first: Value = client
         .post(format!("http://{address}/v1/matches/quick"))
@@ -160,6 +213,8 @@ async fn quick_match_redacts_hidden_progress_and_restores_history_on_reconnect()
 
     let _ = read_until(&mut first_ws, "round_started").await;
     let _ = read_until(&mut second_ws, "round_started").await;
+    let active = read_queue_until(&mut queue_ws, "playing_bo3", 2).await;
+    assert_eq!(active["counts"]["playing_total"], 2);
     second_ws
         .send(Message::Text(
             json!({
@@ -185,6 +240,28 @@ async fn quick_match_redacts_hidden_progress_and_restores_history_on_reconnect()
     assert!(resumed["snapshot"]["mystery_id"].is_null());
 
     server.abort();
+}
+
+async fn read_queue_until<S>(socket: &mut S, field: &str, expected: u64) -> Value
+where
+    S: Stream<Item = Result<Message, tokio_tungstenite::tungstenite::Error>> + Unpin,
+{
+    timeout(Duration::from_secs(3), async {
+        while let Some(message) = socket.next().await {
+            let message = message.unwrap();
+            if let Message::Text(text) = message {
+                let event: Value = serde_json::from_str(&text).unwrap();
+                if event["type"] == "queue_counts"
+                    && event["counts"][field].as_u64() == Some(expected)
+                {
+                    return event;
+                }
+            }
+        }
+        panic!("socket closed before queue count {field} reached {expected}");
+    })
+    .await
+    .expect("queue count arrives before timeout")
 }
 
 fn websocket_url(address: std::net::SocketAddr, room_code: &str, token: &str) -> String {

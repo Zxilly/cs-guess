@@ -16,6 +16,7 @@ artifacts
 __pycache__
 server/target
 server/data/*.sqlite*
+/data/*.sqlite*
 *.local
 
 # Local environment files and secrets

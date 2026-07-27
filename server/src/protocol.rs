@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-pub const MAX_GUESSES: usize = 6;
+pub const MAX_GUESSES: usize = 8;
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "snake_case")]
@@ -75,6 +75,13 @@ pub struct QueueCounts {
     pub group_bo5_hidden: u32,
     pub group_bo5_open: u32,
     pub group_total: u32,
+    pub playing_bo1: u32,
+    pub playing_bo3: u32,
+    pub playing_bo5: u32,
+    pub playing_group_bo1: u32,
+    pub playing_group_bo3: u32,
+    pub playing_group_bo5: u32,
+    pub playing_total: u32,
 }
 
 #[derive(Clone, Debug, Serialize)]

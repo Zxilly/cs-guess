@@ -97,7 +97,7 @@ impl MatchHistoryEntry {
                 .answer_id
                 .as_ref()
                 .is_none_or(|value| valid_short_text(value, 96))
-            && self.guess_ids.len() <= 6
+            && self.guess_ids.len() <= crate::protocol::MAX_GUESSES
             && self
                 .guess_ids
                 .iter()

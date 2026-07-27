@@ -23,6 +23,7 @@ use crate::{
         ClientMessage, GuessView, MAX_GUESSES, OpponentProgressView, Phase, PlayerView, RoomKind,
         ScoreView, ServerMessage, Snapshot, Visibility,
     },
+    state::QueueTelemetry,
 };
 
 pub type OutboundMessage = Arc<ServerMessage>;
@@ -271,6 +272,8 @@ struct RoomActor {
     seq: u64,
     last_activity: Instant,
     config: Config,
+    queue_telemetry: Arc<QueueTelemetry>,
+    telemetry_active: bool,
 }
 
 pub struct RoomSpec {
@@ -280,6 +283,7 @@ pub struct RoomSpec {
     pub max_players: u8,
     pub best_of: u8,
     pub host: NewPlayer,
+    pub(crate) queue_telemetry: Arc<QueueTelemetry>,
 }
 
 pub fn spawn_room(spec: RoomSpec, config: Config, shutdown: CancellationToken) -> RoomHandle {
@@ -290,6 +294,7 @@ pub fn spawn_room(spec: RoomSpec, config: Config, shutdown: CancellationToken) -
         max_players,
         best_of,
         host,
+        queue_telemetry,
     } = spec;
     let (tx, rx) = mpsc::channel(config.room_queue_capacity);
     let target_index = Uuid::new_v4().as_u128() as usize % PLAYERS.len();
@@ -318,6 +323,8 @@ pub fn spawn_room(spec: RoomSpec, config: Config, shutdown: CancellationToken) -
         seq: 0,
         last_activity: Instant::now(),
         config,
+        queue_telemetry,
+        telemetry_active: false,
     };
     tokio::spawn(actor.run(rx, shutdown));
     RoomHandle { tx }
@@ -349,6 +356,7 @@ impl RoomActor {
                 }
             }
         }
+        self.set_telemetry_active(false);
     }
 
     fn handle(&mut self, command: RoomCommand) {
@@ -752,6 +760,9 @@ impl RoomActor {
             }
         }
         self.phase = Phase::Playing;
+        if self.kind == RoomKind::Quick {
+            self.set_telemetry_active(true);
+        }
         self.round_number = self.round_number.saturating_add(1);
         let duration = Duration::from_secs(180);
         self.deadline = Some(Instant::now() + duration);
@@ -786,6 +797,8 @@ impl RoomActor {
             let transition = Duration::from_secs(5);
             self.next_round_at = Some(Instant::now() + transition);
             self.next_round_unix_ms = Some(unix_ms() + transition.as_millis() as u64);
+        } else if self.series_winner_player_id.is_some() {
+            self.set_telemetry_active(false);
         }
         let seq = self.next_seq();
         let mystery_id = self.target_id.to_owned();
@@ -806,6 +819,15 @@ impl RoomActor {
             next_round_unix_ms: self.next_round_unix_ms,
             mystery_id,
         });
+    }
+
+    fn set_telemetry_active(&mut self, active: bool) {
+        if self.telemetry_active == active {
+            return;
+        }
+        self.telemetry_active = active;
+        self.queue_telemetry
+            .set_room_active(self.max_players, self.best_of, active);
     }
 
     fn maintain(&mut self) {
@@ -1334,6 +1356,7 @@ mod tests {
                 max_players: 4,
                 best_of: 3,
                 host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
             },
             config,
             shutdown,
@@ -1419,6 +1442,7 @@ mod tests {
                 max_players: 2,
                 best_of: 3,
                 host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
             },
             config,
             CancellationToken::new(),
@@ -1487,6 +1511,7 @@ mod tests {
                 max_players: 2,
                 best_of: 1,
                 host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
             },
             config,
             CancellationToken::new(),

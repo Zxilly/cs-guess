@@ -1,4 +1,5 @@
 pub mod config;
+pub mod daily;
 pub mod database;
 pub mod error;
 pub mod profile;
