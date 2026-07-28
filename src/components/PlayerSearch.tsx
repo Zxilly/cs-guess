@@ -75,6 +75,7 @@ export function PlayerSearch({
   const submissionGenerationRef = useRef(0);
   const mountedRef = useRef(true);
   const isComposingRef = useRef(false);
+  const restoringSelectionFocusRef = useRef(false);
   const pendingCompositionInputRef = useRef<string | undefined>(undefined);
   const hasConfirmedSelection =
     selectedPlayer !== undefined &&
@@ -91,7 +92,7 @@ export function PlayerSearch({
       : undefined;
   const effectiveHighlightedId = highlightedPlayer?.id;
   const completion = highlightedPlayer
-    ? completionSuffix(query, highlightedPlayer.nickname)
+    ? completionSuffix(query, highlightedPlayer.nickname) || "  ↵ 提交"
     : "";
   const listboxVisible =
     open &&
@@ -267,12 +268,31 @@ export function PlayerSearch({
     onOpenChange(value.trim().length > 0);
   }
 
+  function restoreInputFocus(afterCommit = false) {
+    const focus = () => {
+      const input =
+        searchRef.current?.querySelector<HTMLInputElement>(
+          '[data-slot="command-input"]',
+        );
+      if (!input || input.disabled) return;
+      restoringSelectionFocusRef.current = true;
+      input.focus({ preventScroll: true });
+      restoringSelectionFocusRef.current = false;
+    };
+    if (afterCommit) {
+      window.setTimeout(focus, 0);
+      return;
+    }
+    queueMicrotask(focus);
+  }
+
   function handleSelect(player: Player) {
     if (disabled || isComposingRef.current) return;
     updateQuery(player.nickname);
     clearHighlight();
     onSelect(player.id);
     onOpenChange(false);
+    restoreInputFocus();
   }
 
   function moveHighlight(direction: -1 | 1) {
@@ -320,6 +340,7 @@ export function PlayerSearch({
     updateQuery("");
     clearHighlight();
     onOpenChange(false);
+    restoreInputFocus(true);
   }
 
   function submitHighlightedPlayer() {
@@ -379,6 +400,7 @@ export function PlayerSearch({
               ) {
                 return;
               }
+              if (restoringSelectionFocusRef.current) return;
               if (query.trim()) onOpenChange(true);
             }}
             onClick={() => {

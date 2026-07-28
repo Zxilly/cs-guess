@@ -50,4 +50,19 @@ describe("DailyResultPanel", () => {
 
     expect(markup).toContain(expected);
   });
+
+  it("uses solo-specific result labeling outside the daily challenge", () => {
+    const markup = renderToStaticMarkup(
+      <DailyResultPanel
+        context="solo"
+        outcome="won"
+        attempts={2}
+        maxGuesses={8}
+        mysteryPlayer={legacyPlayer}
+      />,
+    );
+
+    expect(markup).toContain("Solo result");
+    expect(markup).not.toContain("Daily result");
+  });
 });

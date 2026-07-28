@@ -52,6 +52,18 @@ describe("player search", () => {
     expect(forward).toEqual(reversed);
   });
 
+  it("prioritizes the established Major player for duplicate exact nicknames", () => {
+    expect(searchPlayers(players, "rain")[0]?.id).toBe(
+      "rain-no-havard-liset-nygaard",
+    );
+  });
+
+  it("matches common leetspeak spellings without hiding the canonical nickname", () => {
+    const result = searchPlayers(players, "device")[0];
+    expect(result?.nickname).toBe("dev1ce");
+    expect(result?.name).toContain("Nicolai");
+  });
+
   it.each([
     ["alka", ["Alkaren"]],
     ["big", ["biguzera"]],

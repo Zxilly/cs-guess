@@ -277,6 +277,25 @@ export function saveSoloProgress(
   storage.setItem(SOLO_ACTIVE_DIFFICULTY_KEY, state.difficulty);
 }
 
+export function prepareSoloRoundForPlay(
+  difficulty: SoloDifficulty,
+  storage: SoloStorage | undefined = browserStorage(),
+  now = Date.now(),
+) {
+  const loaded = loadSoloProgress(difficulty, storage, now);
+  const state =
+    loaded.state.status === "playing"
+      ? loaded.state
+      : createSoloRound(
+          difficulty,
+          loaded.state.roundNumber + 1,
+          loaded.state.mysteryId,
+          now,
+        );
+  saveSoloProgress(state, storage);
+  return state;
+}
+
 export function loadSoloProgress(
   difficulty: SoloDifficulty,
   storage: SoloStorage | undefined = browserStorage(),

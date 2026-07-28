@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   loadSoloDifficulty,
+  prepareSoloRoundForPlay,
   saveSoloDifficulty,
   SOLO_DIFFICULTIES,
   soloMysteryPool,
@@ -79,6 +80,7 @@ export function SoloDifficultyPage() {
 
   function start() {
     saveSoloDifficulty(selected);
+    prepareSoloRoundForPlay(selected);
     navigate(`/play/solo?difficulty=${selected}`);
   }
 

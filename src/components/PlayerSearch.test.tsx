@@ -496,6 +496,20 @@ describe("PlayerSearch combobox ARIA", () => {
     expect(options.every((option) => option.isConnected === false)).toBe(true);
   });
 
+  it("shows an explicit gray Enter affordance for an exact keyboard highlight", async () => {
+    const candidate = players.find((player) => player.nickname === "donk")!;
+    const container = await mountMutableSearch([candidate], "donk");
+    const input = inputIn(container);
+
+    await pressKey(input, "ArrowDown");
+
+    const completion = container.querySelector<HTMLElement>(
+      '[data-slot="command-input-completion"]',
+    );
+    expect(completion?.textContent).toBe("donk  ↵ 提交");
+    expect(completion?.querySelector(".text-muted-foreground\\/55")).not.toBeNull();
+  });
+
   it("keeps the highlighted draft retryable until an asynchronous submission is accepted", async () => {
     const candidates = players.filter((player) =>
       ["donk", "Dosia", "doto"].includes(player.nickname),
@@ -559,6 +573,10 @@ describe("PlayerSearch combobox ARIA", () => {
     const option =
       container.querySelector<HTMLElement>('[role="option"]');
     if (!option) throw new Error("search option was not rendered");
+    const selectedCandidate = candidates.find(
+      (candidate) => candidate.id === option.dataset.value,
+    );
+    if (!selectedCandidate) throw new Error("selected player was not found");
     await act(async () => option.click());
 
     const submit = Array.from(
@@ -576,9 +594,43 @@ describe("PlayerSearch combobox ARIA", () => {
 
     await act(async () => attempt.resolve(false));
 
-    expect(input.value).toBe(candidates[0].nickname);
+    expect(input.value).toBe(selectedCandidate.nickname);
     expect(submit.disabled).toBe(false);
     expect(submit.hasAttribute("aria-busy")).toBe(false);
+  });
+
+  it("returns focus to the input after a pointer selection so Enter submits", async () => {
+    const candidate = players.find((player) => player.nickname === "donk")!;
+    const onSubmit = vi.fn();
+    const container = await mountMutableSearch([candidate], "don", onSubmit);
+    const input = inputIn(container);
+    const option =
+      container.querySelector<HTMLElement>('[role="option"]');
+    if (!option) throw new Error("search option was not rendered");
+
+    await act(async () => option.click());
+    expect(document.activeElement).toBe(input);
+
+    await pressKey(input, "Enter");
+    expect(onSubmit).toHaveBeenCalledOnce();
+    expect(onSubmit).toHaveBeenCalledWith(candidate.id);
+  });
+
+  it("returns focus to the input after an accepted keyboard submission", async () => {
+    const candidate = players.find((player) => player.nickname === "donk")!;
+    const onSubmit = vi.fn(() => true);
+    const container = await mountMutableSearch([candidate], "don", onSubmit);
+    const input = inputIn(container);
+
+    await pressKey(input, "ArrowDown");
+    await pressKey(input, "Enter");
+    await act(async () => {
+      await new Promise((resolve) => window.setTimeout(resolve, 0));
+    });
+
+    expect(onSubmit).toHaveBeenCalledWith(candidate.id);
+    expect(document.activeElement).toBe(input);
+    expect(input.value).toBe("");
   });
 
   it("clears stale highlight state after controlled query and result changes", async () => {

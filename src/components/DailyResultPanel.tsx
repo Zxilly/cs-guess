@@ -70,7 +70,7 @@ export function DailyResultPanel({
           </div>
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.12em] text-primary">
-              Daily result
+              {isDaily ? "Daily result" : "Solo result"}
             </p>
             <h2
               ref={titleRef}
