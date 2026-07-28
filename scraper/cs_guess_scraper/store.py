@@ -53,6 +53,10 @@ def _json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
+def _is_departed_team_name(value: object) -> bool:
+    return str(value or "").strip().casefold().startswith("ex-")
+
+
 class PlayerStore:
     """SQLite-backed canonical store for normalized player source data."""
 
@@ -369,6 +373,13 @@ class PlayerStore:
         is_new_player = existing is None and matched_platform_player_id is None
         timestamp = str(raw_metadata.get("fetched_at") or _now())
         source_url = raw_metadata.get("source_url") or parsed.get("source_url")
+        current_team = parsed.get("current_team")
+        has_live_current_team = isinstance(current_team, Mapping) and not (
+            _is_departed_team_name(current_team.get("name"))
+        )
+
+        if existing and "current_team" in parsed and not has_live_current_team:
+            self.clear_source_current_team(player_id, source, external_id)
 
         with self.connection:
             if is_new_player:
@@ -582,6 +593,112 @@ class PlayerStore:
                     resolved_value=survivor_id,
                     status="manual",
                 )
+        return result
+
+    def apply_reviewed_role_overrides(
+        self,
+        overrides: list[Mapping[str, Any]],
+    ) -> dict[str, int]:
+        """Apply externally reviewed game-role corrections reproducibly.
+
+        Most source pages do not expose a stable historical weapon role.  A
+        reviewed override is therefore intentionally separate from source-role
+        ingestion: it is keyed by a provider identity, retains its cited
+        evidence in ``source_records`` and stays visible in the normal audit
+        trail after a full database rebuild.
+        """
+
+        labels = {"awper", "rifler", "igl", "entry"}
+        result = {"applied": 0, "already_applied": 0}
+        with self.connection:
+            for override in overrides:
+                player_ref = override.get("player")
+                if not isinstance(player_ref, Mapping):
+                    raise TypeError(
+                        "reviewed role override requires a player provider reference"
+                    )
+                source = str(player_ref.get("source") or "").strip()
+                external_id = str(player_ref.get("external_id") or "").strip()
+                if not source or not external_id:
+                    raise ValueError(
+                        "reviewed role override requires player.source and "
+                        "player.external_id"
+                    )
+                role = str(override.get("role") or "").casefold().strip()
+                if role not in labels:
+                    raise ValueError(
+                        "reviewed role override role must be one of: "
+                        + ", ".join(sorted(labels))
+                    )
+                evidence = override.get("evidence") or []
+                if not isinstance(evidence, list) or not evidence:
+                    raise ValueError(
+                        "reviewed role override requires non-empty evidence"
+                    )
+                if not all(isinstance(item, Mapping) for item in evidence):
+                    raise TypeError(
+                        "reviewed role override evidence entries must be objects"
+                    )
+                if not any(str(item.get("url") or "").strip() for item in evidence):
+                    raise ValueError(
+                        "reviewed role override evidence requires a source URL"
+                    )
+                player_id = self.resolve_player_id(source, external_id)
+                existing = self.connection.execute(
+                    "SELECT game_role_override FROM players WHERE id = ?",
+                    (player_id,),
+                ).fetchone()
+                assert existing is not None
+                already_applied = str(existing["game_role_override"] or "") == role
+                payload = {
+                    "player": {"source": source, "external_id": external_id},
+                    "role": role,
+                    "basis": override.get("basis"),
+                    "evidence": [dict(item) for item in evidence],
+                }
+                observed_at = _now()
+                source_record_id, is_new = self._upsert_source_record(
+                    source="manual",
+                    record_type="role",
+                    external_id=f"reviewed-role:{source}:{external_id}",
+                    raw_metadata={"payload": payload},
+                    parsed={"game_role_override": role},
+                    source_url=next(
+                        (
+                            str(item["url"])
+                            for item in evidence
+                            if str(item.get("url") or "").strip()
+                        ),
+                        None,
+                    ),
+                    fetched_at=observed_at,
+                )
+                self.connection.execute(
+                    "UPDATE players SET game_role_override = ?, updated_at = ? "
+                    "WHERE id = ?",
+                    (role, observed_at, player_id),
+                )
+                if is_new:
+                    self._insert_evidence(
+                        entity_type="player",
+                        entity_id=player_id,
+                        field_name="game_role_override",
+                        source_record_id=source_record_id,
+                        value=role,
+                        observed_at=observed_at,
+                    )
+                self._record_conflict(
+                    entity_type="player",
+                    entity_id=player_id,
+                    field_name="role:reviewed_override",
+                    candidates=[payload],
+                    resolved_value=role,
+                    status="manual",
+                )
+                if already_applied:
+                    result["already_applied"] += 1
+                else:
+                    result["applied"] += 1
         return result
 
     def apply_reviewed_major_winners(
@@ -1633,6 +1750,7 @@ class PlayerStore:
             "conflicts_created": 0,
             "identity_reviews": 0,
             "guessable": 0,
+            "departed_team_claims_retired": 0,
         }
         with self.connection:
             exact_merges, conflicts_created = (
@@ -1675,6 +1793,9 @@ class PlayerStore:
                 result["conflicts_created"] += self._merge_team_fields(
                     str(row["id"])
                 )
+            result["departed_team_claims_retired"] = (
+                self._retire_departed_team_claims()
+            )
             for row in self.connection.execute("SELECT id FROM players"):
                 player_id = str(row["id"])
                 result["conflicts_created"] += self._merge_player_fields(player_id)
@@ -1686,6 +1807,40 @@ class PlayerStore:
             result["conflicts_created"] += conflicts_created
 
         return result
+
+    def _retire_departed_team_claims(self) -> int:
+        """Keep ``ex-*`` rosters as history, never as a current affiliation."""
+        departed_team_ids = [
+            str(row["id"])
+            for row in self.connection.execute(
+                """
+                SELECT id FROM teams
+                WHERE lower(trim(canonical_name)) GLOB 'ex-*'
+                """
+            )
+        ]
+        if not departed_team_ids:
+            return 0
+        placeholders = ",".join("?" for _ in departed_team_ids)
+        self.connection.execute(
+            f"""
+            DELETE FROM field_evidence
+            WHERE entity_type = 'player'
+              AND field_name = 'current_team_id'
+              AND CAST(json_extract(normalized_value_json, '$') AS TEXT)
+                  IN ({placeholders})
+            """,
+            departed_team_ids,
+        )
+        cursor = self.connection.execute(
+            f"""
+            UPDATE player_team_tenures
+            SET is_current = 0, is_primary = 0
+            WHERE is_current = 1 AND team_id IN ({placeholders})
+            """,
+            departed_team_ids,
+        )
+        return int(cursor.rowcount)
 
     def _merge_exact_name_birth_date_identities(self) -> tuple[int, int]:
         """Merge complementary LP/Panda identities on exact biography.
@@ -3060,11 +3215,19 @@ class PlayerStore:
             "SELECT * FROM players WHERE id = ?", (player_id,)
         ).fetchone()
         assert player is not None
-        current_team = self._current_team_row(player_id)
         roles = self._role_rows(player_id)
         game_role = derive_game_role(player["game_role_override"], roles)
+        has_major_appearance = self.connection.execute(
+            """
+            SELECT 1
+            FROM major_appearances
+            WHERE player_id = ? AND counts_toward_total = 1
+            LIMIT 1
+            """,
+            (player_id,),
+        ).fetchone() is not None
         missing = []
-        if bool(player["is_coach"]):
+        if bool(player["is_coach"]) and not has_major_appearance:
             missing.append("not_player:coach")
         for field_name, value in (
             ("nickname", player["canonical_nickname"]),
@@ -3085,9 +3248,7 @@ class PlayerStore:
                 or parsed_birth_date.isoformat() != birth_date
             ):
                 missing.append("birth_date_full")
-        if current_team is None:
-            missing.append("current_team")
-        if game_role is None:
+        if game_role is None and not has_major_appearance:
             missing.append("game_role")
         is_guessable = not missing
         self.connection.execute(
@@ -3335,7 +3496,13 @@ class PlayerStore:
             player_id = str(player["id"])
             current_team = self._current_team_row(player_id)
             roles = self._role_rows(player_id)
-            role = derive_game_role(player["game_role_override"], roles)
+            role = derive_game_role(
+                player["game_role_override"],
+                roles,
+                fallback_to_rifler=True,
+            )
+            if role is None and int(player["major_appearances"]) > 0:
+                role = "Unknown"
             team_history = []
             for tenure in self.connection.execute(
                 """
@@ -3475,7 +3642,9 @@ class PlayerStore:
     ) -> None:
         current_team = parsed.get("current_team")
         current_team_id: str | None = None
-        if isinstance(current_team, Mapping):
+        if isinstance(current_team, Mapping) and not _is_departed_team_name(
+            current_team.get("name")
+        ):
             current_team_id = self._upsert_team(
                 source, current_team, fetched_at=fetched_at
             )
@@ -3502,7 +3671,7 @@ class PlayerStore:
                 )
                 is_current = bool(
                     item.get("is_current", item.get("current", False))
-                )
+                ) and not _is_departed_team_name(team_data.get("name"))
                 is_primary = bool(
                     item.get("is_primary", item.get("primary", False))
                 )
@@ -4040,13 +4209,6 @@ class PlayerStore:
                     OR trim(player.full_name) = ''
                     OR player.country_code IS NULL
                     OR player.birth_date IS NULL
-                    OR NOT EXISTS (
-                        SELECT 1
-                        FROM player_team_tenures tenure
-                        WHERE tenure.player_id = player.id
-                          AND tenure.is_current = 1
-                          AND tenure.is_primary = 1
-                    )
                   )
                 """
             ).fetchone()[0]

@@ -1,0 +1,16 @@
+[
+  {
+    "player": {
+      "source": "liquipedia",
+      "external_id": "friberg"
+    },
+    "role": "entry",
+    "basis": "HLTV's editorial role analysis names friberg as the entry-fragging reference for his Ninjas in Pyjamas era. Liquipedia and the active provider payloads have no role field for this historical player.",
+    "evidence": [
+      {
+        "source": "HLTV editorial",
+        "url": "https://www.hltv.org/news/35286/is-the-entry-fragging-role-dead"
+      }
+    ]
+  }
+]

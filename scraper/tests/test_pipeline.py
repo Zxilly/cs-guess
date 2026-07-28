@@ -440,7 +440,7 @@ def test_bo3_current_coach_is_excluded_from_the_player_pool(tmp_path):
     assert player["exclusion_reason"] == "not_player:coach"
 
 
-def test_bo3_sync_removes_a_stale_current_team_claim(tmp_path):
+def test_bo3_sync_removes_a_stale_team_without_hiding_the_player(tmp_path):
     class RecordsClient:
         def __init__(self, record):
             self.record = record
@@ -490,9 +490,11 @@ def test_bo3_sync_removes_a_stale_current_team_claim(tmp_path):
 
         run_sync(store, bo3_client=RecordsClient(stale))
         player = store.audit(player_id)["player"]
+        record = store.export_game_records()[0]
 
-    assert player["is_guessable"] == 0
-    assert "current_team" in player["exclusion_reason"]
+    assert player["is_guessable"] == 1
+    assert player["exclusion_reason"] is None
+    assert record["currentTeam"] is None
 
 
 def test_missing_major_players_are_fetched_by_known_title_and_linked(tmp_path):

@@ -13,6 +13,9 @@ from typing import Any
 
 import pycountry
 
+UNATTACHED_TEAM = "无队伍"
+_INVALID_TEAM_NAMES = {"", "undefined", "null", "none", "n/a"}
+
 
 def _slug(value: str) -> str:
     normalized = unicodedata.normalize("NFKD", value)
@@ -41,6 +44,21 @@ def _country_name(country_code: str) -> str:
         return display_overrides[normalized]
     country = pycountry.countries.get(alpha_2=normalized)
     return country.name if country is not None else country_code.upper()
+
+
+def _team_display_name(value: object) -> str:
+    name = str(value).strip()
+    without_disambiguation = re.sub(
+        r"\s+\([^()]*\bteam\)$",
+        "",
+        name,
+        flags=re.IGNORECASE,
+    ).strip()
+    normalized = without_disambiguation or name
+    folded = normalized.casefold()
+    if folded in _INVALID_TEAM_NAMES or folded.startswith("ex-"):
+        return UNATTACHED_TEAM
+    return normalized
 
 
 def build_app_catalog(
@@ -79,13 +97,7 @@ def build_app_catalog(
         )
         previous_record = previous_by_identity.get(identity)
         if not isinstance(current_team, Mapping):
-            if previous_record and previous_record.get("team"):
-                current_team = {
-                    "name": previous_record["team"],
-                    "logoUrl": previous_record.get("teamLogoUrl"),
-                }
-            else:
-                raise ValueError(f"{record['nickname']} has no current team")
+            current_team = {"name": UNATTACHED_TEAM}
         previous_id = (
             str(previous_record["id"]) if previous_record is not None else None
         )
@@ -105,11 +117,12 @@ def build_app_catalog(
                 f"app catalog cannot create a stable unique ID for {record['nickname']}"
             )
         used_ids.add(public_id)
+        team_name = _team_display_name(current_team["name"])
         catalog_record = {
             "id": public_id,
             "nickname": str(record["nickname"]),
             "name": full_name,
-            "team": str(current_team["name"]),
+            "team": team_name,
             "nationality": _country_name(country_code),
             "countryCode": country_code,
             "age": _age_on(str(record["birthDate"]), effective_today),
@@ -118,7 +131,7 @@ def build_app_catalog(
             "majorWins": int(record.get("majorWins", 0)),
         }
         team_logo_url = current_team.get("logoUrl")
-        if team_logo_url:
+        if team_logo_url and team_name != UNATTACHED_TEAM:
             catalog_record["teamLogoUrl"] = str(team_logo_url)
         image_url = record.get("imageUrl") or (
             previous_record.get("imageUrl")

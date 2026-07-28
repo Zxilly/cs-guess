@@ -1,6 +1,8 @@
 import sqlite3
 from pathlib import Path
 
+import pytest
+
 from cs_guess_scraper.store import PlayerStore
 
 SCHEMA_PATH = Path(__file__).parents[1] / "schema.sql"
@@ -306,6 +308,302 @@ def test_complete_player_exports_current_team_tenures_and_multiple_roles(tmp_pat
         ("Team Vitality", True),
         ("against All authority", False),
     ]
+
+
+def test_player_without_a_current_team_remains_guessable(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "retired-player",
+                "nickname": "retired",
+                "full_name": "Retired Player",
+                "country_code": "SE",
+                "birth_date": "1990-01-01",
+                "status": "retired",
+                "current_team": None,
+                "roles": ["rifler"],
+            },
+        )
+
+        result = store.merge_all()
+        records = store.export_game_records()
+        report = store.audit(player_id)
+        quality = store.data_quality_report()
+
+    assert result["guessable"] == 1
+    assert report["player"]["is_guessable"] == 1
+    assert records[0]["currentTeam"] is None
+    assert "guessable_player_missing_core_data" not in {
+        issue["code"] for issue in quality["criticalIssues"]
+    }
+
+
+def test_new_source_snapshot_without_team_clears_that_sources_old_claim(
+    tmp_path,
+):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        current = {
+            "source_id": "retired-player",
+            "nickname": "retired",
+            "full_name": "Retired Player",
+            "country_code": "SE",
+            "birth_date": "1990-01-01",
+            "status": "active",
+            "current_team": {
+                "source_id": "old-team",
+                "name": "Old Team",
+            },
+            "roles": ["rifler"],
+        }
+        player_id = store.upsert_source_player(
+            "pandascore",
+            current,
+            {"fetched_at": "2026-07-27T10:00:00Z"},
+        )
+        store.merge_all()
+        assert store.export_game_records()[0]["currentTeam"]["name"] == "Old Team"
+
+        store.upsert_source_player(
+            "pandascore",
+            {**current, "status": "retired", "current_team": None},
+            {"fetched_at": "2026-07-28T10:00:00Z"},
+        )
+        store.merge_all()
+        record = store.export_game_records()[0]
+        report = store.audit(player_id)
+
+    assert record["currentTeam"] is None
+    assert all(not item["current"] for item in record["teamHistory"])
+    assert report["current_team"] is None
+
+
+def test_current_team_consensus_resolves_multiple_provider_claims(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "consensus-player",
+                "nickname": "consensus",
+                "full_name": "Consensus Player",
+                "country_code": "SE",
+                "birth_date": "1990-01-01",
+                "current_team": {
+                    "external_id": "current-team",
+                    "name": "Current Team",
+                },
+                "roles": ["rifler"],
+            },
+        )
+        store.link_source_player(player_id, "pandascore", "100")
+        store.upsert_source_player(
+            "pandascore",
+            {
+                "source_id": "100",
+                "nickname": "consensus",
+                "full_name": "Consensus Player",
+                "country_code": "SE",
+                "current_team": {
+                    "source_id": "stale-team",
+                    "name": "Stale Team",
+                },
+            },
+        )
+        store.link_source_player(player_id, "bo3", "200")
+        store.upsert_source_player(
+            "bo3",
+            {
+                "source_id": "200",
+                "nickname": "consensus",
+                "full_name": "Consensus Player",
+                "country_code": "SE",
+                "current_team": {
+                    "source_id": "current-team",
+                    "name": "Current Team",
+                },
+            },
+        )
+
+        store.merge_all()
+        record = store.export_game_records()[0]
+        conflict = next(
+            item
+            for item in store.audit(player_id)["conflicts"]
+            if item["field_name"] == "current_team_id"
+        )
+
+    assert record["currentTeam"]["name"] == "Current Team"
+    assert conflict["resolution_status"] == "automatic"
+
+
+def test_departed_roster_label_is_retained_only_as_history(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "departed-player",
+                "nickname": "departed",
+                "full_name": "Departed Player",
+                "country_code": "DK",
+                "birth_date": "1990-01-01",
+                "current_team": {
+                    "external_id": "ex-old-team",
+                    "name": "ex-Old Team",
+                },
+                "team_history": [
+                    {
+                        "team": {
+                            "external_id": "ex-old-team",
+                            "name": "ex-Old Team",
+                        },
+                        "current": True,
+                        "from": "2020-01-01",
+                        "to": "2021-01-01",
+                    }
+                ],
+                "roles": ["rifler"],
+            },
+        )
+
+        result = store.merge_all()
+        record = store.export_game_records()[0]
+
+    assert record["currentTeam"] is None
+    assert record["teamHistory"][0]["team"]["name"] == "ex-Old Team"
+    assert record["teamHistory"][0]["current"] is False
+    assert result["departed_team_claims_retired"] == 0
+
+
+def test_historical_major_player_without_a_current_role_defaults_to_rifler(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "major-legend",
+                "nickname": "legend",
+                "full_name": "Major Legend",
+                "country_code": "SE",
+                "birth_date": "1990-01-01",
+                "status": "retired",
+                "is_coach": True,
+                "current_team": None,
+                "roles": [],
+            },
+        )
+        store.upsert_major_records(
+            "liquipedia",
+            [
+                {
+                    "external_id": "historic-major",
+                    "canonical_name": "Historic Major",
+                    "game_title": "csgo",
+                    "starts_on": "2014-01-01",
+                    "appearances": [
+                        {
+                            "player_external_id": "major-legend",
+                            "counts_toward_total": True,
+                        }
+                    ],
+                }
+            ],
+        )
+
+        result = store.merge_all()
+        records = store.export_game_records()
+        report = store.audit(player_id)
+
+    assert result["guessable"] == 1
+    assert report["player"]["is_guessable"] == 1
+    assert records[0]["role"] == "Rifler"
+
+
+def test_reviewed_role_override_is_replayable_and_precedes_role_fallback(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "friberg",
+                "nickname": "friberg",
+                "full_name": "Adam Friberg",
+                "country_code": "SE",
+                "birth_date": "1991-10-19",
+                "roles": [],
+            },
+        )
+        store.upsert_major_records(
+            "liquipedia",
+            [
+                {
+                    "external_id": "major",
+                    "canonical_name": "Historic Major",
+                    "game_title": "csgo",
+                    "starts_on": "2013-01-01",
+                    "appearances": [
+                        {
+                            "player_external_id": "friberg",
+                            "counts_toward_total": True,
+                        }
+                    ],
+                }
+            ],
+        )
+        store.merge_all()
+
+        result = store.apply_reviewed_role_overrides(
+            [
+                {
+                    "player": {
+                        "source": "liquipedia",
+                        "external_id": "friberg",
+                    },
+                    "role": "entry",
+                    "basis": "Reviewed editorial role attribution.",
+                    "evidence": [
+                        {
+                            "url": "https://www.hltv.org/news/35286/"
+                            "is-the-entry-fragging-role-dead",
+                            "source": "HLTV",
+                        }
+                    ],
+                }
+            ]
+        )
+        records = store.export_game_records()
+        report = store.audit(player_id)
+
+    assert result == {"applied": 1, "already_applied": 0}
+    assert records[0]["role"] == "Entry"
+    assert report["player"]["game_role_override"] == "entry"
+    assert any(
+        conflict["field_name"] == "role:reviewed_override"
+        and conflict["resolution_status"] == "manual"
+        for conflict in report["conflicts"]
+    )
+
+
+def test_reviewed_role_override_requires_a_citable_evidence_url(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "friberg",
+                "nickname": "friberg",
+            },
+        )
+
+        with pytest.raises(ValueError, match="source URL"):
+            store.apply_reviewed_role_overrides(
+                [
+                    {
+                        "player": {
+                            "source": "liquipedia",
+                            "external_id": "friberg",
+                        },
+                        "role": "entry",
+                        "evidence": [{"source": "HLTV editorial"}],
+                    }
+                ]
+            )
 
 
 def test_partial_birth_date_is_retained_but_not_marked_guessable(tmp_path):
