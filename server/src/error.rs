@@ -16,6 +16,8 @@ pub enum AppError {
     RoomFull,
     #[error("room capacity reached")]
     Capacity,
+    #[error("client_request_id was already used for different matchmaking settings")]
+    IdempotencyConflict,
     #[error("session is invalid or expired")]
     Unauthorized,
     #[error("profile not found")]
@@ -43,6 +45,7 @@ impl IntoResponse for AppError {
             Self::RoomNotFound => (StatusCode::NOT_FOUND, "room_not_found"),
             Self::RoomFull => (StatusCode::CONFLICT, "room_full"),
             Self::Capacity => (StatusCode::SERVICE_UNAVAILABLE, "capacity_reached"),
+            Self::IdempotencyConflict => (StatusCode::CONFLICT, "idempotency_conflict"),
             Self::Unauthorized => (StatusCode::UNAUTHORIZED, "unauthorized"),
             Self::ProfileNotFound => (StatusCode::NOT_FOUND, "profile_not_found"),
             Self::Unavailable => (StatusCode::SERVICE_UNAVAILABLE, "unavailable"),

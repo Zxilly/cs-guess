@@ -28,6 +28,7 @@ async fn profile_api_persists_and_authenticates_anonymous_state() {
         "lossesTowardCredit": 0,
         "recordedRounds": [],
         "matchHistory": [],
+        "pendingDraw": null,
         "updatedAt": 100
     });
 

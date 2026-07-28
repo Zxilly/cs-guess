@@ -114,10 +114,10 @@ GET /v1/matches/queue
 Subscribe to the same BO1/BO3/BO5 totals in real time with:
 
 ```text
-GET /v1/matches/queue/ws
+Socket.IO namespace `/queue` on `/socket.io`
 ```
 
-The queue socket sends `{ "type": "queue_counts", "counts": { ... } }`.
+The queue namespace sends `queue_counts` events with the counts payload.
 Counts include `bo1`, `bo3`, and `bo5` for 1v1 plus `group_bo1`,
 `group_bo3`, `group_bo5`, and `group_total` for four-player matches. It updates
 immediately and whenever a player joins, pairs, or cancels. It carries only
@@ -130,7 +130,7 @@ Room creation, room join, and quick matching return the same session shape:
   "room_code": "CS-207207",
   "player_id": "a3827574-2b32-43cc-a19a-2398ab0ad54f",
   "session_token": "keep-this-secret",
-  "websocket_url": "ws://127.0.0.1:8080/v1/rooms/CS-207207/ws",
+  "socket_io_url": "http://127.0.0.1:8080/socket.io",
   "snapshot": {
     "seq": 0,
     "room_code": "CS-207207",
@@ -166,7 +166,7 @@ updated `scores`, `series_winner_player_id`, and (for quick matches)
 Opponent history follows the same visibility redaction as live events, so a
 refresh cannot reveal hidden guesses.
 
-## WebSocket protocol
+## Socket.IO protocol
 
 Connect to:
 
@@ -254,7 +254,7 @@ See [`.env.example`](.env.example). Important settings:
 | Variable | Purpose |
 | --- | --- |
 | `CS_GUESS_BIND_ADDR` | Listen address |
-| `CS_GUESS_PUBLIC_BASE_URL` | Base used in returned WebSocket URLs |
+| `CS_GUESS_PUBLIC_BASE_URL` | Base used in returned Socket.IO URLs |
 | `CS_GUESS_ALLOWED_ORIGINS` | Comma-separated exact CORS origins |
 | `CS_GUESS_MAX_ROOMS` | Per-process active room ceiling |
 | `CS_GUESS_ROOM_IDLE_SECS` | Empty-connection room lifetime |
@@ -266,7 +266,7 @@ See [`.env.example`](.env.example). Important settings:
 | `CS_GUESS_WS_QUEUE_CAPACITY` | Per-connection outbound buffer |
 | `CS_GUESS_ROOM_QUEUE_CAPACITY` | Per-room command buffer |
 | `CS_GUESS_HTTP_CONCURRENCY_LIMIT` | In-flight HTTP request ceiling |
-| `CS_GUESS_MAX_WEBSOCKET_CONNECTIONS` | Process-wide WebSocket ceiling |
+| `CS_GUESS_MAX_WEBSOCKET_CONNECTIONS` | Process-wide Socket.IO connection ceiling |
 | `CS_GUESS_SESSION_RATE_CAPACITY` | Session endpoint token-bucket burst |
 | `CS_GUESS_SESSION_RATE_REFILL_PER_SECOND` | Session endpoint token refill rate |
 

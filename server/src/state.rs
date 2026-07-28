@@ -19,7 +19,10 @@ use crate::{
     database::DatabaseStore,
     error::AppError,
     profile::ProfileState,
-    protocol::{QueueCounts, RoomKind, SessionResponse, Snapshot, Visibility},
+    protocol::{
+        Difficulty, DifficultyQueueCounts, QueueCounts, RoomKind, SessionResponse, Snapshot,
+        Visibility,
+    },
     room::{NewPlayer, RoomHandle, RoomSpec, spawn_room},
 };
 
@@ -31,7 +34,9 @@ pub struct AppState {
 struct Inner {
     pub config: Config,
     rooms: DashMap<String, RoomHandle>,
-    quick_queues: Mutex<HashMap<(u8, Visibility, u8), QuickQueue>>,
+    quick_queues: Mutex<HashMap<(u8, Visibility, u8, Difficulty), QuickQueue>>,
+    quick_request_results: DashMap<String, QuickRequestRecord>,
+    quick_request_locks: DashMap<String, Arc<Mutex<()>>>,
     queue_telemetry: Arc<QueueTelemetry>,
     session_limiter: Mutex<SessionRateLimiter>,
     websocket_permits: Arc<Semaphore>,
@@ -44,6 +49,22 @@ struct Inner {
 struct QuickQueue {
     room_code: String,
     players: u32,
+}
+
+#[derive(Clone, PartialEq, Eq)]
+struct QuickRequestFingerprint {
+    identity_id: String,
+    visibility: Visibility,
+    best_of: u8,
+    party_size: u8,
+    difficulty: Difficulty,
+}
+
+#[derive(Clone)]
+struct QuickRequestRecord {
+    fingerprint: QuickRequestFingerprint,
+    response: SessionResponse,
+    created_at: Instant,
 }
 
 pub(crate) struct QueueTelemetry {
@@ -84,6 +105,9 @@ impl QueueTelemetry {
         waiting.playing_group_bo3 = counts.playing_group_bo3;
         waiting.playing_group_bo5 = counts.playing_group_bo5;
         waiting.playing_total = counts.playing_total;
+        waiting.easy.copy_playing_from(counts.easy);
+        waiting.full.copy_playing_from(counts.full);
+        waiting.hard.copy_playing_from(counts.hard);
         if *counts == waiting {
             return;
         }
@@ -91,7 +115,14 @@ impl QueueTelemetry {
         self.sender.send_replace(encode_queue_counts(waiting));
     }
 
-    pub(crate) fn set_room_active(&self, party_size: u8, best_of: u8, active: bool) {
+    pub(crate) fn set_room_active(
+        &self,
+        party_size: u8,
+        best_of: u8,
+        difficulty: Difficulty,
+        visibility: Visibility,
+        active: bool,
+    ) {
         let mut counts = self
             .counts
             .lock()
@@ -114,9 +145,112 @@ impl QueueTelemetry {
             *bucket = bucket.saturating_sub(players);
             counts.playing_total = counts.playing_total.saturating_sub(players);
         }
+        counts
+            .difficulty_mut(difficulty)
+            .set_room_active(party_size, best_of, visibility, active);
         if *counts != previous {
             self.sender.send_replace(encode_queue_counts(*counts));
         }
+    }
+}
+
+impl QueueCounts {
+    fn difficulty_mut(&mut self, difficulty: Difficulty) -> &mut DifficultyQueueCounts {
+        match difficulty {
+            Difficulty::Easy => &mut self.easy,
+            Difficulty::Full => &mut self.full,
+            Difficulty::Hard => &mut self.hard,
+        }
+    }
+}
+
+impl DifficultyQueueCounts {
+    fn add_waiting(&mut self, party_size: u8, best_of: u8, visibility: Visibility, players: u32) {
+        let bucket = match (party_size, best_of, visibility) {
+            (2, 1, Visibility::Hidden) => &mut self.bo1_hidden,
+            (2, 1, Visibility::Open) => &mut self.bo1_open,
+            (2, 3, Visibility::Hidden) => &mut self.bo3_hidden,
+            (2, 3, Visibility::Open) => &mut self.bo3_open,
+            (2, 5, Visibility::Hidden) => &mut self.bo5_hidden,
+            (2, 5, Visibility::Open) => &mut self.bo5_open,
+            (4, 1, Visibility::Hidden) => &mut self.group_bo1_hidden,
+            (4, 1, Visibility::Open) => &mut self.group_bo1_open,
+            (4, 3, Visibility::Hidden) => &mut self.group_bo3_hidden,
+            (4, 3, Visibility::Open) => &mut self.group_bo3_open,
+            (4, 5, Visibility::Hidden) => &mut self.group_bo5_hidden,
+            (4, 5, Visibility::Open) => &mut self.group_bo5_open,
+            _ => return,
+        };
+        *bucket = bucket.saturating_add(players);
+        self.total = self.total.saturating_add(players);
+    }
+
+    fn set_room_active(
+        &mut self,
+        party_size: u8,
+        best_of: u8,
+        visibility: Visibility,
+        active: bool,
+    ) {
+        let players = u32::from(party_size);
+        let bucket = match (party_size, best_of) {
+            (2, 1) => &mut self.playing_bo1,
+            (2, 3) => &mut self.playing_bo3,
+            (2, 5) => &mut self.playing_bo5,
+            (4, 1) => &mut self.playing_group_bo1,
+            (4, 3) => &mut self.playing_group_bo3,
+            (4, 5) => &mut self.playing_group_bo5,
+            _ => return,
+        };
+        if active {
+            *bucket = bucket.saturating_add(players);
+            self.playing_total = self.playing_total.saturating_add(players);
+        } else {
+            *bucket = bucket.saturating_sub(players);
+            self.playing_total = self.playing_total.saturating_sub(players);
+        }
+        let visibility_bucket = match (party_size, best_of, visibility) {
+            (2, 1, Visibility::Hidden) => &mut self.playing_bo1_hidden,
+            (2, 1, Visibility::Open) => &mut self.playing_bo1_open,
+            (2, 3, Visibility::Hidden) => &mut self.playing_bo3_hidden,
+            (2, 3, Visibility::Open) => &mut self.playing_bo3_open,
+            (2, 5, Visibility::Hidden) => &mut self.playing_bo5_hidden,
+            (2, 5, Visibility::Open) => &mut self.playing_bo5_open,
+            (4, 1, Visibility::Hidden) => &mut self.playing_group_bo1_hidden,
+            (4, 1, Visibility::Open) => &mut self.playing_group_bo1_open,
+            (4, 3, Visibility::Hidden) => &mut self.playing_group_bo3_hidden,
+            (4, 3, Visibility::Open) => &mut self.playing_group_bo3_open,
+            (4, 5, Visibility::Hidden) => &mut self.playing_group_bo5_hidden,
+            (4, 5, Visibility::Open) => &mut self.playing_group_bo5_open,
+            _ => return,
+        };
+        if active {
+            *visibility_bucket = visibility_bucket.saturating_add(players);
+        } else {
+            *visibility_bucket = visibility_bucket.saturating_sub(players);
+        }
+    }
+
+    fn copy_playing_from(&mut self, current: Self) {
+        self.playing_bo1 = current.playing_bo1;
+        self.playing_bo1_hidden = current.playing_bo1_hidden;
+        self.playing_bo1_open = current.playing_bo1_open;
+        self.playing_bo3 = current.playing_bo3;
+        self.playing_bo3_hidden = current.playing_bo3_hidden;
+        self.playing_bo3_open = current.playing_bo3_open;
+        self.playing_bo5 = current.playing_bo5;
+        self.playing_bo5_hidden = current.playing_bo5_hidden;
+        self.playing_bo5_open = current.playing_bo5_open;
+        self.playing_group_bo1 = current.playing_group_bo1;
+        self.playing_group_bo1_hidden = current.playing_group_bo1_hidden;
+        self.playing_group_bo1_open = current.playing_group_bo1_open;
+        self.playing_group_bo3 = current.playing_group_bo3;
+        self.playing_group_bo3_hidden = current.playing_group_bo3_hidden;
+        self.playing_group_bo3_open = current.playing_group_bo3_open;
+        self.playing_group_bo5 = current.playing_group_bo5;
+        self.playing_group_bo5_hidden = current.playing_group_bo5_hidden;
+        self.playing_group_bo5_open = current.playing_group_bo5_open;
+        self.playing_total = current.playing_total;
     }
 }
 
@@ -174,6 +308,8 @@ impl AppState {
                 config,
                 rooms: DashMap::new(),
                 quick_queues: Mutex::new(HashMap::new()),
+                quick_request_results: DashMap::new(),
+                quick_request_locks: DashMap::new(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
                 session_limiter,
                 websocket_permits,
@@ -258,6 +394,7 @@ impl AppState {
         visibility: Visibility,
         max_players: u8,
         best_of: u8,
+        difficulty: Difficulty,
     ) -> Result<SessionResponse, AppError> {
         validate_identity_id(&identity_id)?;
         validate_best_of(best_of)?;
@@ -273,6 +410,7 @@ impl AppState {
             visibility,
             max_players,
             best_of,
+            difficulty,
         )?;
         self.session_response(&room_code, &room, host).await
     }
@@ -289,18 +427,129 @@ impl AppState {
         self.session_response(room_code, &room, player).await
     }
 
+    pub async fn leave_friend_room(
+        &self,
+        room_code: &str,
+        session_token: String,
+    ) -> Result<(), AppError> {
+        validate_room_code(room_code)?;
+        let room = self.room(room_code).await?;
+        let left = room.leave_friend_room(session_token).await?;
+        if left.closed {
+            self.inner.rooms.remove(room_code);
+        }
+        Ok(())
+    }
+
     pub async fn quick_match(
         &self,
         identity_id: String,
+        client_request_id: Option<String>,
         visibility: Visibility,
         best_of: u8,
         party_size: u8,
+        difficulty: Difficulty,
     ) -> Result<SessionResponse, AppError> {
         validate_identity_id(&identity_id)?;
         validate_best_of(best_of)?;
         validate_party_size(party_size)?;
 
-        let queue_key = (best_of, visibility, party_size);
+        let Some(client_request_id) = client_request_id else {
+            return self
+                .quick_match_once(identity_id, visibility, best_of, party_size, difficulty)
+                .await;
+        };
+        validate_client_request_id(&client_request_id)?;
+        let fingerprint = QuickRequestFingerprint {
+            identity_id: identity_id.clone(),
+            visibility,
+            best_of,
+            party_size,
+            difficulty,
+        };
+        if let Some(response) = self.cached_quick_response(&client_request_id, &fingerprint)? {
+            return Ok(response);
+        }
+
+        let request_lock = self
+            .inner
+            .quick_request_locks
+            .entry(client_request_id.clone())
+            .or_insert_with(|| Arc::new(Mutex::new(())))
+            .clone();
+        let request_guard = request_lock.lock().await;
+        let result = async {
+            if let Some(response) = self.cached_quick_response(&client_request_id, &fingerprint)? {
+                return Ok(response);
+            }
+            let response = self
+                .quick_match_once(identity_id, visibility, best_of, party_size, difficulty)
+                .await?;
+            self.prune_quick_request_results();
+            self.inner.quick_request_results.insert(
+                client_request_id.clone(),
+                QuickRequestRecord {
+                    fingerprint,
+                    response: response.clone(),
+                    created_at: Instant::now(),
+                },
+            );
+            Ok(response)
+        }
+        .await;
+        drop(request_guard);
+        self.inner.quick_request_locks.remove(&client_request_id);
+        result
+    }
+
+    fn cached_quick_response(
+        &self,
+        client_request_id: &str,
+        fingerprint: &QuickRequestFingerprint,
+    ) -> Result<Option<SessionResponse>, AppError> {
+        let Some(record) = self.inner.quick_request_results.get(client_request_id) else {
+            return Ok(None);
+        };
+        if record.created_at.elapsed() >= self.inner.config.quick_request_ttl {
+            drop(record);
+            self.inner.quick_request_results.remove(client_request_id);
+            return Ok(None);
+        }
+        if &record.fingerprint != fingerprint {
+            return Err(AppError::IdempotencyConflict);
+        }
+        Ok(Some(record.response.clone()))
+    }
+
+    fn prune_quick_request_results(&self) {
+        let ttl = self.inner.config.quick_request_ttl;
+        self.inner
+            .quick_request_results
+            .retain(|_, record| record.created_at.elapsed() < ttl);
+        let capacity = self.inner.config.max_quick_request_results;
+        while self.inner.quick_request_results.len() >= capacity {
+            let oldest = self
+                .inner
+                .quick_request_results
+                .iter()
+                .min_by_key(|entry| entry.created_at)
+                .map(|entry| entry.key().clone());
+            let Some(oldest) = oldest else {
+                break;
+            };
+            self.inner.quick_request_results.remove(&oldest);
+        }
+    }
+
+    async fn quick_match_once(
+        &self,
+        identity_id: String,
+        visibility: Visibility,
+        best_of: u8,
+        party_size: u8,
+        difficulty: Difficulty,
+    ) -> Result<SessionResponse, AppError> {
+        let queue_key = (best_of, visibility, party_size, difficulty);
         loop {
             let mut queues = self.inner.quick_queues.lock().await;
             let Some(queue) = queues.get(&queue_key).cloned() else {
@@ -310,6 +559,7 @@ impl AppState {
                     visibility,
                     party_size,
                     best_of,
+                    difficulty,
                 )?;
                 queues.insert(
                     queue_key,
@@ -375,16 +625,18 @@ impl AppState {
         session_token: String,
     ) -> Result<(), AppError> {
         validate_room_code(room_code)?;
+        let cancelled_session_token = session_token.clone();
         let room = self.room(room_code).await?;
         let cancelled = room.cancel_match(session_token).await?;
         let mut queues = self.inner.quick_queues.lock().await;
         queues.retain(|_, queue| queue.room_code != room_code);
-        if !cancelled.closed {
+        if cancelled.requeue {
             queues
                 .entry((
                     cancelled.best_of,
                     cancelled.visibility,
                     cancelled.party_size,
+                    cancelled.difficulty,
                 ))
                 .or_insert(QuickQueue {
                     room_code: room_code.to_owned(),
@@ -396,13 +648,69 @@ impl AppState {
         if cancelled.closed {
             self.inner.rooms.remove(room_code);
         }
+        self.inner.quick_request_results.retain(|_, record| {
+            record.response.room_code != room_code
+                || record.response.session_token != cancelled_session_token
+        });
         Ok(())
     }
 
-    fn publish_queue_counts(&self, queues: &HashMap<(u8, Visibility, u8), QuickQueue>) {
+    pub async fn cancel_quick_match_by_request_id(
+        &self,
+        client_request_id: &str,
+    ) -> Result<(), AppError> {
+        validate_client_request_id(client_request_id)?;
+        let request_lock = self
+            .inner
+            .quick_request_locks
+            .entry(client_request_id.to_owned())
+            .or_insert_with(|| Arc::new(Mutex::new(())))
+            .clone();
+        let request_guard = request_lock.lock().await;
+        let result = async {
+            let Some(record) = self
+                .inner
+                .quick_request_results
+                .get(client_request_id)
+                .map(|entry| entry.clone())
+            else {
+                return Err(AppError::RoomNotFound);
+            };
+            if record.created_at.elapsed() >= self.inner.config.quick_request_ttl {
+                self.inner.quick_request_results.remove(client_request_id);
+                return Err(AppError::RoomNotFound);
+            }
+            self.cancel_quick_match(&record.response.room_code, record.response.session_token)
+                .await?;
+            self.inner.quick_request_results.remove(client_request_id);
+            Ok(())
+        }
+        .await;
+        drop(request_guard);
+        self.inner.quick_request_locks.remove(client_request_id);
+        result
+    }
+
+    #[cfg(test)]
+    pub(crate) fn quick_request_result_count(&self) -> usize {
+        self.inner.quick_request_results.len()
+    }
+
+    #[cfg(test)]
+    pub(crate) fn quick_request_lock_count(&self) -> usize {
+        self.inner.quick_request_locks.len()
+    }
+
+    fn publish_queue_counts(&self, queues: &HashMap<(u8, Visibility, u8, Difficulty), QuickQueue>) {
         let mut counts = QueueCounts::default();
-        for ((best_of, visibility, party_size), queue) in queues {
+        for ((best_of, visibility, party_size, difficulty), queue) in queues {
             let value = queue.players;
+            counts.difficulty_mut(*difficulty).add_waiting(
+                *party_size,
+                *best_of,
+                *visibility,
+                value,
+            );
             match (*party_size, *best_of) {
                 (2, 1) => {
                     counts.bo1 += value;
@@ -461,6 +769,7 @@ impl AppState {
         visibility: Visibility,
         max_players: u8,
         best_of: u8,
+        difficulty: Difficulty,
     ) -> Result<(String, RoomHandle, NewPlayer), AppError> {
         if self.inner.rooms.len() >= self.inner.config.max_rooms {
             self.inner.rooms.retain(|_, room| !room.is_closed());
@@ -479,6 +788,7 @@ impl AppState {
                         room_code: code.clone(),
                         kind,
                         visibility,
+                        difficulty,
                         max_players,
                         best_of,
                         host: host.clone(),
@@ -506,17 +816,17 @@ impl AppState {
         player: NewPlayer,
     ) -> Result<SessionResponse, AppError> {
         let snapshot: Snapshot = room.snapshot(player.player_id).await?;
-        let ws_base = self
-            .inner
-            .config
-            .public_base_url
-            .replacen("https://", "wss://", 1)
-            .replacen("http://", "ws://", 1);
+        let socket_io_url = format!(
+            "{}/socket.io",
+            self.inner.config.public_base_url.trim_end_matches('/')
+        );
         Ok(SessionResponse {
             room_code: room_code.to_owned(),
             player_id: player.player_id,
             session_token: player.session_token,
-            websocket_url: format!("{ws_base}/v1/rooms/{room_code}/ws"),
+            // Kept for wire compatibility with older clients; this is now the
+            // Socket.IO endpoint, not a native WebSocket URL.
+            socket_io_url,
             snapshot,
         })
     }
@@ -532,6 +842,20 @@ pub fn validate_identity_id(value: &str) -> Result<(), AppError> {
     {
         return Err(AppError::BadRequest(
             "identity_id must be a valid player catalog ID".to_owned(),
+        ));
+    }
+    Ok(())
+}
+
+fn validate_client_request_id(value: &str) -> Result<(), AppError> {
+    if value.is_empty()
+        || value.len() > 128
+        || !value
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_'))
+    {
+        return Err(AppError::BadRequest(
+            "client_request_id must contain 1 to 128 URL-safe characters".to_owned(),
         ));
     }
     Ok(())
