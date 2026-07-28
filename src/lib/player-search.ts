@@ -35,6 +35,23 @@ const LETTER_FOLDING: Readonly<Record<string, string>> = {
   þ: "th",
 };
 
+const NICKNAME_LEET_FOLDING: Readonly<Record<string, string>> = {
+  "0": "o",
+  "1": "i",
+  "3": "e",
+  "4": "a",
+  "5": "s",
+  "7": "t",
+};
+
+function nicknameAliases(nickname: string) {
+  const folded = nickname.replace(
+    /[013457]/g,
+    (character) => NICKNAME_LEET_FOLDING[character],
+  );
+  return folded === nickname ? [] : [folded];
+}
+
 export function normalizeSearchText(value: string): string {
   return value
     .normalize("NFKD")
@@ -99,6 +116,9 @@ function playerFields(player: Player): SearchField[] {
       : countryNameEn(countryCode);
   const values: Array<[string, number, boolean]> = [
     [player.nickname, 0, true],
+    ...nicknameAliases(player.nickname).map(
+      (alias) => [alias, 1, true] as [string, number, boolean],
+    ),
     [player.name, 4, false],
     [player.team, 8, false],
     [countryCode, 1, false],
@@ -158,6 +178,8 @@ export function searchPlayers(
     .sort(
       (left, right) =>
         left.score - right.score ||
+        right.player.majorWins - left.player.majorWins ||
+        right.player.majorAppearances - left.player.majorAppearances ||
         left.player.nickname.localeCompare(right.player.nickname, "en", {
           sensitivity: "base",
         }) ||

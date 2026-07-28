@@ -6,6 +6,7 @@ import {
   loadSoloDifficulty,
   loadSoloProgress,
   parseSoloDifficulty,
+  prepareSoloRoundForPlay,
   saveSoloDifficulty,
   saveSoloProgress,
   SOLO_DIFFICULTIES,
@@ -90,6 +91,33 @@ describe("solo difficulty pools", () => {
     expect(loadSoloDifficulty(storage)).toBe("easy");
     saveSoloDifficulty("full", storage);
     expect(loadSoloDifficulty(storage)).toBe("full");
+  });
+});
+
+describe("prepareSoloRoundForPlay", () => {
+  it("resumes a playable round but replaces a finished round before navigation", () => {
+    const storage = new MemoryStorage();
+    const active = createSoloRound("easy", 4, undefined, 10_000);
+    saveSoloProgress(active, storage);
+
+    expect(prepareSoloRoundForPlay("easy", storage, 11_000).roundId).toBe(
+      active.roundId,
+    );
+
+    const finished = {
+      ...active,
+      status: "won" as const,
+      resultReason: "guessed" as const,
+      guessedIds: [active.mysteryId],
+    };
+    saveSoloProgress(finished, storage);
+
+    const next = prepareSoloRoundForPlay("easy", storage, 20_000);
+    expect(next.status).toBe("playing");
+    expect(next.roundNumber).toBe(5);
+    expect(next.roundId).not.toBe(finished.roundId);
+    expect(next.mysteryId).not.toBe(finished.mysteryId);
+    expect(loadSoloProgress("easy", storage, 20_000).state).toEqual(next);
   });
 });
 

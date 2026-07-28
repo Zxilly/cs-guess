@@ -164,7 +164,7 @@ function SoloGame({ difficulty }: { difficulty: SoloDifficulty }) {
                   在三分钟和八次机会内完成猜测。
                 </InfoTip>
               </div>
-              <h1 className="mt-3 text-3xl font-bold tracking-[-0.03em] sm:text-4xl">
+              <h1 className="mt-3 text-balance text-[2rem] leading-[1.15] font-bold tracking-[-0.04em] sm:text-4xl">
                 根据属性线索确定目标选手
               </h1>
             </div>
