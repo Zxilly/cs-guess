@@ -61,6 +61,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="optional reviewed Major roster corrections",
     )
     sync.add_argument(
+        "--reviewed-role-overrides",
+        type=Path,
+        help="optional reviewed historical game-role corrections",
+    )
+    sync.add_argument(
         "--reviewed-identity-merges",
         type=Path,
         help="optional reviewed cross-source identity mappings",
@@ -157,6 +162,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--reviewed-major-appearances",
         type=Path,
         help="optional reviewed Major roster corrections",
+    )
+    export.add_argument(
+        "--reviewed-role-overrides",
+        type=Path,
+        help="optional reviewed historical game-role corrections",
     )
     export.add_argument(
         "--include-incomplete",
@@ -343,7 +353,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         reviewed_major_appearances = _read_reviewed_major_appearances(
             args.reviewed_major_appearances
         )
+        reviewed_role_overrides = _read_object_list(
+            args.reviewed_role_overrides,
+            label="reviewed role overrides",
+        )
         with PlayerStore(args.db) as store:
+            store.merge_all()
             reviewed = (
                 store.apply_reviewed_major_winners(reviewed_major_winners)
                 if reviewed_major_winners
@@ -355,6 +370,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
                 if reviewed_major_appearances
                 else {"reviewed": 0, "created": 0, "updated": 0}
+            )
+            reviewed_roles = (
+                store.apply_reviewed_role_overrides(reviewed_role_overrides)
+                if reviewed_role_overrides
+                else {"applied": 0, "already_applied": 0}
             )
             records = store.export_game_records(
                 guessable_only=not args.include_incomplete
@@ -382,6 +402,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "catalogRecords": len(catalog_records),
                 "reviewedMajorWinners": reviewed,
                 "reviewedMajorAppearances": reviewed_appearances,
+                "reviewedRoleOverrides": reviewed_roles,
             }
         )
         return 0
@@ -578,6 +599,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     reviewed_major_appearances = _read_reviewed_major_appearances(
         args.reviewed_major_appearances
     )
+    reviewed_role_overrides = _read_object_list(
+        args.reviewed_role_overrides,
+        label="reviewed role overrides",
+    )
     reviewed_identity_merges = _read_object_list(
         args.reviewed_identity_merges,
         label="reviewed identity mappings",
@@ -607,6 +632,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             reviewed_identity_separations=reviewed_identity_separations,
             reviewed_major_winners=reviewed_major_winners,
             reviewed_major_appearances=reviewed_major_appearances,
+            reviewed_role_overrides=reviewed_role_overrides,
             progress=lambda message: print(message, file=sys.stderr, flush=True),
         )
     _print_json(report)

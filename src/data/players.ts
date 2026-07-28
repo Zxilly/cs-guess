@@ -1,12 +1,13 @@
 import generatedPlayers from "./players.generated.json";
 
-export type PlayerRole = "AWPer" | "Rifler" | "IGL" | "Entry";
+export type PlayerRole = "AWPer" | "Rifler" | "IGL" | "Entry" | "Unknown";
 
 const playerRoleNames: Record<PlayerRole, string> = {
   AWPer: "狙击手",
   Rifler: "步枪手",
   IGL: "指挥",
   Entry: "突破手",
+  Unknown: "未知",
 };
 
 export function playerRoleNameZh(role: PlayerRole) {

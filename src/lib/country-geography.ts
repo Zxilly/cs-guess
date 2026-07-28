@@ -30,6 +30,14 @@ const CONTINENT_NAMES: Readonly<Record<string, string>> = {
   Oceania: "大洋洲",
 };
 
+const CHINESE_REGION_NAMES = new Intl.DisplayNames(["zh-CN"], {
+  type: "region",
+});
+
+const ENGLISH_REGION_NAMES = new Intl.DisplayNames(["en"], {
+  type: "region",
+});
+
 const COUNTRY_BY_CODE = new Map(
   (countries as CountryMetadata[]).map((country) => [country.code, country]),
 );
@@ -43,9 +51,15 @@ export function countryNameZh(countryCode: string): string {
   const normalized = normalizeCountryCode(countryCode);
   return (
     POLITICAL_NAME_OVERRIDES[normalized] ??
+    CHINESE_REGION_NAMES.of(normalized) ??
     COUNTRY_BY_CODE.get(normalized)?.nameZh ??
     normalized
   );
+}
+
+export function countryNameEn(countryCode: string): string {
+  const normalized = normalizeCountryCode(countryCode);
+  return ENGLISH_REGION_NAMES.of(normalized) ?? normalized;
 }
 
 export function countryContinentZh(countryCode: string): string | null {

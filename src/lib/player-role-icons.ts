@@ -2,6 +2,7 @@ import {
   CrownSimpleIcon,
   CrosshairIcon,
   LightningIcon,
+  QuestionIcon,
   TargetIcon,
   type Icon,
 } from "@phosphor-icons/react";
@@ -13,6 +14,7 @@ const playerRoleIcons: Record<PlayerRole, Icon> = {
   Rifler: TargetIcon,
   IGL: CrownSimpleIcon,
   Entry: LightningIcon,
+  Unknown: QuestionIcon,
 };
 
 export function playerRoleIcon(role: PlayerRole) {

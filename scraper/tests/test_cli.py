@@ -87,6 +87,120 @@ def test_export_command_writes_compact_shared_app_catalog(tmp_path, capsys):
     assert json.loads(capsys.readouterr().out)["catalogRecords"] == 1
 
 
+def test_export_refreshes_game_eligibility_before_writing_catalog(tmp_path, capsys):
+    db_path = tmp_path / "players.sqlite3"
+    output_path = tmp_path / "players.json"
+    catalog_path = tmp_path / "players.generated.json"
+    with PlayerStore(db_path) as store:
+        store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "retired-player",
+                "nickname": "retired",
+                "full_name": "Retired Player",
+                "country_code": "SE",
+                "birth_date": "1990-01-01",
+                "status": "retired",
+                "current_team": None,
+                "roles": ["rifler"],
+            },
+        )
+
+    result = main(
+        [
+            "export",
+            "--db",
+            str(db_path),
+            "--output",
+            str(output_path),
+            "--catalog-output",
+            str(catalog_path),
+        ]
+    )
+
+    assert result == 0
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    assert catalog[0]["nickname"] == "retired"
+    assert catalog[0]["team"] == "无队伍"
+    assert json.loads(capsys.readouterr().out)["catalogRecords"] == 1
+
+
+def test_export_applies_reviewed_role_overrides(tmp_path, capsys):
+    db_path = tmp_path / "players.sqlite3"
+    output_path = tmp_path / "players.json"
+    reviewed_path = tmp_path / "roles.reviewed.json"
+    with PlayerStore(db_path) as store:
+        store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "friberg",
+                "nickname": "friberg",
+                "full_name": "Adam Friberg",
+                "country_code": "SE",
+                "birth_date": "1991-10-19",
+                "roles": [],
+            },
+        )
+        store.upsert_major_records(
+            "liquipedia",
+            [
+                {
+                    "external_id": "major",
+                    "canonical_name": "Major",
+                    "game_title": "csgo",
+                    "starts_on": "2013-01-01",
+                    "appearances": [
+                        {
+                            "player_external_id": "friberg",
+                            "counts_toward_total": True,
+                        }
+                    ],
+                }
+            ],
+        )
+    reviewed_path.write_text(
+        json.dumps(
+            [
+                {
+                    "player": {
+                        "source": "liquipedia",
+                        "external_id": "friberg",
+                    },
+                    "role": "entry",
+                    "basis": "Reviewed editorial role attribution.",
+                    "evidence": [
+                        {
+                            "source": "HLTV",
+                            "url": "https://www.hltv.org/news/35286/"
+                            "is-the-entry-fragging-role-dead",
+                        }
+                    ],
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    result = main(
+        [
+            "export",
+            "--db",
+            str(db_path),
+            "--output",
+            str(output_path),
+            "--reviewed-role-overrides",
+            str(reviewed_path),
+        ]
+    )
+
+    assert result == 0
+    assert json.loads(output_path.read_text(encoding="utf-8"))[0]["role"] == "Entry"
+    assert json.loads(capsys.readouterr().out)["reviewedRoleOverrides"] == {
+        "applied": 1,
+        "already_applied": 0,
+    }
+
+
 def test_hltv_command_requires_explicit_environment_opt_in(tmp_path):
     env_path = tmp_path / ".env"
     env_path.write_text(

@@ -104,6 +104,13 @@ exporting:
 3. Primary `awper`.
 4. Primary `entry`.
 5. `rifler`.
+6. A game-only `rifler` fallback when no source can classify the player into
+   one of the four displayed roles. This keeps retired and historical Major
+   players playable without presenting a source-data gap as an in-game role.
+
+Exceptional, externally verified historical roles are stored as replayable
+provider-keyed reviewed overrides. Each override requires evidence and is
+visible in the normal audit trail; it never overwrites the source role rows.
 
 This preserves combinations such as AWPer + IGL while remaining compatible
 with the existing UI.

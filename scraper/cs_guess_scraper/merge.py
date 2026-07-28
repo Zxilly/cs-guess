@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import unicodedata
 from collections.abc import Iterable, Mapping
@@ -249,11 +250,13 @@ def choose_evidence(
     field_name: str,
     evidence: Iterable[Mapping[str, Any]],
 ) -> tuple[Mapping[str, Any] | None, list[dict[str, Any]]]:
-    """Select a candidate by field-specific source priority, then recency.
+    """Select a candidate by field-specific evidence rules.
 
     The caller supplies at most the latest observation for each provider. The
     returned candidate list is JSON-serializable and intentionally retains
-    alternatives for audit.
+    alternatives for audit. Current-team claims first use cross-provider
+    agreement, then source priority as a deterministic tie-break; other fields
+    use source priority directly.
     """
     candidates = [row for row in evidence if row.get("value") is not None]
     if not candidates:
@@ -261,9 +264,26 @@ def choose_evidence(
 
     priority = FIELD_SOURCE_PRIORITIES.get(field_name, DEFAULT_SOURCE_PRIORITY)
     ranks = {source: index for index, source in enumerate(priority)}
+    support_counts: dict[str, int] = {}
+    if field_name == "current_team_id":
+        for candidate in candidates:
+            key = json.dumps(
+                candidate["value"],
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+            support_counts[key] = support_counts.get(key, 0) + 1
     selected = min(
         candidates,
         key=lambda row: (
+            -support_counts.get(
+                json.dumps(
+                    row["value"],
+                    ensure_ascii=False,
+                    sort_keys=True,
+                ),
+                1,
+            ),
             ranks.get(str(row.get("source")), len(ranks)),
             -float(row.get("confidence", 1.0)),
             str(row.get("source")),
@@ -290,6 +310,8 @@ def choose_evidence(
 def derive_game_role(
     override: str | None,
     roles: Iterable[Mapping[str, Any]],
+    *,
+    fallback_to_rifler: bool = False,
 ) -> str | None:
     labels = {
         "awper": "AWPer",
@@ -308,5 +330,13 @@ def derive_game_role(
         ):
             return labels[role_name]
     if any(row.get("role") == "rifler" for row in current):
+        return "Rifler"
+    if fallback_to_rifler:
+        # The game needs a single, comparable role. Source pages often omit a
+        # weapon role for retired players, even when they still identify
+        # tactical responsibilities such as support or lurker. Neither maps to
+        # a separate UI column, so classify this residual bucket as the broad
+        # rifle category rather than leaking a source-coverage gap as
+        # "Unknown" to players.
         return "Rifler"
     return None

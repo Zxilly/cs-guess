@@ -781,5 +781,16 @@
       "external_id": "17707"
     },
     "basis": "Both records are Norwegian player Morten zEVES Vollan; Liquipedia includes the additional surname Christensen."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Folke"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "52025"
+    },
+    "basis": "Both records are Danish player Magnus Folke Lind; nickname, legal name, country, and normalized Prestige team identity agree, while Liquipedia supplies the missing birth date."
   }
 ]

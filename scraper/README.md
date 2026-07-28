@@ -40,7 +40,8 @@ uv run cs-guess-scraper sync \
   --reviewed-source-quarantines source-quarantines.reviewed.json \
   --reviewed-identity-separations identity-separations.reviewed.json \
   --reviewed-major-winners reviewed-major-winners.json \
-  --reviewed-major-appearances reviewed-major-appearances.json
+  --reviewed-major-appearances reviewed-major-appearances.json \
+  --reviewed-role-overrides reviewed-role-overrides.json
 
 # 审计或重新导出
 uv run cs-guess-scraper audit --db data/cs_guess.sqlite
@@ -53,7 +54,8 @@ uv run cs-guess-scraper export \
   --output data/players.game.json \
   --catalog-output ../src/data/players.generated.json \
   --reviewed-major-winners reviewed-major-winners.json \
-  --reviewed-major-appearances reviewed-major-appearances.json
+  --reviewed-major-appearances reviewed-major-appearances.json \
+  --reviewed-role-overrides reviewed-role-overrides.json
 
 # 仅在 .env 显式启用后，为一个已知规范选手定向补字段
 uv run cs-guess-scraper hltv \
@@ -94,6 +96,9 @@ HLTV 清单中的每个目标都会在关联前核对身份，并保留月精度
 战队的稳定 provider ID 补充冠军结果，并为夺冠阵容中的每位选手保存
 `manual` 名次证据；`reviewed-major-appearances.json` 用同样的方式补充或修正
 缺失阵容、队伍、替补身份和名次。两类修正都可重复执行并进入同步报告。
+`reviewed-role-overrides.json` 则只收录有外部证据的历史角色修正，按 provider
+ID 重放并写入选手审计轨迹；没有可靠来源的缺失角色在游戏导出层统一归为步枪手，
+不会篡改原始角色记录。
 来源优先级、清洗规则和后续候选见
 [SOURCE_EVALUATION.md](SOURCE_EVALUATION.md)。数据模型见
 [DATA_MODEL.md](DATA_MODEL.md)，SQLite 结构见 [schema.sql](schema.sql)。

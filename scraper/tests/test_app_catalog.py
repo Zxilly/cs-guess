@@ -135,7 +135,7 @@ def test_existing_player_id_stays_stable_when_a_duplicate_nickname_is_added():
     ]
 
 
-def test_catalog_preserves_last_confirmed_team_when_current_team_is_missing():
+def test_catalog_does_not_promote_a_previous_team_to_current():
     record = {
         "id": "internal-player",
         "nickname": "steady",
@@ -161,5 +161,65 @@ def test_catalog_preserves_last_confirmed_team_when_current_team_is_missing():
         previous_catalog=[previous],
     )
 
-    assert catalog[0]["team"] == "Confirmed Team"
-    assert catalog[0]["teamLogoUrl"] == "https://cdn.example/confirmed.png"
+    assert catalog[0]["team"] == "无队伍"
+    assert "teamLogoUrl" not in catalog[0]
+
+
+def test_catalog_labels_a_player_without_team_as_unattached():
+    record = {
+        "id": "internal-retired",
+        "nickname": "retired",
+        "fullName": "Retired Player",
+        "countryCode": "SE",
+        "birthDate": "1990-01-01",
+        "currentTeam": None,
+        "role": "Rifler",
+        "majorAppearances": 1,
+    }
+
+    catalog = build_app_catalog([record], today=date(2026, 7, 27))
+
+    assert catalog[0]["team"] == "无队伍"
+    assert "teamLogoUrl" not in catalog[0]
+
+
+def test_catalog_rejects_undefined_team_names_and_their_logo():
+    record = {
+        "id": "internal-jedqr",
+        "nickname": "jedqr",
+        "fullName": "Grzegorz Jędras",
+        "countryCode": "PL",
+        "birthDate": "1998-11-03",
+        "currentTeam": {
+            "name": "undefined (American team)",
+            "logoUrl": "https://cdn.example/undefined.png",
+        },
+        "role": "Entry",
+        "majorAppearances": 0,
+    }
+
+    catalog = build_app_catalog([record], today=date(2026, 7, 28))
+
+    assert catalog[0]["team"] == "无队伍"
+    assert "teamLogoUrl" not in catalog[0]
+
+
+def test_catalog_treats_departed_ex_roster_labels_as_unattached():
+    record = {
+        "id": "internal-departed",
+        "nickname": "departed",
+        "fullName": "Departed Player",
+        "countryCode": "DK",
+        "birthDate": "2000-01-01",
+        "currentTeam": {
+            "name": "ex-Copenhagen Flames",
+            "logoUrl": "https://cdn.example/old-team.png",
+        },
+        "role": "Rifler",
+        "majorAppearances": 1,
+    }
+
+    catalog = build_app_catalog([record], today=date(2026, 7, 28))
+
+    assert catalog[0]["team"] == "无队伍"
+    assert "teamLogoUrl" not in catalog[0]

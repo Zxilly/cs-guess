@@ -15,6 +15,7 @@ describe("country geography", () => {
     expect(countryNameZh("TW")).toBe("中国");
     expect(countryNameZh("XK")).toBe("塞尔维亚");
     expect(countryNameZh("PS")).toBe("巴勒斯坦国");
+    expect(countryNameZh("MK")).toBe("北马其顿");
   });
 
   it("marks exact countries and countries on the same continent", () => {

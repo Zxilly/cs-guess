@@ -1,8 +1,45 @@
 from cs_guess_scraper.merge import (
+    choose_evidence,
     choose_display_casing,
     person_name_tokens_compatible,
     team_name_identity_signature,
 )
+
+
+def test_current_team_uses_cross_source_consensus_before_provider_priority():
+    selected, candidates = choose_evidence(
+        "current_team_id",
+        [
+            {
+                "source": "pandascore",
+                "value": "stale-team",
+                "confidence": 1.0,
+            },
+            {"source": "bo3", "value": "current-team", "confidence": 1.0},
+            {
+                "source": "liquipedia",
+                "value": "current-team",
+                "confidence": 1.0,
+            },
+        ],
+    )
+
+    assert selected is not None
+    assert selected["value"] == "current-team"
+    assert len(candidates) == 3
+
+
+def test_current_team_consensus_tie_uses_provider_priority_deterministically():
+    selected, _ = choose_evidence(
+        "current_team_id",
+        [
+            {"source": "liquipedia", "value": "team-a", "confidence": 1.0},
+            {"source": "bo3", "value": "team-b", "confidence": 1.0},
+        ],
+    )
+
+    assert selected is not None
+    assert selected["value"] == "team-b"
 
 
 def test_person_name_tokens_allow_omitted_middle_names() -> None:

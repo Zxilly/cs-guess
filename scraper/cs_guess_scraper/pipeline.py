@@ -689,12 +689,6 @@ def sync_bo3(
                     str(external_id),
                     source_url=source_url,
                 )
-                if parsed.get("current_team") is None:
-                    store.clear_source_current_team(
-                        player_id,
-                        "bo3",
-                        str(external_id),
-                    )
                 store.upsert_source_player(
                     "bo3",
                     parsed,
@@ -759,6 +753,7 @@ def run_sync(
     reviewed_identity_separations: list[Mapping[str, Any]] | None = None,
     reviewed_major_winners: list[Mapping[str, Any]] | None = None,
     reviewed_major_appearances: list[Mapping[str, Any]] | None = None,
+    reviewed_role_overrides: list[Mapping[str, Any]] | None = None,
     progress: Progress | None = None,
 ) -> dict[str, Any]:
     """Synchronize configured sources, merge identities, and export game data."""
@@ -875,6 +870,10 @@ def run_sync(
             store.apply_reviewed_major_appearances(
                 reviewed_major_appearances
             )
+        )
+    if reviewed_role_overrides:
+        report["reviewedRoleOverrides"] = store.apply_reviewed_role_overrides(
+            reviewed_role_overrides
         )
 
     records = store.export_game_records()
