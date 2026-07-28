@@ -532,7 +532,11 @@ export function CelebrationOverlay({
               className="w-full rounded-none sm:w-auto"
               onClick={onClose}
             >
-              {context !== "battle" ? "关闭并查看明细" : "查看对局"}
+              {context !== "battle"
+                ? "关闭并查看明细"
+                : tiebreak
+                  ? "继续加赛"
+                  : "继续下一局"}
               <ArrowRightIcon />
             </Button>
           )}
