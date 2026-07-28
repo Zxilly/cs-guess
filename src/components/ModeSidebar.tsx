@@ -21,6 +21,7 @@ import type { GameMode } from "@/types/game";
 
 const modeNames: Record<GameMode, string> = {
   daily: "今日挑战",
+  solo: "单人练习",
   quick: "实时 1v1",
   room: "好友房间",
 };
@@ -34,6 +35,8 @@ interface ModeSidebarProps {
   roundNumber?: number;
   bestOf?: number;
   modeLabel?: string;
+  backHref?: string;
+  backLabel?: string;
   onExit?: () => void;
 }
 
@@ -46,11 +49,14 @@ export function ModeSidebar({
   roundNumber,
   bestOf,
   modeLabel,
+  backHref = "/",
+  backLabel = "模式大厅",
   onExit,
 }: ModeSidebarProps) {
   const today = new Intl.DateTimeFormat("sv-SE", {
     timeZone: "Asia/Shanghai",
   }).format(new Date());
+  const isNumberedRound = mode === "daily" || mode === "solo";
   const finishedStatus = {
     waiting: {
       label: "等待开局",
@@ -58,12 +64,22 @@ export function ModeSidebar({
       icon: HourglassMediumIcon,
     },
     won: {
-      label: mode === "daily" ? "挑战完成" : "本局胜利",
+      label:
+        mode === "daily"
+          ? "挑战完成"
+          : mode === "solo"
+            ? "练习完成"
+            : "本局胜利",
       detail: `已提交 ${guesses} 次猜测`,
       icon: TrophyIcon,
     },
     lost: {
-      label: mode === "daily" ? "挑战结束" : "本局失利",
+      label:
+        mode === "daily"
+          ? "挑战结束"
+          : mode === "solo"
+            ? "练习结束"
+            : "本局失利",
       detail: `已提交 ${guesses} 次猜测`,
       icon: XCircleIcon,
     },
@@ -78,18 +94,18 @@ export function ModeSidebar({
   return (
     <aside className="border-b border-foreground/20 bg-sidebar lg:sticky lg:top-0 lg:h-screen lg:border-r lg:border-b-0">
       <div className="flex h-full flex-col px-5 py-5 sm:px-8 lg:px-9 lg:py-10">
-        <div className="flex items-start justify-between gap-5 lg:block">
-          <div>
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 lg:block">
+          <div className="min-w-0">
             <Link
               to="/"
-              className="group flex items-center gap-3"
+              className="group flex min-w-0 items-center gap-3"
               onClick={onExit}
             >
               <CrosshairIcon
-                className="size-9 text-primary transition-transform group-hover:rotate-45"
+                className="size-9 text-primary motion-safe:transition-transform motion-safe:group-hover:rotate-45 motion-reduce:transform-none motion-reduce:transition-none"
                 weight="regular"
               />
-              <span className="text-xl font-bold tracking-[0.08em]">
+              <span className="truncate text-xl font-bold tracking-[0.08em]">
                 CS GUESS
               </span>
             </Link>
@@ -101,29 +117,29 @@ export function ModeSidebar({
             size="sm"
             className="rounded-none lg:mt-7"
           >
-            <Link to="/" onClick={onExit}>
+            <Link to={backHref} onClick={onExit}>
               <ArrowLeftIcon />
-              模式大厅
+              {backLabel}
             </Link>
           </Button>
         </div>
 
-        <div className="mt-4 flex items-end justify-between gap-4 border-t-2 border-primary pt-4 lg:mt-8 lg:block lg:pt-5">
-          <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+        <div className="mt-4 flex flex-wrap items-end justify-between gap-x-4 gap-y-3 border-t-2 border-primary pt-4 lg:mt-8 lg:block lg:pt-5">
+          <div className="min-w-0 flex-1 basis-32">
+            <p className="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
               当前模式
             </p>
-            <p className="mt-1 whitespace-nowrap text-sm font-semibold lg:mt-2 lg:text-lg">
+            <p className="mt-1 text-sm font-semibold lg:mt-2 lg:text-lg">
               {modeLabel ?? modeNames[mode]}
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-4 border-l border-foreground/15 pl-4 font-mono text-[10px] uppercase tracking-[0.08em] lg:mt-5 lg:gap-5 lg:border-t lg:border-l-0 lg:pt-5 lg:pl-0 lg:text-[11px]">
+          <div className="grid shrink-0 grid-cols-2 gap-3 border-l border-foreground/15 pl-3 font-mono text-xs uppercase tracking-[0.08em] sm:gap-4 sm:pl-4 lg:mt-5 lg:gap-5 lg:border-t lg:border-l-0 lg:pt-5 lg:pl-0">
             <div>
               <p className="text-muted-foreground">
-                {mode === "daily" ? "Round" : "Series"}
+                {isNumberedRound ? "Round" : "Series"}
               </p>
               <p className="mt-1 text-sm font-medium text-foreground">
-                {mode === "daily"
+                {isNumberedRound
                   ? `#${roundNumber ?? "—"}`
                   : roundNumber
                     ? `R${roundNumber} · BO${bestOf ?? 3}`

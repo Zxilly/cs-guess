@@ -1,3 +1,5 @@
+import { createActor } from "xstate";
+
 import type {
   AnonymousProfile,
   AnonymousProfilePatch,
@@ -10,6 +12,13 @@ import type {
   MatchmakingQueueCounts,
   ServerEvent,
 } from "@/lib/realtime";
+import {
+  describeUserJourney,
+  USER_CONNECTION_STATES,
+  USER_JOURNEY_STATES,
+  userJourneyMachine,
+  type UserJourneyEvent,
+} from "@/machines/user-journey-machine";
 import {
   type RealtimeDebugOverride,
   useDebugStore,
@@ -46,6 +55,13 @@ interface CsGuessDebugTool {
     snapshot?: Record<string, unknown>,
     events?: ServerEvent[],
   ) => void;
+  journey: () => {
+    states: typeof USER_JOURNEY_STATES;
+    connectionStates: typeof USER_CONNECTION_STATES;
+  };
+  simulateJourney: (events: UserJourneyEvent[]) => ReturnType<
+    typeof describeUserJourney
+  >;
   reset: () => void;
 }
 
@@ -61,6 +77,8 @@ const HELP = [
   "csGuessDebug.setQueue(counts, true)",
   "csGuessDebug.setGamePhase('finished', { mystery_id: 'donk' })",
   "csGuessDebug.setRealtime({ connection: 'offline', error: '模拟断线' })",
+  "csGuessDebug.journey()",
+  "csGuessDebug.simulateJourney([{ type: 'BOOT', identityConfirmed: true }, { type: 'OPEN_ROOM' }])",
   "csGuessDebug.reset()",
 ];
 
@@ -105,6 +123,18 @@ export function installDebugTool() {
         events,
         error: "",
       }),
+    journey: () => ({
+      states: USER_JOURNEY_STATES,
+      connectionStates: USER_CONNECTION_STATES,
+    }),
+    simulateJourney: (events) => {
+      const actor = createActor(userJourneyMachine);
+      actor.start();
+      for (const event of events) actor.send(event);
+      const result = describeUserJourney(actor.getSnapshot());
+      actor.stop();
+      return result;
+    },
     reset: () => useDebugStore.getState().reset(),
   };
 }

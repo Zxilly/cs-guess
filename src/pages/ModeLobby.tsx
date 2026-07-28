@@ -2,6 +2,7 @@ import {
   ArrowRightIcon,
   CalendarDotsIcon,
   ChartBarIcon,
+  CrosshairSimpleIcon,
   DoorOpenIcon,
   IdentificationCardIcon,
   LightningIcon,
@@ -37,17 +38,17 @@ function ModeOption({
   return (
     <Link
       to={to}
-      className="group grid min-h-20 min-w-0 grid-cols-[32px_minmax(0,1fr)_20px] items-center gap-4 border-t border-foreground/20 px-4 py-3 transition-colors first:border-t-0 hover:bg-primary/[0.035] focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary sm:grid-cols-[36px_minmax(0,1fr)_20px] sm:px-5"
+      className="group grid min-h-16 min-w-0 grid-cols-[28px_minmax(0,1fr)_20px] items-center gap-3 border-t border-foreground/20 px-4 py-2.5 transition-colors first:border-t-0 hover:bg-primary/[0.035] focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary sm:min-h-20 sm:grid-cols-[36px_minmax(0,1fr)_20px] sm:gap-4 sm:px-5 sm:py-3"
     >
-      <ModeIcon className="size-7 text-primary" weight="light" />
+      <ModeIcon className="size-6 text-primary sm:size-7" weight="light" />
       <div className="min-w-0">
         <p className="font-semibold">{title}</p>
-        <p className="mt-1 font-mono text-[10px] uppercase leading-5 tracking-[0.06em] text-muted-foreground sm:text-[11px]">
+        <p className="mt-1 font-mono text-xs leading-5 tracking-[0.04em] text-muted-foreground">
           {meta}
         </p>
       </div>
       <span
-        className="grid size-5 place-items-center text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary"
+        className="grid size-5 place-items-center text-muted-foreground motion-safe:transition-transform motion-safe:group-hover:translate-x-1 group-hover:text-primary motion-reduce:transform-none motion-reduce:transition-none"
         aria-hidden="true"
       >
         <ArrowRightIcon className="size-4" />
@@ -65,21 +66,17 @@ export function ModeLobby() {
       <AppHeader
         subtitle="职业选手竞猜"
         action={
-          <div className="flex items-center gap-4">
-            <div className="hidden text-right font-mono text-[11px] uppercase tracking-[0.08em] sm:block">
-              <p className="text-muted-foreground">
-                {challenge?.date ?? "载入中"}
-              </p>
-              <p className="mt-1 text-primary">
-                Round #{challenge?.roundNumber ?? "—"}
-              </p>
-            </div>
+          <div
+            className="flex items-center gap-1 sm:gap-4"
+            aria-label="玩家快捷操作"
+          >
             <Button asChild variant="ghost" size="sm" className="rounded-none">
               <Link
                 to="/identity"
                 aria-label={`管理玩家身份：${identity.player.nickname}`}
               >
                 <IdentificationCardIcon />
+                <span className="sm:hidden">身份</span>
                 <span className="hidden max-w-28 truncate sm:inline">
                   {identity.player.nickname}
                 </span>
@@ -98,7 +95,7 @@ export function ModeLobby() {
       <main className="app-main app-main-optical">
         <PageIntro eyebrow="Game Lobby" title="选择游戏模式" />
 
-        <div className="mt-8">
+        <div className="mt-6 sm:mt-8">
           <PlayerIdentity
             player={identity.player}
             stats={identity.profile.stats}
@@ -114,43 +111,51 @@ export function ModeLobby() {
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
           <Card
             asChild
-            className="flex min-h-80 flex-col gap-0 rounded-none border border-foreground/25 bg-transparent py-0 shadow-none ring-0"
+            className="flex flex-col gap-0 rounded-none border border-foreground/25 bg-transparent py-0 shadow-none ring-0 lg:min-h-80"
           >
             <section>
               <PanelHeader
                 title="今日挑战"
                 icon={<CalendarDotsIcon className="size-5 text-primary" />}
                 action={
-                  <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-primary">
+                  <span className="font-mono text-xs tracking-[0.04em] text-primary">
                     每日刷新
                   </span>
                 }
               />
 
-              <div className="flex flex-1 flex-col justify-between p-6 sm:p-8">
-                <div>
-                  <p className="font-mono text-6xl font-medium tracking-[-0.08em] text-primary">
-                    #{challenge?.roundNumber ?? "—"}
-                  </p>
-                  <p className="mt-5 text-2xl font-semibold">今日神秘选手</p>
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    3 分钟 · 8 次尝试 · 全服同题
+              <div className="flex flex-1 flex-col justify-between p-4 sm:p-6">
+                <div className="flex min-w-0 items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-xl font-semibold">今日神秘选手</p>
+                    <p className="mt-1.5 text-sm text-muted-foreground">
+                      3 分钟 · 8 次尝试 · 全服同题
+                    </p>
+                  </div>
+                  <p className="shrink-0 font-mono text-xs font-medium tracking-[0.04em] text-primary">
+                    第 {challenge?.roundNumber ?? "—"} 轮
                   </p>
                 </div>
                 <Link
                   to="/play/daily"
-                  className="mt-8 inline-flex h-12 items-center justify-between bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85"
+                  className="mt-4 inline-flex h-11 items-center justify-between bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85 sm:mt-5"
                 >
                   开始今日挑战
                   <ArrowRightIcon className="size-4" />
                 </Link>
               </div>
+              <ModeOption
+                to="/solo"
+                icon={CrosshairSimpleIcon}
+                title="单人练习"
+                meta="简单 / 完整 / 困难 · 3 分钟"
+              />
             </section>
           </Card>
 
           <Card
             asChild
-            className="grid grid-rows-[auto_repeat(3,1fr)] gap-0 rounded-none border border-foreground/25 bg-transparent py-0 shadow-none ring-0"
+            className="grid min-w-0 grid-rows-[auto_repeat(3,1fr)] gap-0 rounded-none border border-foreground/25 bg-transparent py-0 shadow-none ring-0"
           >
             <section>
               <PanelHeader
@@ -158,7 +163,7 @@ export function ModeLobby() {
                 icon={<SwordIcon className="size-5 text-primary" />}
                 action={
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                    <span className="font-mono text-xs tracking-[0.04em] text-muted-foreground">
                       选择玩法
                     </span>
                     <InfoTip
@@ -188,13 +193,13 @@ export function ModeLobby() {
                 to="/quick"
                 icon={LightningIcon}
                 title="实时 1v1"
-                meta="Online · BO1 / BO3 / BO5"
+                meta="在线匹配 · 1 / 3 / 5 局赛制"
               />
               <ModeOption
                 to="/quick?players=4"
                 icon={UsersThreeIcon}
                 title="4 人乱斗"
-                meta="Online · 4 Players · BO1 / BO3 / BO5"
+                meta="在线匹配 · 4 人 · 1 / 3 / 5 局赛制"
               />
               <ModeOption
                 to="/room"

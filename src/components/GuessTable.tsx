@@ -54,12 +54,16 @@ interface GuessTableProps {
   opponentProgress?: readonly OpponentGuessProgress[];
   opponents?: readonly OpponentBoardData[];
   onOpponentVisibilityChange?: (visibility: OpponentVisibility) => void;
+  opponentDisconnectSeconds?: number | null;
+  opponentForfeitedThisRound?: boolean;
 }
 
 interface OpponentBoardData {
   id: string;
   name: string;
   progress: readonly OpponentGuessProgress[];
+  disconnectSeconds?: number | null;
+  forfeitedThisRound?: boolean;
 }
 
 type Comparison = "match" | "higher" | "lower" | "miss";
@@ -191,10 +195,8 @@ function CountryComparisonValue({
       <span className="text-xs font-semibold">{countryNameZh(countryCode)}</span>
       <span
         className={cn(
-          "mt-0.5 font-mono text-[9px]",
-          comparison.relation === "match"
-            ? "text-primary/80"
-            : "text-current/70",
+          "mt-1 font-mono text-xs",
+          comparison.relation === "match" && "text-primary",
         )}
       >
         {distanceLabel} · {relationLabel}
@@ -247,7 +249,7 @@ function GuessBoard({
           {guesses.length} / {maxGuesses}
         </p>
       </div>
-      <p className="border-b border-foreground/15 px-4 py-2 text-[11px] text-muted-foreground sm:hidden">
+      <p className="border-b border-foreground/15 px-4 py-2 text-xs text-muted-foreground sm:hidden">
         横向滑动查看全部属性 →
       </p>
       <div
@@ -297,7 +299,7 @@ function GuessBoard({
                         {player.nickname}
                       </p>
                       <p
-                        className="mt-0.5 truncate text-[10px] text-muted-foreground"
+                        className="mt-0.5 truncate text-xs text-muted-foreground"
                         title={player.name}
                       >
                         {player.name}
@@ -371,24 +373,45 @@ function OpponentBoard({
   visibility,
   maxGuesses,
   mysteryPlayer,
+  disconnectSeconds,
+  forfeitedThisRound = false,
 }: {
   title: string;
   progress: readonly OpponentGuessProgress[];
   visibility: OpponentVisibility;
   maxGuesses: number;
   mysteryPlayer: Player;
+  disconnectSeconds?: number | null;
+  forfeitedThisRound?: boolean;
 }) {
   const rows = Array.from({ length: maxGuesses }, (_, index) => progress[index]);
   const mobileVisibleRows = Math.min(maxGuesses, progress.length + 1);
   return (
     <section className="min-w-0 border border-foreground/25">
-      <div className="flex items-baseline justify-between border-b border-foreground/20 px-4 py-3">
-        <h2 className="text-sm font-semibold">{title}</h2>
-        <p className="font-mono text-xs text-muted-foreground">
+      <div className="flex items-start justify-between gap-3 border-b border-foreground/20 px-4 py-3">
+        <div>
+          <h2 className="text-sm font-semibold">{title}</h2>
+          {disconnectSeconds !== null && disconnectSeconds !== undefined ? (
+            <>
+              <p
+                className="mt-1 font-mono text-xs text-destructive"
+                aria-hidden="true"
+              >
+                重连 00:{String(disconnectSeconds).padStart(2, "0")} · 超时判负
+              </p>
+            </>
+          ) : null}
+          {forfeitedThisRound ? (
+            <p className="mt-1 text-xs font-medium text-destructive">
+              在线 · 本轮已判负
+            </p>
+          ) : null}
+        </div>
+        <p className="shrink-0 font-mono text-xs text-muted-foreground">
           {progress.length} / {maxGuesses}
         </p>
       </div>
-      <p className="border-b border-foreground/15 px-4 py-2 text-[11px] text-muted-foreground sm:hidden">
+      <p className="border-b border-foreground/15 px-4 py-2 text-xs text-muted-foreground sm:hidden">
         横向滑动查看全部属性 →
       </p>
       <div
@@ -446,7 +469,7 @@ function OpponentBoard({
                             {player.nickname}
                           </p>
                           <p
-                            className="mt-0.5 truncate text-[10px] text-muted-foreground"
+                            className="mt-0.5 truncate text-xs text-muted-foreground"
                             title={player.name}
                           >
                             {player.name}
@@ -460,7 +483,7 @@ function OpponentBoard({
                       )
                     ) : (
                       <span className="text-xs text-muted-foreground/50">
-                        等待对手
+                        {forfeitedThisRound ? "本轮已判负" : "等待对手"}
                       </span>
                     )}
                   </TableCell>
@@ -586,8 +609,10 @@ export function GuessTable({
   opponentProgress,
   opponents,
   onOpponentVisibilityChange,
+  opponentDisconnectSeconds,
+  opponentForfeitedThisRound = false,
 }: GuessTableProps) {
-  if (mode === "daily") {
+  if (mode === "daily" || mode === "solo") {
     return (
       <GuessBoard
         title="我的猜测"
@@ -679,6 +704,8 @@ export function GuessTable({
                 visibility={opponentVisibility}
                 maxGuesses={maxGuesses}
                 mysteryPlayer={mysteryPlayer}
+                disconnectSeconds={opponent.disconnectSeconds}
+                forfeitedThisRound={opponent.forfeitedThisRound}
               />
             ))
           : (
@@ -688,6 +715,8 @@ export function GuessTable({
                 visibility={opponentVisibility}
                 maxGuesses={maxGuesses}
                 mysteryPlayer={mysteryPlayer}
+                disconnectSeconds={opponentDisconnectSeconds}
+                forfeitedThisRound={opponentForfeitedThisRound}
               />
             )}
       </div>

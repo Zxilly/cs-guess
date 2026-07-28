@@ -1,10 +1,23 @@
 export const MAX_GUESSES = 8;
 
-export type GameMode = "daily" | "quick" | "room";
+export type GameMode = "daily" | "solo" | "quick" | "room";
 
 export type GameStatus = "playing" | "won" | "lost";
 
 export type OpponentVisibility = "hidden" | "open";
+
+export type BattleFinishReason =
+  | "solved"
+  | "disconnect_forfeit"
+  | "member_left"
+  | "timeout"
+  | "max_guesses";
+export type BattleSeriesStatus = "active" | "completed" | "abandoned";
+export type BattleSeriesFinishReason =
+  | "score_limit"
+  | "member_left_forfeit"
+  | "member_left_abandoned";
+export type GameDifficulty = "easy" | "full" | "hard";
 export type BestOf = 1 | 3 | 5;
 export type PartySize = 2 | 4;
 

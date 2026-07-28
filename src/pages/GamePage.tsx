@@ -1,13 +1,14 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 
 import { BattleContext } from "@/components/BattleContext";
 import { CelebrationOverlay } from "@/components/CelebrationOverlay";
+import { DailyGameLoading } from "@/components/DailyGameLoading";
+import { DailyResultPanel } from "@/components/DailyResultPanel";
 import { GuessTable } from "@/components/GuessTable";
 import { InfoTip } from "@/components/InfoTip";
 import { ModeSidebar } from "@/components/ModeSidebar";
 import { PlayerSearch } from "@/components/PlayerSearch";
 import { Timer } from "@/components/Timer";
-import { Button } from "@/components/ui/button";
 import {
   players,
   type Player,
@@ -21,6 +22,9 @@ import {
   type DailyProgress,
 } from "@/lib/daily-challenge";
 import type { ServerDailyChallenge } from "@/lib/daily-challenge-api";
+import { focusDailyResultAfterDialog } from "@/lib/daily-result-focus";
+import { recordFinishedDailyRoundOnce } from "@/lib/daily-round-record";
+import type { SoloLossReason } from "@/lib/solo-result-copy";
 import {
   MAX_GUESSES,
   type GameMode,
@@ -72,19 +76,25 @@ const modeContent: Record<
 > = {
   daily: {
     eyebrow: "今日神秘选手",
-    title: "根据对比，锁定神秘选手。",
+    title: "根据属性对比确定目标选手",
     description: "所有玩家共享今日答案，在八次机会内完成挑战。",
     round: "DAILY",
   },
+  solo: {
+    eyebrow: "单人练习",
+    title: "根据属性线索确定目标选手",
+    description: "每局随机生成目标选手，结算后可开始下一题。",
+    round: "SOLO",
+  },
   quick: {
     eyebrow: "实时 1v1",
-    title: "根据对比，抢先锁定答案。",
+    title: "竞速确定目标选手",
     description: "双方猜测同一位神秘选手，先正确猜出的玩家赢得本局。",
     round: "BO3 · ROUND 1",
   },
   room: {
     eyebrow: "好友房间",
-    title: "和朋友进行同题竞速。",
+    title: "好友房同题竞速",
     description: "房间支持 2–8 位玩家，本轮使用相同题目与尝试上限。",
     round: "ROOM · CS-207",
   },
@@ -98,32 +108,7 @@ export function GamePage({ mode }: GamePageProps) {
   const { challenge, error, retry } = useDailyChallenge();
 
   if (!challenge) {
-    return (
-      <div className="grid min-h-svh place-items-center bg-background px-5 text-foreground">
-        <div
-          className="w-full max-w-md border border-foreground/25 p-6"
-          role={error ? "alert" : "status"}
-        >
-          <p className="font-mono text-xs uppercase tracking-[0.08em] text-primary">
-            DAILY CHALLENGE
-          </p>
-          <h1 className="mt-3 text-2xl font-bold">
-            {error ? "每日挑战载入失败" : "正在载入今日题目"}
-          </h1>
-          {error ? (
-            <Button
-              onClick={retry}
-              variant="outline"
-              className="mt-6 rounded-none"
-            >
-              重新载入
-            </Button>
-          ) : (
-            <div className="mt-6 h-1 w-full animate-pulse bg-primary motion-reduce:animate-none" />
-          )}
-        </div>
-      </div>
-    );
+    return <DailyGameLoading error={error} onRetry={retry} />;
   }
 
   return <DailyGame mode={mode} challenge={challenge} />;
@@ -142,6 +127,8 @@ function DailyGame({
   const [selectedId, setSelectedId] = useState<string>();
   const [searchOpen, setSearchOpen] = useState(false);
   const [resultDismissed, setResultDismissed] = useState(false);
+  const resultTitleRef = useRef<HTMLHeadingElement>(null);
+  const recordedDailyRoundRef = useRef<string | undefined>(undefined);
   const [now, setNow] = useState(Date.now);
   const [opponentVisibility, setOpponentVisibility] =
     useState<OpponentVisibility>("hidden");
@@ -162,6 +149,12 @@ function DailyGame({
   const isFinished = game.status !== "playing";
   const resultOpen = isFinished && !resultDismissed;
   const secondsLeft = dailySecondsLeft(game, now);
+  const lossReason: SoloLossReason | undefined =
+    game.status !== "lost"
+      ? undefined
+      : game.guessedIds.length >= MAX_GUESSES
+        ? "attempts-exhausted"
+        : "timeout";
   useEffect(() => {
     if (game.status !== "playing" || game.deadline === null) return;
     const deadline = game.deadline;
@@ -180,46 +173,26 @@ function DailyGame({
   }, [game]);
 
   useEffect(() => {
-    if (
-      mode !== "daily" ||
-      game.status === "playing" ||
-      game.guessedIds.length === 0
-    ) {
-      return;
-    }
-    recordRound(
-      `daily:${challenge.date}`,
-      game.status === "won" ? "win" : "loss",
-      {
-        mode: "daily",
-        roundNumber: challenge.roundNumber,
-        bestOf: 1,
-        answerId: mysteryPlayer.id,
-        guessIds: game.guessedIds,
-        selfScore: game.status === "won" ? 1 : 0,
-        opponentScore: game.status === "lost" ? 1 : 0,
-      },
+    if (mode !== "daily") return;
+    recordedDailyRoundRef.current = recordFinishedDailyRoundOnce(
+      recordedDailyRoundRef.current,
+      game,
+      challenge,
+      recordRound,
     );
-  }, [
-    challenge.date,
-    challenge.roundNumber,
-    game.guessedIds,
-    game.status,
-    mysteryPlayer.id,
-    mode,
-    recordRound,
-  ]);
+  }, [challenge, game, mode, recordRound]);
 
-  function handleSubmit() {
-    if (!selectedId) return;
+  function handleSubmit(playerId = selectedId) {
+    if (!playerId) return false;
 
     dispatch({
       type: "guess",
-      playerId: selectedId,
+      playerId,
       mysteryId: mysteryPlayer.id,
       now: Date.now(),
     });
     setSelectedId(undefined);
+    return true;
   }
 
   return (
@@ -290,54 +263,60 @@ function DailyGame({
             isRoomHost={isRoomHost}
           />
 
-          <div className="mt-6 min-w-0">
-            <PlayerSearch
-              players={availablePlayers}
-              selectedPlayer={selectedPlayer}
-              open={searchOpen}
-              disabled={isFinished}
-              onOpenChange={setSearchOpen}
-              onSelect={(playerId) => {
-                setSelectedId(playerId);
-                setSearchOpen(false);
-              }}
-              onSubmit={handleSubmit}
-            />
-          </div>
-
-          <div className="mt-6">
-            <GuessTable
-              guesses={guesses}
-              opponentGuesses={opponentGuesses}
-              opponentVisibility={opponentVisibility}
-              mysteryPlayer={mysteryPlayer}
-              mode={mode}
-              maxGuesses={MAX_GUESSES}
-              onOpponentVisibilityChange={setOpponentVisibility}
-            />
-          </div>
-
-          <div className="mt-5 flex flex-col gap-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-1">
-              <span>结果图例</span>
-              <InfoTip label="查看结果图例" side="right" className="size-10">
-                蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。向上箭头表示目标数值更高，向下箭头表示更低。
-              </InfoTip>
+          {isFinished ? (
+            <div className="mt-6">
+              <DailyResultPanel
+                outcome={game.status === "won" ? "won" : "lost"}
+                attempts={game.guessedIds.length}
+                maxGuesses={MAX_GUESSES}
+                mysteryPlayer={mysteryPlayer}
+                titleRef={resultTitleRef}
+                lossReason={lossReason}
+              />
             </div>
-            {isFinished ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="rounded-none"
-                onClick={() => setResultDismissed(false)}
-              >
-                查看结果
-              </Button>
-            ) : (
-              <p className="font-mono">每日题目 · 上海时间刷新</p>
-            )}
-          </div>
+          ) : (
+            <>
+              <div className="mt-6 min-w-0">
+                <PlayerSearch
+                  players={availablePlayers}
+                  selectedPlayer={selectedPlayer}
+                  open={searchOpen}
+                  onOpenChange={setSearchOpen}
+                  onSelect={(playerId) => {
+                    setSelectedId(playerId);
+                    setSearchOpen(false);
+                  }}
+                  onSubmit={handleSubmit}
+                />
+              </div>
+
+              <div className="mt-6">
+                <GuessTable
+                  guesses={guesses}
+                  opponentGuesses={opponentGuesses}
+                  opponentVisibility={opponentVisibility}
+                  mysteryPlayer={mysteryPlayer}
+                  mode={mode}
+                  maxGuesses={MAX_GUESSES}
+                  onOpponentVisibilityChange={setOpponentVisibility}
+                />
+              </div>
+
+              <div className="mt-5 flex flex-col gap-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-1">
+                  <span>结果图例</span>
+                  <InfoTip
+                    label="查看结果图例"
+                    side="right"
+                    className="size-10"
+                  >
+                    蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。向上箭头表示目标数值更高，向下箭头表示更低。
+                  </InfoTip>
+                </div>
+                <p className="font-mono">每日题目 · 上海时间刷新</p>
+              </div>
+            </>
+          )}
         </div>
       </main>
       {resultOpen ? (
@@ -347,7 +326,11 @@ function DailyGame({
           seriesComplete
           score={`${game.guessedIds.length} / ${MAX_GUESSES}`}
           mysteryPlayer={mysteryPlayer}
+          lossReason={lossReason}
           onClose={() => setResultDismissed(true)}
+          onCloseAutoFocus={(event) =>
+            focusDailyResultAfterDialog(event, resultTitleRef.current)
+          }
         />
       ) : null}
     </div>

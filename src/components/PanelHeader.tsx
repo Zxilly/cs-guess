@@ -30,7 +30,7 @@ export function PanelHeader({
           <h2 className="font-semibold">{title}</h2>
         </div>
         {description ? (
-          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+          <p className="mt-1 font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
             {description}
           </p>
         ) : null}

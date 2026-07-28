@@ -39,7 +39,7 @@ export function PlayerAvatar({
           decoding="async"
           referrerPolicy="no-referrer"
           className={cn(
-            "absolute inset-0 size-full object-cover object-top transition-opacity duration-200",
+            "absolute inset-0 size-full object-cover object-top transition-opacity duration-200 motion-reduce:transition-none",
             loadedUrl === imageUrl ? "opacity-100" : "opacity-0",
           )}
           onLoad={() => setLoadedUrl(imageUrl)}
