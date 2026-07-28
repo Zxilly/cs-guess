@@ -1,5 +1,5 @@
 export const PROFILE_KEY = "cs-guess:anonymous-profile";
-export const PROFILE_VERSION = 7;
+export const PROFILE_VERSION = 8;
 
 export function hasConfirmedIdentity(): boolean {
   try {
@@ -16,7 +16,8 @@ export function hasConfirmedIdentity(): boolean {
     const validVersionSixProfile =
       stored.version === 6 && stored.identityConfirmed === true;
     const validCurrentProfile =
-      stored.version === PROFILE_VERSION && stored.identityConfirmed === true;
+      (stored.version === 7 || stored.version === PROFILE_VERSION) &&
+      stored.identityConfirmed === true;
     return (
       (validLegacyProfile ||
         validVersionSixProfile ||

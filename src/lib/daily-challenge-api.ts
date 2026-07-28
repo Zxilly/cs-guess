@@ -1,4 +1,8 @@
 import type { Player } from "@/data/players";
+import {
+  displayTeamName,
+  UNATTACHED_TEAM_LABEL,
+} from "@/lib/player-display";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 
@@ -19,5 +23,17 @@ export async function loadCurrentDailyChallenge(
   if (!response.ok) {
     throw new Error(`daily challenge load failed: ${response.status}`);
   }
-  return (await response.json()) as ServerDailyChallenge;
+  const challenge = (await response.json()) as ServerDailyChallenge;
+  const team = displayTeamName(challenge.mysteryPlayer.team);
+  const mysteryPlayer = {
+    ...challenge.mysteryPlayer,
+    team,
+  };
+  if (team === UNATTACHED_TEAM_LABEL) {
+    delete mysteryPlayer.teamLogoUrl;
+  }
+  return {
+    ...challenge,
+    mysteryPlayer,
+  };
 }

@@ -47,11 +47,21 @@ export function PlayerIdentity({
 
   return (
     <section className="border border-foreground/25" aria-label="我的身份">
-      <div className="grid sm:grid-cols-[minmax(0,1fr)_auto]">
-        <div className="flex min-w-0 items-center gap-4 px-4 py-4 sm:px-5">
-          <PlayerAvatar player={player} className="size-14" eager />
+      <div
+        className={
+          compact
+            ? "grid grid-cols-[minmax(0,1fr)_auto]"
+            : "grid sm:grid-cols-[minmax(0,1fr)_auto]"
+        }
+      >
+        <div className="flex min-w-0 items-center gap-3 px-4 py-3 sm:gap-4 sm:px-5 sm:py-4">
+          <PlayerAvatar
+            player={player}
+            className={compact ? "size-12 sm:size-14" : "size-14"}
+            eager
+          />
           <div className="min-w-0">
-            <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+            <p className="truncate font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
               我的身份 · {
                 IDENTITY_POOLS.find((pool) => pool.id === currentPool)?.label
               }
@@ -70,21 +80,31 @@ export function PlayerIdentity({
           <Button
             type="button"
             variant="ghost"
-            className="h-12 justify-center rounded-none border-t border-foreground/20 px-5 text-primary sm:h-auto sm:border-t-0 sm:border-l"
+            className={
+              compact
+                ? "h-auto justify-center rounded-none border-l border-foreground/20 px-3 text-primary sm:px-5"
+                : "h-12 justify-center rounded-none border-t border-foreground/20 px-5 text-primary sm:h-auto sm:border-t-0 sm:border-l"
+            }
             disabled
           >
             <DiceFiveIcon />
-            管理身份
+            <span className={compact ? "hidden sm:inline" : ""}>管理身份</span>
+            {compact ? <span className="sm:hidden">身份</span> : null}
           </Button>
         ) : (
           <Button
             asChild
             variant="ghost"
-            className="h-12 justify-center rounded-none border-t border-foreground/20 px-5 text-primary sm:h-auto sm:border-t-0 sm:border-l"
+            className={
+              compact
+                ? "h-auto justify-center rounded-none border-l border-foreground/20 px-3 text-primary sm:px-5"
+                : "h-12 justify-center rounded-none border-t border-foreground/20 px-5 text-primary sm:h-auto sm:border-t-0 sm:border-l"
+            }
           >
             <Link to={manageHref}>
               <DiceFiveIcon />
-              管理身份
+              <span className={compact ? "hidden sm:inline" : ""}>管理身份</span>
+              {compact ? <span className="sm:hidden">身份</span> : null}
             </Link>
           </Button>
         )}
@@ -94,7 +114,7 @@ export function PlayerIdentity({
         <>
           <div className="grid grid-cols-3 border-t border-foreground/20">
             <div className="px-4 py-3">
-              <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <TrophyIcon />
                 胜负
               </p>
@@ -103,7 +123,7 @@ export function PlayerIdentity({
               </p>
             </div>
             <div className="border-x border-foreground/20 px-4 py-3">
-              <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <ChartLineUpIcon />
                 胜率
               </p>
@@ -112,7 +132,7 @@ export function PlayerIdentity({
               </p>
             </div>
             <div className="px-4 py-3">
-              <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <FireIcon />
                 连胜
               </p>

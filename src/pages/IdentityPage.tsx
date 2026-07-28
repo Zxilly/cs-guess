@@ -8,7 +8,7 @@ import {
   ShieldCheckIcon,
   TrophyIcon,
 } from "@phosphor-icons/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 
 import { AppHeader } from "@/components/AppHeader";
@@ -19,14 +19,22 @@ import { PanelHeader } from "@/components/PanelHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import type { Player } from "@/data/players";
+import { players, type Player } from "@/data/players";
 import {
   IDENTITY_POOLS,
   playersInPool,
+  type PendingIdentityDraw,
   type IdentityPoolId,
   useAnonymousProfile,
 } from "@/hooks/use-anonymous-profile";
 import { countryNameZh } from "@/lib/country-geography";
+import {
+  prepareIdentityDraw,
+  reconcilePendingIdentityDraw,
+  restorePreparedIdentityDraw,
+} from "@/lib/identity-draw";
+import { preloadPlayerImages } from "@/lib/player-image-preload";
+import { normalizeIdentityReturnTo } from "@/machines/user-journey-machine";
 
 interface DrawSequence {
   rollKey: number;
@@ -37,54 +45,167 @@ interface DrawSequence {
   revealed: boolean;
 }
 
-function safeReturnPath(value: string | null) {
-  if (
-    value === "/" ||
-    value === "/room" ||
-    value === "/quick" ||
-    value === "/quick?players=4" ||
-    value === "/play/daily" ||
-    value === "/matching" ||
-    value === "/stats"
-  ) {
-    return value;
-  }
-  return "/";
+interface PreparedDraw {
+  forPlayerId: string;
+  items: readonly Player[];
+  winner: Player;
+  winnerIndex: number;
 }
 
-function randomIndex(length: number) {
-  if (length <= 1) return 0;
-  if (globalThis.crypto?.getRandomValues) {
-    const value = new Uint32Array(1);
-    globalThis.crypto.getRandomValues(value);
-    return value[0] % length;
-  }
-  return Math.floor(Math.random() * length);
+function prepareDraw(poolId: IdentityPoolId, currentPlayerId: string) {
+  return prepareIdentityDraw(playersInPool(poolId), currentPlayerId);
 }
 
-function createRouletteItems(candidates: readonly Player[], winner: Player) {
-  const winnerIndex = 23;
-  const items = Array.from(
-    { length: 29 },
-    () => candidates[randomIndex(candidates.length)],
-  );
-  items[winnerIndex] = winner;
-  return { items, winnerIndex };
+function restorePendingDraw(
+  pendingDraw: PendingIdentityDraw | undefined,
+): DrawSequence | null {
+  if (!pendingDraw) return null;
+  const restored = restorePreparedIdentityDraw(pendingDraw, players);
+  if (!restored) return null;
+  return {
+    rollKey: 0,
+    poolId: pendingDraw.poolId,
+    ...restored,
+    revealed: true,
+  };
+}
+
+function pendingDrawRevision(pendingDraw: PendingIdentityDraw | undefined) {
+  return pendingDraw
+    ? `${pendingDraw.createdAt}:${pendingDraw.poolId}:${pendingDraw.winnerId}`
+    : "";
 }
 
 export function IdentityPage() {
   const identity = useAnonymousProfile();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const returnTo = safeReturnPath(searchParams.get("return"));
+  const returnTo = normalizeIdentityReturnTo(searchParams.get("return"));
   const onboarding = !identity.profile.identityConfirmed;
   const visiblePools = onboarding ? IDENTITY_POOLS.slice(0, 1) : IDENTITY_POOLS;
-  const [draw, setDraw] = useState<DrawSequence | null>(null);
+  const [draw, setDraw] = useState<DrawSequence | null>(() =>
+    onboarding ? null : restorePendingDraw(identity.profile.pendingDraw),
+  );
+  const [drawError, setDrawError] = useState<string | null>(null);
+  const [readyPools, setReadyPools] = useState<Set<IdentityPoolId>>(
+    () => new Set(),
+  );
+  const [prepareVersion, setPrepareVersion] = useState(0);
   const revealTimerRef = useRef<number | null>(null);
   const drawInProgressRef = useRef(false);
   const rollSequenceRef = useRef(0);
+  const lastDrawRef = useRef<DrawSequence | null>(draw);
+  const drawButtonRefs = useRef(
+    new Map<IdentityPoolId, HTMLButtonElement>(),
+  );
   const previewCreditsAppliedRef = useRef(false);
+  const pendingDrawRevisionRef = useRef(
+    pendingDrawRevision(identity.profile.pendingDraw),
+  );
+  pendingDrawRevisionRef.current = pendingDrawRevision(
+    identity.profile.pendingDraw,
+  );
+  const preparedDrawsRef = useRef(
+    new Map<IdentityPoolId, PreparedDraw>(),
+  );
   const setPreviewDrawCredits = identity.setPreviewDrawCredits;
+  const preparedOnboardingDraw = useMemo(
+    () =>
+      onboarding ? prepareDraw("common", identity.player.id) : null,
+    [identity.player.id, onboarding],
+  );
+  if (draw) lastDrawRef.current = draw;
+  const displayedDraw = draw ?? lastDrawRef.current;
+
+  useEffect(() => {
+    if (!preparedOnboardingDraw) return;
+    const controller = new AbortController();
+    void preloadPlayerImages(preparedOnboardingDraw.items, {
+      signal: controller.signal,
+    });
+    return () => controller.abort();
+  }, [preparedOnboardingDraw]);
+
+  useEffect(() => {
+    if (onboarding) return;
+    const controller = new AbortController();
+    const newlyPreparedImages: Player[] = [];
+    const cachedImages: Player[] = [];
+    const nextReadyPools = new Set<IdentityPoolId>();
+
+    for (const pool of IDENTITY_POOLS) {
+      if (
+        identity.profile.stats.wins < pool.unlockWins ||
+        identity.profile.drawCredits < 1
+      ) {
+        preparedDrawsRef.current.delete(pool.id);
+        continue;
+      }
+      let cached = preparedDrawsRef.current.get(pool.id);
+      if (cached?.forPlayerId !== identity.player.id) {
+        const prepared = prepareDraw(pool.id, identity.player.id);
+        if (!prepared) continue;
+        cached = {
+          forPlayerId: identity.player.id,
+          ...prepared,
+        };
+        preparedDrawsRef.current.set(pool.id, cached);
+        newlyPreparedImages.push(...prepared.items);
+      } else {
+        cachedImages.push(...cached.items);
+      }
+      nextReadyPools.add(pool.id);
+    }
+    setReadyPools(nextReadyPools);
+
+    const imagesToPreload = [
+      ...newlyPreparedImages,
+      ...cachedImages,
+    ];
+    if (imagesToPreload.length > 0) {
+      void preloadPlayerImages(imagesToPreload, {
+        signal: controller.signal,
+      });
+    }
+
+    return () => controller.abort();
+  }, [
+    identity.player.id,
+    identity.profile.drawCredits,
+    identity.profile.stats.wins,
+    onboarding,
+    prepareVersion,
+  ]);
+
+  useEffect(() => {
+    if (onboarding) return;
+    const reconciliation = reconcilePendingIdentityDraw(
+      draw,
+      identity.profile.pendingDraw,
+      players,
+    );
+    if (reconciliation.action === "keep") return;
+
+    if (revealTimerRef.current !== null) {
+      window.clearTimeout(revealTimerRef.current);
+      revealTimerRef.current = null;
+    }
+    drawInProgressRef.current = false;
+    setDrawError(null);
+
+    if (reconciliation.action === "close") {
+      if (draw) setDraw(null);
+      return;
+    }
+
+    rollSequenceRef.current += 1;
+    setDraw({
+      rollKey: rollSequenceRef.current,
+      ...reconciliation.draw,
+      poolId: reconciliation.draw.poolId as IdentityPoolId,
+      revealed: true,
+    });
+  }, [draw, identity.profile.pendingDraw, onboarding]);
 
   useEffect(() => {
     if (!import.meta.env.DEV || previewCreditsAppliedRef.current) return;
@@ -106,33 +227,71 @@ export function IdentityPage() {
     };
   }, []);
 
-  function beginDraw(poolId: IdentityPoolId) {
+  async function beginDraw(
+    poolId: IdentityPoolId,
+    replacedWinnerId?: string,
+  ) {
     if (drawInProgressRef.current || identity.profile.drawCredits < 1) return;
     if (onboarding && poolId !== "common") return;
-    const pool = playersInPool(poolId);
-    const candidates = pool.filter(
-      (candidate) => candidate.id !== identity.player.id,
-    );
-    const previews = candidates.length > 0 ? candidates : pool;
-    if (previews.length === 0) return;
+    const prepared =
+      onboarding && poolId === "common"
+        ? preparedOnboardingDraw
+        : preparedDrawsRef.current.get(poolId);
+    if (
+      !prepared ||
+      (!onboarding &&
+        (!("forPlayerId" in prepared) ||
+          prepared.forPlayerId !== identity.player.id))
+    ) {
+      return;
+    }
 
     drawInProgressRef.current = true;
+    const startingPendingRevision = pendingDrawRevisionRef.current;
+    setDrawError(null);
     rollSequenceRef.current += 1;
-    const winner = previews[randomIndex(previews.length)];
-    const { items, winnerIndex } = createRouletteItems(previews, winner);
-    if (!onboarding) identity.spendDrawCredit(poolId);
-    setDraw({
-      rollKey: rollSequenceRef.current,
-      poolId,
-      items,
-      winner,
-      winnerIndex,
-      revealed: false,
-    });
-
+    if (!onboarding) {
+      const pendingDraw: PendingIdentityDraw = {
+        poolId,
+        itemIds: prepared.items.map((player) => player.id),
+        winnerId: prepared.winner.id,
+        winnerIndex: prepared.winnerIndex,
+        createdAt: Date.now(),
+      };
+      const spent = await identity.spendDrawCredit(
+        poolId,
+        pendingDraw,
+        replacedWinnerId,
+      );
+      if (!spent) {
+        drawInProgressRef.current = false;
+        if (pendingDrawRevisionRef.current === startingPendingRevision) {
+          setDrawError("抽取次数已变化，请检查其他标签页后重试。");
+        }
+        return;
+      }
+      preparedDrawsRef.current.delete(poolId);
+      setReadyPools((current) => {
+        const next = new Set(current);
+        next.delete(poolId);
+        return next;
+      });
+      setPrepareVersion((current) => current + 1);
+    }
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
+    setDraw({
+      rollKey: rollSequenceRef.current,
+      poolId,
+      ...prepared,
+      revealed: reducedMotion,
+    });
+
+    if (reducedMotion) {
+      drawInProgressRef.current = false;
+      return;
+    }
     revealTimerRef.current = window.setTimeout(
       () => {
         drawInProgressRef.current = false;
@@ -141,27 +300,35 @@ export function IdentityPage() {
         );
         revealTimerRef.current = null;
       },
-      reducedMotion ? 150 : 3100,
+      3100,
     );
   }
 
   function startDraw(poolId: IdentityPoolId) {
     if (draw) return;
-    beginDraw(poolId);
+    void beginDraw(poolId);
   }
 
   function rerollIdentity() {
     if (!draw?.revealed) return;
-    beginDraw(draw.poolId);
+    void beginDraw(draw.poolId, draw.winner.id);
   }
 
   function changeDrawDialog(open: boolean) {
     if (onboarding) return;
-    if (!open && draw?.revealed) setDraw(null);
+    if (!open && draw?.revealed) keepCurrentIdentity();
   }
 
   function keepCurrentIdentity() {
-    if (draw?.revealed) setDraw(null);
+    if (!draw?.revealed) return;
+    if (
+      !identity.discardPendingDraw(draw.poolId, draw.winner.id)
+    ) {
+      setDrawError("未能保存选择，请重试。");
+      return;
+    }
+    setDraw(null);
+    setDrawError(null);
   }
 
   function acceptDrawnIdentity() {
@@ -173,8 +340,24 @@ export function IdentityPage() {
       navigate(returnTo, { replace: true });
       return;
     }
-    identity.adoptIdentity(draw.poolId, draw.winner.id);
+    const adopted = identity.adoptIdentity(draw.poolId, draw.winner.id);
+    if (!adopted) {
+      setDrawError("身份保存失败，请保留此窗口并重试。");
+      return;
+    }
     setDraw(null);
+    setDrawError(null);
+  }
+
+  function restoreDrawButtonFocus(event: Event) {
+    event.preventDefault();
+    const poolId = lastDrawRef.current?.poolId;
+    if (!poolId) return;
+    window.requestAnimationFrame(() => {
+      drawButtonRefs.current
+        .get(poolId)
+        ?.focus({ preventScroll: true });
+    });
   }
 
   return (
@@ -196,7 +379,12 @@ export function IdentityPage() {
       <main className="app-main">
         <PageIntro
           eyebrow={onboarding ? "First Run" : "Player Identity"}
-          title={onboarding ? "抽取你的初始身份" : "我的身份"}
+          title={onboarding ? "设置初始身份" : "我的身份"}
+          description={
+            onboarding
+              ? "首次进入需设置匿名身份；确认后返回此前选择的页面。"
+              : undefined
+          }
           help={
             <InfoTip label="查看身份规则" side="right" className="size-10">
               {onboarding
@@ -215,11 +403,14 @@ export function IdentityPage() {
           }
         />
 
-        <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-          <Card className="overflow-hidden rounded-none border-foreground/25 bg-transparent py-0 shadow-none">
-            <div className="relative flex min-h-64 flex-col justify-between p-6 sm:p-8">
+        <div
+          className="app-section-offset grid gap-5 lg:grid-cols-2"
+          data-layout="identity-equal-columns"
+        >
+          <Card className="min-w-0 overflow-hidden rounded-none border-foreground/25 bg-transparent py-0 shadow-none">
+            <div className="relative flex min-h-52 flex-col justify-between p-5 sm:min-h-64 sm:p-8">
               <div className="flex items-center justify-between gap-4">
-                <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+                <p className="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
                   {onboarding ? "待设置身份" : "当前身份"}
                 </p>
                 <IdentificationCardIcon
@@ -229,17 +420,17 @@ export function IdentityPage() {
               </div>
 
               <div>
-                <p className="mt-10 break-words text-5xl font-bold tracking-[-0.06em] sm:text-6xl">
+                <p className="mt-6 break-words text-5xl font-bold tracking-[-0.06em] sm:mt-10 sm:text-6xl">
                   {onboarding ? "等待抽取" : identity.player.nickname}
                 </p>
                 <p className="mt-3 text-sm text-muted-foreground">
                   {onboarding
-                    ? "从 Major 参赛选手中获得你的固定匿名身份"
+                    ? "从 Major 参赛选手中抽取固定匿名身份"
                     : `${countryNameZh(identity.player.countryCode)} · ${identity.player.team}`}
                 </p>
               </div>
 
-              <div className="mt-9 flex flex-wrap items-center gap-2">
+              <div className="mt-6 flex flex-wrap items-center gap-2 sm:mt-9">
                 <Badge variant="outline" className="rounded-none font-mono">
                   {onboarding
                     ? "Major 参赛池"
@@ -252,22 +443,22 @@ export function IdentityPage() {
 
             {onboarding ? (
               <div className="border-t border-foreground/20 px-5 py-4 text-xs text-muted-foreground">
-                抽取结果确认后自动进入模式大厅。
+                确认抽取结果后返回此前页面。
               </div>
             ) : (
               <div className="grid grid-cols-3 border-t border-foreground/20">
                 <div className="px-4 py-3">
-                  <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <TrophyIcon />
                     胜负
                   </p>
                   <p className="mt-1 font-mono text-sm font-semibold">
-                    {identity.profile.stats.wins}W ·{" "}
-                    {identity.profile.stats.losses}L
+                    {identity.profile.stats.wins}胜 ·{" "}
+                    {identity.profile.stats.losses}负
                   </p>
                 </div>
                 <div className="border-x border-foreground/20 px-4 py-3">
-                  <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <ChartLineUpIcon />
                     胜率
                   </p>
@@ -276,19 +467,19 @@ export function IdentityPage() {
                   </p>
                 </div>
                 <div className="px-4 py-3">
-                  <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <FireIcon />
                     连胜
                   </p>
                   <p className="mt-1 font-mono text-sm font-semibold">
-                    {identity.profile.stats.currentStreak}
+                    {identity.profile.stats.currentStreak} 连胜
                   </p>
                 </div>
               </div>
             )}
           </Card>
 
-          <Card className="gap-0 rounded-none border-foreground/25 bg-transparent py-0 shadow-none">
+          <Card className="min-w-0 gap-0 rounded-none border-foreground/25 bg-transparent py-0 shadow-none">
             <PanelHeader
               title={onboarding ? "初始选手池" : "选择选手池"}
               icon={<DiceFiveIcon className="size-5 text-primary" />}
@@ -297,7 +488,7 @@ export function IdentityPage() {
                   <p>
                     {onboarding
                       ? "首次只能从 Major 参赛池抽取，确认后身份会固定保留。"
-                      : "抽取会更换当前身份，并消耗一次机会。"}
+                      : "抽取消耗一次机会；结果可使用、保留当前身份或继续重抽。"}
                   </p>
                   <p className="mt-1">
                     <strong>Major 参赛池：</strong>参加过 1–4 次且未夺冠。
@@ -312,17 +503,32 @@ export function IdentityPage() {
               }
             />
 
+            {!draw && drawError ? (
+              <p
+                className="border-b border-foreground/20 px-5 py-3 text-sm text-destructive"
+                role="alert"
+              >
+                {drawError}
+              </p>
+            ) : null}
+
             <div className="grid flex-1 auto-rows-fr">
               {visiblePools.map((pool) => {
                 const unlocked =
                   identity.profile.stats.wins >= pool.unlockWins;
                 const canDraw =
-                  unlocked && identity.profile.drawCredits > 0 && !draw;
+                  unlocked &&
+                  identity.profile.drawCredits > 0 &&
+                  !draw &&
+                  (onboarding ||
+                    (readyPools.has(pool.id) &&
+                      preparedDrawsRef.current.get(pool.id)?.forPlayerId ===
+                        identity.player.id));
 
                 return (
                   <div
                     key={pool.id}
-                    className="grid gap-4 border-b border-foreground/20 p-5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+                    className="grid min-w-0 gap-4 border-b border-foreground/20 p-5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_minmax(7rem,auto)] sm:items-center"
                   >
                     <div className="flex min-w-0 items-start gap-3">
                       {unlocked ? (
@@ -334,13 +540,20 @@ export function IdentityPage() {
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="font-semibold">{pool.label}</p>
                           {!onboarding && pool.id === identity.currentPool ? (
-                            <span className="font-mono text-[10px] text-primary">
-                              当前
+                            <span className="border border-primary px-1.5 py-0.5 font-mono text-xs text-primary">
+                              当前身份池
+                            </span>
+                          ) : unlocked ? (
+                            <span className="border border-foreground/25 px-1.5 py-0.5 font-mono text-xs text-foreground">
+                              已解锁
                             </span>
                           ) : null}
                         </div>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {pool.description}
+                        </p>
                         {!unlocked ? (
-                          <p className="mt-1 font-mono text-[11px] text-foreground">
+                          <p className="mt-1 font-mono text-xs text-foreground">
                             再胜 {pool.unlockWins - identity.profile.stats.wins}{" "}
                             场解锁
                           </p>
@@ -348,22 +561,41 @@ export function IdentityPage() {
                       </div>
                     </div>
 
-                    {canDraw ? (
+                    {unlocked && !draw ? (
                       <Button
+                        ref={(node) => {
+                          if (node) {
+                            drawButtonRefs.current.set(pool.id, node);
+                          } else {
+                            drawButtonRefs.current.delete(pool.id);
+                          }
+                        }}
                         type="button"
                         size="sm"
-                        className="rounded-none sm:min-w-28"
-                        onClick={() => startDraw(pool.id)}
+                        variant={canDraw ? "default" : "outline"}
+                        className="app-control h-12 min-w-0 rounded-none px-3 sm:min-w-28"
+                        aria-disabled={!canDraw}
+                        onClick={() => {
+                          if (canDraw) startDraw(pool.id);
+                        }}
                       >
-                        {onboarding ? "抽取初始身份" : "抽取一次"}
+                        {canDraw
+                          ? onboarding
+                            ? "抽取初始身份"
+                            : "抽取 · 消耗 1 次"
+                          : identity.profile.drawCredits < 1
+                            ? "抽取 · 暂无机会"
+                            : "抽取 · 正在准备"}
                       </Button>
                     ) : (
-                      <span className="text-sm text-muted-foreground sm:min-w-28 sm:text-right">
+                      <span className="min-w-0 text-sm text-muted-foreground sm:min-w-28 sm:text-right">
                         {draw
                           ? "抽取中"
                           : !unlocked
                             ? `${pool.unlockWins} 胜解锁`
-                            : "暂无机会"}
+                            : identity.profile.drawCredits < 1
+                              ? "暂无机会"
+                              : "正在准备头像"}
                       </span>
                     )}
                   </div>
@@ -374,25 +606,42 @@ export function IdentityPage() {
         </div>
       </main>
 
-      {draw ? (
+      {displayedDraw ? (
         <IdentityDrawDialog
-          open
+          open={Boolean(draw)}
           poolLabel={
-            IDENTITY_POOLS.find((pool) => pool.id === draw.poolId)?.label ?? ""
+            IDENTITY_POOLS.find((pool) => pool.id === displayedDraw.poolId)
+              ?.label ?? ""
           }
-          rollKey={draw.rollKey}
-          items={draw.items}
-          winner={draw.winner}
-          winnerIndex={draw.winnerIndex}
-          revealed={draw.revealed}
+          rollKey={displayedDraw.rollKey}
+          items={displayedDraw.items}
+          winner={displayedDraw.winner}
+          winnerIndex={displayedDraw.winnerIndex}
+          revealed={displayedDraw.revealed}
+          errorMessage={drawError}
           remainingCredits={onboarding ? 0 : identity.profile.drawCredits}
           allowKeepCurrent={!onboarding}
           allowReroll={!onboarding}
-          acceptLabel={onboarding ? "确认身份并进入大厅" : "使用新身份"}
+          rerollReady={
+            readyPools.has(displayedDraw.poolId) &&
+            preparedDrawsRef.current.get(displayedDraw.poolId)
+              ?.forPlayerId ===
+              identity.player.id
+          }
+          acceptLabel={
+            onboarding
+              ? returnTo === "/"
+                ? "确认身份并进入大厅"
+                : "确认身份并继续"
+              : "使用新身份"
+          }
           onOpenChange={changeDrawDialog}
           onKeep={keepCurrentIdentity}
           onReroll={rerollIdentity}
           onAccept={acceptDrawnIdentity}
+          onCloseAutoFocus={
+            onboarding ? undefined : restoreDrawButtonFocus
+          }
         />
       ) : null}
     </div>

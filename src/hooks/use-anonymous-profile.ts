@@ -10,6 +10,7 @@ import {
   loadServerProfile,
   saveServerProfile,
 } from "@/lib/profile-api";
+import { deriveRoundSummary } from "@/lib/round-history";
 
 const MAX_RECORDED_ROUNDS = 100;
 const MAX_MATCH_HISTORY = 50;
@@ -18,16 +19,30 @@ const PROFILE_CHANGED_EVENT = "cs-guess:profile-changed";
 export type IdentityPoolId = "common" | "advanced" | "star";
 export type SeriesResult = "win" | "loss" | "draw";
 
+export type HistoryPlayerSnapshot = Pick<
+  Player,
+  | "id"
+  | "nickname"
+  | "name"
+  | "team"
+  | "countryCode"
+  | "age"
+  | "role"
+  | "majorAppearances"
+>;
+
 export interface MatchHistoryEntry {
   id: string;
   completedAt: string;
   result: SeriesResult;
-  mode: "daily" | "quick" | "room";
+  mode: "daily" | "solo" | "quick" | "room";
   roomCode?: string;
   roundNumber: number;
   bestOf: number;
   answerId?: string;
+  answerSnapshot?: HistoryPlayerSnapshot;
   guessIds: string[];
+  guessSnapshots?: (HistoryPlayerSnapshot | null)[];
   opponentNames: string[];
   selfScore: number;
   opponentScore: number;
@@ -53,6 +68,14 @@ export interface AnonymousStats {
   bestStreak: number;
 }
 
+export interface PendingIdentityDraw {
+  poolId: IdentityPoolId;
+  itemIds: string[];
+  winnerId: string;
+  winnerIndex: number;
+  createdAt: number;
+}
+
 export interface AnonymousProfile {
   anonymousId: string;
   syncToken: string;
@@ -63,6 +86,7 @@ export interface AnonymousProfile {
   lossesTowardCredit: number;
   recordedRounds: string[];
   matchHistory: MatchHistoryEntry[];
+  pendingDraw?: PendingIdentityDraw;
   updatedAt: number;
 }
 
@@ -186,7 +210,7 @@ function readProfile(): AnonymousProfile | null {
       version?: number;
     };
     if (
-      ![4, 5, 6, PROFILE_VERSION].includes(stored.version ?? -1) ||
+      ![4, 5, 6, 7, PROFILE_VERSION].includes(stored.version ?? -1) ||
       typeof stored.anonymousId !== "string" ||
       typeof stored.playerId !== "string" ||
       !isValidStats(stored.stats) ||
@@ -211,6 +235,9 @@ function readProfile(): AnonymousProfile | null {
       .filter((entry) => !passiveDailyLosses.includes(entry))
       .slice(-MAX_MATCH_HISTORY);
     const retainedRoundIds = new Set(matchHistory.map((entry) => entry.id));
+    const pendingDraw = isValidPendingDraw(stored.pendingDraw)
+      ? stored.pendingDraw
+      : undefined;
     return {
       anonymousId: stored.anonymousId,
       syncToken:
@@ -241,6 +268,7 @@ function readProfile(): AnonymousProfile | null {
           (!value.startsWith("daily:") || retainedRoundIds.has(value)),
       ),
       matchHistory,
+      pendingDraw,
       updatedAt:
         typeof stored.updatedAt === "number" &&
         Number.isSafeInteger(stored.updatedAt) &&
@@ -253,6 +281,30 @@ function readProfile(): AnonymousProfile | null {
   }
 }
 
+function isValidPendingDraw(value: unknown): value is PendingIdentityDraw {
+  if (!value || typeof value !== "object") return false;
+  const draw = value as Partial<PendingIdentityDraw>;
+  return (
+    ["common", "advanced", "star"].includes(draw.poolId ?? "") &&
+    Array.isArray(draw.itemIds) &&
+    draw.itemIds.length === 29 &&
+    draw.itemIds.every(
+      (id) => typeof id === "string" && players.some((player) => player.id === id),
+    ) &&
+    typeof draw.winnerId === "string" &&
+    Number.isInteger(draw.winnerIndex) &&
+    (draw.winnerIndex ?? -1) >= 0 &&
+    (draw.winnerIndex ?? 29) < draw.itemIds.length &&
+    draw.itemIds[draw.winnerIndex ?? -1] === draw.winnerId &&
+    playersInPool(draw.poolId as IdentityPoolId).some(
+      (player) => player.id === draw.winnerId,
+    ) &&
+    typeof draw.createdAt === "number" &&
+    Number.isSafeInteger(draw.createdAt) &&
+    draw.createdAt > 0
+  );
+}
+
 function isValidHistoryEntry(value: unknown): value is MatchHistoryEntry {
   if (!value || typeof value !== "object") return false;
   const entry = value as Partial<MatchHistoryEntry>;
@@ -260,16 +312,60 @@ function isValidHistoryEntry(value: unknown): value is MatchHistoryEntry {
     typeof entry.id === "string" &&
     typeof entry.completedAt === "string" &&
     ["win", "loss", "draw"].includes(entry.result ?? "") &&
-    ["daily", "quick", "room"].includes(entry.mode ?? "") &&
+    ["daily", "solo", "quick", "room"].includes(entry.mode ?? "") &&
     typeof entry.roundNumber === "number" &&
     typeof entry.bestOf === "number" &&
+    (entry.answerSnapshot === undefined ||
+      isValidHistoryPlayerSnapshot(entry.answerSnapshot)) &&
     Array.isArray(entry.guessIds) &&
     entry.guessIds.every((id) => typeof id === "string") &&
+    (entry.guessSnapshots === undefined ||
+      (Array.isArray(entry.guessSnapshots) &&
+        entry.guessSnapshots.length === entry.guessIds.length &&
+        entry.guessSnapshots.every(
+          (snapshot) =>
+            snapshot === null || isValidHistoryPlayerSnapshot(snapshot),
+        ))) &&
     Array.isArray(entry.opponentNames) &&
     entry.opponentNames.every((name) => typeof name === "string") &&
     typeof entry.selfScore === "number" &&
     typeof entry.opponentScore === "number"
   );
+}
+
+function isValidHistoryPlayerSnapshot(
+  value: unknown,
+): value is HistoryPlayerSnapshot {
+  if (!value || typeof value !== "object") return false;
+  const snapshot = value as Partial<HistoryPlayerSnapshot>;
+  return (
+    typeof snapshot.id === "string" &&
+    typeof snapshot.nickname === "string" &&
+    typeof snapshot.name === "string" &&
+    typeof snapshot.team === "string" &&
+    typeof snapshot.countryCode === "string" &&
+    typeof snapshot.age === "number" &&
+    ["AWPer", "Rifler", "IGL", "Entry", "Unknown"].includes(
+      snapshot.role ?? "",
+    ) &&
+    typeof snapshot.majorAppearances === "number"
+  );
+}
+
+function historyPlayerSnapshot(
+  player: Player | undefined,
+): HistoryPlayerSnapshot | undefined {
+  if (!player) return undefined;
+  return {
+    id: player.id,
+    nickname: player.nickname,
+    name: player.name,
+    team: player.team,
+    countryCode: player.countryCode,
+    age: player.age,
+    role: player.role,
+    majorAppearances: player.majorAppearances,
+  };
 }
 
 interface SaveProfileOptions {
@@ -406,6 +502,120 @@ function poolForPlayer(player: Player): IdentityPoolId {
   return "common";
 }
 
+export function spendDrawCreditAtomically(
+  poolId: IdentityPoolId,
+  pendingDraw: PendingIdentityDraw,
+  replacedWinnerId?: string,
+) {
+  const latest = readProfile();
+  const pool = IDENTITY_POOLS.find((candidate) => candidate.id === poolId);
+  if (
+    !latest ||
+    !pool ||
+    (latest.pendingDraw
+      ? latest.pendingDraw.poolId !== poolId ||
+        latest.pendingDraw.winnerId !== replacedWinnerId
+      : replacedWinnerId !== undefined) ||
+    latest.stats.wins < pool.unlockWins ||
+    latest.drawCredits < 1 ||
+    pendingDraw.poolId !== poolId ||
+    !isValidPendingDraw(pendingDraw) ||
+    pendingDraw.winnerId === latest.playerId
+  ) {
+    return false;
+  }
+  try {
+    const saved = saveProfile({
+      ...latest,
+      drawCredits: latest.drawCredits - 1,
+      pendingDraw,
+    });
+    useAnonymousProfileStore.getState().replaceProfile(saved);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function withDrawMutationLock<T>(mutation: () => T) {
+  if (navigator.locks) {
+    return navigator.locks.request("cs-guess:identity-draw", mutation);
+  }
+  return mutation();
+}
+
+export function spendDrawCreditSafely(
+  poolId: IdentityPoolId,
+  pendingDraw: PendingIdentityDraw,
+  replacedWinnerId?: string,
+) {
+  return withDrawMutationLock(async () => {
+    const latest = readProfile();
+    if (!latest) return false;
+    await hydrateProfile(latest);
+    return spendDrawCreditAtomically(
+      poolId,
+      pendingDraw,
+      replacedWinnerId,
+    );
+  }).catch(() => false);
+}
+
+export function discardPendingIdentityDraw(
+  poolId: IdentityPoolId,
+  winnerId: string,
+) {
+  const latest = readProfile();
+  if (
+    latest?.pendingDraw?.poolId !== poolId ||
+    latest.pendingDraw.winnerId !== winnerId
+  ) {
+    return false;
+  }
+  const { pendingDraw: _pendingDraw, ...withoutPending } = latest;
+  try {
+    const saved = saveProfile(withoutPending);
+    useAnonymousProfileStore.getState().replaceProfile(saved);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function adoptPendingIdentityDraw(
+  poolId: IdentityPoolId,
+  selectedPlayerId: string,
+) {
+  const latest = readProfile();
+  const pool = IDENTITY_POOLS.find((candidate) => candidate.id === poolId);
+  const selectedPlayer = playersInPool(poolId).find(
+    (candidate) =>
+      candidate.id === selectedPlayerId && candidate.id !== latest?.playerId,
+  );
+  if (
+    !latest ||
+    !pool ||
+    latest.stats.wins < pool.unlockWins ||
+    latest.pendingDraw?.poolId !== poolId ||
+    latest.pendingDraw.winnerId !== selectedPlayerId ||
+    !selectedPlayer
+  ) {
+    return false;
+  }
+  const { pendingDraw: _pendingDraw, ...withoutPending } = latest;
+  try {
+    const saved = saveProfile({
+      ...withoutPending,
+      playerId: selectedPlayer.id,
+      identityConfirmed: true,
+    });
+    useAnonymousProfileStore.getState().replaceProfile(saved);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function useAnonymousProfile() {
   const profile = useAnonymousProfileStore((state) => state.profile);
   const setProfile = useAnonymousProfileStore(
@@ -445,57 +655,26 @@ export function useAnonymousProfile() {
   }, [setProfile]);
 
   const spendDrawCredit = useCallback(
-    (poolId: IdentityPoolId) => {
-      const latest = readProfile();
-      const pool = IDENTITY_POOLS.find((candidate) => candidate.id === poolId);
-      if (
-        !latest ||
-        !pool ||
-        latest.stats.wins < pool.unlockWins ||
-        latest.drawCredits < 1
-      ) {
-        return;
-      }
-      const next = {
-        ...latest,
-        drawCredits: latest.drawCredits - 1,
-      };
-      const saved = saveProfile(next);
-      setProfile(saved);
-    },
-    [setProfile],
+    (
+      poolId: IdentityPoolId,
+      pendingDraw: PendingIdentityDraw,
+      replacedWinnerId?: string,
+    ) =>
+      spendDrawCreditSafely(poolId, pendingDraw, replacedWinnerId),
+    [],
   );
 
   const adoptIdentity = useCallback(
     (poolId: IdentityPoolId, selectedPlayerId: string) => {
-      const latest = readProfile();
-      const pool = IDENTITY_POOLS.find(
-        (candidate) => candidate.id === poolId,
-      );
-      const selectedPlayer = latest
-        ? playersInPool(poolId).find(
-            (candidate) =>
-              candidate.id === selectedPlayerId &&
-              candidate.id !== latest.playerId,
-          )
-        : undefined;
-      if (
-        !latest ||
-        !pool ||
-        latest.stats.wins < pool.unlockWins ||
-        !selectedPlayer
-      ) {
-        return;
-      }
-      const next = {
-        ...latest,
-        playerId: selectedPlayer.id,
-        identityConfirmed: true,
-      };
-      const saved = saveProfile(next);
-      setProfile(saved);
+      return adoptPendingIdentityDraw(poolId, selectedPlayerId);
     },
-    [setProfile],
+    [],
+  );
+
+  const discardPendingDraw = useCallback(
+    (poolId: IdentityPoolId, winnerId: string) =>
+      discardPendingIdentityDraw(poolId, winnerId),
+    [],
   );
 
   const completeIdentitySetup = useCallback((selectedPlayerId: string) => {
@@ -583,7 +762,16 @@ export function useAnonymousProfile() {
                 roundNumber: details.roundNumber ?? 1,
                 bestOf: details.bestOf ?? 1,
                 answerId: details.answerId,
+                answerSnapshot: historyPlayerSnapshot(
+                  players.find((player) => player.id === details.answerId),
+                ),
                 guessIds: details.guessIds ?? [],
+                guessSnapshots: (details.guessIds ?? []).map(
+                  (id) =>
+                    historyPlayerSnapshot(
+                      players.find((player) => player.id === id),
+                    ) ?? null,
+                ),
                 opponentNames: details.opponentNames ?? [],
                 selfScore: details.selfScore ?? 0,
                 opponentScore: details.opponentScore ?? 0,
@@ -597,41 +785,19 @@ export function useAnonymousProfile() {
     [setProfile],
   );
 
-  const completedSeries =
-    profile.stats.wins + profile.stats.losses + profile.stats.draws;
-  const winRate =
-    completedSeries === 0
-      ? 0
-      : Math.round((profile.stats.wins / completedSeries) * 100);
-  const winningHistory = profile.matchHistory.filter(
-    (entry) => entry.result === "win",
+  const roundSummary = deriveRoundSummary(
+    profile.stats,
+    profile.matchHistory,
   );
-  const averageWinningGuesses =
-    winningHistory.length === 0
-      ? 0
-      : Number(
-          (
-            winningHistory.reduce(
-              (total, entry) => total + entry.guessIds.length,
-              0,
-            ) / winningHistory.length
-          ).toFixed(1),
-        );
-  const bestGuessCount =
-    winningHistory.length === 0
-      ? 0
-      : Math.min(...winningHistory.map((entry) => entry.guessIds.length));
 
   return {
     profile,
     player: player as Player,
     currentPool: poolForPlayer(player as Player),
-    completedSeries,
-    winRate,
-    averageWinningGuesses,
-    bestGuessCount,
+    ...roundSummary,
     spendDrawCredit,
     adoptIdentity,
+    discardPendingDraw,
     completeIdentitySetup,
     setPreviewDrawCredits,
     recordRound,

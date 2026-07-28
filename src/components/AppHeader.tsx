@@ -17,28 +17,44 @@ export function AppHeader({
 }: AppHeaderProps) {
   return (
     <header className="border-b border-foreground/20">
-      <div className="app-container flex min-h-20 items-center justify-between gap-5 py-4">
-        <Link to="/" className="flex min-w-0 items-center gap-3">
+      <div
+        className="app-container grid min-h-20 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-3 sm:flex sm:justify-between sm:gap-5 sm:py-4"
+        data-layout="app-header"
+      >
+        <Link
+          to="/"
+          aria-label={`CS GUESS · ${subtitle}`}
+          className="flex min-h-10 min-w-0 items-center gap-2 sm:gap-3"
+        >
           <CrosshairIcon
-            className="size-9 shrink-0 text-primary"
+            className="size-8 shrink-0 text-primary sm:size-9"
             weight="regular"
           />
           <div className="min-w-0">
-            <p className="truncate text-lg font-bold tracking-[0.08em]">
+            <p className="whitespace-nowrap text-base font-bold tracking-[0.08em] sm:text-lg">
               CS GUESS
             </p>
-            <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
+            <p className="whitespace-nowrap text-xs text-muted-foreground">
+              {subtitle}
+            </p>
           </div>
         </Link>
-        {action ??
-          (backToLobby ? (
-            <Button asChild variant="outline" size="sm" className="rounded-none">
-              <Link to="/">
-                <ArrowLeftIcon />
-                模式大厅
-              </Link>
-            </Button>
-          ) : null)}
+        <div className="min-w-0" data-layout="app-header-actions">
+          {action ??
+            (backToLobby ? (
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="rounded-none"
+              >
+                <Link to="/">
+                  <ArrowLeftIcon />
+                  模式大厅
+                </Link>
+              </Button>
+            ) : null)}
+        </div>
       </div>
     </header>
   );

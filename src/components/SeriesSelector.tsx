@@ -58,8 +58,8 @@ export function SeriesSelector({
   return (
     <div
       className={cn(
-        "grid border border-foreground/25",
-        compact ? "grid-cols-3" : "gap-px bg-foreground/20 sm:grid-cols-3",
+        "grid grid-cols-3 border border-foreground/25",
+        compact ? null : "gap-px bg-foreground/20",
       )}
       role="radiogroup"
       aria-label="比赛赛制"
@@ -78,7 +78,9 @@ export function SeriesSelector({
             onKeyDown={(event) => moveSelection(event, index)}
             className={cn(
               "relative min-w-0 bg-background text-left transition-colors focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-55",
-              compact ? "border-r border-foreground/20 px-3 py-2.5 last:border-r-0" : "p-4",
+              compact
+                ? "border-r border-foreground/20 px-3 py-2.5 last:border-r-0"
+                : "min-h-20 p-3 sm:p-4",
               selected ? "bg-primary text-primary-foreground" : "hover:bg-primary/[0.04]",
             )}
           >
@@ -89,13 +91,14 @@ export function SeriesSelector({
               {selected ? <CheckIcon className="size-3.5" weight="bold" /> : null}
             </span>
             {!compact ? (
-              <span className="mt-2 flex items-center justify-between gap-2 text-xs">
+              <span className="mt-2 flex min-w-0 flex-col items-start gap-1 text-xs sm:flex-row sm:items-center sm:justify-between sm:gap-2">
                 <span
-                  className={
+                  className={cn(
+                    "min-w-0 leading-tight",
                     selected
                       ? "text-primary-foreground/75"
-                      : "text-muted-foreground"
-                  }
+                      : "text-muted-foreground",
+                  )}
                 >
                   {option.description}
                 </span>

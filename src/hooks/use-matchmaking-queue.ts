@@ -1,10 +1,47 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { io, type Socket } from "socket.io-client";
 
 import {
-  resolveQueueWebSocketUrl,
+  resolveQueueSocketIoEndpoint,
+  type MatchmakingDifficultyCounts,
   type MatchmakingQueueCounts,
 } from "@/lib/realtime";
 import { useDebugStore } from "@/stores/debug-store";
+
+const EMPTY_DIFFICULTY_COUNTS: MatchmakingDifficultyCounts = {
+  bo1_hidden: 0,
+  bo1_open: 0,
+  bo3_hidden: 0,
+  bo3_open: 0,
+  bo5_hidden: 0,
+  bo5_open: 0,
+  group_bo1_hidden: 0,
+  group_bo1_open: 0,
+  group_bo3_hidden: 0,
+  group_bo3_open: 0,
+  group_bo5_hidden: 0,
+  group_bo5_open: 0,
+  total: 0,
+  playing_bo1: 0,
+  playing_bo1_hidden: 0,
+  playing_bo1_open: 0,
+  playing_bo3: 0,
+  playing_bo3_hidden: 0,
+  playing_bo3_open: 0,
+  playing_bo5: 0,
+  playing_bo5_hidden: 0,
+  playing_bo5_open: 0,
+  playing_group_bo1: 0,
+  playing_group_bo1_hidden: 0,
+  playing_group_bo1_open: 0,
+  playing_group_bo3: 0,
+  playing_group_bo3_hidden: 0,
+  playing_group_bo3_open: 0,
+  playing_group_bo5: 0,
+  playing_group_bo5_hidden: 0,
+  playing_group_bo5_open: 0,
+  playing_total: 0,
+};
 
 const EMPTY_COUNTS: MatchmakingQueueCounts = {
   bo1: 0,
@@ -34,7 +71,17 @@ const EMPTY_COUNTS: MatchmakingQueueCounts = {
   playing_group_bo3: 0,
   playing_group_bo5: 0,
   playing_total: 0,
+  easy: { ...EMPTY_DIFFICULTY_COUNTS },
+  full: { ...EMPTY_DIFFICULTY_COUNTS },
+  hard: { ...EMPTY_DIFFICULTY_COUNTS },
 };
+
+function isDifficultyCounts(value: unknown): value is MatchmakingDifficultyCounts {
+  if (!value || typeof value !== "object") return false;
+  return Object.values(value).every(
+    (count) => typeof count === "number" && Number.isFinite(count) && count >= 0,
+  );
+}
 
 function isQueueCounts(value: unknown): value is MatchmakingQueueCounts {
   if (!value || typeof value !== "object") return false;
@@ -61,6 +108,8 @@ function isQueueCounts(value: unknown): value is MatchmakingQueueCounts {
     counts.group_bo5_open,
     counts.group_total,
     counts.playing_bo1,
+    counts.easy?.playing_bo1_hidden,
+    counts.easy?.playing_bo1_open,
     counts.playing_bo3,
     counts.playing_bo5,
     counts.playing_group_bo1,
@@ -69,68 +118,127 @@ function isQueueCounts(value: unknown): value is MatchmakingQueueCounts {
     counts.playing_total,
   ].every(
     (count) => typeof count === "number" && Number.isFinite(count) && count >= 0,
-  );
+  ) && isDifficultyCounts(counts.easy)
+    && isDifficultyCounts(counts.full)
+    && isDifficultyCounts(counts.hard);
 }
 
 export function useMatchmakingQueue() {
   const [counts, setCounts] = useState(EMPTY_COUNTS);
   const [live, setLive] = useState(false);
-  const retryRef = useRef<number | undefined>(undefined);
   const debugCounts = useDebugStore((state) => state.queueCounts);
   const debugLive = useDebugStore((state) => state.queueLive);
 
   useEffect(() => {
     let closed = false;
-    let attempts = 0;
-    let socket: WebSocket | undefined;
+    let generation = 0;
+
+    interface OwnedSocket {
+      socket: Socket;
+      generation: number;
+      disposed: boolean;
+      detach: () => void;
+    }
+
+    let ownedSocket: OwnedSocket | undefined;
+    const createdSockets = new Set<OwnedSocket>();
+
+    function isCurrent(owner: OwnedSocket) {
+      return (
+        !closed &&
+        !owner.disposed &&
+        ownedSocket === owner &&
+        generation === owner.generation
+      );
+    }
+
+    function retire(owner: OwnedSocket, disconnect: boolean) {
+      if (owner.disposed) return;
+      owner.disposed = true;
+      owner.detach();
+      if (ownedSocket === owner) {
+        ownedSocket = undefined;
+      }
+      if (disconnect) {
+        owner.socket.disconnect();
+      }
+    }
 
     function connect() {
-      if (
-        closed ||
-        document.hidden ||
-        socket?.readyState === WebSocket.CONNECTING ||
-        socket?.readyState === WebSocket.OPEN
-      ) {
+      if (closed || document.hidden) {
         return;
       }
-      const nextSocket = new WebSocket(resolveQueueWebSocketUrl());
-      socket = nextSocket;
-      nextSocket.addEventListener("open", () => {
-        if (socket !== nextSocket) return;
-        attempts = 0;
-        setLive(true);
+
+      if (ownedSocket) {
+        // `active` stays true while Socket.IO is initially connecting or is
+        // waiting for a managed reconnect. Reuse that manager instead of
+        // creating an orphan that can reconnect behind the current socket.
+        if (ownedSocket.socket.connected || ownedSocket.socket.active) {
+          return;
+        }
+        retire(ownedSocket, true);
+      }
+
+      const endpoint = resolveQueueSocketIoEndpoint();
+      const nextSocket = io(`${endpoint.url}/queue`, {
+        path: endpoint.path,
+        reconnection: true,
+        reconnectionDelay: 500,
+        reconnectionDelayMax: 10_000,
+        randomizationFactor: 0.25,
       });
-      nextSocket.addEventListener("message", (message) => {
-        if (socket !== nextSocket) return;
+
+      const owner: OwnedSocket = {
+        socket: nextSocket,
+        generation: ++generation,
+        disposed: false,
+        detach: () => undefined,
+      };
+      const handleConnect = () => {
+        if (!isCurrent(owner)) return;
+        setLive(true);
+      };
+      const handleCounts = (counts: unknown) => {
+        if (!isCurrent(owner)) return;
         try {
-          const payload = JSON.parse(String(message.data)) as {
-            type?: string;
-            counts?: unknown;
-          };
-          if (payload.type === "queue_counts" && isQueueCounts(payload.counts)) {
-            setCounts(payload.counts);
+          if (isQueueCounts(counts)) {
+            setCounts(counts);
           }
         } catch {
           // Ignore malformed public telemetry and wait for the next broadcast.
         }
-      });
-      nextSocket.addEventListener("close", () => {
-        if (socket !== nextSocket) return;
-        socket = undefined;
+      };
+      const handleDisconnect = () => {
+        if (!isCurrent(owner)) return;
         setLive(false);
-        if (closed || document.hidden || !navigator.onLine) return;
-        const baseDelay = Math.min(10_000, 500 * 2 ** attempts);
-        const delay = baseDelay * (0.75 + Math.random() * 0.5);
-        attempts += 1;
-        retryRef.current = window.setTimeout(connect, delay);
-      });
-      nextSocket.addEventListener("error", () => nextSocket.close());
+        if (!nextSocket.active) {
+          retire(owner, false);
+        }
+      };
+      const handleConnectError = () => {
+        if (!isCurrent(owner)) return;
+        setLive(false);
+      };
+      owner.detach = () => {
+        nextSocket.off("connect", handleConnect);
+        nextSocket.off("queue_counts", handleCounts);
+        nextSocket.off("disconnect", handleDisconnect);
+        nextSocket.off("connect_error", handleConnectError);
+      };
+      ownedSocket = owner;
+      createdSockets.add(owner);
+
+      nextSocket.on("connect", handleConnect);
+      nextSocket.on("queue_counts", handleCounts);
+      nextSocket.on("disconnect", handleDisconnect);
+      nextSocket.on("connect_error", handleConnectError);
     }
 
     function handleVisibilityChange() {
-      window.clearTimeout(retryRef.current);
       if (document.hidden) {
-        socket?.close(1000, "page-hidden");
+        if (ownedSocket) {
+          retire(ownedSocket, true);
+        }
         setLive(false);
       } else {
         connect();
@@ -138,7 +246,6 @@ export function useMatchmakingQueue() {
     }
 
     function handleOnline() {
-      attempts = 0;
       connect();
     }
 
@@ -147,10 +254,12 @@ export function useMatchmakingQueue() {
     connect();
     return () => {
       closed = true;
-      window.clearTimeout(retryRef.current);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("online", handleOnline);
-      socket?.close(1000, "page-unmounted");
+      for (const owner of createdSockets) {
+        retire(owner, true);
+      }
+      createdSockets.clear();
     };
   }, []);
 

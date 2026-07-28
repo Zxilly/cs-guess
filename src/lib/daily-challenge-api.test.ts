@@ -38,4 +38,40 @@ describe("loadCurrentDailyChallenge", () => {
 
     await expect(loadCurrentDailyChallenge()).resolves.toEqual(response);
   });
+
+  it("replaces a legacy undefined snapshot team before rendering", async () => {
+    const response = {
+      date: "2026-07-28",
+      roundNumber: 209,
+      mysteryPlayerId: "jedqr",
+      mysteryPlayer: {
+        id: "jedqr",
+        nickname: "jedqr",
+        name: "Grzegorz Jędras",
+        team: "undefined (American team)",
+        teamLogoUrl: "https://cdn.example/undefined.png",
+        nationality: "Poland",
+        countryCode: "PL",
+        age: 27,
+        role: "Entry",
+        majorAppearances: 0,
+        majorWins: 0,
+      },
+      catalogVersion: "legacy-catalog",
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify(response), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      ),
+    );
+
+    const challenge = await loadCurrentDailyChallenge();
+
+    expect(challenge.mysteryPlayer.team).toBe("无队伍");
+    expect(challenge.mysteryPlayer.teamLogoUrl).toBeUndefined();
+  });
 });

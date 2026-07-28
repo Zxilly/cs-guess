@@ -5,6 +5,16 @@ import { cn } from "@/lib/utils";
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
 import { SearchIcon, CheckIcon } from "lucide-react";
 
+const CommandInputElement = React.forwardRef<
+  HTMLInputElement,
+  React.ComponentProps<"input">
+>((props, ref) => <input ref={ref} {...props} />);
+
+const CommandListElement = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<"div">
+>((props, ref) => <div ref={ref} {...props} />);
+
 function Command({
   className,
   ...props
@@ -23,22 +33,54 @@ function Command({
 
 function CommandInput({
   className,
+  completion,
+  completionClassName,
+  value,
+  "aria-expanded": ariaExpanded,
+  "aria-controls": ariaControls,
+  "aria-activedescendant": ariaActiveDescendant,
+  "aria-autocomplete": ariaAutocomplete,
   ...props
-}: React.ComponentProps<typeof CommandPrimitive.Input>) {
+}: React.ComponentProps<typeof CommandPrimitive.Input> & {
+  completion?: string;
+  completionClassName?: string;
+}) {
+  const visibleValue = typeof value === "string" ? value : "";
+
   return (
     <div
       data-slot="command-input-wrapper"
       className="border-b border-foreground/20 p-3"
     >
       <InputGroup className="h-12! rounded-none! border-foreground/25 bg-background shadow-none! *:data-[slot=input-group-addon]:pl-3!">
-        <CommandPrimitive.Input
-          data-slot="command-input"
-          className={cn(
-            "w-full text-base outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
-            className,
-          )}
-          {...props}
-        />
+        <div className="relative min-w-0 flex-1 self-stretch">
+          {completion ? (
+            <span
+              data-slot="command-input-completion"
+              aria-hidden="true"
+              className={cn(
+                "pointer-events-none absolute inset-0 flex items-center overflow-hidden whitespace-pre text-base",
+                completionClassName,
+              )}
+            >
+              <span className="invisible">{visibleValue}</span>
+              <span className="text-muted-foreground/55">{completion}</span>
+            </span>
+          ) : null}
+          <CommandPrimitive.Input asChild value={value} {...props}>
+            <CommandInputElement
+              data-slot="command-input"
+              className={cn(
+                "relative z-10 h-full w-full bg-transparent text-base outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+                className,
+              )}
+              aria-expanded={ariaExpanded}
+              aria-controls={ariaControls}
+              aria-activedescendant={ariaActiveDescendant}
+              aria-autocomplete={ariaAutocomplete}
+            />
+          </CommandPrimitive.Input>
+        </div>
         <InputGroupAddon>
           <SearchIcon className="size-5 shrink-0 text-primary" />
         </InputGroupAddon>
@@ -49,17 +91,26 @@ function CommandInput({
 
 function CommandList({
   className,
+  id,
+  children,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.List>) {
   return (
     <CommandPrimitive.List
-      data-slot="command-list"
-      className={cn(
-        "no-scrollbar max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
-        className,
-      )}
+      asChild
       {...props}
-    />
+    >
+      <CommandListElement
+        id={id}
+        data-slot="command-list"
+        className={cn(
+          "no-scrollbar max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
+          className,
+        )}
+      >
+        {children}
+      </CommandListElement>
+    </CommandPrimitive.List>
   );
 }
 
