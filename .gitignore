@@ -20,6 +20,10 @@ server/data/*.sqlite*
 /data/*.sqlite*
 *.local
 design-qa.md
+docs/user-journey-state-audit.md
+dogfood-output/
+playwright-report/
+test-results/
 
 # Local environment files and secrets
 .env
