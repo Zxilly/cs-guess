@@ -72,18 +72,18 @@ describe("RoomEntry", () => {
     expect(markup).toContain("比赛赛制");
   });
 
-  it("keeps both room-capacity actions and their value on the same 40px control row", () => {
+  it("keeps both room-capacity actions and their value on the same 44px control row", () => {
     const markup = renderRoomEntry();
 
     expect(markup).toContain('aria-label="减少房间人数"');
     expect(markup).toContain('aria-label="增加房间人数"');
     expect(markup.match(/data-size="icon-sm"/g)).toHaveLength(2);
     expect(markup).toContain(
-      "min-h-10 grid-cols-[2.5rem_1fr_2.5rem]",
+      "min-h-11 grid-cols-[2.75rem_1fr_2.75rem]",
     );
-    expect(markup.match(/h-10 w-10 rounded-none/g)).toHaveLength(2);
+    expect(markup.match(/h-11 w-11 rounded-none/g)).toHaveLength(2);
     expect(markup).toContain(
-      'class="flex h-10 items-center justify-center font-mono text-xs"',
+      'class="flex h-11 items-center justify-center font-mono text-xs"',
     );
   });
 });

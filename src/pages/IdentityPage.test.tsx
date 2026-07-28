@@ -94,8 +94,9 @@ describe("IdentityPage onboarding", () => {
 
     expect(markup).not.toContain("首次游玩需设置匿名身份");
     expect(markup).toContain("当前身份池");
-    expect(markup).toContain("测试选手池");
+    expect(markup).not.toContain("测试选手池");
     expect(markup).toContain("0胜");
+    expect(markup).toContain("0平");
     expect(markup).toContain("0 连胜");
   });
 });

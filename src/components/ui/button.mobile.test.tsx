@@ -50,7 +50,7 @@ describe("Button mobile touch contract", () => {
     }
   });
 
-  it("gives maintained button sizes a 40px minimum on narrow or coarse-pointer devices", () => {
+  it("gives maintained button sizes a 44px minimum on narrow or coarse-pointer devices", () => {
     const mediaContract = css.match(
       /@media \(max-width: 39\.999rem\), \(pointer: coarse\) \{([\s\S]*?)\n\}/,
     )?.[1];
@@ -70,7 +70,7 @@ describe("Button mobile touch contract", () => {
         `[data-slot="button"][data-size="${size}"]`,
       );
     }
-    expect(mediaContract).toContain("min-width: 2.5rem");
-    expect(mediaContract).toContain("min-height: 2.5rem");
+    expect(mediaContract).toContain("min-width: 2.75rem");
+    expect(mediaContract).toContain("min-height: 2.75rem");
   });
 });

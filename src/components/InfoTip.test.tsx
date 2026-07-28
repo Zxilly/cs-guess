@@ -147,6 +147,24 @@ describe("InfoTip interaction contract", () => {
     expect(content()).toBeNull();
   });
 
+  it("provides a visible mobile close action and returns focus to the trigger", async () => {
+    await renderInfoTip();
+    const button = trigger();
+
+    await act(async () => button.click());
+    const closeButton = content()?.querySelector<HTMLButtonElement>(
+      '[data-slot="info-tip-close"]',
+    );
+    expect(closeButton?.getAttribute("aria-label")).toBe("关闭说明");
+    expect(closeButton?.className).toContain("max-sm:grid");
+
+    await act(async () => closeButton?.click());
+    await flush();
+
+    expect(content()).toBeNull();
+    expect(document.activeElement).toBe(button);
+  });
+
   it("keeps hover, click pinning, and click dismissal in one state", async () => {
     vi.useFakeTimers();
     await renderInfoTip();
