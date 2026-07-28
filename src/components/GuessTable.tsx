@@ -6,7 +6,7 @@ import {
   EyeIcon,
   EyeSlashIcon,
 } from "@phosphor-icons/react";
-import type { ReactNode } from "react";
+import { useId, useState, type KeyboardEvent, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -184,7 +184,7 @@ function CountryComparisonValue({
   return (
     <span
       className={cn(
-        "inline-flex max-w-full flex-col items-center justify-center",
+        "inline-flex w-full min-w-0 max-w-full flex-col items-center justify-center overflow-hidden",
         comparison.relation === "match" && "text-primary",
         comparison.relation === "near" && "text-comparison-near",
         comparison.relation === "miss" && "text-muted-foreground",
@@ -192,10 +192,12 @@ function CountryComparisonValue({
       title={comparisonLabel}
       aria-label={comparisonLabel}
     >
-      <span className="text-xs font-semibold">{countryNameZh(countryCode)}</span>
+      <span className="max-w-full truncate text-xs font-semibold">
+        {countryNameZh(countryCode)}
+      </span>
       <span
         className={cn(
-          "mt-1 font-mono text-xs",
+          "mt-1 font-mono text-xs max-w-full truncate",
           comparison.relation === "match" && "text-primary",
         )}
       >
@@ -258,7 +260,7 @@ function GuessBoard({
         aria-label={`${title}，横向滚动查看更多属性`}
         tabIndex={0}
       >
-        <Table className="min-w-[31rem] table-fixed">
+        <Table className="min-w-[46rem] table-fixed">
           <TableHeader>
             <TableRow className="border-foreground/20 hover:bg-transparent">
               <TableHead className="w-10 border-r border-foreground/15 text-center">
@@ -314,7 +316,7 @@ function GuessBoard({
                 {ATTRIBUTES.map((attribute) => (
                   <TableCell
                     key={attribute[0]}
-                    className="border-r border-foreground/15 px-2 text-center last:border-r-0"
+                    className="overflow-hidden border-r border-foreground/15 px-2 text-center last:border-r-0"
                   >
                     {player ? (
                       attribute[1] === "team" ? (
@@ -420,7 +422,7 @@ function OpponentBoard({
         aria-label={`${title}，横向滚动查看更多属性`}
         tabIndex={0}
       >
-        <Table className="min-w-[31rem] table-fixed">
+        <Table className="min-w-[46rem] table-fixed">
           <TableHeader>
             <TableRow className="border-foreground/20 hover:bg-transparent">
               <TableHead className="w-10 border-r border-foreground/15 text-center">
@@ -595,6 +597,135 @@ function OpponentBoard({
   );
 }
 
+function MultiplayerGuessBoards({
+  guesses,
+  maxGuesses,
+  mysteryPlayer,
+  selfName,
+  ownMatchedFields,
+  ownCountryHints,
+  opponents,
+  opponentVisibility,
+}: {
+  guesses: readonly Player[];
+  maxGuesses: number;
+  mysteryPlayer: Player;
+  selfName: string;
+  ownMatchedFields?: readonly (readonly string[])[];
+  ownCountryHints?: readonly CountryHint[];
+  opponents: readonly OpponentBoardData[];
+  opponentVisibility: OpponentVisibility;
+}) {
+  const tabsId = useId();
+  const [activeOpponentId, setActiveOpponentId] = useState(
+    () => opponents[0]?.id,
+  );
+  const activeIndex = Math.max(
+    0,
+    opponents.findIndex((opponent) => opponent.id === activeOpponentId),
+  );
+
+  function moveOpponentTab(
+    event: KeyboardEvent<HTMLButtonElement>,
+    direction: -1 | 1,
+  ) {
+    event.preventDefault();
+    const nextIndex =
+      (activeIndex + direction + opponents.length) % opponents.length;
+    const next = opponents[nextIndex];
+    if (!next) return;
+    setActiveOpponentId(next.id);
+    document
+      .getElementById(`${tabsId}-tab-${next.id}`)
+      ?.focus({ preventScroll: true });
+  }
+
+  return (
+    <>
+      <div
+        className="mb-3 grid grid-cols-3 border border-foreground/25"
+        role="tablist"
+        aria-label="选择要查看的对手"
+      >
+        {opponents.map((opponent, index) => {
+          const selected = index === activeIndex;
+          return (
+            <button
+              key={opponent.id}
+              id={`${tabsId}-tab-${opponent.id}`}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              aria-controls={`${tabsId}-panel-${opponent.id}`}
+              tabIndex={selected ? 0 : -1}
+              className={cn(
+                "min-w-0 border-r border-foreground/20 px-3 py-2.5 text-left last:border-r-0",
+                "focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary",
+                selected
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-primary/[0.04]",
+              )}
+              onClick={() => setActiveOpponentId(opponent.id)}
+              onKeyDown={(event) => {
+                if (event.key === "ArrowRight") {
+                  moveOpponentTab(event, 1);
+                } else if (event.key === "ArrowLeft") {
+                  moveOpponentTab(event, -1);
+                }
+              }}
+            >
+              <span className="block truncate text-xs font-semibold">
+                对手 {index + 1}
+              </span>
+              <span
+                className={cn(
+                  "mt-0.5 block truncate font-mono text-[10px]",
+                  selected
+                    ? "text-primary-foreground/75"
+                    : "text-muted-foreground",
+                )}
+              >
+                {opponent.name.replace(/^对手 \d+ · /, "")} ·{" "}
+                {opponent.progress.length}/{maxGuesses}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="grid min-w-0 gap-4 min-[1400px]:grid-cols-2">
+        <GuessBoard
+          title={`${selfName} · 我的猜测`}
+          guesses={guesses}
+          maxGuesses={maxGuesses}
+          mysteryPlayer={mysteryPlayer}
+          matchedFields={ownMatchedFields}
+          countryHints={ownCountryHints}
+        />
+        {opponents.map((opponent, index) => (
+          <div
+            key={opponent.id}
+            id={`${tabsId}-panel-${opponent.id}`}
+            role="tabpanel"
+            aria-labelledby={`${tabsId}-tab-${opponent.id}`}
+            hidden={index !== activeIndex}
+            className="min-w-0"
+          >
+            <OpponentBoard
+              title={`${opponent.name} · 对手进度`}
+              progress={opponent.progress}
+              visibility={opponentVisibility}
+              maxGuesses={maxGuesses}
+              mysteryPlayer={mysteryPlayer}
+              disconnectSeconds={opponent.disconnectSeconds}
+              forfeitedThisRound={opponent.forfeitedThisRound}
+            />
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
 export function GuessTable({
   guesses,
   opponentGuesses,
@@ -686,40 +817,38 @@ export function GuessTable({
         ) : null}
       </div>
 
-      <div className="grid min-w-0 gap-4 min-[1400px]:grid-cols-2">
-        <GuessBoard
-          title={`${selfName} · 我的猜测`}
+      {opponents && opponents.length > 1 ? (
+        <MultiplayerGuessBoards
           guesses={guesses}
           maxGuesses={maxGuesses}
           mysteryPlayer={mysteryPlayer}
-          matchedFields={ownMatchedFields}
-          countryHints={ownCountryHints}
+          selfName={selfName}
+          ownMatchedFields={ownMatchedFields}
+          ownCountryHints={ownCountryHints}
+          opponents={opponents}
+          opponentVisibility={opponentVisibility}
         />
-        {opponents && opponents.length > 1
-          ? opponents.map((opponent) => (
-              <OpponentBoard
-                key={opponent.id}
-                title={`${opponent.name} · 对手进度`}
-                progress={opponent.progress}
-                visibility={opponentVisibility}
-                maxGuesses={maxGuesses}
-                mysteryPlayer={mysteryPlayer}
-                disconnectSeconds={opponent.disconnectSeconds}
-                forfeitedThisRound={opponent.forfeitedThisRound}
-              />
-            ))
-          : (
-              <OpponentBoard
-                title={`${opponentName} · 对手进度`}
-                progress={normalizedProgress}
-                visibility={opponentVisibility}
-                maxGuesses={maxGuesses}
-                mysteryPlayer={mysteryPlayer}
-                disconnectSeconds={opponentDisconnectSeconds}
-                forfeitedThisRound={opponentForfeitedThisRound}
-              />
-            )}
-      </div>
+      ) : (
+        <div className="grid min-w-0 gap-4 min-[1400px]:grid-cols-2">
+          <GuessBoard
+            title={`${selfName} · 我的猜测`}
+            guesses={guesses}
+            maxGuesses={maxGuesses}
+            mysteryPlayer={mysteryPlayer}
+            matchedFields={ownMatchedFields}
+            countryHints={ownCountryHints}
+          />
+          <OpponentBoard
+            title={`${opponentName} · 对手进度`}
+            progress={normalizedProgress}
+            visibility={opponentVisibility}
+            maxGuesses={maxGuesses}
+            mysteryPlayer={mysteryPlayer}
+            disconnectSeconds={opponentDisconnectSeconds}
+            forfeitedThisRound={opponentForfeitedThisRound}
+          />
+        </div>
+      )}
     </div>
   );
 }
