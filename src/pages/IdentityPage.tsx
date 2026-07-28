@@ -16,6 +16,7 @@ import { IdentityDrawDialog } from "@/components/IdentityDrawDialog";
 import { InfoTip } from "@/components/InfoTip";
 import { PageIntro } from "@/components/PageIntro";
 import { PanelHeader } from "@/components/PanelHeader";
+import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -419,15 +420,24 @@ export function IdentityPage() {
                 />
               </div>
 
-              <div>
-                <p className="mt-6 break-words text-5xl font-bold tracking-[-0.06em] sm:mt-10 sm:text-6xl">
-                  {onboarding ? "等待抽取" : identity.player.nickname}
-                </p>
-                <p className="mt-3 text-sm text-muted-foreground">
-                  {onboarding
-                    ? "从 Major 参赛选手中抽取固定匿名身份"
-                    : `${countryNameZh(identity.player.countryCode)} · ${identity.player.team}`}
-                </p>
+              <div className="mt-6 flex min-w-0 items-end gap-5 sm:mt-10">
+                {!onboarding ? (
+                  <PlayerAvatar
+                    player={identity.player}
+                    className="size-24 shrink-0 sm:size-28"
+                    eager
+                  />
+                ) : null}
+                <div className="min-w-0">
+                  <p className="break-words text-4xl font-bold tracking-[-0.06em] sm:text-5xl">
+                    {onboarding ? "等待抽取" : identity.player.nickname}
+                  </p>
+                  <p className="mt-3 truncate text-sm text-muted-foreground">
+                    {onboarding
+                      ? "从 Major 参赛选手中抽取固定匿名身份"
+                      : `${countryNameZh(identity.player.countryCode)} · ${identity.player.team}`}
+                  </p>
+                </div>
               </div>
 
               <div className="mt-6 flex flex-wrap items-center gap-2 sm:mt-9">
@@ -450,11 +460,12 @@ export function IdentityPage() {
                 <div className="px-4 py-3">
                   <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <TrophyIcon />
-                    胜负
+                    战绩
                   </p>
-                  <p className="mt-1 font-mono text-sm font-semibold">
-                    {identity.profile.stats.wins}胜 ·{" "}
-                    {identity.profile.stats.losses}负
+                  <p className="mt-1 font-mono text-xs leading-5 font-semibold sm:text-sm">
+                    {identity.profile.stats.wins}胜{" "}
+                    {identity.profile.stats.losses}负{" "}
+                    {identity.profile.stats.draws}平
                   </p>
                 </div>
                 <div className="border-x border-foreground/20 px-4 py-3">
@@ -549,9 +560,6 @@ export function IdentityPage() {
                             </span>
                           ) : null}
                         </div>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {pool.description}
-                        </p>
                         {!unlocked ? (
                           <p className="mt-1 font-mono text-xs text-foreground">
                             再胜 {pool.unlockWins - identity.profile.stats.wins}{" "}

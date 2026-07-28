@@ -390,7 +390,7 @@ export function RoomEntry() {
                     房间人数
                   </p>
                   <div
-                    className="mt-2 grid min-h-10 grid-cols-[2.5rem_1fr_2.5rem] border border-foreground/25"
+                    className="mt-2 grid min-h-11 grid-cols-[2.75rem_1fr_2.75rem] border border-foreground/25"
                     role="group"
                     aria-label="房间人数"
                   >
@@ -399,7 +399,7 @@ export function RoomEntry() {
                       size="icon-sm"
                       variant="ghost"
                       aria-label="减少房间人数"
-                      className="h-10 w-10 rounded-none border-r border-foreground/20"
+                      className="h-11 w-11 rounded-none border-r border-foreground/20"
                       disabled={pending !== null || maxPlayers <= 2}
                       onClick={() =>
                         setMaxPlayers((value) => Math.max(2, value - 1))
@@ -408,7 +408,7 @@ export function RoomEntry() {
                       <MinusIcon />
                     </Button>
                     <output
-                      className="flex h-10 items-center justify-center font-mono text-xs"
+                      className="flex h-11 items-center justify-center font-mono text-xs"
                       aria-live="polite"
                     >
                       {maxPlayers} 人
@@ -418,7 +418,7 @@ export function RoomEntry() {
                       size="icon-sm"
                       variant="ghost"
                       aria-label="增加房间人数"
-                      className="h-10 w-10 rounded-none border-l border-foreground/20"
+                      className="h-11 w-11 rounded-none border-l border-foreground/20"
                       disabled={pending !== null || maxPlayers >= 8}
                       onClick={() =>
                         setMaxPlayers((value) => Math.min(8, value + 1))

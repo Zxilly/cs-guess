@@ -8,7 +8,7 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
-import { InfoIcon } from "@phosphor-icons/react";
+import { InfoIcon, XIcon } from "@phosphor-icons/react";
 
 import {
   Popover,
@@ -163,6 +163,18 @@ export function InfoTip({
     triggerHoveredRef.current = false;
   }
 
+  function closePinnedTip() {
+    clearInteractionState();
+    suppressFocusOpenRef.current = true;
+    setOpen(false);
+    queueMicrotask(() => {
+      triggerRef.current?.focus();
+      queueMicrotask(() => {
+        suppressFocusOpenRef.current = false;
+      });
+    });
+  }
+
   useEffect(
     () => () => {
       cancelScheduledClose();
@@ -187,7 +199,7 @@ export function InfoTip({
           ref={triggerRef}
           type="button"
           className={cn(
-            "grid size-8 min-h-10 min-w-10 place-items-center text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+            "grid size-8 min-h-11 min-w-11 place-items-center text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
             className,
           )}
           aria-label={label}
@@ -243,11 +255,20 @@ export function InfoTip({
           restoreFocusRef.current = false;
         }}
         className={cn(
-          "w-64 rounded-none bg-foreground px-3 py-2 text-xs leading-5 text-background shadow-none ring-0",
+          "relative w-[min(20rem,calc(100vw-2rem))] rounded-none border border-foreground/25 bg-background px-4 py-3 text-sm leading-6 text-foreground shadow-xl ring-0 max-sm:pr-12",
           contentClassName,
         )}
       >
-        {children}
+        <div>{children}</div>
+        <button
+          type="button"
+          data-slot="info-tip-close"
+          className="absolute top-1.5 right-1.5 hidden size-11 place-items-center text-muted-foreground hover:bg-primary hover:text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary max-sm:grid"
+          aria-label="关闭说明"
+          onClick={closePinnedTip}
+        >
+          <XIcon className="size-4" />
+        </button>
       </PopoverContent>
     </Popover>
   );
