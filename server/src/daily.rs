@@ -25,6 +25,23 @@ pub struct CatalogPlayer {
     pub major_wins: u16,
 }
 
+impl CatalogPlayer {
+    pub(crate) fn normalize_team_for_display(&mut self) -> bool {
+        let normalized = self.team.trim().to_ascii_lowercase();
+        let invalid = matches!(
+            normalized.as_str(),
+            "" | "undefined" | "null" | "none" | "n/a"
+        ) || (normalized.starts_with("undefined (")
+            && normalized.ends_with(" team)"));
+        if !invalid {
+            return false;
+        }
+        self.team = "无队伍".to_owned();
+        self.team_logo_url = None;
+        true
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DailyChallenge {
@@ -43,7 +60,12 @@ pub struct DailyChallengeCandidate {
 static CATALOG_JSON: &str = include_str!("../../src/data/players.generated.json");
 
 static PLAYERS: LazyLock<Vec<CatalogPlayer>> = LazyLock::new(|| {
-    serde_json::from_str(CATALOG_JSON).expect("generated player catalog must be valid JSON")
+    let mut players: Vec<CatalogPlayer> =
+        serde_json::from_str(CATALOG_JSON).expect("generated player catalog must be valid JSON");
+    for player in &mut players {
+        player.normalize_team_for_display();
+    }
+    players
 });
 
 static CATALOG_VERSION: LazyLock<String> =
@@ -87,5 +109,33 @@ impl DailyChallengeCandidate {
             },
             player_snapshot_json,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::CatalogPlayer;
+
+    #[test]
+    fn legacy_undefined_team_is_safe_for_display() {
+        let mut player = CatalogPlayer {
+            id: "jedqr".to_owned(),
+            nickname: "jedqr".to_owned(),
+            name: "Grzegorz Jędras".to_owned(),
+            team: "undefined (American team)".to_owned(),
+            team_logo_url: Some("https://cdn.example/undefined.png".to_owned()),
+            image_url: None,
+            nationality: "Poland".to_owned(),
+            country_code: "PL".to_owned(),
+            age: 27,
+            role: "Entry".to_owned(),
+            major_appearances: 0,
+            major_wins: 0,
+        };
+
+        player.normalize_team_for_display();
+
+        assert_eq!(player.team, "无队伍");
+        assert_eq!(player.team_logo_url, None);
     }
 }

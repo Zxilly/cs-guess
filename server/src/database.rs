@@ -182,11 +182,23 @@ impl DatabaseStore {
             error!(%error, date = %candidate.challenge.date, "stored daily player is invalid");
             AppError::Internal
         })?;
+        let current_player = catalog_player_by_id(&row.1);
+        let mut snapshot_changed = false;
+        if mystery_player.normalize_team_for_display() {
+            if let Some(current_player) = current_player {
+                mystery_player.team = current_player.team.clone();
+                mystery_player.team_logo_url = current_player.team_logo_url.clone();
+            }
+            snapshot_changed = true;
+        }
         if mystery_player.image_url.is_none()
-            && let Some(current_player) = catalog_player_by_id(&row.1)
+            && let Some(current_player) = current_player
             && current_player.image_url.is_some()
         {
             mystery_player.image_url = current_player.image_url.clone();
+            snapshot_changed = true;
+        }
+        if snapshot_changed {
             let enriched_snapshot =
                 serde_json::to_string(&mystery_player).map_err(|_| AppError::Internal)?;
             sqlx::query(
@@ -253,6 +265,7 @@ mod tests {
             losses_toward_credit: 1,
             recorded_rounds: Vec::new(),
             match_history: Vec::new(),
+            pending_draw: None,
             updated_at,
         }
     }
@@ -301,6 +314,70 @@ mod tests {
                 .await
                 .unwrap(),
             saved
+        );
+
+        store.pool.close().await;
+        let _ = std::fs::remove_file(&path);
+        let _ = std::fs::remove_file(path.with_extension("sqlite-wal"));
+        let _ = std::fs::remove_file(path.with_extension("sqlite-shm"));
+    }
+
+    #[tokio::test]
+    async fn daily_challenge_repairs_a_legacy_undefined_team_without_changing_answer() {
+        let path = std::env::temp_dir().join(format!("cs-guess-daily-{}.sqlite", Uuid::new_v4()));
+        let mut config = Config::for_test();
+        config.database_path = path.clone();
+        let store = DatabaseStore::new(&config);
+        store.initialize().await.unwrap();
+
+        let candidate = DailyChallengeCandidate::current().unwrap();
+        let mut legacy_player = candidate.challenge.mystery_player.clone();
+        legacy_player.team = "undefined".to_owned();
+        legacy_player.team_logo_url = Some("https://cdn.example/undefined.png".to_owned());
+        let legacy_snapshot = serde_json::to_string(&legacy_player).unwrap();
+        sqlx::query(
+            "INSERT INTO daily_challenges (
+                challenge_date, round_number, player_id, player_snapshot_json,
+                catalog_version, created_at
+             ) VALUES (?, ?, ?, ?, ?, ?)",
+        )
+        .bind(&candidate.challenge.date)
+        .bind(i64::from(candidate.challenge.round_number))
+        .bind(&candidate.challenge.mystery_player_id)
+        .bind(legacy_snapshot)
+        .bind("legacy-catalog")
+        .bind(1_i64)
+        .execute(&store.pool)
+        .await
+        .unwrap();
+
+        let challenge = store.current_daily_challenge().await.unwrap();
+
+        assert_eq!(
+            challenge.mystery_player_id,
+            candidate.challenge.mystery_player_id
+        );
+        assert_eq!(
+            challenge.mystery_player.team,
+            candidate.challenge.mystery_player.team
+        );
+        assert_eq!(
+            challenge.mystery_player.team_logo_url,
+            candidate.challenge.mystery_player.team_logo_url
+        );
+        let persisted: String = sqlx::query_scalar(
+            "SELECT player_snapshot_json
+             FROM daily_challenges
+             WHERE challenge_date = ?",
+        )
+        .bind(&candidate.challenge.date)
+        .fetch_one(&store.pool)
+        .await
+        .unwrap();
+        let persisted_player: CatalogPlayer = serde_json::from_str(&persisted).unwrap();
+        assert_eq!(
+            persisted_player.team,
+            candidate.challenge.mystery_player.team
         );
 
         store.pool.close().await;

@@ -10,9 +10,12 @@ pub struct Config {
     pub public_base_url: String,
     pub allowed_origins: Vec<HeaderValue>,
     pub max_rooms: usize,
+    pub quick_request_ttl: Duration,
+    pub max_quick_request_results: usize,
     pub room_idle_timeout: Duration,
     pub reconnect_grace: Duration,
     pub disconnect_forfeit: Duration,
+    pub round_transition: Duration,
     pub heartbeat_interval: Duration,
     pub client_timeout: Duration,
     pub queue_broadcast_interval: Duration,
@@ -24,6 +27,7 @@ pub struct Config {
     pub session_rate_refill_per_second: usize,
     pub database_path: PathBuf,
     pub database_max_connections: u32,
+    pub static_dir: PathBuf,
 }
 
 impl Config {
@@ -56,12 +60,19 @@ impl Config {
             public_base_url: public_base_url.trim_end_matches('/').to_owned(),
             allowed_origins,
             max_rooms: parse_usize("CS_GUESS_MAX_ROOMS", 10_000)?,
+            quick_request_ttl: Duration::from_secs(parse_nonzero_u64(
+                "CS_GUESS_QUICK_REQUEST_TTL_SECS",
+                900,
+            )?),
+            max_quick_request_results: parse_usize("CS_GUESS_MAX_QUICK_REQUEST_RESULTS", 20_000)?
+                .max(1),
             room_idle_timeout: Duration::from_secs(parse_u64("CS_GUESS_ROOM_IDLE_SECS", 1_800)?),
             reconnect_grace: Duration::from_secs(parse_u64("CS_GUESS_RECONNECT_SECS", 120)?),
             disconnect_forfeit: Duration::from_secs(parse_u64(
                 "CS_GUESS_DISCONNECT_FORFEIT_SECS",
                 30,
             )?),
+            round_transition: Duration::from_secs(parse_u64("CS_GUESS_ROUND_TRANSITION_SECS", 5)?),
             heartbeat_interval: Duration::from_secs(parse_u64("CS_GUESS_HEARTBEAT_SECS", 15)?),
             client_timeout: Duration::from_secs(parse_u64("CS_GUESS_CLIENT_TIMEOUT_SECS", 45)?),
             queue_broadcast_interval: Duration::from_millis(parse_nonzero_u64(
@@ -82,6 +93,7 @@ impl Config {
                 "data/cs-guess.sqlite",
             )),
             database_max_connections: parse_nonzero_u32("CS_GUESS_DATABASE_MAX_CONNECTIONS", 8)?,
+            static_dir: PathBuf::from(env_value("CS_GUESS_STATIC_DIR", "../dist")),
         })
     }
 
@@ -91,9 +103,12 @@ impl Config {
             public_base_url: "http://localhost".to_owned(),
             allowed_origins: vec![HeaderValue::from_static("http://localhost")],
             max_rooms: 2_000,
+            quick_request_ttl: Duration::from_secs(60),
+            max_quick_request_results: 4_000,
             room_idle_timeout: Duration::from_secs(60),
             reconnect_grace: Duration::from_secs(10),
             disconnect_forfeit: Duration::from_secs(10),
+            round_transition: Duration::from_millis(20),
             heartbeat_interval: Duration::from_secs(1),
             client_timeout: Duration::from_secs(3),
             queue_broadcast_interval: Duration::from_millis(25),
@@ -105,6 +120,7 @@ impl Config {
             session_rate_refill_per_second: 10_000,
             database_path: PathBuf::from(":memory:"),
             database_max_connections: 1,
+            static_dir: PathBuf::from("__missing_cs_guess_static__"),
         }
     }
 }

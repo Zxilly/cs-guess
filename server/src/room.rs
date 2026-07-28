@@ -20,8 +20,9 @@ use crate::{
     config::Config,
     error::AppError,
     protocol::{
-        ClientMessage, GuessView, MAX_GUESSES, OpponentProgressView, Phase, PlayerView, RoomKind,
-        ScoreView, ServerMessage, Snapshot, Visibility,
+        ClientMessage, Difficulty, FinishReason, GuessView, MAX_GUESSES, OpponentProgressView,
+        Phase, PlayerView, RoomKind, RoundResultView, RoundStandingView, ScoreView,
+        SeriesFinishReason, SeriesStandingView, SeriesStatus, ServerMessage, Snapshot, Visibility,
     },
     state::QueueTelemetry,
 };
@@ -58,7 +59,9 @@ pub struct CancelledMatch {
     pub visibility: Visibility,
     pub best_of: u8,
     pub party_size: u8,
+    pub difficulty: Difficulty,
     pub closed: bool,
+    pub requeue: bool,
 }
 
 #[derive(Clone)]
@@ -178,6 +181,21 @@ impl RoomHandle {
         reply_rx.await.map_err(|_| AppError::Unavailable)?
     }
 
+    pub async fn leave_friend_room(
+        &self,
+        session_token: String,
+    ) -> Result<CancelledMatch, AppError> {
+        let (reply_tx, reply_rx) = oneshot::channel();
+        self.tx
+            .send(RoomCommand::LeaveFriendRoom {
+                session_token,
+                reply: reply_tx,
+            })
+            .await
+            .map_err(|_| AppError::Unavailable)?;
+        reply_rx.await.map_err(|_| AppError::Unavailable)?
+    }
+
     #[cfg(test)]
     async fn target_id(&self) -> &'static str {
         let (reply_tx, reply_rx) = oneshot::channel();
@@ -220,6 +238,10 @@ enum RoomCommand {
         session_token: String,
         reply: oneshot::Sender<Result<CancelledMatch, AppError>>,
     },
+    LeaveFriendRoom {
+        session_token: String,
+        reply: oneshot::Sender<Result<CancelledMatch, AppError>>,
+    },
     StartIfReady,
     #[cfg(test)]
     Target {
@@ -229,6 +251,7 @@ enum RoomCommand {
 
 struct Participant {
     player_id: Uuid,
+    seat_index: u8,
     display_name: String,
     token_hash: [u8; 32],
     outbound: Option<mpsc::Sender<OutboundMessage>>,
@@ -238,11 +261,13 @@ struct Participant {
     cached_guesses: HashMap<Uuid, CachedGuess>,
     seen_requests: HashSet<Uuid>,
     disconnected_at: Option<Instant>,
+    disconnect_deadline_unix_ms: Option<u64>,
     forfeited_round: bool,
 }
 
 #[derive(Clone)]
 struct CachedGuess {
+    seq: u64,
     player_id: String,
     guess_number: usize,
     matched_fields: Vec<&'static str>,
@@ -255,6 +280,7 @@ struct RoomActor {
     room_code: String,
     kind: RoomKind,
     visibility: Visibility,
+    difficulty: Difficulty,
     phase: Phase,
     max_players: u8,
     best_of: u8,
@@ -264,6 +290,11 @@ struct RoomActor {
     target_id: &'static str,
     winner_player_id: Option<Uuid>,
     series_winner_player_id: Option<Uuid>,
+    series_status: SeriesStatus,
+    series_finish_reason: Option<SeriesFinishReason>,
+    series_final_standings: Option<Vec<SeriesStandingView>>,
+    round_results: Vec<RoundResultView>,
+    finish_reason: Option<FinishReason>,
     deadline: Option<Instant>,
     deadline_unix_ms: Option<u64>,
     next_round_at: Option<Instant>,
@@ -280,6 +311,7 @@ pub struct RoomSpec {
     pub room_code: String,
     pub kind: RoomKind,
     pub visibility: Visibility,
+    pub difficulty: Difficulty,
     pub max_players: u8,
     pub best_of: u8,
     pub host: NewPlayer,
@@ -291,30 +323,45 @@ pub fn spawn_room(spec: RoomSpec, config: Config, shutdown: CancellationToken) -
         room_code,
         kind,
         visibility,
+        difficulty,
         max_players,
         best_of,
         host,
         queue_telemetry,
     } = spec;
     let (tx, rx) = mpsc::channel(config.room_queue_capacity);
-    let target_index = Uuid::new_v4().as_u128() as usize % PLAYERS.len();
+    let mystery_pool = PLAYERS
+        .iter()
+        .filter(|player| match difficulty {
+            Difficulty::Easy => player.major_wins > 0 || player.majors >= 5,
+            Difficulty::Full => player.majors > 0,
+            Difficulty::Hard => true,
+        })
+        .collect::<Vec<_>>();
+    let target_index = Uuid::new_v4().as_u128() as usize % mystery_pool.len();
     let host_player_id = host.player_id;
     let mut players = HashMap::new();
-    players.insert(host.player_id, participant_from(host));
+    players.insert(host.player_id, participant_from(host, 0));
 
     let actor = RoomActor {
         room_code,
         kind,
         visibility,
+        difficulty,
         phase: Phase::Waiting,
         max_players,
         best_of,
         round_number: 0,
         host_player_id,
         players,
-        target_id: PLAYERS[target_index].id.as_str(),
+        target_id: mystery_pool[target_index].id.as_str(),
         winner_player_id: None,
         series_winner_player_id: None,
+        series_status: SeriesStatus::Active,
+        series_finish_reason: None,
+        series_final_standings: None,
+        round_results: Vec::new(),
+        finish_reason: None,
         deadline: None,
         deadline_unix_ms: None,
         next_round_at: None,
@@ -348,6 +395,9 @@ impl RoomActor {
                 }
                 _ = maintenance.tick() => {
                     self.maintain();
+                    if self.closed {
+                        break;
+                    }
                     if self.players.values().all(|player| player.outbound.is_none())
                         && self.last_activity.elapsed() >= self.config.room_idle_timeout
                     {
@@ -414,6 +464,13 @@ impl RoomActor {
                 let result = self.cancel_match(&session_token);
                 let _ = reply.send(result);
             }
+            RoomCommand::LeaveFriendRoom {
+                session_token,
+                reply,
+            } => {
+                let result = self.leave_friend_room(&session_token);
+                let _ = reply.send(result);
+            }
             RoomCommand::StartIfReady => {
                 if self.kind == RoomKind::Quick
                     && self
@@ -437,26 +494,53 @@ impl RoomActor {
         if self.phase != Phase::Waiting || self.players.len() >= usize::from(self.max_players) {
             return Err(AppError::RoomFull);
         }
+        let seat_index = (0..self.max_players)
+            .find(|seat| {
+                self.players
+                    .values()
+                    .all(|participant| participant.seat_index != *seat)
+            })
+            .ok_or(AppError::RoomFull)?;
         let view = PlayerView {
             player_id: player.player_id,
+            seat_index,
             display_name: player.display_name.clone(),
             connected: false,
+            disconnect_deadline_unix_ms: None,
+            forfeited_this_round: false,
             guess_count: 0,
             score: 0,
         };
         self.players
-            .insert(player.player_id, participant_from(player));
+            .insert(player.player_id, participant_from(player, seat_index));
         let seq = self.next_seq();
         self.broadcast(ServerMessage::PlayerJoined { seq, player: view });
         Ok(self.players.len() >= usize::from(self.max_players))
     }
 
     fn cancel_match(&mut self, session_token: &str) -> Result<CancelledMatch, AppError> {
-        if self.kind != RoomKind::Quick || self.phase != Phase::Waiting {
+        if self.kind != RoomKind::Quick {
             return Err(AppError::BadRequest(
-                "only a waiting quick match can be cancelled".to_owned(),
+                "only a quick match can be left".to_owned(),
             ));
         }
+        self.leave_player(session_token, true)
+    }
+
+    fn leave_friend_room(&mut self, session_token: &str) -> Result<CancelledMatch, AppError> {
+        if self.kind != RoomKind::Friend {
+            return Err(AppError::BadRequest(
+                "only a friend room can be left".to_owned(),
+            ));
+        }
+        self.leave_player(session_token, false)
+    }
+
+    fn leave_player(
+        &mut self,
+        session_token: &str,
+        allow_requeue: bool,
+    ) -> Result<CancelledMatch, AppError> {
         let token_hash = hash_token(session_token);
         let player_id = self
             .players
@@ -464,20 +548,105 @@ impl RoomActor {
             .find(|player| bool::from(player.token_hash.ct_eq(&token_hash)))
             .map(|player| player.player_id)
             .ok_or(AppError::Unauthorized)?;
+        let was_waiting = self.phase == Phase::Waiting;
+        let was_playing = self.phase == Phase::Playing;
+        let mut final_standings = (!was_waiting).then(|| {
+            let mut standings = self
+                .players
+                .values()
+                .map(|player| SeriesStandingView {
+                    player_id: player.player_id,
+                    display_name: player.display_name.clone(),
+                    seat_index: player.seat_index,
+                    score: player.score,
+                    left_series: player.player_id == player_id,
+                })
+                .collect::<Vec<_>>();
+            standings.sort_by_key(|player| player.seat_index);
+            standings
+        });
+        let seq = self.next_seq();
+        self.broadcast_except(
+            player_id,
+            ServerMessage::PlayerConnection {
+                seq,
+                player_id,
+                connected: false,
+                disconnect_deadline_unix_ms: None,
+            },
+        );
         self.players.remove(&player_id);
-        if self.host_player_id == player_id
-            && let Some(next_host) = self.players.keys().next().copied()
-        {
-            self.host_player_id = next_host;
+        if self.host_player_id == player_id {
+            let next_host = if self.kind == RoomKind::Friend {
+                self.active_replacement_host()
+            } else {
+                self.players
+                    .values()
+                    .min_by_key(|player| player.seat_index)
+                    .map(|player| player.player_id)
+            };
+            if let Some(next_host) = next_host {
+                self.host_player_id = next_host;
+            } else {
+                self.players.clear();
+                self.closed = true;
+            }
         }
         let remaining_players = self.players.len() as u32;
-        self.closed = remaining_players == 0;
+        self.closed = self.closed || remaining_players == 0;
+        if !was_waiting && !self.closed && self.series_status == SeriesStatus::Active {
+            self.phase = Phase::Finished;
+            self.finish_reason = Some(if allow_requeue {
+                FinishReason::DisconnectForfeit
+            } else {
+                FinishReason::MemberLeft
+            });
+            self.deadline = None;
+            self.deadline_unix_ms = None;
+            self.next_round_at = None;
+            self.next_round_unix_ms = None;
+            let wins_needed = self.best_of / 2 + 1;
+            if self.max_players == 2
+                && remaining_players == 1
+                && let Some(winner) = self.players.keys().next().copied()
+            {
+                self.winner_player_id = Some(winner);
+                self.series_winner_player_id = Some(winner);
+                self.series_status = SeriesStatus::Completed;
+                self.series_finish_reason = Some(SeriesFinishReason::MemberLeftForfeit);
+                if let Some(player) = self.players.get_mut(&winner) {
+                    player.score = wins_needed;
+                }
+                if let Some(standings) = final_standings.as_mut()
+                    && let Some(entry) =
+                        standings.iter_mut().find(|entry| entry.player_id == winner)
+                {
+                    entry.score = wins_needed;
+                }
+            } else {
+                self.winner_player_id = None;
+                self.series_winner_player_id = None;
+                self.series_status = SeriesStatus::Abandoned;
+                self.series_finish_reason = Some(SeriesFinishReason::MemberLeftAbandoned);
+            }
+            self.series_final_standings = final_standings;
+            if was_playing {
+                self.record_departure_round_result();
+            }
+            self.set_telemetry_active(false);
+            self.broadcast_round_finished();
+        }
+        if !self.closed {
+            self.broadcast_snapshots();
+        }
         Ok(CancelledMatch {
             remaining_players,
             visibility: self.visibility,
+            difficulty: self.difficulty,
             best_of: self.best_of,
             party_size: self.max_players,
             closed: self.closed,
+            requeue: allow_requeue && was_waiting && !self.closed,
         })
     }
 
@@ -499,6 +668,7 @@ impl RoomActor {
             player.outbound = Some(outbound);
             player.connection_id = Some(connection_id);
             player.disconnected_at = None;
+            player.disconnect_deadline_unix_ms = None;
         }
 
         let seq = self.next_seq();
@@ -511,6 +681,7 @@ impl RoomActor {
                 seq,
                 player_id,
                 connected: true,
+                disconnect_deadline_unix_ms: None,
             },
         );
         if self.kind == RoomKind::Quick
@@ -535,6 +706,8 @@ impl RoomActor {
             let changed = player.outbound.take().is_some();
             player.connection_id = None;
             player.disconnected_at = Some(Instant::now());
+            player.disconnect_deadline_unix_ms =
+                Some(unix_ms() + self.config.disconnect_forfeit.as_millis() as u64);
             changed
         } else {
             false
@@ -547,6 +720,10 @@ impl RoomActor {
                     seq,
                     player_id,
                     connected: false,
+                    disconnect_deadline_unix_ms: self
+                        .players
+                        .get(&player_id)
+                        .and_then(|player| player.disconnect_deadline_unix_ms),
                 },
             );
         }
@@ -562,7 +739,10 @@ impl RoomActor {
                     self.ack(player_id, request_id);
                     return;
                 }
-                if player_id != self.host_player_id || self.kind != RoomKind::Friend {
+                if player_id != self.host_player_id
+                    || self.kind != RoomKind::Friend
+                    || self.phase != Phase::Waiting
+                {
                     self.error(
                         player_id,
                         Some(request_id),
@@ -574,13 +754,13 @@ impl RoomActor {
                     .values()
                     .filter(|player| player.outbound.is_some())
                     .count()
-                    < 2
+                    < usize::from(self.max_players)
                 {
                     self.error(
                         player_id,
                         Some(request_id),
                         "not_ready",
-                        "at least two connected players are required",
+                        "all room seats must be connected before starting",
                     );
                 } else {
                     self.mark_seen(player_id, request_id);
@@ -612,6 +792,33 @@ impl RoomActor {
                         request_id,
                         visibility,
                     });
+                }
+            }
+            ClientMessage::RestartSeries { request_id } => {
+                if self.is_duplicate(player_id, request_id) {
+                    self.ack(player_id, request_id);
+                    return;
+                }
+                if self.kind != RoomKind::Friend || player_id != self.host_player_id {
+                    self.error(
+                        player_id,
+                        Some(request_id),
+                        "forbidden",
+                        "only the friend-room host may restart the series",
+                    );
+                } else if self.phase != Phase::Finished
+                    || self.series_status == SeriesStatus::Active
+                {
+                    self.error(
+                        player_id,
+                        Some(request_id),
+                        "series_not_finished",
+                        "the series is not ready to restart",
+                    );
+                } else {
+                    self.mark_seen(player_id, request_id);
+                    self.restart_series();
+                    self.ack(player_id, request_id);
                 }
             }
             ClientMessage::Guess {
@@ -696,15 +903,20 @@ impl RoomActor {
         let country = country_hint(guess_player, target);
         let correct = guess_player.id == target.id;
         participant.guesses.push(guessed_player_id.clone());
+        let guess_number = participant.guesses.len();
+        let seq = self.next_seq();
         let cached = CachedGuess {
+            seq,
             player_id: guessed_player_id,
-            guess_number: participant.guesses.len(),
+            guess_number,
             matched_fields,
             country_relation: country.relation,
             country_distance_km: country.distance_km,
             correct,
         };
-        participant
+        self.players
+            .get_mut(&actor_id)
+            .expect("the participant was validated above")
             .cached_guesses
             .insert(request_id, cached.clone());
         self.send_guess_ack(actor_id, request_id, &cached);
@@ -729,28 +941,25 @@ impl RoomActor {
         );
 
         if correct {
-            self.finish_round(Some(actor_id));
+            self.finish_round(Some(actor_id), FinishReason::Solved);
         } else if self
             .players
             .values()
             .all(|player| player.forfeited_round || player.guesses.len() >= MAX_GUESSES)
         {
-            self.finish_round(None);
+            self.finish_round(None, FinishReason::MaxGuesses);
         }
     }
 
     fn start_round(&mut self) {
-        if self.phase == Phase::Playing || self.series_winner_player_id.is_some() {
+        if self.phase == Phase::Playing || self.series_status != SeriesStatus::Active {
             return;
         }
         if self.phase == Phase::Finished {
-            let old_target = self.target_id;
-            let mut target_index = Uuid::new_v4().as_u128() as usize % PLAYERS.len();
-            if PLAYERS.len() > 1 && PLAYERS[target_index].id == old_target {
-                target_index = (target_index + 1) % PLAYERS.len();
-            }
-            self.target_id = PLAYERS[target_index].id.as_str();
+            self.rotate_target();
             self.winner_player_id = None;
+            self.finish_reason = None;
+            self.series_final_standings = None;
             self.next_round_at = None;
             self.next_round_unix_ms = None;
             for player in self.players.values_mut() {
@@ -776,12 +985,13 @@ impl RoomActor {
         });
     }
 
-    fn finish_round(&mut self, winner_player_id: Option<Uuid>) {
+    fn finish_round(&mut self, winner_player_id: Option<Uuid>, finish_reason: FinishReason) {
         if self.phase == Phase::Finished {
             return;
         }
         self.phase = Phase::Finished;
         self.winner_player_id = winner_player_id;
+        self.finish_reason = Some(finish_reason);
         if let Some(winner) = winner_player_id
             && let Some(player) = self.players.get_mut(&winner)
         {
@@ -789,17 +999,242 @@ impl RoomActor {
             let wins_needed = self.best_of / 2 + 1;
             if player.score >= wins_needed {
                 self.series_winner_player_id = Some(winner);
+                self.series_status = SeriesStatus::Completed;
+                self.series_finish_reason = Some(SeriesFinishReason::ScoreLimit);
             }
+        }
+        self.record_round_result(finish_reason);
+        let terminal_friend_room =
+            self.kind == RoomKind::Friend && self.series_status != SeriesStatus::Active;
+        if terminal_friend_room {
+            self.ensure_terminal_standings();
+            self.evict_expired_friend_members(None);
         }
         self.deadline = None;
         self.deadline_unix_ms = None;
-        if self.kind == RoomKind::Quick && self.series_winner_player_id.is_none() {
-            let transition = Duration::from_secs(5);
+        if self.series_status == SeriesStatus::Active {
+            let transition = self.config.round_transition;
             self.next_round_at = Some(Instant::now() + transition);
             self.next_round_unix_ms = Some(unix_ms() + transition.as_millis() as u64);
-        } else if self.series_winner_player_id.is_some() {
+        } else {
             self.set_telemetry_active(false);
         }
+        if !self.closed {
+            self.broadcast_round_finished();
+            if terminal_friend_room {
+                self.broadcast_snapshots();
+            }
+        }
+    }
+
+    fn record_round_result(&mut self, finish_reason: FinishReason) {
+        if self
+            .round_results
+            .last()
+            .is_some_and(|result| result.round_number == self.round_number)
+        {
+            return;
+        }
+        let scores = self
+            .players
+            .values()
+            .map(|player| player.score)
+            .collect::<Vec<_>>();
+        let mut standings = self
+            .players
+            .values()
+            .map(|player| RoundStandingView {
+                player_id: player.player_id,
+                display_name: player.display_name.clone(),
+                seat_index: player.seat_index,
+                score: player.score,
+                rank: 1 + scores.iter().filter(|score| **score > player.score).count() as u8,
+            })
+            .collect::<Vec<_>>();
+        standings.sort_by_key(|player| player.seat_index);
+        self.round_results.push(RoundResultView {
+            round_number: self.round_number,
+            mystery_id: self.target_id.to_owned(),
+            finish_reason,
+            winner_player_id: self.winner_player_id,
+            standings,
+        });
+    }
+
+    fn record_departure_round_result(&mut self) {
+        if self
+            .round_results
+            .last()
+            .is_some_and(|result| result.round_number == self.round_number)
+        {
+            return;
+        }
+        let Some(final_standings) = self.series_final_standings.as_ref() else {
+            return;
+        };
+        let standings = final_standings
+            .iter()
+            .map(|player| RoundStandingView {
+                player_id: player.player_id,
+                display_name: player.display_name.clone(),
+                seat_index: player.seat_index,
+                score: player.score,
+                rank: 1 + final_standings
+                    .iter()
+                    .filter(|other| other.score > player.score)
+                    .count() as u8,
+            })
+            .collect();
+        self.round_results.push(RoundResultView {
+            round_number: self.round_number,
+            mystery_id: self.target_id.to_owned(),
+            finish_reason: FinishReason::MemberLeft,
+            winner_player_id: self.winner_player_id,
+            standings,
+        });
+    }
+
+    fn restart_series(&mut self) {
+        // A terminal four-player series may still contain an expired disconnected
+        // participant. Drop those seats so a replacement can join the waiting room.
+        self.players.retain(|_, player| player.outbound.is_some());
+        if !self.players.contains_key(&self.host_player_id)
+            && let Some(next_host) = self
+                .players
+                .values()
+                .min_by_key(|player| player.seat_index)
+                .map(|player| player.player_id)
+        {
+            self.host_player_id = next_host;
+        }
+        self.phase = Phase::Waiting;
+        self.round_number = 0;
+        self.winner_player_id = None;
+        self.series_winner_player_id = None;
+        self.series_status = SeriesStatus::Active;
+        self.series_finish_reason = None;
+        self.series_final_standings = None;
+        self.finish_reason = None;
+        self.round_results.clear();
+        self.deadline = None;
+        self.deadline_unix_ms = None;
+        self.next_round_at = None;
+        self.next_round_unix_ms = None;
+        self.rotate_target();
+        for player in self.players.values_mut() {
+            player.score = 0;
+            player.guesses.clear();
+            player.cached_guesses.clear();
+            player.forfeited_round = false;
+            player.disconnected_at = None;
+            player.disconnect_deadline_unix_ms = None;
+        }
+        self.set_telemetry_active(false);
+
+        let recipients = self.players.keys().copied().collect::<Vec<_>>();
+        for player_id in recipients {
+            let seq = self.next_seq();
+            let snapshot = self.snapshot_for(player_id);
+            self.send_to(player_id, ServerMessage::Snapshot { seq, snapshot });
+        }
+    }
+
+    fn active_replacement_host(&self) -> Option<Uuid> {
+        self.players
+            .values()
+            .filter(|player| {
+                player.outbound.is_some()
+                    && player.disconnected_at.is_none()
+                    && !player.forfeited_round
+            })
+            .min_by_key(|player| player.seat_index)
+            .map(|player| player.player_id)
+    }
+
+    fn ensure_terminal_standings(&mut self) {
+        if self.series_final_standings.is_some() {
+            return;
+        }
+        let mut standings = self
+            .players
+            .values()
+            .map(|player| SeriesStandingView {
+                player_id: player.player_id,
+                display_name: player.display_name.clone(),
+                seat_index: player.seat_index,
+                score: player.score,
+                left_series: player.forfeited_round,
+            })
+            .collect::<Vec<_>>();
+        standings.sort_by_key(|player| player.seat_index);
+        self.series_final_standings = Some(standings);
+    }
+
+    fn evict_expired_friend_members(&mut self, additionally_expired: Option<Uuid>) {
+        if self.kind != RoomKind::Friend {
+            return;
+        }
+        let mut expired = self
+            .players
+            .values()
+            .filter(|player| player.forfeited_round)
+            .map(|player| player.player_id)
+            .collect::<HashSet<_>>();
+        if let Some(player_id) = additionally_expired {
+            expired.insert(player_id);
+        }
+        if expired.is_empty() {
+            return;
+        }
+        if let Some(standings) = self.series_final_standings.as_mut() {
+            for standing in standings {
+                if expired.contains(&standing.player_id) {
+                    standing.left_series = true;
+                }
+            }
+        }
+        self.players
+            .retain(|player_id, _| !expired.contains(player_id));
+        let next_host = self.active_replacement_host();
+        if next_host.is_none() {
+            self.players.clear();
+            self.closed = true;
+            return;
+        }
+        if !self.players.contains_key(&self.host_player_id)
+            || expired.contains(&self.host_player_id)
+        {
+            self.host_player_id = next_host.expect("replacement host was checked");
+        }
+    }
+
+    fn broadcast_snapshots(&mut self) {
+        let recipients = self.players.keys().copied().collect::<Vec<_>>();
+        for player_id in recipients {
+            let seq = self.next_seq();
+            let snapshot = self.snapshot_for(player_id);
+            self.send_to(player_id, ServerMessage::Snapshot { seq, snapshot });
+        }
+    }
+
+    fn rotate_target(&mut self) {
+        let candidates = PLAYERS
+            .iter()
+            .filter(|player| match self.difficulty {
+                Difficulty::Easy => player.major_wins > 0 || player.majors >= 5,
+                Difficulty::Full => player.majors > 0,
+                Difficulty::Hard => true,
+            })
+            .collect::<Vec<_>>();
+        let old_target = self.target_id;
+        let mut target_index = Uuid::new_v4().as_u128() as usize % candidates.len();
+        if candidates.len() > 1 && candidates[target_index].id == old_target {
+            target_index = (target_index + 1) % candidates.len();
+        }
+        self.target_id = candidates[target_index].id.as_str();
+    }
+
+    fn broadcast_round_finished(&mut self) {
         let seq = self.next_seq();
         let mystery_id = self.target_id.to_owned();
         let scores = self
@@ -813,12 +1248,76 @@ impl RoomActor {
         self.broadcast(ServerMessage::RoundFinished {
             seq,
             round_number: self.round_number,
-            winner_player_id,
+            host_player_id: self.host_player_id,
+            winner_player_id: self.winner_player_id,
             series_winner_player_id: self.series_winner_player_id,
+            series_status: self.series_status,
+            series_finish_reason: self.series_finish_reason,
+            series_final_standings: self.series_final_standings.clone(),
+            round_results: self.round_results.clone(),
+            finish_reason: self.finish_reason.unwrap_or(FinishReason::MaxGuesses),
             scores,
             next_round_unix_ms: self.next_round_unix_ms,
             mystery_id,
         });
+    }
+
+    fn finish_series_after_disconnect(&mut self, missing_player_id: Uuid) {
+        if self.series_status != SeriesStatus::Active {
+            return;
+        }
+        let mut standings = self
+            .players
+            .values()
+            .map(|player| SeriesStandingView {
+                player_id: player.player_id,
+                display_name: player.display_name.clone(),
+                seat_index: player.seat_index,
+                score: player.score,
+                left_series: player.player_id == missing_player_id,
+            })
+            .collect::<Vec<_>>();
+        standings.sort_by_key(|player| player.seat_index);
+
+        self.next_round_at = None;
+        self.next_round_unix_ms = None;
+        self.finish_reason = Some(FinishReason::DisconnectForfeit);
+        if self.max_players == 2
+            && let Some(winner) = self
+                .players
+                .values()
+                .find(|player| {
+                    player.player_id != missing_player_id
+                        && player.outbound.is_some()
+                        && player.disconnected_at.is_none()
+                        && !player.forfeited_round
+                })
+                .map(|player| player.player_id)
+        {
+            let wins_needed = self.best_of / 2 + 1;
+            self.winner_player_id = Some(winner);
+            self.series_winner_player_id = Some(winner);
+            self.series_status = SeriesStatus::Completed;
+            self.series_finish_reason = Some(SeriesFinishReason::MemberLeftForfeit);
+            if let Some(player) = self.players.get_mut(&winner) {
+                player.score = wins_needed;
+            }
+            if let Some(entry) = standings.iter_mut().find(|entry| entry.player_id == winner) {
+                entry.score = wins_needed;
+            }
+        } else {
+            self.winner_player_id = None;
+            self.series_winner_player_id = None;
+            self.series_status = SeriesStatus::Abandoned;
+            self.series_finish_reason = Some(SeriesFinishReason::MemberLeftAbandoned);
+        }
+        self.series_final_standings = Some(standings);
+        self.evict_expired_friend_members(Some(missing_player_id));
+        self.set_telemetry_active(false);
+        if !self.closed {
+            self.broadcast_round_finished();
+            self.broadcast_snapshots();
+        }
     }
 
     fn set_telemetry_active(&mut self, active: bool) {
@@ -826,13 +1325,19 @@ impl RoomActor {
             return;
         }
         self.telemetry_active = active;
-        self.queue_telemetry
-            .set_room_active(self.max_players, self.best_of, active);
+        self.queue_telemetry.set_room_active(
+            self.max_players,
+            self.best_of,
+            self.difficulty,
+            self.visibility,
+            active,
+        );
     }
 
     fn maintain(&mut self) {
         if self.phase == Phase::Playing {
             let forfeit_after = self.config.disconnect_forfeit;
+            let mut newly_forfeited = Vec::new();
             for player in self.players.values_mut() {
                 if !player.forfeited_round
                     && player
@@ -840,7 +1345,17 @@ impl RoomActor {
                         .is_some_and(|instant| instant.elapsed() >= forfeit_after)
                 {
                     player.forfeited_round = true;
+                    player.disconnect_deadline_unix_ms = None;
+                    newly_forfeited.push(player.player_id);
                 }
+            }
+            for player_id in newly_forfeited {
+                let seq = self.next_seq();
+                self.broadcast(ServerMessage::PlayerRoundForfeited {
+                    seq,
+                    player_id,
+                    round_number: self.round_number,
+                });
             }
 
             let active_players = self
@@ -855,7 +1370,10 @@ impl RoomActor {
                 .filter(|player| player.forfeited_round)
                 .count();
             if forfeited_count > 0 && active_players.len() <= 1 {
-                self.finish_round(active_players.first().copied());
+                self.finish_round(
+                    active_players.first().copied(),
+                    FinishReason::DisconnectForfeit,
+                );
             }
         }
         if self.phase == Phase::Playing
@@ -863,14 +1381,30 @@ impl RoomActor {
                 .deadline
                 .is_some_and(|deadline| Instant::now() >= deadline)
         {
-            self.finish_round(None);
+            self.finish_round(None, FinishReason::Timeout);
         }
         if self.phase == Phase::Finished
             && self
                 .next_round_at
                 .is_some_and(|deadline| Instant::now() >= deadline)
+            && self.players.len() == usize::from(self.max_players)
+            && self
+                .players
+                .values()
+                .all(|player| player.outbound.is_some() && player.disconnected_at.is_none())
         {
             self.start_round();
+        }
+        if self.phase == Phase::Finished && self.series_status == SeriesStatus::Active {
+            let forfeit_after = self.config.disconnect_forfeit;
+            if let Some(missing_player_id) = self.players.values().find_map(|player| {
+                player
+                    .disconnected_at
+                    .is_some_and(|instant| instant.elapsed() >= forfeit_after)
+                    .then_some(player.player_id)
+            }) {
+                self.finish_series_after_disconnect(missing_player_id);
+            }
         }
 
         if self.phase == Phase::Waiting && self.kind == RoomKind::Friend {
@@ -941,6 +1475,7 @@ impl RoomActor {
             room_code: self.room_code.clone(),
             kind: self.kind,
             visibility: self.visibility,
+            difficulty: self.difficulty,
             phase: self.phase,
             self_player_id,
             host_player_id: self.host_player_id,
@@ -950,31 +1485,46 @@ impl RoomActor {
             round_number: self.round_number,
             deadline_unix_ms: self.deadline_unix_ms,
             next_round_unix_ms: self.next_round_unix_ms,
-            players: self
-                .players
-                .values()
-                .map(|player| PlayerView {
-                    player_id: player.player_id,
-                    display_name: player.display_name.clone(),
-                    connected: player.outbound.is_some(),
-                    guess_count: player.guesses.len(),
-                    score: player.score,
-                })
-                .collect(),
+            players: {
+                let mut players = self
+                    .players
+                    .values()
+                    .map(|player| PlayerView {
+                        player_id: player.player_id,
+                        seat_index: player.seat_index,
+                        display_name: player.display_name.clone(),
+                        connected: player.outbound.is_some(),
+                        disconnect_deadline_unix_ms: player.disconnect_deadline_unix_ms,
+                        forfeited_this_round: player.forfeited_round,
+                        guess_count: player.guesses.len(),
+                        score: player.score,
+                    })
+                    .collect::<Vec<_>>();
+                players.sort_by_key(|player| player.seat_index);
+                players
+            },
             own_guesses,
             opponent_progress,
             winner_player_id: self.winner_player_id,
             series_winner_player_id: self.series_winner_player_id,
+            series_status: self.series_status,
+            series_finish_reason: self.series_finish_reason,
+            series_final_standings: self.series_final_standings.clone(),
+            round_results: self.round_results.clone(),
+            finish_reason: self.finish_reason,
             mystery_id: reveal.then(|| self.target_id.to_owned()),
         }
     }
 
     fn send_guess_ack(&mut self, actor_id: Uuid, request_id: Uuid, cached: &CachedGuess) {
-        let seq = self.next_seq();
         self.send_to(
             actor_id,
             ServerMessage::GuessAccepted {
-                seq,
+                // A Socket.IO acknowledgement can be lost after the command
+                // has committed. Replaying the exact application event lets
+                // the client recover without turning a transport retry into
+                // a second room transition or a new event identity.
+                seq: cached.seq,
                 request_id,
                 player_id: cached.player_id.clone(),
                 guess_number: cached.guess_number,
@@ -1039,6 +1589,7 @@ impl RoomActor {
 
     fn send_shared(&mut self, player_id: Uuid, message: OutboundMessage) {
         let mut detached = Vec::new();
+        let disconnect_deadline = unix_ms() + self.config.disconnect_forfeit.as_millis() as u64;
         if let Some(player) = self.players.get_mut(&player_id)
             && let Some(outbound) = &player.outbound
             && outbound.try_send(message).is_err()
@@ -1046,6 +1597,7 @@ impl RoomActor {
             player.outbound = None;
             player.connection_id = None;
             player.disconnected_at = Some(Instant::now());
+            player.disconnect_deadline_unix_ms = Some(disconnect_deadline);
             detached.push(player_id);
         }
         self.broadcast_detached(detached);
@@ -1054,6 +1606,7 @@ impl RoomActor {
     fn broadcast(&mut self, message: ServerMessage) {
         let message = Arc::new(message);
         let mut detached = Vec::new();
+        let disconnect_deadline = unix_ms() + self.config.disconnect_forfeit.as_millis() as u64;
         for player in self.players.values_mut() {
             if let Some(outbound) = &player.outbound
                 && outbound.try_send(Arc::clone(&message)).is_err()
@@ -1061,6 +1614,7 @@ impl RoomActor {
                 player.outbound = None;
                 player.connection_id = None;
                 player.disconnected_at = Some(Instant::now());
+                player.disconnect_deadline_unix_ms = Some(disconnect_deadline);
                 detached.push(player.player_id);
             }
         }
@@ -1070,6 +1624,7 @@ impl RoomActor {
     fn broadcast_except(&mut self, excluded: Uuid, message: ServerMessage) {
         let message = Arc::new(message);
         let mut detached = Vec::new();
+        let disconnect_deadline = unix_ms() + self.config.disconnect_forfeit.as_millis() as u64;
         for player in self
             .players
             .values_mut()
@@ -1081,6 +1636,7 @@ impl RoomActor {
                 player.outbound = None;
                 player.connection_id = None;
                 player.disconnected_at = Some(Instant::now());
+                player.disconnect_deadline_unix_ms = Some(disconnect_deadline);
                 detached.push(player.player_id);
             }
         }
@@ -1098,7 +1654,12 @@ impl RoomActor {
                 seq: self.next_seq(),
                 player_id,
                 connected: false,
+                disconnect_deadline_unix_ms: self
+                    .players
+                    .get(&player_id)
+                    .and_then(|player| player.disconnect_deadline_unix_ms),
             });
+            let disconnect_deadline = unix_ms() + self.config.disconnect_forfeit.as_millis() as u64;
             for player in self
                 .players
                 .values_mut()
@@ -1110,6 +1671,7 @@ impl RoomActor {
                     player.outbound = None;
                     player.connection_id = None;
                     player.disconnected_at = Some(Instant::now());
+                    player.disconnect_deadline_unix_ms = Some(disconnect_deadline);
                     pending.push(player.player_id);
                 }
             }
@@ -1117,9 +1679,10 @@ impl RoomActor {
     }
 }
 
-fn participant_from(player: NewPlayer) -> Participant {
+fn participant_from(player: NewPlayer, seat_index: u8) -> Participant {
     Participant {
         player_id: player.player_id,
+        seat_index,
         display_name: player.display_name,
         token_hash: hash_token(&player.session_token),
         outbound: None,
@@ -1129,6 +1692,7 @@ fn participant_from(player: NewPlayer) -> Participant {
         cached_guesses: HashMap::new(),
         seen_requests: HashSet::new(),
         disconnected_at: Some(Instant::now()),
+        disconnect_deadline_unix_ms: None,
         forfeited_round: false,
     }
 }
@@ -1156,6 +1720,8 @@ struct CatalogPlayer {
     role: String,
     #[serde(rename = "majorAppearances")]
     majors: u16,
+    #[serde(rename = "majorWins")]
+    major_wins: u16,
 }
 
 static PLAYERS: LazyLock<Vec<CatalogPlayer>> = LazyLock::new(|| {
@@ -1274,6 +1840,7 @@ mod tests {
             age: 20,
             role: "AWPer".to_owned(),
             majors: 1,
+            major_wins: 0,
         };
         let target = CatalogPlayer {
             id: "target".to_owned(),
@@ -1283,6 +1850,7 @@ mod tests {
             age: 21,
             role: "Rifler".to_owned(),
             majors: 2,
+            major_wins: 0,
         };
 
         let result = matched_fields(&guess, &target);
@@ -1299,6 +1867,7 @@ mod tests {
             age: 20,
             role: "Rifler".to_owned(),
             majors: 1,
+            major_wins: 0,
         };
         let target = CatalogPlayer {
             id: "target".to_owned(),
@@ -1308,6 +1877,7 @@ mod tests {
             age: 21,
             role: "AWPer".to_owned(),
             majors: 2,
+            major_wins: 0,
         };
 
         let hint = country_hint(&guess, &target);
@@ -1335,12 +1905,98 @@ mod tests {
         let first = NewPlayer::new("0samas".to_owned()).unwrap();
         let second = NewPlayer::new("1nvisiblee".to_owned()).unwrap();
         assert_ne!(first.session_token, second.session_token);
-        let participant = participant_from(first.clone());
+        let participant = participant_from(first.clone(), 0);
         assert!(bool::from(
             participant
                 .token_hash
                 .ct_eq(&hash_token(&first.session_token))
         ));
+    }
+
+    #[tokio::test]
+    async fn friend_room_requires_every_configured_seat_before_starting() {
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-404040".to_owned(),
+                kind: RoomKind::Friend,
+                visibility: Visibility::Hidden,
+                difficulty: Difficulty::Hard,
+                max_players: 4,
+                best_of: 1,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            Config::for_test(),
+            CancellationToken::new(),
+        );
+        let second = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let (host_tx, mut host_rx) = mpsc::channel(32);
+        let (second_tx, _second_rx) = mpsc::channel(32);
+        let (_, host_connection) = room
+            .connect(host.session_token.clone(), host_tx)
+            .await
+            .unwrap();
+        room.connect(second.session_token, second_tx).await.unwrap();
+
+        let rejected_request = Uuid::new_v4();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::StartRound {
+                request_id: rejected_request,
+            },
+        )
+        .await
+        .unwrap();
+
+        let rejection = timeout(Duration::from_secs(1), async {
+            loop {
+                if let Some(message) = host_rx.recv().await
+                    && let ServerMessage::Error {
+                        request_id,
+                        code,
+                        message,
+                        ..
+                    } = message.as_ref()
+                    && *request_id == Some(rejected_request)
+                {
+                    break (*code, message.clone());
+                }
+            }
+        })
+        .await
+        .expect("host receives the not-ready rejection");
+        assert_eq!(rejection.0, "not_ready");
+        assert_eq!(
+            rejection.1,
+            "all room seats must be connected before starting"
+        );
+        assert_eq!(
+            room.snapshot(host.player_id).await.unwrap().phase,
+            Phase::Waiting
+        );
+
+        let third = room.reserve_player("2high".to_owned()).await.unwrap();
+        let fourth = room.reserve_player("2ssb".to_owned()).await.unwrap();
+        let (third_tx, _third_rx) = mpsc::channel(32);
+        let (fourth_tx, _fourth_rx) = mpsc::channel(32);
+        room.connect(third.session_token, third_tx).await.unwrap();
+        room.connect(fourth.session_token, fourth_tx).await.unwrap();
+
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::StartRound {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(
+            room.snapshot(host.player_id).await.unwrap().phase,
+            Phase::Playing
+        );
     }
 
     #[tokio::test]
@@ -1353,7 +2009,8 @@ mod tests {
                 room_code: "CS-207207".to_owned(),
                 kind: RoomKind::Friend,
                 visibility: Visibility::Hidden,
-                max_players: 4,
+                difficulty: Difficulty::Hard,
+                max_players: 2,
                 best_of: 3,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
@@ -1363,7 +2020,7 @@ mod tests {
         );
         let guest = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
         let (host_tx, mut host_rx) = mpsc::channel(16);
-        let (guest_tx, _guest_rx) = mpsc::channel(16);
+        let (guest_tx, mut guest_rx) = mpsc::channel(16);
         let (_, host_connection) = room
             .connect(host.session_token.clone(), host_tx)
             .await
@@ -1394,20 +2051,62 @@ mod tests {
             .await
             .unwrap();
 
-        let progress = timeout(Duration::from_secs(1), async {
+        let progress_seq = timeout(Duration::from_secs(1), async {
             loop {
                 if let Some(message) = host_rx.recv().await
                     && let ServerMessage::OpponentProgress {
-                        guessed_player_id, ..
+                        seq,
+                        guessed_player_id,
+                        ..
                     } = message.as_ref()
                 {
-                    break guessed_player_id.clone();
+                    break (*seq, guessed_player_id.clone());
                 }
             }
         })
         .await
         .expect("host receives progress");
-        assert_eq!(progress, None);
+        assert_eq!(progress_seq.1, None);
+        assert!(
+            timeout(Duration::from_millis(50), async {
+                loop {
+                    if let Some(message) = host_rx.recv().await
+                        && matches!(message.as_ref(), ServerMessage::OpponentProgress { .. })
+                    {
+                        break;
+                    }
+                }
+            })
+            .await
+            .is_err(),
+            "a retried request must not broadcast opponent progress twice"
+        );
+
+        let accepted_sequences = timeout(Duration::from_secs(1), async {
+            let mut sequences = Vec::new();
+            while sequences.len() < 2 {
+                if let Some(message) = guest_rx.recv().await
+                    && let ServerMessage::GuessAccepted {
+                        seq, request_id, ..
+                    } = message.as_ref()
+                    && *request_id == guess_request_id
+                {
+                    sequences.push(*seq);
+                }
+            }
+            sequences
+        })
+        .await
+        .expect("the actor replays both guess acknowledgements");
+        assert_eq!(
+            accepted_sequences,
+            vec![accepted_sequences[0], accepted_sequences[0]],
+            "a transport retry must replay the original event identity"
+        );
+        assert!(
+            accepted_sequences[0] < progress_seq.0,
+            "the original guess acknowledgement precedes opponent progress"
+        );
 
         let snapshot = room.snapshot(guest.player_id).await.unwrap();
         let guest_view = snapshot
@@ -1431,6 +2130,108 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn concurrent_guess_retries_commit_and_broadcast_once() {
+        let shutdown = CancellationToken::new();
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-208208".to_owned(),
+                kind: RoomKind::Friend,
+                visibility: Visibility::Open,
+                difficulty: Difficulty::Hard,
+                max_players: 2,
+                best_of: 3,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            Config::for_test(),
+            shutdown,
+        );
+        let guest = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let (host_tx, mut host_rx) = mpsc::channel(16);
+        let (guest_tx, mut guest_rx) = mpsc::channel(16);
+        let (_, host_connection) = room
+            .connect(host.session_token.clone(), host_tx)
+            .await
+            .unwrap();
+        let (_, guest_connection) = room
+            .connect(guest.session_token.clone(), guest_tx)
+            .await
+            .unwrap();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::StartRound {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+
+        let request_id = Uuid::new_v4();
+        let message = ClientMessage::Guess {
+            request_id,
+            player_id: "donk".to_owned(),
+        };
+        let (first, second) = tokio::join!(
+            room.client_message(guest.player_id, guest_connection, message.clone()),
+            room.client_message(guest.player_id, guest_connection, message),
+        );
+        first.unwrap();
+        second.unwrap();
+
+        let accepted_sequences = timeout(Duration::from_secs(1), async {
+            let mut sequences = Vec::new();
+            while sequences.len() < 2 {
+                if let Some(message) = guest_rx.recv().await
+                    && let ServerMessage::GuessAccepted {
+                        seq,
+                        request_id: event_request_id,
+                        ..
+                    } = message.as_ref()
+                    && *event_request_id == request_id
+                {
+                    sequences.push(*seq);
+                }
+            }
+            sequences
+        })
+        .await
+        .expect("both concurrent deliveries receive the cached acknowledgement");
+        assert_eq!(accepted_sequences[0], accepted_sequences[1]);
+
+        let progress_count = timeout(Duration::from_millis(100), async {
+            let mut count = 0;
+            loop {
+                match timeout(Duration::from_millis(25), host_rx.recv()).await {
+                    Ok(Some(message))
+                        if matches!(message.as_ref(), ServerMessage::OpponentProgress { .. }) =>
+                    {
+                        count += 1;
+                    }
+                    Ok(Some(_)) => {}
+                    _ => break,
+                }
+            }
+            count
+        })
+        .await
+        .unwrap();
+        assert_eq!(progress_count, 1);
+        let snapshot = room.snapshot(guest.player_id).await.unwrap();
+        assert_eq!(snapshot.own_guesses.len(), 1);
+        assert_eq!(
+            snapshot
+                .players
+                .iter()
+                .find(|player| player.player_id == guest.player_id)
+                .unwrap()
+                .guess_count,
+            1
+        );
+    }
+
+    #[tokio::test]
     async fn best_of_three_tracks_scores_and_declares_series_winner() {
         let config = Config::for_test();
         let host = NewPlayer::new("0samas".to_owned()).unwrap();
@@ -1439,8 +2240,120 @@ mod tests {
                 room_code: "CS-303303".to_owned(),
                 kind: RoomKind::Friend,
                 visibility: Visibility::Open,
+                difficulty: Difficulty::Hard,
                 max_players: 2,
                 best_of: 3,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            config,
+            CancellationToken::new(),
+        );
+        let guest = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let (host_tx, _host_rx) = mpsc::channel(64);
+        let (guest_tx, mut guest_rx) = mpsc::channel(64);
+        let (_, host_connection) = room
+            .connect(host.session_token.clone(), host_tx)
+            .await
+            .unwrap();
+        let (_, guest_connection) = room
+            .connect(guest.session_token.clone(), guest_tx)
+            .await
+            .unwrap();
+
+        for expected_score in 1..=2 {
+            if expected_score == 1 {
+                room.client_message(
+                    host.player_id,
+                    host_connection,
+                    ClientMessage::StartRound {
+                        request_id: Uuid::new_v4(),
+                    },
+                )
+                .await
+                .unwrap();
+            } else {
+                timeout(Duration::from_secs(2), async {
+                    loop {
+                        if room.snapshot(host.player_id).await.unwrap().phase == Phase::Playing {
+                            break;
+                        }
+                        tokio::time::sleep(Duration::from_millis(20)).await;
+                    }
+                })
+                .await
+                .expect("friend room automatically starts its next round");
+            }
+            let target = room.target_id().await;
+            room.client_message(
+                guest.player_id,
+                guest_connection,
+                ClientMessage::Guess {
+                    request_id: Uuid::new_v4(),
+                    player_id: target.to_owned(),
+                },
+            )
+            .await
+            .unwrap();
+
+            let finish_reason = timeout(Duration::from_secs(1), async {
+                loop {
+                    if let Some(message) = guest_rx.recv().await
+                        && let ServerMessage::RoundFinished { finish_reason, .. } = message.as_ref()
+                    {
+                        break *finish_reason;
+                    }
+                }
+            })
+            .await
+            .expect("guest receives the authoritative round finish reason");
+            assert_eq!(finish_reason, FinishReason::Solved);
+
+            let snapshot = room.snapshot(guest.player_id).await.unwrap();
+            let score = snapshot
+                .players
+                .iter()
+                .find(|player| player.player_id == guest.player_id)
+                .unwrap()
+                .score;
+            assert_eq!(score, expected_score);
+            assert_eq!(snapshot.round_number, expected_score);
+            assert_eq!(snapshot.finish_reason, Some(FinishReason::Solved));
+            if expected_score == 1 {
+                assert_eq!(snapshot.series_winner_player_id, None);
+            } else {
+                assert_eq!(snapshot.series_winner_player_id, Some(guest.player_id));
+            }
+            assert_eq!(snapshot.round_results.len(), usize::from(expected_score));
+            let latest = snapshot.round_results.last().unwrap();
+            assert_eq!(latest.round_number, expected_score);
+            assert_eq!(latest.finish_reason, FinishReason::Solved);
+            assert_eq!(latest.winner_player_id, Some(guest.player_id));
+            assert_eq!(latest.standings.len(), 2);
+            assert_eq!(
+                latest
+                    .standings
+                    .iter()
+                    .find(|standing| standing.player_id == guest.player_id)
+                    .map(|standing| standing.score),
+                Some(expected_score)
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn bo_one_draw_keeps_the_series_active_and_schedules_a_tiebreak() {
+        let mut config = Config::for_test();
+        config.round_transition = Duration::from_secs(5);
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-313131".to_owned(),
+                kind: RoomKind::Friend,
+                visibility: Visibility::Hidden,
+                difficulty: Difficulty::Hard,
+                max_players: 2,
+                best_of: 1,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
             },
@@ -1458,17 +2371,116 @@ mod tests {
             .connect(guest.session_token.clone(), guest_tx)
             .await
             .unwrap();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::StartRound {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
 
-        for expected_score in 1..=2 {
+        let target = room.target_id().await;
+        let misses = PLAYERS
+            .iter()
+            .filter(|player| player.id != target)
+            .take(MAX_GUESSES)
+            .map(|player| player.id.clone())
+            .collect::<Vec<_>>();
+        assert_eq!(misses.len(), MAX_GUESSES);
+        for miss in &misses {
             room.client_message(
                 host.player_id,
                 host_connection,
-                ClientMessage::StartRound {
+                ClientMessage::Guess {
                     request_id: Uuid::new_v4(),
+                    player_id: miss.clone(),
                 },
             )
             .await
             .unwrap();
+            room.client_message(
+                guest.player_id,
+                guest_connection,
+                ClientMessage::Guess {
+                    request_id: Uuid::new_v4(),
+                    player_id: miss.clone(),
+                },
+            )
+            .await
+            .unwrap();
+        }
+
+        let snapshot = room.snapshot(host.player_id).await.unwrap();
+        assert_eq!(snapshot.phase, Phase::Finished);
+        assert_eq!(snapshot.series_status, SeriesStatus::Active);
+        assert_eq!(snapshot.series_winner_player_id, None);
+        assert_eq!(snapshot.winner_player_id, None);
+        assert_eq!(snapshot.finish_reason, Some(FinishReason::MaxGuesses));
+        assert!(snapshot.next_round_unix_ms.is_some());
+        assert_eq!(snapshot.round_results.len(), 1);
+        assert!(
+            snapshot.round_results[0]
+                .standings
+                .iter()
+                .all(|standing| standing.score == 0 && standing.rank == 1)
+        );
+    }
+
+    #[tokio::test]
+    async fn host_can_restart_a_completed_bo_five_without_recreating_the_room() {
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-353535".to_owned(),
+                kind: RoomKind::Friend,
+                visibility: Visibility::Open,
+                difficulty: Difficulty::Hard,
+                max_players: 2,
+                best_of: 5,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            Config::for_test(),
+            CancellationToken::new(),
+        );
+        let guest = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let (host_tx, _host_rx) = mpsc::channel(64);
+        let (guest_tx, _guest_rx) = mpsc::channel(64);
+        let (_, host_connection) = room
+            .connect(host.session_token.clone(), host_tx)
+            .await
+            .unwrap();
+        let (_, guest_connection) = room
+            .connect(guest.session_token.clone(), guest_tx)
+            .await
+            .unwrap();
+
+        for round in 1..=3 {
+            if round == 1 {
+                room.client_message(
+                    host.player_id,
+                    host_connection,
+                    ClientMessage::StartRound {
+                        request_id: Uuid::new_v4(),
+                    },
+                )
+                .await
+                .unwrap();
+            } else {
+                timeout(Duration::from_secs(2), async {
+                    loop {
+                        let snapshot = room.snapshot(host.player_id).await.unwrap();
+                        if snapshot.phase == Phase::Playing && snapshot.round_number == round {
+                            break;
+                        }
+                        tokio::time::sleep(Duration::from_millis(10)).await;
+                    }
+                })
+                .await
+                .expect("next BO5 round starts authoritatively");
+            }
             let target = room.target_id().await;
             room.client_message(
                 guest.player_id,
@@ -1480,22 +2492,63 @@ mod tests {
             )
             .await
             .unwrap();
+        }
 
-            let snapshot = room.snapshot(guest.player_id).await.unwrap();
-            let score = snapshot
+        let completed = room.snapshot(host.player_id).await.unwrap();
+        assert_eq!(completed.series_status, SeriesStatus::Completed);
+        assert_eq!(completed.round_results.len(), 3);
+        assert_eq!(completed.round_number, 3);
+        let completed_target = completed.mystery_id.clone().unwrap();
+
+        room.client_message(
+            guest.player_id,
+            guest_connection,
+            ClientMessage::RestartSeries {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(
+            room.snapshot(host.player_id).await.unwrap().series_status,
+            SeriesStatus::Completed
+        );
+
+        let restart_request = Uuid::new_v4();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::RestartSeries {
+                request_id: restart_request,
+            },
+        )
+        .await
+        .unwrap();
+        // Retrying the same acknowledged command must remain harmless.
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::RestartSeries {
+                request_id: restart_request,
+            },
+        )
+        .await
+        .unwrap();
+
+        let restarted = room.snapshot(guest.player_id).await.unwrap();
+        assert_eq!(restarted.phase, Phase::Waiting);
+        assert_eq!(restarted.series_status, SeriesStatus::Active);
+        assert_eq!(restarted.round_number, 0);
+        assert!(restarted.round_results.is_empty());
+        assert_eq!(restarted.series_winner_player_id, None);
+        assert_eq!(restarted.finish_reason, None);
+        assert_ne!(room.target_id().await, completed_target);
+        assert!(
+            restarted
                 .players
                 .iter()
-                .find(|player| player.player_id == guest.player_id)
-                .unwrap()
-                .score;
-            assert_eq!(score, expected_score);
-            assert_eq!(snapshot.round_number, expected_score);
-            if expected_score == 1 {
-                assert_eq!(snapshot.series_winner_player_id, None);
-            } else {
-                assert_eq!(snapshot.series_winner_player_id, Some(guest.player_id));
-            }
-        }
+                .all(|player| player.score == 0 && player.guess_count == 0)
+        );
     }
 
     #[tokio::test]
@@ -1508,6 +2561,7 @@ mod tests {
                 room_code: "CS-404404".to_owned(),
                 kind: RoomKind::Friend,
                 visibility: Visibility::Hidden,
+                difficulty: Difficulty::Hard,
                 max_players: 2,
                 best_of: 1,
                 host: host.clone(),
@@ -1517,7 +2571,7 @@ mod tests {
             CancellationToken::new(),
         );
         let guest = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
-        let (host_tx, _host_rx) = mpsc::channel(16);
+        let (host_tx, mut host_rx) = mpsc::channel(16);
         let (guest_tx, _guest_rx) = mpsc::channel(16);
         let (_, host_connection) = room
             .connect(host.session_token.clone(), host_tx)
@@ -1538,6 +2592,23 @@ mod tests {
         .await
         .unwrap();
         room.disconnect(guest.player_id, guest_connection).await;
+        let disconnected = room.snapshot(host.player_id).await.unwrap();
+        let disconnect_deadline = disconnected
+            .players
+            .iter()
+            .find(|player| player.player_id == guest.player_id)
+            .and_then(|player| player.disconnect_deadline_unix_ms)
+            .expect("disconnect snapshot carries an authoritative deadline");
+        tokio::time::sleep(Duration::from_millis(5)).await;
+        let refreshed = room.snapshot(host.player_id).await.unwrap();
+        assert_eq!(
+            refreshed
+                .players
+                .iter()
+                .find(|player| player.player_id == guest.player_id)
+                .and_then(|player| player.disconnect_deadline_unix_ms),
+            Some(disconnect_deadline)
+        );
 
         let finished = timeout(Duration::from_secs(2), async {
             loop {
@@ -1553,5 +2624,1040 @@ mod tests {
 
         assert_eq!(finished.winner_player_id, Some(host.player_id));
         assert_eq!(finished.series_winner_player_id, Some(host.player_id));
+        assert_eq!(
+            finished.finish_reason,
+            Some(FinishReason::DisconnectForfeit)
+        );
+        let finish_reason = timeout(Duration::from_secs(1), async {
+            loop {
+                if let Some(message) = host_rx.recv().await
+                    && let ServerMessage::RoundFinished { finish_reason, .. } = message.as_ref()
+                {
+                    break *finish_reason;
+                }
+            }
+        })
+        .await
+        .expect("winner receives the disconnect-forfeit finish reason");
+        assert_eq!(finish_reason, FinishReason::DisconnectForfeit);
+    }
+
+    #[tokio::test]
+    async fn reconnect_snapshot_keeps_current_round_forfeit_and_next_round_restores_eligibility() {
+        let mut config = Config::for_test();
+        config.disconnect_forfeit = Duration::from_millis(20);
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-414141".to_owned(),
+                kind: RoomKind::Friend,
+                visibility: Visibility::Hidden,
+                difficulty: Difficulty::Hard,
+                max_players: 4,
+                best_of: 3,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            config,
+            CancellationToken::new(),
+        );
+        let second = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let third = room.reserve_player("2high".to_owned()).await.unwrap();
+        let fourth = room.reserve_player("2ssb".to_owned()).await.unwrap();
+
+        let (host_tx, mut host_rx) = mpsc::channel(64);
+        let (second_tx, second_rx) = mpsc::channel(64);
+        let (third_tx, third_rx) = mpsc::channel(64);
+        let (fourth_tx, fourth_rx) = mpsc::channel(64);
+        let (_, host_connection) = room
+            .connect(host.session_token.clone(), host_tx)
+            .await
+            .unwrap();
+        let (_, second_connection) = room
+            .connect(second.session_token.clone(), second_tx)
+            .await
+            .unwrap();
+        room.connect(third.session_token.clone(), third_tx)
+            .await
+            .unwrap();
+        room.connect(fourth.session_token.clone(), fourth_tx)
+            .await
+            .unwrap();
+        // Keep every receiver alive so the bounded outbound channels remain connected.
+        let _other_receivers = (second_rx, third_rx, fourth_rx);
+
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::StartRound {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        room.disconnect(second.player_id, second_connection).await;
+
+        timeout(Duration::from_secs(3), async {
+            loop {
+                let snapshot = room.snapshot(host.player_id).await.unwrap();
+                if snapshot
+                    .players
+                    .iter()
+                    .find(|player| player.player_id == second.player_id)
+                    .is_some_and(|player| player.forfeited_this_round)
+                {
+                    break;
+                }
+                tokio::time::sleep(Duration::from_millis(25)).await;
+            }
+        })
+        .await
+        .expect("authoritative maintenance marks the disconnected player forfeited");
+
+        let forfeit_event = timeout(Duration::from_secs(1), async {
+            loop {
+                if let Some(message) = host_rx.recv().await
+                    && let ServerMessage::PlayerRoundForfeited {
+                        player_id,
+                        round_number,
+                        ..
+                    } = message.as_ref()
+                    && *player_id == second.player_id
+                {
+                    break *round_number;
+                }
+            }
+        })
+        .await
+        .expect("remaining players receive the current-round eligibility change");
+        assert_eq!(forfeit_event, 1);
+
+        let (reconnect_tx, _reconnect_rx) = mpsc::channel(64);
+        room.connect(second.session_token.clone(), reconnect_tx)
+            .await
+            .unwrap();
+        let reconnected = room.snapshot(second.player_id).await.unwrap();
+        let second_view = reconnected
+            .players
+            .iter()
+            .find(|player| player.player_id == second.player_id)
+            .unwrap();
+        assert!(second_view.connected);
+        assert!(second_view.forfeited_this_round);
+        assert_eq!(second_view.disconnect_deadline_unix_ms, None);
+        assert_eq!(reconnected.phase, Phase::Playing);
+
+        let target = room.target_id().await;
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::Guess {
+                request_id: Uuid::new_v4(),
+                player_id: target.to_owned(),
+            },
+        )
+        .await
+        .unwrap();
+        let next_round = timeout(Duration::from_secs(2), async {
+            loop {
+                let snapshot = room.snapshot(second.player_id).await.unwrap();
+                if snapshot.phase == Phase::Playing && snapshot.round_number == 2 {
+                    break snapshot;
+                }
+                tokio::time::sleep(Duration::from_millis(20)).await;
+            }
+        })
+        .await
+        .expect("friend room automatically starts the next round");
+        assert_eq!(next_round.phase, Phase::Playing);
+        assert_eq!(next_round.round_number, 2);
+        assert!(
+            next_round
+                .players
+                .iter()
+                .all(|player| !player.forfeited_this_round)
+        );
+    }
+
+    #[tokio::test]
+    async fn four_player_snapshot_seats_are_stable_across_refresh_and_reconnect() {
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-505505".to_owned(),
+                kind: RoomKind::Quick,
+                visibility: Visibility::Hidden,
+                difficulty: Difficulty::Easy,
+                max_players: 4,
+                best_of: 3,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            Config::for_test(),
+            CancellationToken::new(),
+        );
+        let second = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let third = room.reserve_player("2high".to_owned()).await.unwrap();
+        let fourth = room.reserve_player("2ssb".to_owned()).await.unwrap();
+        let first_snapshot = room.snapshot(host.player_id).await.unwrap();
+        let second_snapshot = room.snapshot(host.player_id).await.unwrap();
+        assert_eq!(
+            first_snapshot
+                .players
+                .iter()
+                .map(|player| player.seat_index)
+                .collect::<Vec<_>>(),
+            vec![0, 1, 2, 3]
+        );
+        assert_eq!(
+            first_snapshot
+                .players
+                .iter()
+                .map(|player| player.player_id)
+                .collect::<Vec<_>>(),
+            second_snapshot
+                .players
+                .iter()
+                .map(|player| player.player_id)
+                .collect::<Vec<_>>()
+        );
+
+        let (outbound, _receiver) = mpsc::channel(8);
+        let (_, connection_id) = room
+            .connect(third.session_token.clone(), outbound)
+            .await
+            .unwrap();
+        room.disconnect(third.player_id, connection_id).await;
+        let (outbound, _receiver) = mpsc::channel(8);
+        room.connect(third.session_token, outbound).await.unwrap();
+        let reconnected = room.snapshot(host.player_id).await.unwrap();
+        assert_eq!(
+            reconnected
+                .players
+                .iter()
+                .find(|player| player.player_id == third.player_id)
+                .map(|player| player.seat_index),
+            Some(2)
+        );
+        assert!(
+            reconnected
+                .players
+                .iter()
+                .any(|player| player.player_id == second.player_id)
+        );
+        assert!(
+            reconnected
+                .players
+                .iter()
+                .any(|player| player.player_id == fourth.player_id)
+        );
+    }
+
+    #[tokio::test]
+    async fn two_player_member_leave_awards_the_remaining_player_the_series() {
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-616161".to_owned(),
+                kind: RoomKind::Friend,
+                visibility: Visibility::Hidden,
+                difficulty: Difficulty::Hard,
+                max_players: 2,
+                best_of: 5,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            Config::for_test(),
+            CancellationToken::new(),
+        );
+        let guest = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let (host_tx, mut host_rx) = mpsc::channel(32);
+        let (guest_tx, _guest_rx) = mpsc::channel(32);
+        let (_, host_connection) = room
+            .connect(host.session_token.clone(), host_tx)
+            .await
+            .unwrap();
+        room.connect(guest.session_token.clone(), guest_tx)
+            .await
+            .unwrap();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::StartRound {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+
+        room.leave_friend_room(guest.session_token).await.unwrap();
+        let snapshot = room.snapshot(host.player_id).await.unwrap();
+        assert_eq!(snapshot.phase, Phase::Finished);
+        assert_eq!(snapshot.winner_player_id, Some(host.player_id));
+        assert_eq!(snapshot.series_winner_player_id, Some(host.player_id));
+        assert_eq!(snapshot.series_status, SeriesStatus::Completed);
+        assert_eq!(
+            snapshot.series_finish_reason,
+            Some(SeriesFinishReason::MemberLeftForfeit)
+        );
+        assert_eq!(snapshot.finish_reason, Some(FinishReason::MemberLeft));
+        assert_eq!(snapshot.next_round_unix_ms, None);
+        assert_eq!(
+            snapshot
+                .players
+                .iter()
+                .find(|player| player.player_id == host.player_id)
+                .map(|player| player.score),
+            Some(3)
+        );
+        let standings = snapshot.series_final_standings.unwrap();
+        assert_eq!(standings.len(), 2);
+        assert!(
+            standings
+                .iter()
+                .any(|player| player.player_id == guest.player_id && player.left_series)
+        );
+
+        let event = timeout(Duration::from_secs(1), async {
+            loop {
+                if let Some(message) = host_rx.recv().await
+                    && let ServerMessage::RoundFinished {
+                        series_status,
+                        series_finish_reason,
+                        ..
+                    } = message.as_ref()
+                {
+                    break (*series_status, *series_finish_reason);
+                }
+            }
+        })
+        .await
+        .expect("remaining player receives the terminal series event");
+        assert_eq!(event.0, SeriesStatus::Completed);
+        assert_eq!(event.1, Some(SeriesFinishReason::MemberLeftForfeit));
+    }
+
+    #[tokio::test]
+    async fn four_player_member_leave_abandons_without_choosing_a_tied_winner() {
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-626262".to_owned(),
+                kind: RoomKind::Friend,
+                visibility: Visibility::Open,
+                difficulty: Difficulty::Hard,
+                max_players: 4,
+                best_of: 3,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            Config::for_test(),
+            CancellationToken::new(),
+        );
+        let second = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let third = room.reserve_player("2high".to_owned()).await.unwrap();
+        let fourth = room.reserve_player("2ssb".to_owned()).await.unwrap();
+        let (host_tx, _host_rx) = mpsc::channel(32);
+        let (second_tx, _second_rx) = mpsc::channel(32);
+        let (third_tx, _third_rx) = mpsc::channel(32);
+        let (fourth_tx, _fourth_rx) = mpsc::channel(32);
+        let (_, host_connection) = room
+            .connect(host.session_token.clone(), host_tx)
+            .await
+            .unwrap();
+        room.connect(second.session_token.clone(), second_tx)
+            .await
+            .unwrap();
+        room.connect(third.session_token.clone(), third_tx)
+            .await
+            .unwrap();
+        room.connect(fourth.session_token.clone(), fourth_tx)
+            .await
+            .unwrap();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::StartRound {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+
+        room.leave_friend_room(third.session_token).await.unwrap();
+        let snapshot = room.snapshot(host.player_id).await.unwrap();
+        assert_eq!(snapshot.phase, Phase::Finished);
+        assert_eq!(snapshot.winner_player_id, None);
+        assert_eq!(snapshot.series_winner_player_id, None);
+        assert_eq!(snapshot.series_status, SeriesStatus::Abandoned);
+        assert_eq!(
+            snapshot.series_finish_reason,
+            Some(SeriesFinishReason::MemberLeftAbandoned)
+        );
+        assert_eq!(snapshot.next_round_unix_ms, None);
+        let standings = snapshot.series_final_standings.unwrap();
+        assert_eq!(standings.len(), 4);
+        assert!(
+            standings
+                .iter()
+                .any(|player| player.player_id == third.player_id && player.left_series)
+        );
+
+        let restart_request = Uuid::new_v4();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::RestartSeries {
+                request_id: restart_request,
+            },
+        )
+        .await
+        .unwrap();
+        let restarted = room.snapshot(host.player_id).await.unwrap();
+        assert_eq!(restarted.phase, Phase::Waiting);
+        assert_eq!(restarted.players.len(), 3);
+        assert!(restarted.round_results.is_empty());
+        let replacement = room.reserve_player("333ed2k".to_owned()).await.unwrap();
+        let refilled = room.snapshot(host.player_id).await.unwrap();
+        assert_eq!(refilled.players.len(), 4);
+        assert_eq!(
+            refilled
+                .players
+                .iter()
+                .find(|player| player.player_id == replacement.player_id)
+                .map(|player| player.seat_index),
+            Some(2)
+        );
+    }
+
+    #[tokio::test]
+    async fn expired_friend_room_host_transfers_authority_and_cannot_rejoin() {
+        let mut config = Config::for_test();
+        config.disconnect_forfeit = Duration::from_millis(20);
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-717171".to_owned(),
+                kind: RoomKind::Friend,
+                visibility: Visibility::Hidden,
+                difficulty: Difficulty::Hard,
+                max_players: 2,
+                best_of: 1,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            config,
+            CancellationToken::new(),
+        );
+        let guest = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let (host_tx, _host_rx) = mpsc::channel(64);
+        let (guest_tx, mut guest_rx) = mpsc::channel(64);
+        let (_, host_connection) = room
+            .connect(host.session_token.clone(), host_tx)
+            .await
+            .unwrap();
+        let (_, guest_connection) = room
+            .connect(guest.session_token.clone(), guest_tx)
+            .await
+            .unwrap();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::StartRound {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        room.disconnect(host.player_id, host_connection).await;
+
+        let terminal = timeout(Duration::from_secs(3), async {
+            loop {
+                let snapshot = room.snapshot(guest.player_id).await.unwrap();
+                if snapshot.series_status == SeriesStatus::Completed {
+                    break snapshot;
+                }
+                tokio::time::sleep(Duration::from_millis(25)).await;
+            }
+        })
+        .await
+        .expect("host expiry terminalizes the duel");
+        assert_eq!(terminal.host_player_id, guest.player_id);
+        assert_eq!(terminal.players.len(), 1);
+        assert_eq!(terminal.series_winner_player_id, Some(guest.player_id));
+        assert!(room.snapshot(host.player_id).await.is_err());
+        let (late_host_tx, _late_host_rx) = mpsc::channel(8);
+        assert!(
+            room.connect(host.session_token.clone(), late_host_tx)
+                .await
+                .is_err()
+        );
+
+        let transferred_snapshot = timeout(Duration::from_secs(1), async {
+            loop {
+                if let Some(message) = guest_rx.recv().await
+                    && let ServerMessage::Snapshot { snapshot, .. } = message.as_ref()
+                    && snapshot.series_status == SeriesStatus::Completed
+                {
+                    break snapshot.clone();
+                }
+            }
+        })
+        .await
+        .expect("remaining member receives the transferred host snapshot");
+        assert_eq!(transferred_snapshot.host_player_id, guest.player_id);
+
+        room.client_message(
+            guest.player_id,
+            guest_connection,
+            ClientMessage::RestartSeries {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        let restarted = room.snapshot(guest.player_id).await.unwrap();
+        assert_eq!(restarted.phase, Phase::Waiting);
+        assert_eq!(restarted.host_player_id, guest.player_id);
+        assert_eq!(
+            restarted
+                .players
+                .iter()
+                .find(|player| player.player_id == guest.player_id)
+                .map(|player| player.seat_index),
+            Some(1)
+        );
+        let replacement = room.reserve_player("2high".to_owned()).await.unwrap();
+        assert_eq!(
+            room.snapshot(guest.player_id)
+                .await
+                .unwrap()
+                .players
+                .iter()
+                .find(|player| player.player_id == replacement.player_id)
+                .map(|player| player.seat_index),
+            Some(0)
+        );
+    }
+
+    #[tokio::test]
+    async fn four_player_host_expiry_preserves_online_seats_for_refill() {
+        let mut config = Config::for_test();
+        config.disconnect_forfeit = Duration::from_millis(20);
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-727272".to_owned(),
+                kind: RoomKind::Friend,
+                visibility: Visibility::Open,
+                difficulty: Difficulty::Hard,
+                max_players: 4,
+                best_of: 3,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            config,
+            CancellationToken::new(),
+        );
+        let second = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let third = room.reserve_player("2high".to_owned()).await.unwrap();
+        let fourth = room.reserve_player("2ssb".to_owned()).await.unwrap();
+        let (host_tx, _host_rx) = mpsc::channel(64);
+        let (second_tx, _second_rx) = mpsc::channel(64);
+        let (third_tx, _third_rx) = mpsc::channel(64);
+        let (fourth_tx, _fourth_rx) = mpsc::channel(64);
+        let (_, host_connection) = room
+            .connect(host.session_token.clone(), host_tx)
+            .await
+            .unwrap();
+        let (_, second_connection) = room
+            .connect(second.session_token.clone(), second_tx)
+            .await
+            .unwrap();
+        room.connect(third.session_token.clone(), third_tx)
+            .await
+            .unwrap();
+        room.connect(fourth.session_token.clone(), fourth_tx)
+            .await
+            .unwrap();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::StartRound {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        room.disconnect(host.player_id, host_connection).await;
+        timeout(Duration::from_secs(3), async {
+            loop {
+                if room
+                    .snapshot(second.player_id)
+                    .await
+                    .unwrap()
+                    .players
+                    .iter()
+                    .find(|player| player.player_id == host.player_id)
+                    .is_some_and(|player| player.forfeited_this_round)
+                {
+                    break;
+                }
+                tokio::time::sleep(Duration::from_millis(25)).await;
+            }
+        })
+        .await
+        .expect("host reaches the authoritative expiry deadline");
+        let target = room.target_id().await;
+        room.client_message(
+            second.player_id,
+            second_connection,
+            ClientMessage::Guess {
+                request_id: Uuid::new_v4(),
+                player_id: target.to_owned(),
+            },
+        )
+        .await
+        .unwrap();
+
+        let abandoned = timeout(Duration::from_secs(3), async {
+            loop {
+                let snapshot = room.snapshot(second.player_id).await.unwrap();
+                if snapshot.series_status == SeriesStatus::Abandoned {
+                    break snapshot;
+                }
+                tokio::time::sleep(Duration::from_millis(25)).await;
+            }
+        })
+        .await
+        .expect("expired host abandons the active four-player series");
+        assert_eq!(abandoned.host_player_id, second.player_id);
+        assert_eq!(
+            abandoned
+                .players
+                .iter()
+                .map(|player| player.seat_index)
+                .collect::<Vec<_>>(),
+            vec![1, 2, 3]
+        );
+        assert!(room.snapshot(host.player_id).await.is_err());
+
+        room.client_message(
+            second.player_id,
+            second_connection,
+            ClientMessage::RestartSeries {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        let replacement = room.reserve_player("333ed2k".to_owned()).await.unwrap();
+        let refilled = room.snapshot(second.player_id).await.unwrap();
+        assert_eq!(refilled.phase, Phase::Waiting);
+        assert_eq!(
+            refilled
+                .players
+                .iter()
+                .find(|player| player.player_id == replacement.player_id)
+                .map(|player| player.seat_index),
+            Some(0)
+        );
+        assert_eq!(
+            refilled
+                .players
+                .iter()
+                .filter(|player| player.player_id != replacement.player_id)
+                .map(|player| player.seat_index)
+                .collect::<Vec<_>>(),
+            vec![1, 2, 3]
+        );
+    }
+
+    #[tokio::test]
+    async fn explicit_host_leave_transfers_the_same_restart_authority() {
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-737373".to_owned(),
+                kind: RoomKind::Friend,
+                visibility: Visibility::Hidden,
+                difficulty: Difficulty::Hard,
+                max_players: 2,
+                best_of: 5,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            Config::for_test(),
+            CancellationToken::new(),
+        );
+        let guest = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let (host_tx, _host_rx) = mpsc::channel(32);
+        let (guest_tx, _guest_rx) = mpsc::channel(32);
+        let (_, host_connection) = room
+            .connect(host.session_token.clone(), host_tx)
+            .await
+            .unwrap();
+        let (_, guest_connection) = room
+            .connect(guest.session_token.clone(), guest_tx)
+            .await
+            .unwrap();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::StartRound {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        room.leave_friend_room(host.session_token.clone())
+            .await
+            .unwrap();
+        let terminal = room.snapshot(guest.player_id).await.unwrap();
+        assert_eq!(terminal.host_player_id, guest.player_id);
+        assert_eq!(terminal.series_status, SeriesStatus::Completed);
+        assert!(room.snapshot(host.player_id).await.is_err());
+
+        room.client_message(
+            guest.player_id,
+            guest_connection,
+            ClientMessage::RestartSeries {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(
+            room.snapshot(guest.player_id).await.unwrap().phase,
+            Phase::Waiting
+        );
+    }
+
+    #[tokio::test]
+    async fn explicit_four_player_host_leave_broadcasts_the_new_host_and_can_start_after_refill() {
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-767676".to_owned(),
+                kind: RoomKind::Friend,
+                visibility: Visibility::Open,
+                difficulty: Difficulty::Hard,
+                max_players: 4,
+                best_of: 3,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            Config::for_test(),
+            CancellationToken::new(),
+        );
+        let second = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let third = room.reserve_player("2high".to_owned()).await.unwrap();
+        let fourth = room.reserve_player("2ssb".to_owned()).await.unwrap();
+        let (host_tx, _host_rx) = mpsc::channel(64);
+        let (second_tx, mut second_rx) = mpsc::channel(64);
+        let (third_tx, _third_rx) = mpsc::channel(64);
+        let (fourth_tx, _fourth_rx) = mpsc::channel(64);
+        let (_, host_connection) = room
+            .connect(host.session_token.clone(), host_tx)
+            .await
+            .unwrap();
+        let (_, second_connection) = room
+            .connect(second.session_token.clone(), second_tx)
+            .await
+            .unwrap();
+        room.connect(third.session_token.clone(), third_tx)
+            .await
+            .unwrap();
+        room.connect(fourth.session_token.clone(), fourth_tx)
+            .await
+            .unwrap();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::StartRound {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        room.leave_friend_room(host.session_token.clone())
+            .await
+            .unwrap();
+
+        let (event_host, event_status, event_standings) = timeout(Duration::from_secs(1), async {
+            loop {
+                if let Some(message) = second_rx.recv().await
+                    && let ServerMessage::RoundFinished {
+                        host_player_id,
+                        series_status,
+                        series_final_standings,
+                        ..
+                    } = message.as_ref()
+                {
+                    break (
+                        *host_player_id,
+                        *series_status,
+                        series_final_standings.clone().unwrap(),
+                    );
+                }
+            }
+        })
+        .await
+        .expect("new host receives the terminal round event");
+        let final_snapshot = timeout(Duration::from_secs(1), async {
+            loop {
+                if let Some(message) = second_rx.recv().await
+                    && let ServerMessage::Snapshot { snapshot, .. } = message.as_ref()
+                    && snapshot.series_status == SeriesStatus::Abandoned
+                {
+                    break snapshot.clone();
+                }
+            }
+        })
+        .await
+        .expect("new host receives a matching terminal snapshot");
+        assert_eq!(event_host, second.player_id);
+        assert_eq!(event_status, SeriesStatus::Abandoned);
+        assert_eq!(final_snapshot.host_player_id, event_host);
+        assert_eq!(final_snapshot.series_status, event_status);
+        let snapshot_standings = final_snapshot.series_final_standings.unwrap();
+        assert_eq!(event_standings.len(), snapshot_standings.len());
+        assert_eq!(
+            event_standings
+                .iter()
+                .map(|standing| (standing.player_id, standing.score, standing.left_series))
+                .collect::<Vec<_>>(),
+            snapshot_standings
+                .iter()
+                .map(|standing| (standing.player_id, standing.score, standing.left_series))
+                .collect::<Vec<_>>()
+        );
+        assert!(room.snapshot(host.player_id).await.is_err());
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::RestartSeries {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(
+            room.snapshot(second.player_id).await.unwrap().series_status,
+            SeriesStatus::Abandoned
+        );
+
+        room.client_message(
+            second.player_id,
+            second_connection,
+            ClientMessage::RestartSeries {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        let replacement = room.reserve_player("333ed2k".to_owned()).await.unwrap();
+        let (replacement_tx, _replacement_rx) = mpsc::channel(32);
+        room.connect(replacement.session_token, replacement_tx)
+            .await
+            .unwrap();
+        room.client_message(
+            second.player_id,
+            second_connection,
+            ClientMessage::StartRound {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        let started = room.snapshot(second.player_id).await.unwrap();
+        assert_eq!(started.phase, Phase::Playing);
+        assert_eq!(started.host_player_id, second.player_id);
+        assert_eq!(
+            started
+                .players
+                .iter()
+                .map(|player| player.seat_index)
+                .collect::<Vec<_>>(),
+            vec![0, 1, 2, 3]
+        );
+    }
+
+    #[tokio::test]
+    async fn explicit_host_leave_closes_when_every_remaining_member_is_offline() {
+        for (index, max_players) in [2_u8, 4].into_iter().enumerate() {
+            let host = NewPlayer::new("0samas".to_owned()).unwrap();
+            let room = spawn_room(
+                RoomSpec {
+                    room_code: format!("CS-78{index}78{index}"),
+                    kind: RoomKind::Friend,
+                    visibility: Visibility::Hidden,
+                    difficulty: Difficulty::Hard,
+                    max_players,
+                    best_of: 3,
+                    host: host.clone(),
+                    queue_telemetry: Arc::new(QueueTelemetry::new()),
+                },
+                Config::for_test(),
+                CancellationToken::new(),
+            );
+            let identity_ids = ["1nvisiblee", "2high", "2ssb"];
+            let mut guests = Vec::new();
+            for identity_id in identity_ids.iter().take(usize::from(max_players - 1)) {
+                guests.push(
+                    room.reserve_player((*identity_id).to_owned())
+                        .await
+                        .unwrap(),
+                );
+            }
+            let (host_tx, _host_rx) = mpsc::channel(32);
+            room.connect(host.session_token.clone(), host_tx)
+                .await
+                .unwrap();
+            for guest in &guests {
+                let (guest_tx, _guest_rx) = mpsc::channel(8);
+                let (_, connection_id) = room
+                    .connect(guest.session_token.clone(), guest_tx)
+                    .await
+                    .unwrap();
+                room.disconnect(guest.player_id, connection_id).await;
+            }
+
+            let result = room
+                .leave_friend_room(host.session_token.clone())
+                .await
+                .unwrap();
+            assert!(result.closed);
+            assert_eq!(result.remaining_players, 0);
+            timeout(Duration::from_secs(1), async {
+                while !room.is_closed() {
+                    tokio::time::sleep(Duration::from_millis(10)).await;
+                }
+            })
+            .await
+            .expect("room actor closes instead of assigning an offline host");
+        }
+    }
+
+    #[tokio::test]
+    async fn host_reconnect_inside_the_grace_window_keeps_authority() {
+        let mut config = Config::for_test();
+        config.disconnect_forfeit = Duration::from_millis(250);
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-797979".to_owned(),
+                kind: RoomKind::Friend,
+                visibility: Visibility::Hidden,
+                difficulty: Difficulty::Hard,
+                max_players: 2,
+                best_of: 3,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            config,
+            CancellationToken::new(),
+        );
+        let guest = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let (host_tx, _host_rx) = mpsc::channel(32);
+        let (guest_tx, _guest_rx) = mpsc::channel(32);
+        let (_, host_connection) = room
+            .connect(host.session_token.clone(), host_tx)
+            .await
+            .unwrap();
+        room.connect(guest.session_token, guest_tx).await.unwrap();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::StartRound {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        room.disconnect(host.player_id, host_connection).await;
+        tokio::time::sleep(Duration::from_millis(25)).await;
+        let (reconnect_tx, _reconnect_rx) = mpsc::channel(32);
+        room.connect(host.session_token, reconnect_tx)
+            .await
+            .unwrap();
+
+        let snapshot = room.snapshot(guest.player_id).await.unwrap();
+        assert_eq!(snapshot.host_player_id, host.player_id);
+        assert_eq!(snapshot.series_status, SeriesStatus::Active);
+        assert!(
+            snapshot
+                .players
+                .iter()
+                .find(|player| player.player_id == host.player_id)
+                .is_some_and(|player| player.connected && !player.forfeited_this_round)
+        );
+    }
+
+    #[tokio::test]
+    async fn a_friend_room_closes_when_no_online_member_can_take_authority() {
+        let mut config = Config::for_test();
+        config.disconnect_forfeit = Duration::from_millis(20);
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-747474".to_owned(),
+                kind: RoomKind::Friend,
+                visibility: Visibility::Hidden,
+                difficulty: Difficulty::Hard,
+                max_players: 2,
+                best_of: 1,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            config,
+            CancellationToken::new(),
+        );
+        let guest = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let (host_tx, _host_rx) = mpsc::channel(16);
+        let (guest_tx, _guest_rx) = mpsc::channel(16);
+        let (_, host_connection) = room.connect(host.session_token, host_tx).await.unwrap();
+        let (_, guest_connection) = room.connect(guest.session_token, guest_tx).await.unwrap();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::StartRound {
+                request_id: Uuid::new_v4(),
+            },
+        )
+        .await
+        .unwrap();
+        room.disconnect(host.player_id, host_connection).await;
+        room.disconnect(guest.player_id, guest_connection).await;
+
+        timeout(Duration::from_secs(3), async {
+            while !room.is_closed() {
+                tokio::time::sleep(Duration::from_millis(25)).await;
+            }
+        })
+        .await
+        .expect("room actor closes after every member expires");
+
+        let lone_host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let lone_room = spawn_room(
+            RoomSpec {
+                room_code: "CS-757575".to_owned(),
+                kind: RoomKind::Friend,
+                visibility: Visibility::Hidden,
+                difficulty: Difficulty::Hard,
+                max_players: 2,
+                best_of: 1,
+                host: lone_host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            Config::for_test(),
+            CancellationToken::new(),
+        );
+        let result = lone_room
+            .leave_friend_room(lone_host.session_token)
+            .await
+            .unwrap();
+        assert!(result.closed);
+        assert_eq!(result.remaining_players, 0);
     }
 }
