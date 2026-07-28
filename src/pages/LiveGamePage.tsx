@@ -283,7 +283,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
   } | null>(null);
   const realtime = useRealtimeRoom(
     closingIntent ? null : (session?.credentials ?? null),
-    closingIntent ? {} : session?.snapshot,
+    closingIntent ? undefined : session?.snapshot,
   );
 
   const snapshot = realtime.snapshot;

@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 
-import { act } from "react";
+import { act, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -111,7 +111,9 @@ function renderQuickMatch() {
   act(() => {
     root.render(
       <MemoryRouter initialEntries={["/quick"]}>
-        <QuickMatch />
+        <StrictMode>
+          <QuickMatch />
+        </StrictMode>
       </MemoryRouter>,
     );
   });
