@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 
-import { act } from "react";
+import { act, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter, useLocation } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -164,8 +164,10 @@ function renderPage() {
   act(() => {
     root.render(
       <MemoryRouter initialEntries={["/matching"]}>
-        <MatchmakingPage />
-        <LocationProbe />
+        <StrictMode>
+          <MatchmakingPage />
+          <LocationProbe />
+        </StrictMode>
       </MemoryRouter>,
     );
   });
@@ -269,12 +271,13 @@ describe("MatchmakingPage", () => {
         )?.getAttribute("aria-live"),
       ).toBe("off");
       if (expected === "会话已失效") {
-        expect(container.textContent).toContain("重新匹配");
+        expect(container.textContent).toContain("清除失效会话并返回");
         expect(container.textContent).not.toContain("重试房间连接");
+        expect(container.textContent).not.toContain("安全返回");
       } else {
         expect(container.textContent).toContain("重试房间连接");
+        expect(container.textContent).toContain("安全返回");
       }
-      expect(container.textContent).toContain("安全返回");
     },
   );
 
@@ -465,7 +468,7 @@ describe("MatchmakingPage", () => {
       "当前匹配会话已失效",
     );
 
-    act(() => findButton("重新匹配")?.click());
+    act(() => findButton("清除失效会话并返回")?.click());
 
     expect(mocks.realtime.close).toHaveBeenCalledOnce();
     expect(sessionStorage.length).toBe(0);

@@ -78,15 +78,15 @@ export function MatchmakingPage() {
   const queue = useMatchmakingQueue();
   const realtime = useRealtimeRoom(
     closingIntent ? null : (session?.credentials ?? null),
-    closingIntent ? {} : session?.snapshot,
+    closingIntent ? undefined : session?.snapshot,
   );
   const realtimeRef = useRef(realtime);
   const cancellationRef = useRef<QuickMatchCancellation | null>(null);
   const closingReturnToRef = useRef(closingIntent?.returnTo ?? "/quick");
   realtimeRef.current = realtime;
 
-  if (!cancellationRef.current) {
-    cancellationRef.current = new QuickMatchCancellation({
+  useEffect(() => {
+    const current = new QuickMatchCancellation({
       request: cancelQuickMatch,
       commit: (ticket) => {
         realtimeRef.current.close();
@@ -132,7 +132,14 @@ export function MatchmakingPage() {
         return `/quick?${search.toString()}`;
       },
     });
-  }
+    cancellationRef.current = current;
+    return () => {
+      current.dispose();
+      if (cancellationRef.current === current) {
+        cancellationRef.current = null;
+      }
+    };
+  }, [navigate]);
 
   const phase = readString(realtime.snapshot, "phase") ?? "waiting";
   const bestOf = (readNumber(realtime.snapshot, "best_of") ?? 3) as BestOf;
@@ -262,13 +269,6 @@ export function MatchmakingPage() {
     return () => window.clearInterval(timer);
   }, [session]);
 
-  useEffect(
-    () => () => {
-      cancellationRef.current?.dispose();
-    },
-    [],
-  );
-
   useEffect(() => {
     if (!session || !closingIntent) return;
     closingReturnToRef.current = closingIntent.returnTo;
@@ -307,6 +307,14 @@ export function MatchmakingPage() {
     navigate(destination, { replace: true });
   }
 
+  function leaveMatchmaking() {
+    if (fatalOffline) {
+      discardInvalidSession();
+      return;
+    }
+    cancel();
+  }
+
   return (
     <div className="min-h-svh bg-background text-foreground">
       <AppHeader subtitle={partySize === 4 ? "4 人乱斗匹配" : "实时 1v1 匹配"} />
@@ -331,7 +339,7 @@ export function MatchmakingPage() {
               ref={cancelButtonRef}
               variant="outline"
               className="w-full rounded-none sm:w-auto"
-              onClick={cancel}
+              onClick={leaveMatchmaking}
               disabled={cancelPending}
             >
               {cancelPending ? (
@@ -343,7 +351,9 @@ export function MatchmakingPage() {
                 ? "正在退出…"
                 : closingIntent
                   ? "重试退出"
-                  : "取消匹配"}
+                  : fatalOffline
+                    ? "返回匹配设置"
+                    : "取消匹配"}
             </Button>
           }
         />
@@ -404,12 +414,11 @@ export function MatchmakingPage() {
                   ) : fatalOffline ? (
                     <Button
                       type="button"
-                      variant="outline"
                       onClick={discardInvalidSession}
                     >
                       {realtime.offlineReason === "profile_invalid"
                         ? "重新设置身份"
-                        : "重新匹配"}
+                        : "清除失效会话并返回"}
                     </Button>
                   ) : (
                     <Button
@@ -422,7 +431,7 @@ export function MatchmakingPage() {
                       重试房间连接
                     </Button>
                   )}
-                  {!closingIntent ? (
+                  {!closingIntent && !fatalOffline ? (
                     <Button
                       type="button"
                       variant="outline"

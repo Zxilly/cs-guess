@@ -99,8 +99,8 @@ export function QuickMatch() {
   const queue = useMatchmakingQueue();
   navigateRef.current = navigate;
 
-  if (!submission.current) {
-    submission.current = new QuickMatchSubmission({
+  useEffect(() => {
+    const current = new QuickMatchSubmission({
       createClientRequestId: () => crypto.randomUUID(),
       request: (snapshot, clientRequestId, signal) =>
         createQuickMatch(
@@ -140,7 +140,14 @@ export function QuickMatch() {
         );
       },
     });
-  }
+    submission.current = current;
+    return () => {
+      current.dispose();
+      if (submission.current === current) {
+        submission.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const session = existingSession.current;
@@ -150,13 +157,6 @@ export function QuickMatch() {
       replace: true,
     });
   }, [navigate]);
-
-  useEffect(
-    () => () => {
-      submission.current?.dispose();
-    },
-    [],
-  );
 
   useEffect(() => {
     setError("");
