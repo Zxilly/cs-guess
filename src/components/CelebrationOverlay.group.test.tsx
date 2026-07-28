@@ -143,6 +143,35 @@ describe("group round result", () => {
     expect(markup).toContain("sm:flex-row");
   });
 
+  it("does not promise a persistent review while the server advances the series", () => {
+    const ordinaryRound = renderToStaticMarkup(
+      <CelebrationOverlay
+        outcome="win"
+        seriesComplete={false}
+        nextRoundSeconds={4}
+        score="1 : 0"
+        mysteryPlayer={players[0]}
+        onClose={vi.fn()}
+      />,
+    );
+    const tiebreakRound = renderToStaticMarkup(
+      <CelebrationOverlay
+        outcome="draw"
+        seriesComplete={false}
+        tiebreak
+        nextRoundSeconds={4}
+        score="0 : 0"
+        mysteryPlayer={players[0]}
+        onClose={vi.fn()}
+      />,
+    );
+
+    expect(ordinaryRound).toContain("继续下一局");
+    expect(tiebreakRound).toContain("继续加赛");
+    expect(ordinaryRound).not.toContain("查看对局");
+    expect(tiebreakRound).not.toContain("查看对局");
+  });
+
   it.each([
     {
       label: "2P explicit leave",

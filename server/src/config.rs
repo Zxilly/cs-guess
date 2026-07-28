@@ -72,7 +72,10 @@ impl Config {
                 "CS_GUESS_DISCONNECT_FORFEIT_SECS",
                 30,
             )?),
-            round_transition: Duration::from_secs(parse_u64("CS_GUESS_ROUND_TRANSITION_SECS", 5)?),
+            round_transition: Duration::from_secs(parse_u64(
+                "CS_GUESS_ROUND_TRANSITION_SECS",
+                10,
+            )?),
             heartbeat_interval: Duration::from_secs(parse_u64("CS_GUESS_HEARTBEAT_SECS", 15)?),
             client_timeout: Duration::from_secs(parse_u64("CS_GUESS_CLIENT_TIMEOUT_SECS", 45)?),
             queue_broadcast_interval: Duration::from_millis(parse_nonzero_u64(
