@@ -15,9 +15,11 @@ artifacts
 .ruff_cache
 __pycache__
 server/target
+server/target-*
 server/data/*.sqlite*
 /data/*.sqlite*
 *.local
+design-qa.md
 
 # Local environment files and secrets
 .env
