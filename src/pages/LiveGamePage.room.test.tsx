@@ -252,7 +252,7 @@ describe("LiveGamePage friend-room waiting state", () => {
     expect(container.textContent).not.toContain("WAITING FOR ROUND");
   });
 
-  it("hides answer and legend chrome during play and restores it after the round", () => {
+  it("keeps the redundant answer strip removed before and after the round", () => {
     mocks.realtime.snapshot = {
       ...roomSnapshot({ maxPlayers: 2 }),
       phase: "playing",
@@ -275,10 +275,8 @@ describe("LiveGamePage friend-room waiting state", () => {
     };
     renderPage();
 
-    expect(container.textContent).toContain("神秘选手");
+    expect(container.textContent).not.toContain("神秘选手");
     expect(container.textContent).toContain("结果图例");
-    expect(container.textContent).toContain("Major 参赛");
-    expect(container.textContent).toContain("Major 冠军");
   });
 
   it("restores result focus after review but focuses the closing shell after exit", () => {
@@ -1309,6 +1307,7 @@ describe("LiveGamePage friend-room waiting state", () => {
               seat_index: 0,
               score: 0,
               rank: 2,
+              guess_count: 3,
             },
             {
               player_id: "player-2",
@@ -1316,6 +1315,7 @@ describe("LiveGamePage friend-room waiting state", () => {
               seat_index: 1,
               score: 1,
               rank: 1,
+              guess_count: 5,
             },
           ],
         },
@@ -1331,6 +1331,7 @@ describe("LiveGamePage friend-room waiting state", () => {
               seat_index: 0,
               score: 1,
               rank: 1,
+              guess_count: 2,
             },
             {
               player_id: "player-2",
@@ -1338,6 +1339,7 @@ describe("LiveGamePage friend-room waiting state", () => {
               seat_index: 1,
               score: 1,
               rank: 1,
+              guess_count: 4,
             },
           ],
         },
@@ -1349,6 +1351,11 @@ describe("LiveGamePage friend-room waiting state", () => {
     expect(container.textContent).toContain("2 轮");
     expect(container.textContent).toContain("m0NESY 获胜");
     expect(container.textContent).toContain("第 2 轮");
+    expect(container.textContent).toContain("5 次猜出");
+    expect(container.textContent).toContain("2 次猜出");
+    expect(container.textContent).toContain("未猜出");
+    expect(container.textContent).not.toContain("0 分");
+    expect(container.textContent).not.toContain("1 分");
 
     mocks.realtime.snapshot = {
       ...mocks.realtime.snapshot,

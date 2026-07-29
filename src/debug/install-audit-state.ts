@@ -283,14 +283,21 @@ function realtimeSnapshot(audit: string, roomCode: string) {
               mystery_id: "zywoo",
               winner_player_id: "audit-rival",
               finish_reason: "solved",
-              standings: playersInRoom,
+              standings: playersInRoom.map((player) => ({
+                ...player,
+                guess_count: player.player_id === "audit-rival" ? 5 : 3,
+              })),
             },
             {
               round_number: 2,
               mystery_id: "donk",
               winner_player_id: selfWon ? "audit-self" : "audit-rival",
               finish_reason: "solved",
-              standings: playersInRoom,
+              standings: playersInRoom.map((player) => ({
+                ...player,
+                guess_count:
+                  player.player_id === "audit-self" ? 3 : 5,
+              })),
             },
           ],
         }

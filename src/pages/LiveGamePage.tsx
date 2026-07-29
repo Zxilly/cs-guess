@@ -21,7 +21,6 @@ import { InfoTip } from "@/components/InfoTip";
 import { ModeSidebar } from "@/components/ModeSidebar";
 import { OperationStatusDialog } from "@/components/OperationStatusDialog";
 import { PlayerAvatar } from "@/components/PlayerAvatar";
-import { PlayerRoleLabel } from "@/components/PlayerRoleLabel";
 import { PlayerSearch } from "@/components/PlayerSearch";
 import { RematchInviteCard } from "@/components/RematchInviteCard";
 import { Timer } from "@/components/Timer";
@@ -65,7 +64,6 @@ import {
   rematchStatusCopy,
   type RematchState,
 } from "@/lib/rematch";
-import { countryNameZh } from "@/lib/country-geography";
 import {
   markBattleResultViewed,
   wasBattleResultViewed,
@@ -119,6 +117,7 @@ interface RoundResult {
     seatIndex: number;
     score: number;
     rank: number;
+    guessCount?: number;
   }>;
 }
 
@@ -230,6 +229,7 @@ function readRoundResults(source: Record<string, unknown>): RoundResult[] {
               readNumber(standing, "seat_index") ?? Number.MAX_SAFE_INTEGER,
             score: readNumber(standing, "score") ?? 0,
             rank: readNumber(standing, "rank") ?? 0,
+            guessCount: readNumber(standing, "guess_count"),
           }];
         })
         .sort((left, right) => left.seatIndex - right.seatIndex),
@@ -536,18 +536,6 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
     readNumber(snapshot, "max_guesses") ?? MAX_GUESSES;
   const mysteryPlayer =
     players.find((player) => player.id === mysteryId) ?? players[0];
-  const answerDetails = [
-    ["选手", mysteryPlayer.nickname],
-    ["战队", mysteryPlayer.team],
-    ["国籍", countryNameZh(mysteryPlayer.countryCode)],
-    ["年龄", mysteryPlayer.age],
-    [
-      "位置",
-      <PlayerRoleLabel key="role" role={mysteryPlayer.role} />,
-    ],
-    ["Major 参赛", mysteryPlayer.majorAppearances],
-    ["Major 冠军", mysteryPlayer.majorWins],
-  ] as const;
   const availablePlayers = players.filter(
     (player) => !ownGuesses.some((guess) => guess.id === player.id),
   );
@@ -1907,44 +1895,6 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
             />
           </div>
 
-          {phase === "finished" ? (
-            <section className="mt-7 border border-foreground/35">
-              <div className="grid min-h-28 grid-cols-[140px_1fr] sm:grid-cols-[150px_repeat(7,minmax(0,1fr))]">
-                <div className="flex flex-col justify-center border-r border-foreground/20 px-5">
-                  <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-primary">
-                    神秘选手
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    服务器已揭晓
-                  </p>
-                </div>
-                {answerDetails.map(([label, value]) => (
-                  <div
-                    key={label}
-                    className="hidden min-w-0 flex-col justify-center border-r border-foreground/15 px-4 last:border-r-0 sm:flex"
-                  >
-                    <p className="text-xs text-muted-foreground">{label}</p>
-                    <p className="mt-2 truncate font-mono text-sm font-semibold text-primary">
-                      {value}
-                    </p>
-                  </div>
-                ))}
-                <div className="grid grid-cols-2 gap-x-5 gap-y-3 px-5 py-4 sm:hidden">
-                  {answerDetails.map(([label, value]) => (
-                    <div key={label}>
-                      <p className="text-[10px] text-muted-foreground">
-                        {label}
-                      </p>
-                      <p className="mt-1 truncate font-mono text-xs font-semibold text-primary">
-                        {value}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          ) : null}
-
           {phase === "finished" && seriesComplete ? (
             <section
               className="mt-6 border border-foreground/25"
@@ -1959,7 +1909,12 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
                 </span>
               </div>
               {roundResults.length > 0 ? (
-                <ol className="grid gap-px bg-foreground/15 sm:grid-cols-2 xl:grid-cols-3">
+                <ol
+                  className={[
+                    "grid gap-px bg-foreground/15 sm:grid-cols-2",
+                    roundResults.length >= 3 ? "xl:grid-cols-3" : "",
+                  ].join(" ")}
+                >
                   {roundResults.map((round) => {
                     const answer =
                       players.find((player) => player.id === round.mysteryId);
@@ -1999,7 +1954,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
                         </div>
                         <ol
                           className="mt-3 grid grid-cols-2 gap-px bg-foreground/15"
-                          aria-label={`第 ${round.roundNumber} 轮结束后比分`}
+                          aria-label={`第 ${round.roundNumber} 轮猜测结果`}
                         >
                           {round.standings.map((standing) => (
                             <li
@@ -2007,16 +1962,16 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
                               className="min-w-0 bg-background px-2 py-2"
                             >
                               <p className="truncate text-[10px] text-muted-foreground">
-                                {round.standings.length > 2
-                                  ? `第 ${standing.rank || "—"} 名`
-                                  : standing.playerId === selfPlayerId
-                                    ? "你"
-                                    : standing.displayName}
+                                {standing.playerId === selfPlayerId
+                                  ? "你"
+                                  : standing.displayName}
                               </p>
                               <p className="mt-0.5 truncate font-mono text-xs font-semibold">
-                                {round.standings.length > 2
-                                  ? `${standing.displayName} · ${standing.score} 分`
-                                  : `${standing.score} 分`}
+                                {standing.playerId === round.winnerPlayerId
+                                  ? standing.guessCount === undefined
+                                    ? "已猜出"
+                                    : `${standing.guessCount} 次猜出`
+                                  : "未猜出"}
                               </p>
                             </li>
                           ))}
