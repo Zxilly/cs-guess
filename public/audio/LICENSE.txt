@@ -1,0 +1,24 @@
+Counter-Strike 2 battle result sound effects
+
+Copyright Valve Corporation. All rights reserved.
+
+These files were extracted from a locally installed copy of Counter-Strike 2
+for browser playback. The battle result files reproduce the layers used by:
+
+- Player.DeathHeadShotArmor.AttackerFeedback (battle-headshot-win.mp3)
+- Player.DeathHeadShot.Victim (battle-headshot-loss.mp3)
+
+Source assets:
+
+- sounds/player/headshot_armor_e1.vsnd
+- sounds/player/headshot_armor_flesh.vsnd
+
+The final-ten-second countdown is the original audio used by the default
+Counter-Strike 2 music kit:
+
+- sounds/music/valve_cs2_01/bombtenseccount.vsnd
+  (bomb-ten-second-countdown.mp3)
+
+Use in this open-source project is based on creator authorization represented
+by the project owner. That authorization does not grant downstream users any
+separate right to reuse or redistribute these audio assets outside this project.

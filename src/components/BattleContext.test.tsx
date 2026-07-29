@@ -79,6 +79,7 @@ describe("quick group battle slots", () => {
     expect(markup).toContain('aria-labelledby="battle-participant-3"');
     expect(markup).not.toContain("HOST · GROUP BATTLE");
     expect(markup).toContain("FIRST TO SOLVE WINS");
+    expect(markup).not.toContain("CS-207207");
   });
 
   it("keeps the 1v1 opponent countdown", () => {
@@ -99,5 +100,20 @@ describe("quick group battle slots", () => {
     expect(markup).toContain("m0NESY");
     expect(markup).toContain("重连 00:09");
     expect(markup).toContain("对手 1连接中断");
+    expect(markup).not.toContain("CS-207207");
+  });
+
+  it("only exposes the shareable room code when one is supplied", () => {
+    const markup = renderToStaticMarkup(
+      <BattleContext
+        mode="room"
+        guesses={0}
+        opponentGuesses={0}
+        maxGuesses={8}
+        roomCode="CS-123456"
+      />,
+    );
+
+    expect(markup).toContain("CS-123456");
   });
 });

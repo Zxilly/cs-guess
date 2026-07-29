@@ -9,6 +9,7 @@ import {
   CheckIcon,
   CopyIcon,
   PlugsConnectedIcon,
+  UserCircleIcon,
   WarningCircleIcon,
 } from "@phosphor-icons/react";
 import { Navigate, useLocation, useNavigate } from "react-router";
@@ -18,13 +19,16 @@ import { CelebrationOverlay } from "@/components/CelebrationOverlay";
 import { GuessTable } from "@/components/GuessTable";
 import { InfoTip } from "@/components/InfoTip";
 import { ModeSidebar } from "@/components/ModeSidebar";
+import { OperationStatusDialog } from "@/components/OperationStatusDialog";
 import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { PlayerRoleLabel } from "@/components/PlayerRoleLabel";
 import { PlayerSearch } from "@/components/PlayerSearch";
+import { RematchInviteCard } from "@/components/RematchInviteCard";
 import { Timer } from "@/components/Timer";
 import { Button } from "@/components/ui/button";
 import { players } from "@/data/players";
 import { useAnonymousProfile } from "@/hooks/use-anonymous-profile";
+import { useBombCountdown } from "@/hooks/use-bomb-countdown";
 import { useRealtimeRoom } from "@/hooks/use-realtime-room";
 import {
   clearCredentialsIfMatches,
@@ -54,6 +58,13 @@ import {
   playerPresenceLabel,
   quickRematchPath,
 } from "@/lib/live-presence";
+import {
+  readRematchState,
+  rematchPendingNames,
+  rematchSecondsLeft,
+  rematchStatusCopy,
+  type RematchState,
+} from "@/lib/rematch";
 import { countryNameZh } from "@/lib/country-geography";
 import {
   markBattleResultViewed,
@@ -69,6 +80,7 @@ import {
   parseSoloDifficulty,
   SOLO_DIFFICULTIES,
 } from "@/lib/solo-game";
+import { useSoundStore } from "@/stores/sound-store";
 import {
   MAX_GUESSES,
   type BattleFinishReason,
@@ -261,6 +273,12 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
   const [leaveError, setLeaveError] = useState("");
   const [startPending, setStartPending] = useState(false);
   const [restartPending, setRestartPending] = useState(false);
+  const [rematchActionPending, setRematchActionPending] = useState<
+    "request" | "accept" | "decline" | "cancel" | null
+  >(null);
+  const [terminalRematch, setTerminalRematch] =
+    useState<RematchState | null>(null);
+  const resultSoundEnabled = useSoundStore((state) => state.enabled);
   const resultTitleRef = useRef<HTMLHeadingElement | null>(null);
   const closingTitleRef = useRef<HTMLHeadingElement | null>(null);
   const recoveryTitleRef = useRef<HTMLHeadingElement | null>(null);
@@ -287,6 +305,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
   );
 
   const snapshot = realtime.snapshot;
+  const rematch = readRematchState(snapshot);
   const hasAuthoritativeSnapshot =
     realtime.hasAuthoritativeSnapshot ??
     isAuthoritativeRoomSnapshot(snapshot);
@@ -463,10 +482,26 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
     players.filter((player) => player.id === progress.guessedPlayerId),
   );
 
-  const maxPlayers = readNumber(snapshot, "max_players") ?? 2;
+  const maxPlayers = readNumber(snapshot, "max_players") === 4 ? 4 : 2;
   const selfPlayer = playersInRoom.find(
     (player) => player.playerId === selfPlayerId,
   );
+  const selfRematchResponse = rematch?.responses.find(
+    (response) => response.playerId === selfPlayerId,
+  );
+  const rematchRequester = rematch?.responses.find(
+    (response) => response.playerId === rematch.requesterPlayerId,
+  );
+  const isRematchRequester =
+    rematch?.requesterPlayerId === selfPlayerId;
+  const incomingRematch =
+    mode === "quick" &&
+    rematch?.status === "pending" &&
+    !isRematchRequester &&
+    selfRematchResponse?.decision === "pending";
+  const rematchSeconds = rematch
+    ? rematchSecondsLeft(rematch, now)
+    : 0;
   const opponentPlayers = playersInRoom
     .filter((player) => player.playerId !== selfPlayerId)
     .sort(
@@ -510,6 +545,8 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
       "位置",
       <PlayerRoleLabel key="role" role={mysteryPlayer.role} />,
     ],
+    ["Major 参赛", mysteryPlayer.majorAppearances],
+    ["Major 冠军", mysteryPlayer.majorWins],
   ] as const;
   const availablePlayers = players.filter(
     (player) => !ownGuesses.some((guess) => guess.id === player.id),
@@ -526,6 +563,9 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
   const connectionUnavailable =
     realtime.connection === "offline" ||
     realtime.connection === "closed";
+  const connectionRecovering =
+    realtime.connection === "connecting" ||
+    realtime.connection === "reconnecting";
   const fatalOffline =
     realtime.offlineReason === "session_invalid" ||
     realtime.offlineReason === "profile_invalid" ||
@@ -561,7 +601,6 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
     !selfForfeitedThisRound &&
     !guessPending &&
     selfGuessCount < maxGuesses;
-  const revealAnswer = phase === "finished" && Boolean(mysteryId);
   const selfScore = selfPlayer?.score ?? 0;
   const opponentScore = opponentPlayer?.score ?? 0;
   const orderedPlayers = [
@@ -674,6 +713,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
   };
   const showCelebration =
     phase === "finished" &&
+    rematch === null &&
     dismissedCelebration !== celebrationKey &&
     !wasBattleResultViewed(resultIdentity);
   const seriesComplete =
@@ -715,6 +755,29 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
       winnerPlayerId,
     ],
   );
+  useEffect(() => {
+    if (incomingRematch && showCelebration) {
+      dismissCelebration();
+    }
+  }, [dismissCelebration, incomingRematch, showCelebration]);
+
+  useEffect(() => {
+    if (
+      rematch &&
+      isRematchRequester &&
+      (
+        rematch.status === "declined" ||
+        rematch.status === "cancelled" ||
+        rematch.status === "expired" ||
+        rematch.status === "opponent_offline"
+      )
+    ) {
+      setTerminalRematch(rematch);
+    }
+    if (rematch?.status === "pending") {
+      setTerminalRematch(null);
+    }
+  }, [isRematchRequester, rematch]);
   const roomSettings = friendRoomSettings({
     maxPlayers,
     visibility,
@@ -733,10 +796,20 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
       left.seatIndex - right.seatIndex ||
       left.playerId.localeCompare(right.playerId),
   );
+  const isRoomLobby = mode === "room" && phase === "waiting";
+  const roomLobbySlots = Array.from({ length: maxPlayers }, (_, seatIndex) =>
+    roomMembers.find((player) => player.seatIndex === seatIndex),
+  );
   const guessDraftScope =
     phase === "playing" && roomCode !== "—" && roundNumber >= 1
       ? `${roomCode}:${roundNumber}`
       : "";
+  useBombCountdown({
+    active:
+      phase === "playing" &&
+      !(import.meta.env.DEV && location.search.includes("audit=")),
+    deadline,
+  });
 
   useEffect(() => {
     if (!guessDraftScope) {
@@ -840,16 +913,27 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
   ]);
 
   useEffect(() => {
+    if (import.meta.env.DEV && location.search.includes("audit=")) {
+      return;
+    }
     if (
       (!deadline || phase !== "playing") &&
-      (!nextRoundAt || phase !== "finished")
+      (!nextRoundAt || phase !== "finished") &&
+      rematch?.status !== "pending"
     ) {
       return;
     }
     setNow(Date.now());
     const timer = window.setInterval(() => setNow(Date.now()), 250);
     return () => window.clearInterval(timer);
-  }, [deadline, nextRoundAt, phase]);
+  }, [
+    deadline,
+    location.search,
+    nextRoundAt,
+    phase,
+    rematch?.expiresAt,
+    rematch?.status,
+  ]);
 
   useEffect(() => {
     if (phase !== "waiting" || realtime.error || !connected) {
@@ -1014,7 +1098,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
   }
   startLeaveRef.current = startLeave;
 
-  async function rematch() {
+  async function requeue() {
     if (leavePendingRef.current) return;
     if (!connected) {
       setLeaveError(
@@ -1035,6 +1119,42 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
     if (result.left && result.shouldNavigate) {
       navigate(destination, { replace: true });
     }
+  }
+
+  function requestRematch() {
+    if (!connected || rematchActionPending) return;
+    dismissCelebration();
+    setRematchActionPending("request");
+    realtime.send("request_rematch", {}, () => {
+      if (mountedRef.current) setRematchActionPending(null);
+    });
+  }
+
+  function respondRematch(accept: boolean) {
+    if (!rematch || rematchActionPending) return;
+    setRematchActionPending(accept ? "accept" : "decline");
+    realtime.send(
+      "respond_rematch",
+      {
+        invitation_id: rematch.invitationId,
+        accept,
+      },
+      () => {
+        if (mountedRef.current) setRematchActionPending(null);
+      },
+    );
+  }
+
+  function cancelRematch() {
+    if (!rematch || rematchActionPending) return;
+    setRematchActionPending("cancel");
+    realtime.send(
+      "cancel_rematch",
+      { invitation_id: rematch.invitationId },
+      () => {
+        if (mountedRef.current) setRematchActionPending(null);
+      },
+    );
   }
 
   useEffect(() => {
@@ -1166,56 +1286,6 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
     return <Navigate to={mode === "room" ? "/room" : "/quick"} replace />;
   }
 
-  if (closingIntent) {
-    return (
-      <main className="flex min-h-svh items-center justify-center bg-background px-5 py-12 text-foreground">
-        <section
-          className="w-full max-w-xl border border-foreground/25 bg-card px-6 py-9 sm:px-9"
-          aria-busy={leavePendingRef.current}
-          aria-labelledby="closing-room-title"
-        >
-          <p className="font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary">
-            {mode === "room" ? "FRIEND ROOM" : "LIVE MATCH"} ·{" "}
-            {closingIntent.roomCode}
-          </p>
-          <h1
-            ref={closingTitleRef}
-            id="closing-room-title"
-            tabIndex={-1}
-            className="mt-3 text-3xl font-bold tracking-[-0.03em] sm:text-4xl"
-          >
-            正在完成退出
-          </h1>
-          <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            {leaveError
-              ? "退出尚未完成，原会话不会自动恢复。请检查网络后重试。"
-              : "正在通知服务器释放当前席位，请勿重复操作。"}
-          </p>
-          {leaveError ? (
-            <p
-              className="mt-5 border-l-2 border-destructive pl-3 text-sm text-destructive"
-              role="alert"
-            >
-              {leaveError}
-            </p>
-          ) : (
-            <p className="sr-only" role="status" aria-live="polite">
-              正在完成退出
-            </p>
-          )}
-          <Button
-            type="button"
-            className="mt-7 rounded-none"
-            onClick={() => startLeave(closingIntent.returnTo)}
-            disabled={leavePendingRef.current}
-          >
-            {leavePendingRef.current ? "正在退出…" : "重试退出"}
-          </Button>
-        </section>
-      </main>
-    );
-  }
-
   if (!hasAuthoritativeSnapshot) {
     const unavailable = connectionUnavailable;
     const reconnecting = realtime.connection === "reconnecting";
@@ -1226,6 +1296,23 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
         : realtime.connection === "connected"
           ? "已连接，正在同步房间"
           : "正在连接";
+    const operationFailed = Boolean(leaveError) ||
+      (!closingIntent && unavailable);
+    const operationTitle = closingIntent
+      ? operationFailed
+        ? "未能退出房间"
+        : "正在完成退出"
+      : operationFailed
+        ? "未能连接房间"
+        : statusCopy;
+    const operationDescription = closingIntent
+      ? operationFailed
+        ? leaveError
+        : "正在通知服务器释放当前席位，请勿重复操作。"
+      : operationFailed
+        ? realtime.error ||
+          "尚未取得可用的房间状态，请重试连接或安全退出。"
+        : "正在获取服务器确认的房间设置、成员与对局状态。";
     return (
       <div className="min-h-svh bg-background text-foreground lg:grid lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="border-b border-foreground/20 bg-sidebar lg:min-h-svh lg:border-r lg:border-b-0">
@@ -1248,9 +1335,15 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
               </p>
             </div>
             <dl className="mt-6 space-y-4 border-t border-foreground/15 pt-5 text-sm">
+              {mode === "room" ? (
+                <div>
+                  <dt className="text-xs text-muted-foreground">房间号</dt>
+                  <dd className="mt-1 font-mono font-medium">{roomCode}</dd>
+                </div>
+              ) : null}
               <div>
-                <dt className="text-xs text-muted-foreground">房间号</dt>
-                <dd className="mt-1 font-mono font-medium">{roomCode}</dd>
+                <dt className="text-xs text-muted-foreground">连接状态</dt>
+                <dd className="mt-1 font-medium">{statusCopy}</dd>
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">玩家身份</dt>
@@ -1288,7 +1381,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
               )}
             </div>
             <p className="mt-6 font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary">
-              ROOM · {roomCode}
+              {mode === "room" ? `ROOM · ${roomCode}` : "LIVE MATCH"}
             </p>
             <h1
               ref={recoveryTitleRef}
@@ -1313,14 +1406,6 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
                 aria-atomic="true"
               >
                 {statusCopy}
-              </p>
-            ) : null}
-            {realtime.error || leaveError || unavailable ? (
-              <p
-                className="mt-5 border-l-2 border-destructive pl-3 text-sm text-destructive"
-                role={reconnecting ? undefined : "alert"}
-              >
-                {leaveError || realtime.error || statusCopy}
               </p>
             ) : null}
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -1356,6 +1441,48 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
             </div>
           </section>
         </main>
+        <OperationStatusDialog
+          open
+          kind={operationFailed ? "error" : "progress"}
+          eyebrow={mode === "room" ? "FRIEND ROOM" : "LIVE MATCH"}
+          title={operationTitle}
+          description={operationDescription}
+          titleRef={closingIntent ? closingTitleRef : recoveryTitleRef}
+        >
+          {operationFailed ? (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full rounded-none sm:w-auto"
+                onClick={exitSeries}
+              >
+                安全退出
+              </Button>
+              <Button
+                type="button"
+                className="w-full rounded-none sm:w-auto"
+                onClick={
+                  closingIntent
+                    ? () => startLeave(closingIntent.returnTo)
+                    : fatalOffline
+                      ? discardInvalidSession
+                      : realtime.retry
+                }
+              >
+                {closingIntent
+                  ? "重试退出"
+                  : fatalOffline
+                    ? realtime.offlineReason === "profile_invalid"
+                      ? "重新设置身份"
+                      : mode === "room"
+                        ? "重新加入房间"
+                        : "重新匹配"
+                    : "重试连接"}
+              </Button>
+            </>
+          ) : null}
+        </OperationStatusDialog>
       </div>
     );
   }
@@ -1380,10 +1507,29 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
         ? `等待 ${opponentPlayer.displayName} 建立实时连接`
         : "等待玩家实时连接后开始";
 
+  const finishedTitle =
+    seriesStatus === "abandoned"
+      ? "本系列已结束。"
+      : resultOutcome === "win"
+        ? seriesComplete
+          ? "系列赛胜利。"
+          : "本局胜利。"
+        : resultOutcome === "loss"
+          ? seriesComplete
+            ? "系列赛失利。"
+            : "本局失利。"
+          : seriesComplete
+            ? "系列赛平局。"
+            : "本局平局。";
+  const outcomeTextClass =
+    resultOutcome === "win"
+      ? "text-outcome-win"
+      : resultOutcome === "loss"
+        ? "text-outcome-loss"
+        : "text-primary";
   const content =
     mode === "quick"
       ? {
-          eyebrow: maxPlayers === 4 ? "4 人乱斗" : "实时 1v1",
           title:
             phase === "waiting"
               ? opponentPlayer && !opponentPlayer.connected
@@ -1394,26 +1540,18 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
                     ? "双方就位，正在开始。"
                     : "正在等待对手加入。"
               : phase === "finished"
-                ? "本局已经揭晓。"
+                ? finishedTitle
                 : maxPlayers === 4
                   ? "四人同题竞速。"
-                  : "实时同题竞速。",
-          description:
-            maxPlayers === 4
-              ? "四位玩家共享题目，所有对手的命中进度都会实时同步。"
-              : "服务器裁定倒计时、猜测结果与胜负。",
+                  : "",
         }
       : {
-          eyebrow: "好友房间",
           title:
             phase === "waiting"
-              ? "等待玩家准备。"
+              ? ""
               : phase === "finished"
-                ? seriesStatus === "abandoned"
-                  ? "本系列已结束。"
-                  : "查看本局结果。"
+                ? finishedTitle
                 : "好友房同题竞速。",
-          description: "房主开始回合，服务器为所有玩家同步同一题目。",
         };
 
   return (
@@ -1439,152 +1577,94 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
         modeLabel={
           mode === "quick"
             ? `${maxPlayers === 4 ? "4 人乱斗" : "实时 1v1"} · ${difficultyLabel}`
-            : `好友房间 · ${difficultyLabel}`
+            : isRoomLobby
+              ? "好友房间"
+              : `好友房间 · ${difficultyLabel}`
         }
+        connectionLabel={
+          connected &&
+          phase === "waiting" &&
+          opponentPlayer &&
+          !opponentPlayer.connected
+            ? "你已连接"
+            : connectionCopy(realtime.connection)
+        }
+        connectionTone={
+          connected
+            ? "connected"
+            : realtime.connection === "connecting"
+              ? "connecting"
+              : realtime.connection === "reconnecting"
+                ? "warning"
+                : "offline"
+        }
+        opponentVisibility={isRoomLobby ? undefined : visibility}
         onExit={exitSeries}
       />
 
-      <main className="min-w-0">
+      <main className="app-game-main">
         <div className="app-game-container app-game-container-live min-w-0">
-          <header className="mb-7 flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary">
-                  {content.eyebrow}
-                </p>
-                <InfoTip label={`${content.eyebrow}规则`} side="right">
-                  {content.description}
-                </InfoTip>
-              </div>
-              <h1
-                ref={resultTitleRef}
-                tabIndex={-1}
-                className="mt-3 text-3xl font-bold tracking-[-0.03em] outline-none sm:text-4xl"
-              >
-                {content.title}
-              </h1>
-            </div>
-            <div className="shrink-0 sm:text-right">
-              <div className="flex items-center gap-2 sm:justify-end">
-                <p className="font-mono text-xs font-medium uppercase tracking-[0.08em]">
-                  ROOM · {roomCode}
-                </p>
-                {mode === "room" && roomCode !== "—" ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    className="rounded-none"
-                    aria-label={`复制房间号 ${roomCode}`}
-                    onClick={() => void copyCurrentRoomCode()}
-                  >
-                    {copyFeedback === "房间号已复制" ? (
-                      <CheckIcon />
-                    ) : (
-                      <CopyIcon />
-                    )}
-                  </Button>
-                ) : null}
-              </div>
-              {copyFeedback ? (
-                <span
-                  className="mt-1 block min-h-4 text-[10px] text-muted-foreground"
-                  role="status"
-                  aria-live="polite"
-                >
-                  {copyFeedback}
-                </span>
-              ) : (
-                <span className="mt-1 block min-h-4" aria-hidden="true" />
-              )}
-              <p
-                className={`mt-2 inline-flex items-center gap-1.5 text-xs ${
-                  connected || realtime.connection === "connecting"
-                    ? "text-primary"
-                    : realtime.connection === "reconnecting"
-                      ? "text-warning"
-                      : "text-destructive"
-                }`}
-                role={
-                  realtime.connection === "offline" ||
-                  realtime.connection === "closed"
-                    ? undefined
-                    : "status"
-                }
-                aria-live={
-                  realtime.connection === "offline" ||
-                  realtime.connection === "closed"
-                    ? "off"
-                    : "polite"
-                }
-                aria-atomic="true"
-              >
-                {realtime.connection === "offline" ||
-                realtime.connection === "closed" ? (
-                  <WarningCircleIcon />
-                ) : (
-                  <PlugsConnectedIcon />
-                )}
-                {connected &&
-                phase === "waiting" &&
-                opponentPlayer &&
-                !opponentPlayer.connected
-                  ? "你已连接"
-                  : connectionCopy(realtime.connection)}
-              </p>
-            </div>
-          </header>
-
-          {realtime.error || leaveError || connectionUnavailable ? (
-            <div
-              className="mb-5 flex flex-col justify-between gap-3 border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm sm:flex-row sm:items-center"
-              role={
-                realtime.connection === "reconnecting" ? undefined : "alert"
-              }
-            >
+          {phase !== "playing" || mode === "room" ? (
+            <header className="mb-7 flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
               <div>
-                <h2
-                  ref={recoveryTitleRef}
+                {content.title ? (
+                <h1
+                  ref={resultTitleRef}
                   tabIndex={-1}
-                  className="font-semibold outline-none"
+                  className={`text-3xl font-bold tracking-[-0.03em] outline-none sm:text-4xl ${
+                    phase === "finished" ? outcomeTextClass : ""
+                  }`}
                 >
-                  {fatalOffline ? "当前房间会话已失效" : "连接需要处理"}
-                </h2>
-                <p className="mt-1">
-                  {leaveError ||
-                    realtime.error ||
-                    connectionCopy(realtime.connection)}
-                </p>
+                  {content.title}
+                </h1>
+                ) : (
+                  <h1 ref={resultTitleRef} tabIndex={-1} className="sr-only">
+                    {mode === "room" ? "好友房间" : "实时对战"}
+                  </h1>
+                )}
               </div>
-              {fatalOffline ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-none"
-                  onClick={discardInvalidSession}
-                >
-                  {realtime.offlineReason === "profile_invalid"
-                    ? "重新设置身份"
-                    : mode === "room"
-                      ? "重新加入房间"
-                      : "重新匹配"}
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-none"
-                  onClick={
-                    leaveError
-                      ? () => exitSeries()
-                      : realtime.retry
-                  }
-                >
-                  {leaveError ? "重试退出" : "立即重连"}
-                </Button>
-              )}
-            </div>
-          ) : null}
+              {mode === "room" ? (
+                <div className="shrink-0 sm:text-right">
+                  <div className="flex items-center gap-2 sm:justify-end">
+                    <p className="font-mono text-xs font-medium uppercase tracking-[0.08em]">
+                      ROOM · {roomCode}
+                    </p>
+                    {roomCode !== "—" ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="rounded-none"
+                        aria-label={`复制房间号 ${roomCode}`}
+                        onClick={() => void copyCurrentRoomCode()}
+                      >
+                        {copyFeedback === "房间号已复制" ? (
+                          <CheckIcon />
+                        ) : (
+                          <CopyIcon />
+                        )}
+                      </Button>
+                    ) : null}
+                  </div>
+                  {copyFeedback ? (
+                    <span
+                      className="mt-1 block min-h-4 text-[10px] text-muted-foreground"
+                      role="status"
+                      aria-live="polite"
+                    >
+                      {copyFeedback}
+                    </span>
+                  ) : (
+                    <span className="mt-1 block min-h-4" aria-hidden="true" />
+                  )}
+                </div>
+              ) : null}
+            </header>
+          ) : (
+            <h1 ref={resultTitleRef} tabIndex={-1} className="sr-only">
+              实时对战
+            </h1>
+          )}
 
           <div className="mb-5 flex items-center justify-between border-y border-foreground/15 py-3 lg:hidden">
             <span className="text-xs text-muted-foreground">
@@ -1593,7 +1673,11 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
             {phase === "playing" ? (
               <Timer seconds={secondsLeft} className="text-lg text-primary" />
             ) : (
-              <span className="font-mono text-xs font-semibold text-primary">
+              <span
+                className={`font-mono text-xs font-semibold ${
+                  phase === "finished" ? outcomeTextClass : "text-primary"
+                }`}
+              >
                 {phase === "waiting"
                   ? "等待开始"
                   : resultOutcome === "win"
@@ -1603,54 +1687,126 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
                       : "本局平局"}
               </span>
             )}
-            <span className="font-mono text-xs">
-              {selfGuessCount} / {maxGuesses}
+            <span className="text-xs text-muted-foreground">
+              {connectionCopy(realtime.connection)}
             </span>
           </div>
 
-          {mode === "room" ? (
+          {isRoomLobby ? (
             <section
-              className="mb-5 border-y border-foreground/20 py-3"
+              className="border border-foreground/25"
               aria-label="好友房设置与成员"
             >
-              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div className="flex flex-col gap-4 border-b border-foreground/15 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <div>
+                  <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-primary">
+                    ROOM LOBBY
+                  </p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em]">
+                    房间成员
+                  </h2>
+                </div>
+                <div className="sm:text-right">
+                  <p className="font-mono text-lg font-semibold">
+                    {connectedPlayers} / {maxPlayers}
+                  </p>
+                  <p className="text-xs text-muted-foreground">已连接</p>
+                </div>
+              </div>
+
+              <ul
+                className={`grid gap-px bg-foreground/15 ${
+                  maxPlayers > 2
+                    ? "sm:grid-cols-2 xl:grid-cols-4"
+                    : "sm:grid-cols-2"
+                }`}
+                aria-label="房间席位"
+              >
+                {roomLobbySlots.map((player, seatIndex) => (
+                  <li
+                    key={player?.playerId ?? `empty-seat-${seatIndex}`}
+                    data-player-id={player?.playerId}
+                    className="min-w-0 bg-background px-5 py-5 sm:px-6"
+                  >
+                    <div className="flex items-center gap-3">
+                      <UserCircleIcon
+                        className={`size-9 shrink-0 ${
+                          player?.connected
+                            ? "text-primary"
+                            : "text-muted-foreground"
+                        }`}
+                        weight={player ? "regular" : "thin"}
+                        aria-hidden="true"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <p
+                            className={`truncate font-semibold ${
+                              player ? "" : "text-muted-foreground"
+                            }`}
+                          >
+                            {player?.displayName ?? "等待加入"}
+                          </p>
+                          {player?.playerId === hostPlayerId ? (
+                            <span className="shrink-0 font-mono text-[10px] font-semibold text-primary">
+                              房主
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {player
+                            ? player.connected
+                              ? "已连接"
+                              : "连接中断"
+                            : `席位 ${seatIndex + 1}`}
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex flex-col gap-5 border-t border-foreground/15 px-5 py-5 sm:px-6 lg:flex-row lg:items-end lg:justify-between">
+                <div className="min-w-0">
                   <p className="text-xs text-muted-foreground">房间设置</p>
                   <p className="mt-1 font-mono text-xs font-medium">
                     {roomSettings.join(" · ")}
                   </p>
+                  {startDisabledReason ? (
+                    <p id="room-start-reason" className="sr-only">
+                      {startDisabledReason}
+                    </p>
+                  ) : (
+                    <p id="room-start-reason" className="sr-only">
+                      房主可以开始本轮
+                    </p>
+                  )}
                 </div>
-                <ul className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
-                  {roomMembers.map((player) => (
-                    <li
-                      key={player.playerId}
-                      data-player-id={player.playerId}
-                      className="inline-flex items-center gap-1.5"
-                    >
-                      <span>{player.displayName}</span>
-                      {player.playerId === hostPlayerId ? (
-                        <span className="font-mono text-[10px] font-semibold text-primary">
-                          房主
-                        </span>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
+                <Button
+                  className="w-full shrink-0 rounded-none sm:w-auto sm:min-w-36"
+                  disabled={Boolean(startDisabledReason)}
+                  aria-describedby="room-start-reason"
+                  onClick={requestStartRound}
+                >
+                  {startPending ? "正在开始" : "开始本轮"}
+                </Button>
               </div>
             </section>
-          ) : null}
-
-          <BattleContext
+          ) : (
+            <>
+              <BattleContext
             mode={mode}
             guesses={selfGuessCount}
             opponentGuesses={opponentGuessCount}
             maxGuesses={maxGuesses}
-            roomCode={roomCode}
             isRoomHost={isHost}
             onlinePlayers={connectedPlayers}
             maxPlayers={maxPlayers}
             selfName={selfPlayer?.displayName ?? "你"}
             opponentName={opponentPlayer?.displayName ?? "等待对手"}
+            selfPlayerId={selfPlayer?.playerId}
+            opponentPlayerId={opponentPlayer?.playerId}
+            hostPlayerId={mode === "room" ? hostPlayerId : undefined}
             connected={connected}
             opponentConnected={opponentPlayer?.connected ?? false}
             selfPresenceLabel={
@@ -1692,25 +1848,6 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
                 : undefined
             }
           />
-
-          {phase === "waiting" && mode === "room" ? (
-            <div className="mt-5 flex flex-col items-end gap-2">
-              <Button
-                className="rounded-none"
-                disabled={Boolean(startDisabledReason)}
-                aria-describedby="room-start-reason"
-                onClick={requestStartRound}
-              >
-                {startPending ? "正在开始" : "开始本轮"}
-              </Button>
-              <p
-                id="room-start-reason"
-                className="text-xs text-muted-foreground"
-              >
-                {startDisabledReason || "所有成员将同步进入同一题目"}
-              </p>
-            </div>
-          ) : null}
 
           <div className="mt-6 min-w-0">
             {phase === "playing" && selfForfeitedThisRound ? (
@@ -1756,8 +1893,6 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
               mysteryPlayer={mysteryPlayer}
               mode={mode}
               maxGuesses={maxGuesses}
-              selfName={selfPlayer?.displayName ?? "你"}
-              opponentName={opponentPlayer?.displayName ?? "等待对手"}
               opponentDisconnectSeconds={opponentDisconnectSeconds}
               opponentForfeitedThisRound={
                 opponentPlayer?.forfeitedThisRound ?? false
@@ -1772,30 +1907,30 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
             />
           </div>
 
-          <section className="mt-7 border border-foreground/35">
-            <div className="grid min-h-28 grid-cols-[140px_1fr] sm:grid-cols-[150px_repeat(5,1fr)]">
-              <div className="flex flex-col justify-center border-r border-foreground/20 px-5">
-                <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-primary">
-                  神秘选手
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {revealAnswer ? "服务器已揭晓" : "回合结束后揭晓"}
-                </p>
-              </div>
-              {answerDetails.map(([label, value]) => (
-                <div
-                  key={label}
-                  className="hidden flex-col justify-center border-r border-foreground/15 px-4 last:border-r-0 sm:flex"
-                >
-                  <p className="text-xs text-muted-foreground">{label}</p>
-                  <p className="mt-2 font-mono text-sm font-semibold text-primary">
-                    {revealAnswer ? value : "?????"}
+          {phase === "finished" ? (
+            <section className="mt-7 border border-foreground/35">
+              <div className="grid min-h-28 grid-cols-[140px_1fr] sm:grid-cols-[150px_repeat(7,minmax(0,1fr))]">
+                <div className="flex flex-col justify-center border-r border-foreground/20 px-5">
+                  <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-primary">
+                    神秘选手
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    服务器已揭晓
                   </p>
                 </div>
-              ))}
-              <div className="grid grid-cols-2 gap-x-5 gap-y-3 px-5 py-4 sm:hidden">
-                {revealAnswer ? (
-                  answerDetails.map(([label, value]) => (
+                {answerDetails.map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="hidden min-w-0 flex-col justify-center border-r border-foreground/15 px-4 last:border-r-0 sm:flex"
+                  >
+                    <p className="text-xs text-muted-foreground">{label}</p>
+                    <p className="mt-2 truncate font-mono text-sm font-semibold text-primary">
+                      {value}
+                    </p>
+                  </div>
+                ))}
+                <div className="grid grid-cols-2 gap-x-5 gap-y-3 px-5 py-4 sm:hidden">
+                  {answerDetails.map(([label, value]) => (
                     <div key={label}>
                       <p className="text-[10px] text-muted-foreground">
                         {label}
@@ -1804,15 +1939,11 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
                         {value}
                       </p>
                     </div>
-                  ))
-                ) : (
-                  <p className="col-span-2 font-mono text-sm font-semibold text-primary">
-                    ?????
-                  </p>
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          ) : null}
 
           {phase === "finished" && seriesComplete ? (
             <section
@@ -1902,16 +2033,16 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
             </section>
           ) : null}
 
-          <div className="mt-5 flex flex-col gap-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-1">
-              <span>结果图例</span>
-              <InfoTip label="查看结果图例" side="right" className="size-10">
-                蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。隐藏模式不公开对手猜测的具体选手。
-              </InfoTip>
-            </div>
-            {phase === "finished" ? (
+          {phase === "finished" ? (
+            <div className="mt-5 flex flex-col gap-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-1">
+                <span>结果图例</span>
+                <InfoTip label="查看结果图例" side="right" className="size-10">
+                  蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。隐藏模式不公开对手猜测的具体选手。
+                </InfoTip>
+              </div>
               <div className="text-right">
-                <p className="font-mono text-foreground">
+                <p className={`font-mono ${outcomeTextClass}`}>
                   {seriesStatus === "abandoned"
                     ? "SERIES ABANDONED"
                     : seriesWinnerPlayerId === selfPlayerId
@@ -1934,12 +2065,8 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
                   </p>
                 ) : null}
               </div>
-            ) : phase === "waiting" ? (
-              <p className="font-mono">WAITING FOR ROUND</p>
-            ) : (
-              <p className="font-mono">SERVER AUTHORITATIVE</p>
-            )}
-          </div>
+            </div>
+          ) : null}
 
           {phase === "finished" && seriesComplete ? (
             <div className="mt-5 flex flex-col gap-2 border-t border-foreground/15 pt-5 sm:flex-row sm:items-center sm:justify-between">
@@ -2005,14 +2132,190 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
               </div>
             </div>
           ) : null}
+            </>
+          )}
         </div>
       </main>
+      {incomingRematch && rematch ? (
+        <RematchInviteCard
+          requesterName={rematchRequester?.displayName ?? "原对手"}
+          secondsLeft={rematchSeconds}
+          pending={
+            rematchActionPending === "accept" ||
+            rematchActionPending === "decline"
+              ? rematchActionPending
+              : null
+          }
+          onAccept={() => respondRematch(true)}
+          onDecline={() => respondRematch(false)}
+        />
+      ) : null}
+      <OperationStatusDialog
+        open={Boolean(closingIntent)}
+        kind={leaveError ? "error" : "progress"}
+        eyebrow={mode === "room" ? "FRIEND ROOM" : "LIVE MATCH"}
+        titleRef={closingTitleRef}
+        title={leaveError ? "未能退出房间" : "正在完成退出"}
+        description={
+          leaveError ||
+          "正在通知服务器释放当前席位，请勿重复操作。"
+        }
+      >
+        {leaveError && closingIntent ? (
+          <Button
+            type="button"
+            className="w-full rounded-none sm:w-auto"
+            onClick={() => startLeave(closingIntent.returnTo)}
+          >
+            重试退出
+          </Button>
+        ) : null}
+      </OperationStatusDialog>
+      <OperationStatusDialog
+        open={!closingIntent && startPending}
+        kind="progress"
+        eyebrow="FRIEND ROOM"
+        title="正在开始本轮"
+        description="正在通知房间成员并同步本轮题目。"
+      />
+      <OperationStatusDialog
+        open={!closingIntent && restartPending}
+        kind="progress"
+        eyebrow="FRIEND ROOM"
+        title="正在重置系列赛"
+        description="正在清理上一场结果并同步新的系列赛状态。"
+      />
+      <OperationStatusDialog
+        open={
+          !closingIntent &&
+          mode === "quick" &&
+          rematch?.status === "pending" &&
+          isRematchRequester
+        }
+        kind="progress"
+        eyebrow="REMATCH REQUEST"
+        title="等待原对手回应"
+        description={
+          rematch
+            ? `${rematchPendingNames(rematch).join("、") || "原对手"}尚未回应，邀请将在 ${rematchSeconds} 秒后失效。`
+            : "邀请已发送。"
+        }
+      >
+        <Button
+          type="button"
+          variant="outline"
+          className="col-span-2 w-full rounded-none sm:w-auto"
+          disabled={rematchActionPending === "cancel"}
+          onClick={cancelRematch}
+        >
+          {rematchActionPending === "cancel" ? "正在取消" : "取消邀请"}
+        </Button>
+      </OperationStatusDialog>
+      <OperationStatusDialog
+        open={
+          !closingIntent &&
+          mode === "quick" &&
+          rematch?.status === "starting"
+        }
+        kind="progress"
+        eyebrow="REMATCH CONFIRMED"
+        title="正在匹配原对手"
+        description="所有玩家均已同意，服务器正在重置比分并同步新的题目。"
+      />
+      <OperationStatusDialog
+        open={
+          !closingIntent &&
+          mode === "quick" &&
+          terminalRematch !== null
+        }
+        kind="error"
+        eyebrow="REMATCH REQUEST"
+        title={
+          terminalRematch
+            ? rematchStatusCopy(terminalRematch.status).title
+            : "重赛邀请已结束"
+        }
+        description={
+          terminalRematch
+            ? rematchStatusCopy(terminalRematch.status).description
+            : "本次邀请已经结束。"
+        }
+        onOpenChange={(open) => {
+          if (!open) setTerminalRematch(null);
+        }}
+      >
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full rounded-none sm:w-auto"
+          onClick={() => {
+            setTerminalRematch(null);
+            dismissCelebration();
+          }}
+        >
+          查看对局
+        </Button>
+        <Button
+          type="button"
+          className="w-full rounded-none sm:w-auto"
+          onClick={() => {
+            setTerminalRematch(null);
+            void requeue();
+          }}
+        >
+          重新匹配
+        </Button>
+      </OperationStatusDialog>
+      <OperationStatusDialog
+        open={
+          !closingIntent &&
+          !startPending &&
+          !restartPending &&
+          Boolean(realtime.error || connectionUnavailable)
+        }
+        kind={connectionRecovering ? "progress" : "error"}
+        eyebrow={mode === "room" ? "FRIEND ROOM" : "LIVE MATCH"}
+        titleRef={recoveryTitleRef}
+        title={
+          connectionRecovering
+            ? "正在恢复连接"
+            : fatalOffline
+              ? "当前房间会话已失效"
+              : "连接需要处理"
+        }
+        description={
+          realtime.error || connectionCopy(realtime.connection)
+        }
+      >
+        {fatalOffline ? (
+          <Button
+            type="button"
+            className="w-full rounded-none sm:w-auto"
+            onClick={discardInvalidSession}
+          >
+            {realtime.offlineReason === "profile_invalid"
+              ? "重新设置身份"
+              : mode === "room"
+                ? "重新加入房间"
+                : "重新匹配"}
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            className="w-full rounded-none sm:w-auto"
+            onClick={realtime.retry}
+          >
+            立即重连
+          </Button>
+        )}
+      </OperationStatusDialog>
       {showCelebration ? (
         <CelebrationOverlay
           outcome={resultOutcome}
           seriesComplete={seriesComplete}
           seriesStatus={seriesStatus}
           seriesFinishReason={seriesFinishReason}
+          soundEnabled={resultSoundEnabled}
           score={`${selfScore} : ${opponentScore}`}
           mysteryPlayer={mysteryPlayer}
           finishReason={finishReason}
@@ -2024,7 +2327,13 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
           }
           standings={resultStandings}
           onClose={dismissCelebration}
-          onExit={fatalOffline ? discardInvalidSession : exitSeries}
+          onExit={
+            fatalOffline
+              ? discardInvalidSession
+              : mode === "quick"
+                ? () => void requeue()
+                : exitSeries
+          }
           exitLabel={
             fatalOffline
               ? realtime.offlineReason === "profile_invalid"
@@ -2032,16 +2341,23 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
                 : mode === "room"
                   ? "重新加入房间"
                   : "重新匹配"
-              : undefined
+              : mode === "quick"
+                ? "重新匹配"
+                : undefined
           }
           onRematch={
             mode === "quick"
-              ? () => void rematch()
+              ? requestRematch
               : mode === "room" && isHost
                 ? requestRestartSeries
                 : undefined
           }
-          rematchDisabled={!connected}
+          rematchLabel={
+            rematchActionPending === "request"
+              ? "正在发送"
+              : "邀请重赛"
+          }
+          rematchDisabled={!connected || rematchActionPending === "request"}
           rematchDisabledReason={
             fatalOffline
               ? mode === "room"

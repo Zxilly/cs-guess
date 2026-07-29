@@ -1,4 +1,5 @@
 export const MAX_GUESSES = 8;
+export const HARD_MAX_GUESSES = 10;
 
 export type GameMode = "daily" | "solo" | "quick" | "room";
 
@@ -20,6 +21,10 @@ export type BattleSeriesFinishReason =
 export type GameDifficulty = "easy" | "full" | "hard";
 export type BestOf = 1 | 3 | 5;
 export type PartySize = 2 | 4;
+
+export function maxGuessesForDifficulty(difficulty: GameDifficulty) {
+  return difficulty === "hard" ? HARD_MAX_GUESSES : MAX_GUESSES;
+}
 
 export type CountryRelation = "match" | "near" | "miss";
 

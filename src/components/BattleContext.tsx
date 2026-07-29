@@ -1,10 +1,9 @@
 import { UserCircleIcon, WifiHighIcon } from "@phosphor-icons/react";
 
-import { InfoTip } from "@/components/InfoTip";
 import type { GameMode } from "@/types/game";
 
 interface BattleContextProps {
-  mode: GameMode;
+  mode: Extract<GameMode, "quick" | "room">;
   guesses: number;
   opponentGuesses: number;
   maxGuesses: number;
@@ -14,6 +13,9 @@ interface BattleContextProps {
   maxPlayers?: number;
   selfName?: string;
   opponentName?: string;
+  selfPlayerId?: string;
+  opponentPlayerId?: string;
+  hostPlayerId?: string;
   connected?: boolean;
   opponentConnected?: boolean;
   selfScore?: number;
@@ -65,6 +67,8 @@ function PlayerSide({
   presenceLabel,
   disconnectSeconds,
   slotLabel,
+  playerId,
+  isHost = false,
 }: {
   side: "自己" | "对手";
   name: string;
@@ -74,9 +78,12 @@ function PlayerSide({
   presenceLabel?: string;
   disconnectSeconds?: number | null;
   slotLabel?: string;
+  playerId?: string;
+  isHost?: boolean;
 }) {
   return (
     <div
+      data-player-id={playerId}
       className={`flex min-w-0 items-center gap-3 px-3 py-4 sm:px-5 ${
         side === "对手" ? "justify-end text-right" : ""
       }`}
@@ -91,7 +98,16 @@ function PlayerSide({
         <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
           {side}
         </p>
-        <p className="mt-1 truncate text-sm font-semibold">{name}</p>
+        <div className={`mt-1 flex min-w-0 items-center gap-2 ${
+          side === "对手" ? "justify-end" : ""
+        }`}>
+          <p className="truncate text-sm font-semibold">{name}</p>
+          {isHost ? (
+            <span className="shrink-0 font-mono text-[9px] font-semibold text-primary">
+              房主
+            </span>
+          ) : null}
+        </div>
         <p
           className={`mt-1 flex items-center gap-1 text-xs ${
             side === "对手" ? "justify-end" : ""
@@ -135,12 +151,15 @@ export function BattleContext({
   guesses,
   opponentGuesses,
   maxGuesses,
-  roomCode = "CS-207207",
+  roomCode,
   isRoomHost = false,
   onlinePlayers = 1,
-  maxPlayers = 8,
+  maxPlayers = 4,
   selfName = "你",
   opponentName = "等待对手",
+  selfPlayerId,
+  opponentPlayerId,
+  hostPlayerId,
   connected = true,
   opponentConnected = false,
   selfScore = 0,
@@ -152,29 +171,6 @@ export function BattleContext({
   opponentPresenceLabel,
   opponentDisconnectSeconds,
 }: BattleContextProps) {
-  if (mode === "daily" || mode === "solo") {
-    const isDaily = mode === "daily";
-    return (
-      <div className="flex items-center justify-between border-y border-foreground/20 px-5 py-4">
-        <div className="flex items-center gap-1">
-          <p className="text-sm font-medium">
-            {isDaily ? "今日统一题目" : "随机个人题目"}
-          </p>
-          <InfoTip
-            label={isDaily ? "今日题目说明" : "单人题目说明"}
-            side="right"
-            className="size-7"
-          >
-            {isDaily
-              ? "所有玩家共享同一个神秘选手，每日零点刷新。"
-              : "本局随机生成神秘选手，结算后可以立即开始下一局。"}
-          </InfoTip>
-        </div>
-        <AttemptDots used={guesses} total={maxGuesses} />
-      </div>
-    );
-  }
-
   if (participants && participants.length > 2) {
     return (
       <section
@@ -194,9 +190,11 @@ export function BattleContext({
               四人同题竞速
             </h2>
           </div>
-          <p className="font-mono text-xs text-muted-foreground">
-            {roomCode}
-          </p>
+          {roomCode ? (
+            <p className="font-mono text-xs text-muted-foreground">
+              {roomCode}
+            </p>
+          ) : null}
         </div>
         <div
           className="grid sm:grid-cols-2 xl:grid-cols-4"
@@ -208,6 +206,7 @@ export function BattleContext({
             return (
               <div
                 key={participant.playerId}
+                data-player-id={participant.playerId}
                 role="listitem"
                 aria-labelledby={headingId}
                 className={`min-w-0 border-b border-foreground/20 p-4 last:border-b-0 sm:odd:border-r sm:[&:nth-last-child(-n+2)]:border-b-0 xl:border-r xl:border-b-0 xl:last:border-r-0 ${
@@ -226,6 +225,11 @@ export function BattleContext({
                     >
                       {participant.name}
                     </h3>
+                    {participant.playerId === hostPlayerId ? (
+                      <p className="mt-1 font-mono text-[9px] font-semibold text-primary">
+                        房主
+                      </p>
+                    ) : null}
                     <p className="mt-1 text-xs text-muted-foreground">
                       {participant.rankLabel}
                     </p>
@@ -299,6 +303,8 @@ export function BattleContext({
           maxGuesses={maxGuesses}
           presenceLabel={selfPresenceLabel}
           slotLabel="你"
+          playerId={selfPlayerId}
+          isHost={selfPlayerId === hostPlayerId}
         />
         <div className="flex min-w-26 flex-col items-center justify-center border-x border-foreground/20 px-3 py-3 sm:min-w-36 sm:px-6">
           <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-primary">
@@ -309,9 +315,11 @@ export function BattleContext({
             <span className="mx-2 text-muted-foreground">:</span>
             {opponentScore}
           </p>
-          <p className="mt-1 hidden font-mono text-[9px] text-muted-foreground sm:block">
-            {roomCode}
-          </p>
+          {roomCode ? (
+            <p className="mt-1 hidden font-mono text-[9px] text-muted-foreground sm:block">
+              {roomCode}
+            </p>
+          ) : null}
         </div>
         <PlayerSide
           side="对手"
@@ -322,6 +330,8 @@ export function BattleContext({
           presenceLabel={opponentPresenceLabel}
           disconnectSeconds={opponentDisconnectSeconds}
           slotLabel="对手 1"
+          playerId={opponentPlayerId}
+          isHost={opponentPlayerId === hostPlayerId}
         />
       </div>
       {mode === "room" ? (

@@ -9,8 +9,6 @@ import {
 import { useId, useState, type KeyboardEvent, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { InfoTip } from "@/components/InfoTip";
 import { PlayerRoleIcon } from "@/components/PlayerRoleLabel";
 import { TeamLogo } from "@/components/TeamLogo";
 import {
@@ -47,8 +45,6 @@ interface GuessTableProps {
   mysteryPlayer: Player;
   mode: GameMode;
   maxGuesses: number;
-  selfName?: string;
-  opponentName?: string;
   ownMatchedFields?: readonly (readonly string[])[];
   ownCountryHints?: readonly CountryHint[];
   opponentProgress?: readonly OpponentGuessProgress[];
@@ -56,6 +52,7 @@ interface GuessTableProps {
   onOpponentVisibilityChange?: (visibility: OpponentVisibility) => void;
   opponentDisconnectSeconds?: number | null;
   opponentForfeitedThisRound?: boolean;
+  showProgressCount?: boolean;
 }
 
 interface OpponentBoardData {
@@ -73,7 +70,8 @@ const ATTRIBUTES = [
   ["国籍", "countryCode", "nationality"],
   ["年龄", "age", "age"],
   ["位置", "role", "role"],
-  ["Major", "majorAppearances", "major_appearances"],
+  ["Major 参赛", "majorAppearances", "major_appearances"],
+  ["Major 冠军", "majorWins", "major_wins"],
 ] as const;
 
 function compareNumber(guess: number, target: number): Comparison {
@@ -217,7 +215,11 @@ function comparisonFor(
   if (matchedFields) {
     return matchedFields.includes(protocolKey) ? "match" : "miss";
   }
-  if (key === "age" || key === "majorAppearances") {
+  if (
+    key === "age" ||
+    key === "majorAppearances" ||
+    key === "majorWins"
+  ) {
     return compareNumber(
       player[key] as number,
       mysteryPlayer[key] as number,
@@ -233,6 +235,7 @@ function GuessBoard({
   mysteryPlayer,
   matchedFields,
   countryHints,
+  showCount = true,
 }: {
   title: string;
   guesses: readonly Player[];
@@ -240,6 +243,7 @@ function GuessBoard({
   mysteryPlayer: Player;
   matchedFields?: readonly (readonly string[])[];
   countryHints?: readonly CountryHint[];
+  showCount?: boolean;
 }) {
   const rows = Array.from({ length: maxGuesses }, (_, index) => guesses[index]);
   const mobileVisibleRows = Math.min(maxGuesses, guesses.length + 1);
@@ -247,9 +251,11 @@ function GuessBoard({
     <section className="min-w-0 border border-foreground/25">
       <div className="flex items-baseline justify-between border-b border-foreground/20 px-4 py-3">
         <h2 className="text-sm font-semibold">{title}</h2>
-        <p className="font-mono text-xs text-muted-foreground">
-          {guesses.length} / {maxGuesses}
-        </p>
+        {showCount ? (
+          <p className="font-mono text-xs text-muted-foreground">
+            {guesses.length} / {maxGuesses}
+          </p>
+        ) : null}
       </div>
       <p className="border-b border-foreground/15 px-4 py-2 text-xs text-muted-foreground sm:hidden">
         横向滑动查看全部属性 →
@@ -260,7 +266,7 @@ function GuessBoard({
         aria-label={`${title}，横向滚动查看更多属性`}
         tabIndex={0}
       >
-        <Table className="min-w-[46rem] table-fixed">
+        <Table className="min-w-[44rem] table-fixed">
           <TableHeader>
             <TableRow className="border-foreground/20 hover:bg-transparent">
               <TableHead className="w-10 border-r border-foreground/15 text-center">
@@ -377,6 +383,7 @@ function OpponentBoard({
   mysteryPlayer,
   disconnectSeconds,
   forfeitedThisRound = false,
+  showCount = true,
 }: {
   title: string;
   progress: readonly OpponentGuessProgress[];
@@ -385,6 +392,7 @@ function OpponentBoard({
   mysteryPlayer: Player;
   disconnectSeconds?: number | null;
   forfeitedThisRound?: boolean;
+  showCount?: boolean;
 }) {
   const rows = Array.from({ length: maxGuesses }, (_, index) => progress[index]);
   const mobileVisibleRows = Math.min(maxGuesses, progress.length + 1);
@@ -409,9 +417,11 @@ function OpponentBoard({
             </p>
           ) : null}
         </div>
-        <p className="shrink-0 font-mono text-xs text-muted-foreground">
-          {progress.length} / {maxGuesses}
-        </p>
+        {showCount ? (
+          <p className="shrink-0 font-mono text-xs text-muted-foreground">
+            {progress.length} / {maxGuesses}
+          </p>
+        ) : null}
       </div>
       <p className="border-b border-foreground/15 px-4 py-2 text-xs text-muted-foreground sm:hidden">
         横向滑动查看全部属性 →
@@ -422,7 +432,7 @@ function OpponentBoard({
         aria-label={`${title}，横向滚动查看更多属性`}
         tabIndex={0}
       >
-        <Table className="min-w-[46rem] table-fixed">
+        <Table className="min-w-[44rem] table-fixed">
           <TableHeader>
             <TableRow className="border-foreground/20 hover:bg-transparent">
               <TableHead className="w-10 border-r border-foreground/15 text-center">
@@ -601,7 +611,6 @@ function MultiplayerGuessBoards({
   guesses,
   maxGuesses,
   mysteryPlayer,
-  selfName,
   ownMatchedFields,
   ownCountryHints,
   opponents,
@@ -610,7 +619,6 @@ function MultiplayerGuessBoards({
   guesses: readonly Player[];
   maxGuesses: number;
   mysteryPlayer: Player;
-  selfName: string;
   ownMatchedFields?: readonly (readonly string[])[];
   ownCountryHints?: readonly CountryHint[];
   opponents: readonly OpponentBoardData[];
@@ -685,8 +693,7 @@ function MultiplayerGuessBoards({
                     : "text-muted-foreground",
                 )}
               >
-                {opponent.name.replace(/^对手 \d+ · /, "")} ·{" "}
-                {opponent.progress.length}/{maxGuesses}
+                {opponent.name.replace(/^对手 \d+ · /, "")}
               </span>
             </button>
           );
@@ -694,12 +701,13 @@ function MultiplayerGuessBoards({
       </div>
       <div className="grid min-w-0 gap-4 min-[1400px]:grid-cols-2">
         <GuessBoard
-          title={`${selfName} · 我的猜测`}
+          title="我的猜测"
           guesses={guesses}
           maxGuesses={maxGuesses}
           mysteryPlayer={mysteryPlayer}
           matchedFields={ownMatchedFields}
           countryHints={ownCountryHints}
+          showCount={false}
         />
         {opponents.map((opponent, index) => (
           <div
@@ -711,13 +719,14 @@ function MultiplayerGuessBoards({
             className="min-w-0"
           >
             <OpponentBoard
-              title={`${opponent.name} · 对手进度`}
+              title="对手进度"
               progress={opponent.progress}
               visibility={opponentVisibility}
               maxGuesses={maxGuesses}
               mysteryPlayer={mysteryPlayer}
               disconnectSeconds={opponent.disconnectSeconds}
               forfeitedThisRound={opponent.forfeitedThisRound}
+              showCount={false}
             />
           </div>
         ))}
@@ -733,8 +742,6 @@ export function GuessTable({
   mysteryPlayer,
   mode,
   maxGuesses,
-  selfName = "自己",
-  opponentName = "对手",
   ownMatchedFields,
   ownCountryHints,
   opponentProgress,
@@ -742,6 +749,7 @@ export function GuessTable({
   onOpponentVisibilityChange,
   opponentDisconnectSeconds,
   opponentForfeitedThisRound = false,
+  showProgressCount = true,
 }: GuessTableProps) {
   if (mode === "daily" || mode === "solo") {
     return (
@@ -752,6 +760,7 @@ export function GuessTable({
         mysteryPlayer={mysteryPlayer}
         matchedFields={ownMatchedFields}
         countryHints={ownCountryHints}
+        showCount={showProgressCount}
       />
     );
   }
@@ -765,19 +774,8 @@ export function GuessTable({
 
   return (
     <div className="min-w-0">
-      <div className="mb-3 flex flex-col justify-between gap-3 border-y border-foreground/15 py-3 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-1">
-          <Badge variant="outline" className="rounded-none">
-            {opponentVisibility === "open" ? <EyeIcon /> : <EyeSlashIcon />}
-            {opponentVisibility === "open" ? "明牌模式" : "隐藏模式"}
-          </Badge>
-          <InfoTip label="查看可见性规则" side="right" className="size-10">
-            {opponentVisibility === "open"
-              ? "所有玩家都能看到彼此猜测的具体选手。"
-              : "只公开对手命中的属性，不显示具体猜测选手。"}
-          </InfoTip>
-        </div>
-        {onOpponentVisibilityChange ? (
+      {onOpponentVisibilityChange ? (
+        <div className="mb-3 flex justify-end border-y border-foreground/15 py-3">
           <div
             className="inline-flex w-fit border border-foreground/25"
             role="group"
@@ -814,15 +812,14 @@ export function GuessTable({
               明牌
             </Button>
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       {opponents && opponents.length > 1 ? (
         <MultiplayerGuessBoards
           guesses={guesses}
           maxGuesses={maxGuesses}
           mysteryPlayer={mysteryPlayer}
-          selfName={selfName}
           ownMatchedFields={ownMatchedFields}
           ownCountryHints={ownCountryHints}
           opponents={opponents}
@@ -831,21 +828,23 @@ export function GuessTable({
       ) : (
         <div className="grid min-w-0 gap-4 min-[1400px]:grid-cols-2">
           <GuessBoard
-            title={`${selfName} · 我的猜测`}
+            title="我的猜测"
             guesses={guesses}
             maxGuesses={maxGuesses}
             mysteryPlayer={mysteryPlayer}
             matchedFields={ownMatchedFields}
             countryHints={ownCountryHints}
+            showCount={false}
           />
           <OpponentBoard
-            title={`${opponentName} · 对手进度`}
+            title="对手进度"
             progress={normalizedProgress}
             visibility={opponentVisibility}
             maxGuesses={maxGuesses}
             mysteryPlayer={mysteryPlayer}
             disconnectSeconds={opponentDisconnectSeconds}
             forfeitedThisRound={opponentForfeitedThisRound}
+            showCount={false}
           />
         </div>
       )}

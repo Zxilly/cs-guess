@@ -2,6 +2,7 @@ import { ArrowLeftIcon, CrosshairIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { Link } from "react-router";
 
+import { SoundToggle } from "@/components/SoundToggle";
 import { Button } from "@/components/ui/button";
 
 interface AppHeaderProps {
@@ -39,7 +40,11 @@ export function AppHeader({
             </p>
           </div>
         </Link>
-        <div className="min-w-0" data-layout="app-header-actions">
+        <div
+          className="flex min-w-0 items-center justify-end gap-1 sm:gap-2"
+          data-layout="app-header-actions"
+        >
+          <SoundToggle />
           {action ??
             (backToLobby ? (
               <Button

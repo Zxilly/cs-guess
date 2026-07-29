@@ -174,7 +174,7 @@ function renderPage() {
 }
 
 function findButton(text: string) {
-  return Array.from(container.querySelectorAll("button")).find((button) =>
+  return Array.from(document.body.querySelectorAll("button")).find((button) =>
     button.textContent?.includes(text),
   );
 }
@@ -224,7 +224,9 @@ describe("MatchmakingPage", () => {
     expect(container.textContent).toContain("公共队列数据");
     expect(container.textContent).toContain("房间正在重连");
     expect(container.textContent).not.toContain("房间已连接");
-    expect(container.textContent).toContain("实时连接中断，正在自动重连。");
+    expect(document.body.textContent).toContain(
+      "实时连接中断，正在自动重连。",
+    );
     expect(container.textContent).toContain("当前条件等待总数");
     expect(container.textContent).toContain("当前条件游戏中总数");
     expect(container.textContent).toContain("6");
@@ -233,7 +235,8 @@ describe("MatchmakingPage", () => {
       "00:",
     );
     expect(container.querySelectorAll('[role="status"]')).toHaveLength(1);
-    expect(container.querySelector('[role="alert"]')).toBeNull();
+    expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.body.querySelector('[role="alertdialog"]')).toBeNull();
     expect(
       container.querySelector(
         '[data-testid="matching-queue-summary"]',
@@ -260,10 +263,12 @@ describe("MatchmakingPage", () => {
       storeSession();
       renderPage();
 
-      expect(container.querySelectorAll('[role="alert"]')).toHaveLength(1);
-      expect(container.querySelector('[role="alert"]')?.textContent).toContain(
-        expected,
-      );
+      expect(
+        document.body.querySelectorAll('[role="alertdialog"]'),
+      ).toHaveLength(1);
+      expect(
+        document.body.querySelector('[role="alertdialog"]')?.textContent,
+      ).toContain(expected);
       expect(container.querySelectorAll('[role="status"]')).toHaveLength(0);
       expect(
         container.querySelector(
@@ -271,12 +276,12 @@ describe("MatchmakingPage", () => {
         )?.getAttribute("aria-live"),
       ).toBe("off");
       if (expected === "会话已失效") {
-        expect(container.textContent).toContain("清除失效会话并返回");
-        expect(container.textContent).not.toContain("重试房间连接");
-        expect(container.textContent).not.toContain("安全返回");
+        expect(document.body.textContent).toContain("清除失效会话并返回");
+        expect(document.body.textContent).not.toContain("重试房间连接");
+        expect(document.body.textContent).not.toContain("安全返回");
       } else {
-        expect(container.textContent).toContain("重试房间连接");
-        expect(container.textContent).toContain("安全返回");
+        expect(document.body.textContent).toContain("重试连接");
+        expect(document.body.textContent).toContain("安全返回");
       }
     },
   );
@@ -286,7 +291,10 @@ describe("MatchmakingPage", () => {
     renderPage();
 
     expect(container.querySelectorAll('[role="status"]')).toHaveLength(1);
-    expect(container.querySelectorAll('[role="alert"]')).toHaveLength(0);
+    expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+    expect(
+      document.body.querySelectorAll('[role="alertdialog"]'),
+    ).toHaveLength(0);
 
     mocks.realtime.connection = "offline";
     mocks.realtime.error =
@@ -294,7 +302,9 @@ describe("MatchmakingPage", () => {
     renderPage();
 
     expect(container.querySelectorAll('[role="status"]')).toHaveLength(0);
-    expect(container.querySelectorAll('[role="alert"]')).toHaveLength(1);
+    expect(
+      document.body.querySelectorAll('[role="alertdialog"]'),
+    ).toHaveLength(1);
 
     const persistentCancelButton = findButton("取消匹配")!;
     act(() => persistentCancelButton.focus());
@@ -303,8 +313,10 @@ describe("MatchmakingPage", () => {
     renderPage();
 
     expect(container.querySelectorAll('[role="status"]')).toHaveLength(1);
-    expect(container.querySelectorAll('[role="alert"]')).toHaveLength(0);
-    expect(document.activeElement).toBe(persistentCancelButton);
+    expect(
+      document.body.querySelectorAll('[role="alertdialog"]'),
+    ).toHaveLength(0);
+    expect(persistentCancelButton.isConnected).toBe(true);
     expect(
       container.querySelector(
         '[data-testid="matching-connection-status"]',
@@ -353,9 +365,9 @@ describe("MatchmakingPage", () => {
     renderPage();
 
     expect(container.textContent).toContain("11:05");
-    expect(container.textContent).toContain("等待已超过 10 分钟");
-    expect(container.textContent).toContain("重试房间连接");
-    expect(container.textContent).toContain("安全返回");
+    expect(document.body.textContent).toContain("等待已超过 10 分钟");
+    expect(document.body.textContent).toContain("重试连接");
+    expect(document.body.textContent).toContain("安全返回");
   });
 
   it("gives cancellation a synchronous single decision over match-found", async () => {
@@ -385,7 +397,9 @@ describe("MatchmakingPage", () => {
       ],
     };
     renderPage();
-    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(
+      document.body.querySelectorAll('[role="dialog"]'),
+    ).toHaveLength(1);
 
     response.resolve(new Response(null, { status: 204 }));
     await act(async () => {
@@ -418,8 +432,8 @@ describe("MatchmakingPage", () => {
       await Promise.resolve();
     });
 
-    expect(container.textContent).toContain("对战服务暂时不可用");
-    expect(document.activeElement?.textContent).toContain("正在完成退出");
+    expect(document.body.textContent).toContain("对战服务暂时不可用");
+    expect(document.activeElement?.textContent).toContain("未能退出匹配");
     expect(
       sessionStorage.getItem("cs-guess:realtime-session"),
     ).not.toBeNull();
@@ -499,10 +513,12 @@ describe("MatchmakingPage", () => {
       await Promise.resolve();
     });
 
-    expect(container.querySelectorAll('[role="alert"]')).toHaveLength(1);
-    expect(container.querySelector('[role="alert"]')?.textContent).toContain(
-      "对战服务暂时不可用",
-    );
+    expect(
+      document.body.querySelectorAll('[role="alertdialog"]'),
+    ).toHaveLength(1);
+    expect(
+      document.body.querySelector('[role="alertdialog"]')?.textContent,
+    ).toContain("对战服务暂时不可用");
   });
 
   it("uses an immediate reduced-motion transition after match found", async () => {
@@ -520,7 +536,7 @@ describe("MatchmakingPage", () => {
     storeSession();
     renderPage();
 
-    expect(container.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
     expect(
       container.querySelector('[data-testid="location"]')?.textContent,
     ).toBe("/matching");

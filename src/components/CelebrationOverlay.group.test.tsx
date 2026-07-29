@@ -34,6 +34,25 @@ function politeLiveRegionCount(markup: string) {
 }
 
 describe("group round result", () => {
+  it.each([
+    ["win", "result-dialog--win"],
+    ["loss", "result-dialog--loss"],
+    ["draw", "result-dialog--draw"],
+  ] as const)("applies the %s outcome tone to the result dialog", (outcome, className) => {
+    const markup = renderToStaticMarkup(
+      <CelebrationOverlay
+        outcome={outcome}
+        seriesComplete={false}
+        score="1 : 0"
+        mysteryPlayer={players[0]}
+        onClose={vi.fn()}
+      />,
+    );
+
+    expect(markup).toContain(className);
+    expect(markup).toContain("result-dialog__action");
+  });
+
   it("shows every stable seat, score, and tied rank for four players", () => {
     const markup = renderToStaticMarkup(
       <CelebrationOverlay
@@ -137,7 +156,7 @@ describe("group round result", () => {
     );
 
     expect(markup).toContain("查看对局");
-    expect(markup).toContain("再次对战");
+    expect(markup).toContain("邀请重赛");
     expect(markup).toContain("返回模式大厅");
     expect(markup).toContain("flex-col");
     expect(markup).toContain("sm:flex-row");
