@@ -817,7 +817,7 @@ mod tests {
                 json!({
                     "identity_id": "0samas",
                     "visibility": "open",
-                    "max_players": 6,
+                    "max_players": 4,
                     "best_of": 5,
                     "difficulty": "full"
                 }),
@@ -830,7 +830,7 @@ mod tests {
             serde_json::from_slice(&response.into_body().collect().await.unwrap().to_bytes())
                 .unwrap();
         assert_eq!(body["snapshot"]["difficulty"], "full");
-        assert_eq!(body["snapshot"]["max_players"], 6);
+        assert_eq!(body["snapshot"]["max_players"], 4);
         assert_eq!(body["snapshot"]["best_of"], 5);
         assert_eq!(body["snapshot"]["visibility"], "open");
     }

@@ -63,12 +63,12 @@ Content-Type: application/json
 {
   "identity_id": "0samas",
   "visibility": "hidden",
-  "max_players": 8,
+  "max_players": 4,
   "best_of": 3
 }
 ```
 
-`visibility` is `hidden` or `open`; `max_players` is 2–8; `best_of` is 1, 3,
+`visibility` is `hidden` or `open`; `max_players` is 2 or 4; `best_of` is 1, 3,
 or 5.
 
 ### Join a friend room
@@ -139,7 +139,7 @@ Room creation, room join, and quick matching return the same session shape:
     "phase": "waiting",
     "self_player_id": "a3827574-2b32-43cc-a19a-2398ab0ad54f",
     "host_player_id": "a3827574-2b32-43cc-a19a-2398ab0ad54f",
-    "max_players": 8,
+    "max_players": 4,
     "max_guesses": 6,
     "best_of": 3,
     "round_number": 0,
