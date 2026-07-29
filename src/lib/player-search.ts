@@ -102,7 +102,81 @@ function scoreField(field: SearchField, token: string): number | null {
     return fieldBase + 200 + field.weight;
   }
   if (field.value.includes(token)) return fieldBase + 300 + field.weight;
+
+  const fuzzyDistance = closestFuzzyWordDistance(field.value, token);
+  if (fuzzyDistance !== null) {
+    return fieldBase + 500 + fuzzyDistance * 20 + field.weight;
+  }
   return null;
+}
+
+function maximumFuzzyDistance(length: number) {
+  if (length < 3) return 0;
+  if (length <= 4) return 1;
+  if (length <= 8) return 2;
+  return 3;
+}
+
+function damerauLevenshteinDistance(
+  source: string,
+  target: string,
+  maximumDistance: number,
+) {
+  if (Math.abs(source.length - target.length) > maximumDistance) {
+    return maximumDistance + 1;
+  }
+
+  let previousPrevious = Array.from(
+    { length: target.length + 1 },
+    (_, index) => index,
+  );
+  let previous = [...previousPrevious];
+
+  for (let sourceIndex = 1; sourceIndex <= source.length; sourceIndex += 1) {
+    const current = new Array<number>(target.length + 1);
+    current[0] = sourceIndex;
+    for (let targetIndex = 1; targetIndex <= target.length; targetIndex += 1) {
+      const substitutionCost =
+        source[sourceIndex - 1] === target[targetIndex - 1] ? 0 : 1;
+      current[targetIndex] = Math.min(
+        previous[targetIndex] + 1,
+        current[targetIndex - 1] + 1,
+        previous[targetIndex - 1] + substitutionCost,
+      );
+
+      if (
+        sourceIndex > 1 &&
+        targetIndex > 1 &&
+        source[sourceIndex - 1] === target[targetIndex - 2] &&
+        source[sourceIndex - 2] === target[targetIndex - 1]
+      ) {
+        current[targetIndex] = Math.min(
+          current[targetIndex],
+          previousPrevious[targetIndex - 2] + 1,
+        );
+      }
+    }
+    previousPrevious = previous;
+    previous = current;
+  }
+
+  return previous[target.length];
+}
+
+function closestFuzzyWordDistance(value: string, token: string) {
+  const maximumDistance = maximumFuzzyDistance(token.length);
+  if (maximumDistance === 0) return null;
+
+  let closest = maximumDistance + 1;
+  for (const word of value.split(" ")) {
+    const distance = damerauLevenshteinDistance(
+      word,
+      token,
+      maximumDistance,
+    );
+    closest = Math.min(closest, distance);
+  }
+  return closest <= maximumDistance ? closest : null;
 }
 
 function playerFields(player: Player): SearchField[] {
@@ -116,6 +190,9 @@ function playerFields(player: Player): SearchField[] {
       : countryNameEn(countryCode);
   const values: Array<[string, number, boolean]> = [
     [player.nickname, 0, true],
+    ...((player.aliases ?? []).map(
+      (alias) => [alias, 2, true] as [string, number, boolean],
+    )),
     ...nicknameAliases(player.nickname).map(
       (alias) => [alias, 1, true] as [string, number, boolean],
     ),

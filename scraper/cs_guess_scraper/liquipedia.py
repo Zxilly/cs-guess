@@ -99,13 +99,16 @@ class LiquipediaClient:
         self._last_request_at = time.monotonic()
         return response
 
-    def iter_player_pages(self) -> Iterator[dict[str, object]]:
+    def _iter_category_pages(
+        self,
+        category: str,
+    ) -> Iterator[dict[str, object]]:
         base_params = {
             "action": "query",
             "format": "json",
             "formatversion": "2",
             "generator": "categorymembers",
-            "gcmtitle": "Category:Players",
+            "gcmtitle": category,
             "gcmnamespace": "0",
             "gcmtype": "page",
             "gcmlimit": "max",
@@ -134,6 +137,25 @@ class LiquipediaClient:
             continuation = response.get("continue", {})
             if not continuation:
                 return
+
+    def iter_player_pages(self) -> Iterator[dict[str, object]]:
+        yield from self._iter_category_pages("Category:Players")
+
+    def iter_chinese_former_player_pages(
+        self,
+    ) -> Iterator[dict[str, object]]:
+        """Discover former players whose pages have moved to staff categories.
+
+        Liquipedia removes some retired players from ``Category:Players`` after
+        they become casters, coaches, or managers.  Chinese community figures
+        are particularly affected.  Only staff pages with an explicit
+        ``years_active`` player-career field are admitted, so pure broadcast
+        talent does not leak into the player pool.
+        """
+
+        for page in self._iter_category_pages("Category:Chinese Staffs"):
+            if has_player_career_evidence(str(page.get("wikitext") or "")):
+                yield page
 
     def iter_player_pages_by_titles(
         self,
@@ -332,6 +354,27 @@ def _clean_person_name(value: str) -> str:
     return _clean_markup(primary)
 
 
+def _split_aliases(value: str) -> list[str]:
+    aliases: list[str] = []
+    for raw_alias in re.split(r"[,，]", value):
+        alias = _clean_markup(raw_alias)
+        if alias and alias.casefold() not in {
+            existing.casefold() for existing in aliases
+        }:
+            aliases.append(alias)
+    return aliases
+
+
+def has_player_career_evidence(wikitext: str) -> bool:
+    """Return whether an infobox explicitly records years active as a player."""
+
+    infobox = _extract_template(wikitext, "Infobox player")
+    if infobox is None:
+        return False
+    fields = _template_parameters(infobox)
+    return bool(_clean_markup(fields.get("years_active", "")))
+
+
 def _partial_date(value: str) -> tuple[str | None, str]:
     cleaned = _clean_markup(value)
     if not cleaned or cleaned.casefold() == "present":
@@ -453,6 +496,11 @@ def parse_player_page(title: str, wikitext: str) -> dict[str, object]:
         _clean_markup(fields.get("status", "")).casefold(),
         "unknown",
     )
+    aliases = _split_aliases(fields.get("ids", ""))
+    if native_name and native_name.casefold() not in {
+        alias.casefold() for alias in aliases
+    }:
+        aliases.append(native_name)
 
     result: dict[str, object] = {
         "id": nickname,
@@ -470,6 +518,8 @@ def parse_player_page(title: str, wikitext: str) -> dict[str, object]:
             else None
         ),
         "roles": roles,
+        "aliases": aliases,
+        "has_player_career_evidence": has_player_career_evidence(wikitext),
         "source_ids": source_ids,
         "platform_ids": platform_ids,
         "source_url": (

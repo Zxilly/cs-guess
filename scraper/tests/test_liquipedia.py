@@ -3,6 +3,7 @@ from urllib.parse import parse_qs, urlparse
 
 from cs_guess_scraper.liquipedia import (
     LiquipediaClient,
+    has_player_career_evidence,
     parse_major_player_database,
     parse_player_page,
 )
@@ -228,6 +229,62 @@ def test_iter_player_pages_replaces_obsolete_mediawiki_continue_tokens():
     assert third_query["gcmcontinue"] == ["page|42|2"]
 
 
+def test_chinese_staff_supplement_only_returns_verified_former_players():
+    former_player = (
+        FIXTURES / "machinewjq.wiki"
+    ).read_text(encoding="utf-8")
+    transport = StubTransport(
+        [
+            {
+                "batchcomplete": True,
+                "query": {
+                    "pages": [
+                        {
+                            "title": "MachineWJQ",
+                            "revisions": [
+                                {
+                                    "revid": 3410216,
+                                    "timestamp": "2026-07-04T08:09:11Z",
+                                    "slots": {"main": {"content": former_player}},
+                                }
+                            ],
+                        },
+                        {
+                            "title": "PureCaster",
+                            "revisions": [
+                                {
+                                    "revid": 2,
+                                    "timestamp": "2026-07-04T08:09:11Z",
+                                    "slots": {
+                                        "main": {
+                                            "content": (
+                                                "{{Infobox player"
+                                                "|id=PureCaster"
+                                                "|roles=caster}}"
+                                            )
+                                        }
+                                    },
+                                }
+                            ],
+                        },
+                    ]
+                },
+            }
+        ]
+    )
+    client = LiquipediaClient(
+        "CSGuess/0.1 (contact@example.com)",
+        transport=transport,
+        min_interval=0,
+    )
+
+    pages = list(client.iter_chinese_former_player_pages())
+
+    assert [page["title"] for page in pages] == ["MachineWJQ"]
+    query = parse_qs(urlparse(transport.requests[0][0]).query)
+    assert query["gcmtitle"] == ["Category:Chinese Staffs"]
+
+
 def test_parse_player_page_extracts_normalized_identity_and_current_facts():
     wikitext = (FIXTURES / "s1mple.wiki").read_text(encoding="utf-8")
 
@@ -265,6 +322,31 @@ def test_parse_player_page_selects_first_name_from_html_separated_aliases():
     )
 
     assert player["full_name"] == "Zheng Hang"
+
+
+def test_parse_former_chinese_player_preserves_aliases_and_career_evidence():
+    wikitext = (
+        FIXTURES / "machinewjq.wiki"
+    ).read_text(encoding="utf-8")
+
+    player = parse_player_page("MachineWJQ", wikitext)
+
+    assert player["nickname"] == "MachineWJQ"
+    assert player["full_name"] == "Liu Yibo"
+    assert player["native_name"] == "刘亦博"
+    assert player["country"] == "China"
+    assert player["birth_date"] == "1996-01-11"
+    assert player["roles"] == []
+    assert player["aliases"] == [
+        "Machine",
+        "WJQ",
+        "6657",
+        "玩机器",
+        "C9的Shroud本人",
+        "刘亦博",
+    ]
+    assert player["has_player_career_evidence"] is True
+    assert has_player_career_evidence(wikitext) is True
 
 
 def test_parse_player_page_preserves_team_history_precision_and_membership_kind():

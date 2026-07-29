@@ -5,6 +5,7 @@ from cs_guess_scraper.pipeline import (
     group_liquipedia_major_records,
     run_sync,
     supplement_liquipedia_major_players,
+    sync_liquipedia,
 )
 from cs_guess_scraper.store import PlayerStore
 
@@ -35,6 +36,21 @@ class FakeLiquipediaClient:
             "wikitext": "",
             "revid": 103,
             "timestamp": "2026-07-27T01:02:00Z",
+        }
+
+
+class FakeChineseFormerPlayerClient:
+    def iter_player_pages(self):
+        return iter(())
+
+    def iter_chinese_former_player_pages(self):
+        yield {
+            "title": "MachineWJQ",
+            "wikitext": (
+                FIXTURES / "liquipedia" / "machinewjq.wiki"
+            ).read_text(encoding="utf-8"),
+            "revid": 3410216,
+            "timestamp": "2026-07-04T08:09:11Z",
         }
 
 
@@ -152,6 +168,23 @@ def test_major_rows_are_grouped_into_store_events():
         "external_id": "Team_Vitality",
         "name": "Team Vitality",
     }
+
+
+def test_liquipedia_sync_supplements_chinese_former_players(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        stats = sync_liquipedia(
+            store,
+            FakeChineseFormerPlayerClient(),
+            include_majors=False,
+        )
+        store.merge_all()
+        [record] = store.export_game_records()
+
+    assert stats["chinese_former_players_seen"] == 1
+    assert stats["chinese_former_players_stored"] == 1
+    assert record["nickname"] == "MachineWJQ"
+    assert record["role"] == "Unknown"
+    assert "玩机器" in record["aliases"]
 
 
 def test_run_sync_uses_real_store_merges_sources_and_writes_auditable_report(

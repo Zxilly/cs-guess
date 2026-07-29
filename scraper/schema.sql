@@ -16,6 +16,9 @@ CREATE TABLE IF NOT EXISTS players (
     is_coach INTEGER NOT NULL DEFAULT 0 CHECK (
         is_coach IN (0, 1)
     ),
+    has_player_career_evidence INTEGER NOT NULL DEFAULT 0 CHECK (
+        has_player_career_evidence IN (0, 1)
+    ),
     game_role_override TEXT CHECK (
         game_role_override IS NULL OR
         game_role_override IN ('awper', 'rifler', 'igl', 'entry')
@@ -34,6 +37,20 @@ CREATE INDEX IF NOT EXISTS idx_players_nickname_nocase
     ON players(canonical_nickname COLLATE NOCASE);
 CREATE INDEX IF NOT EXISTS idx_players_guessable
     ON players(is_guessable, status);
+
+CREATE TABLE IF NOT EXISTS player_aliases (
+    player_id TEXT NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+    alias TEXT NOT NULL,
+    alias_kind TEXT NOT NULL DEFAULT 'alternate' CHECK (
+        alias_kind IN ('alternate', 'native_name')
+    ),
+    source_record_id INTEGER REFERENCES source_records(id) ON DELETE SET NULL,
+    observed_at TEXT NOT NULL,
+    PRIMARY KEY (player_id, alias)
+);
+
+CREATE INDEX IF NOT EXISTS idx_player_aliases_player
+    ON player_aliases(player_id);
 
 CREATE TABLE IF NOT EXISTS teams (
     id TEXT PRIMARY KEY,

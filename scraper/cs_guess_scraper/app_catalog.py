@@ -130,6 +130,13 @@ def build_app_catalog(
             "majorAppearances": int(record["majorAppearances"]),
             "majorWins": int(record.get("majorWins", 0)),
         }
+        aliases = [
+            str(alias).strip()
+            for alias in record.get("aliases", [])
+            if str(alias).strip()
+        ]
+        if aliases:
+            catalog_record["aliases"] = list(dict.fromkeys(aliases))
         team_logo_url = current_team.get("logoUrl")
         if team_logo_url and team_name != UNATTACHED_TEAM:
             catalog_record["teamLogoUrl"] = str(team_logo_url)
