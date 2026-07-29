@@ -1,6 +1,41 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+mod wire_uuid {
+    use serde::{Deserialize, Deserializer, Serializer, de::Error as _};
+    use uuid::Uuid;
+
+    pub fn serialize<S>(value: &Uuid, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&value.hyphenated().to_string())
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Uuid, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let value = String::deserialize(deserializer)?;
+        Uuid::parse_str(&value).map_err(D::Error::custom)
+    }
+}
+
+mod wire_optional_uuid {
+    use serde::Serializer;
+    use uuid::Uuid;
+
+    pub fn serialize<S>(value: &Option<Uuid>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match value {
+            Some(value) => serializer.serialize_some(&value.hyphenated().to_string()),
+            None => serializer.serialize_none(),
+        }
+    }
+}
+
 pub const STANDARD_MAX_GUESSES: usize = 8;
 pub const MAX_GUESSES: usize = 10;
 
@@ -93,6 +128,7 @@ pub enum RematchDecision {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct RematchResponseView {
+    #[serde(with = "wire_uuid")]
     pub player_id: Uuid,
     pub display_name: String,
     pub decision: RematchDecision,
@@ -100,7 +136,9 @@ pub struct RematchResponseView {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct RematchView {
+    #[serde(with = "wire_uuid")]
     pub invitation_id: Uuid,
+    #[serde(with = "wire_uuid")]
     pub requester_player_id: Uuid,
     pub status: RematchStatus,
     pub expires_at_unix_ms: u64,
@@ -109,6 +147,7 @@ pub struct RematchView {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct SeriesStandingView {
+    #[serde(with = "wire_uuid")]
     pub player_id: Uuid,
     pub display_name: String,
     pub seat_index: u8,
@@ -118,6 +157,7 @@ pub struct SeriesStandingView {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct RoundStandingView {
+    #[serde(with = "wire_uuid")]
     pub player_id: Uuid,
     pub display_name: String,
     pub seat_index: u8,
@@ -131,7 +171,7 @@ pub struct RoundResultView {
     pub round_number: u8,
     pub mystery_id: String,
     pub finish_reason: FinishReason,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(with = "wire_optional_uuid", skip_serializing_if = "Option::is_none")]
     pub winner_player_id: Option<Uuid>,
     pub standings: Vec<RoundStandingView>,
 }
@@ -242,6 +282,7 @@ pub struct QueueCounts {
 #[derive(Clone, Debug, Serialize)]
 pub struct SessionResponse {
     pub room_code: String,
+    #[serde(with = "wire_uuid")]
     pub player_id: Uuid,
     pub session_token: String,
     pub socket_io_url: String,
@@ -256,7 +297,9 @@ pub struct Snapshot {
     pub visibility: Visibility,
     pub difficulty: Difficulty,
     pub phase: Phase,
+    #[serde(with = "wire_uuid")]
     pub self_player_id: Uuid,
+    #[serde(with = "wire_uuid")]
     pub host_player_id: Uuid,
     pub max_players: u8,
     pub max_guesses: usize,
@@ -269,9 +312,9 @@ pub struct Snapshot {
     pub players: Vec<PlayerView>,
     pub own_guesses: Vec<GuessView>,
     pub opponent_progress: Vec<OpponentProgressView>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(with = "wire_optional_uuid", skip_serializing_if = "Option::is_none")]
     pub winner_player_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(with = "wire_optional_uuid", skip_serializing_if = "Option::is_none")]
     pub series_winner_player_id: Option<Uuid>,
     #[serde(default)]
     pub series_status: SeriesStatus,
@@ -291,6 +334,7 @@ pub struct Snapshot {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct PlayerView {
+    #[serde(with = "wire_uuid")]
     pub player_id: Uuid,
     pub seat_index: u8,
     pub display_name: String,
@@ -315,6 +359,7 @@ pub struct GuessView {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct OpponentProgressView {
+    #[serde(with = "wire_uuid")]
     pub player_id: Uuid,
     pub guess_number: usize,
     pub guessed_player_id: Option<String>,
@@ -329,29 +374,38 @@ pub struct OpponentProgressView {
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum ClientMessage {
     StartRound {
+        #[serde(with = "wire_uuid")]
         request_id: Uuid,
     },
     Guess {
+        #[serde(with = "wire_uuid")]
         request_id: Uuid,
         player_id: String,
     },
     SetVisibility {
+        #[serde(with = "wire_uuid")]
         request_id: Uuid,
         visibility: Visibility,
     },
     RestartSeries {
+        #[serde(with = "wire_uuid")]
         request_id: Uuid,
     },
     RequestRematch {
+        #[serde(with = "wire_uuid")]
         request_id: Uuid,
     },
     RespondRematch {
+        #[serde(with = "wire_uuid")]
         request_id: Uuid,
+        #[serde(with = "wire_uuid")]
         invitation_id: Uuid,
         accept: bool,
     },
     CancelRematch {
+        #[serde(with = "wire_uuid")]
         request_id: Uuid,
+        #[serde(with = "wire_uuid")]
         invitation_id: Uuid,
     },
 }
@@ -383,6 +437,7 @@ pub enum ServerMessage {
     },
     PlayerConnection {
         seq: u64,
+        #[serde(with = "wire_uuid")]
         player_id: Uuid,
         connected: bool,
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -390,6 +445,7 @@ pub enum ServerMessage {
     },
     PlayerRoundForfeited {
         seq: u64,
+        #[serde(with = "wire_uuid")]
         player_id: Uuid,
         round_number: u8,
     },
@@ -400,6 +456,7 @@ pub enum ServerMessage {
     },
     GuessAccepted {
         seq: u64,
+        #[serde(with = "wire_uuid")]
         request_id: Uuid,
         player_id: String,
         guess_number: usize,
@@ -411,6 +468,7 @@ pub enum ServerMessage {
     },
     OpponentProgress {
         seq: u64,
+        #[serde(with = "wire_uuid")]
         player_id: Uuid,
         guess_number: usize,
         guessed_player_id: Option<String>,
@@ -422,14 +480,18 @@ pub enum ServerMessage {
     },
     VisibilityChanged {
         seq: u64,
+        #[serde(with = "wire_uuid")]
         request_id: Uuid,
         visibility: Visibility,
     },
     RoundFinished {
         seq: u64,
         round_number: u8,
+        #[serde(with = "wire_uuid")]
         host_player_id: Uuid,
+        #[serde(with = "wire_optional_uuid")]
         winner_player_id: Option<Uuid>,
+        #[serde(with = "wire_optional_uuid")]
         series_winner_player_id: Option<Uuid>,
         series_status: SeriesStatus,
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -445,10 +507,12 @@ pub enum ServerMessage {
     },
     Ack {
         seq: u64,
+        #[serde(with = "wire_uuid")]
         request_id: Uuid,
     },
     Error {
         seq: u64,
+        #[serde(with = "wire_optional_uuid")]
         request_id: Option<Uuid>,
         code: &'static str,
         message: String,
@@ -469,6 +533,7 @@ fn default_party_size() -> u8 {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct ScoreView {
+    #[serde(with = "wire_uuid")]
     pub player_id: Uuid,
     pub score: u8,
 }

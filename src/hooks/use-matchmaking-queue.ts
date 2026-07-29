@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { io, type Socket } from "socket.io-client";
+import * as msgpackParser from "socket.io-msgpack-parser";
 
 import {
   resolveQueueSocketIoEndpoint,
@@ -201,6 +202,7 @@ function useMatchmakingQueueConnection(
       const endpoint = resolveQueueSocketIoEndpoint();
       const nextSocket = io(`${endpoint.url}/queue`, {
         path: endpoint.path,
+        parser: msgpackParser,
         reconnection: true,
         reconnectionDelay: 500,
         reconnectionDelayMax: 10_000,

@@ -16,7 +16,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use socketioxide::{
-    SocketIo,
+    ParserConfig, SocketIo,
     extract::{AckSender, Data, SocketRef, State as SocketState},
 };
 use tokio::sync::mpsc;
@@ -46,6 +46,7 @@ pub fn app(state: AppState) -> Router {
     let config = state.config().clone();
     let (socket_layer, io) = SocketIo::builder()
         .with_state(state.clone())
+        .with_parser(ParserConfig::msgpack())
         .ping_interval(config.heartbeat_interval)
         .ping_timeout(config.client_timeout)
         .max_buffer_size(config.ws_queue_capacity)

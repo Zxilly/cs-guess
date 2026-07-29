@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useMachine } from "@xstate/react";
 import { io, type Socket } from "socket.io-client";
+import * as msgpackParser from "socket.io-msgpack-parser";
 
 import {
   clearCredentialsIfMatches,
@@ -227,6 +228,7 @@ function useRealtimeRoomConnection(
       const endpoint = resolveSocketIoEndpoint(credentials.socketIoUrl);
       socket = io(`${endpoint.url}/room`, {
         path: endpoint.path,
+        parser: msgpackParser,
         // The room hook owns this lifecycle. A dedicated manager guarantees
         // socket.disconnect() also releases its Engine.IO transport without
         // disturbing the independent public queue connection.
