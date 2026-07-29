@@ -1314,6 +1314,7 @@ impl RoomActor {
                 seat_index: player.seat_index,
                 score: player.score,
                 rank: 1 + scores.iter().filter(|score| **score > player.score).count() as u8,
+                guess_count: player.guesses.len().min(usize::from(u8::MAX)) as u8,
             })
             .collect::<Vec<_>>();
         standings.sort_by_key(|player| player.seat_index);
@@ -1348,6 +1349,12 @@ impl RoomActor {
                     .iter()
                     .filter(|other| other.score > player.score)
                     .count() as u8,
+                guess_count: self
+                    .players
+                    .get(&player.player_id)
+                    .map_or(0, |participant| {
+                        participant.guesses.len().min(usize::from(u8::MAX)) as u8
+                    }),
             })
             .collect();
         self.round_results.push(RoundResultView {
@@ -2964,8 +2971,8 @@ mod tests {
                     .standings
                     .iter()
                     .find(|standing| standing.player_id == guest.player_id)
-                    .map(|standing| standing.score),
-                Some(expected_score)
+                    .map(|standing| (standing.score, standing.guess_count)),
+                Some((expected_score, 1))
             );
         }
     }

@@ -123,6 +123,7 @@ pub struct RoundStandingView {
     pub seat_index: u8,
     pub score: u8,
     pub rank: u8,
+    pub guess_count: u8,
 }
 
 #[derive(Clone, Debug, Serialize)]
