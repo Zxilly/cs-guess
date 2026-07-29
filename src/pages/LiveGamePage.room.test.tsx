@@ -1614,4 +1614,121 @@ describe("LiveGamePage friend-room waiting state", () => {
     });
     expect(findButton("返回模式大厅")).toBeUndefined();
   });
+
+  it("renders a terminal quick-rematch state without an update loop", () => {
+    const snapshot = {
+      ...roomSnapshot({
+        maxPlayers: 2,
+        players: [
+          {
+            player_id: "player-1",
+            seat_index: 0,
+            display_name: "donk",
+            connected: true,
+            score: 1,
+          },
+          {
+            player_id: "player-2",
+            seat_index: 1,
+            display_name: "m0NESY",
+            connected: true,
+            score: 0,
+          },
+        ],
+      }),
+      phase: "finished",
+      round_number: 1,
+      winner_player_id: "player-1",
+      series_winner_player_id: "player-1",
+      series_status: "completed",
+      mystery_id: "donk",
+      rematch: {
+        invitation_id: "rematch-1",
+        requester_player_id: "player-1",
+        status: "declined",
+        expires_at_unix_ms: Date.now() + 10_000,
+        responses: [
+          {
+            player_id: "player-1",
+            display_name: "donk",
+            decision: "accepted",
+          },
+          {
+            player_id: "player-2",
+            display_name: "m0NESY",
+            decision: "declined",
+          },
+        ],
+      },
+    };
+    mocks.realtime.snapshot = snapshot;
+    sessionStorage.setItem(
+      "cs-guess:realtime-session",
+      JSON.stringify({
+        credentials: {
+          roomCode: "CS-123456",
+          playerId: "player-1",
+          sessionToken: "secret-token",
+          socketIoUrl: "/socket.io",
+          mode: "quick",
+        },
+        snapshot,
+        startedAt: Date.now(),
+      }),
+    );
+    const errorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation((message: unknown) => {
+        if (
+          String(message).includes("Maximum update depth exceeded")
+        ) {
+          throw new Error("terminal rematch triggered an update loop");
+        }
+      });
+
+    expect(() => {
+      act(() => {
+        root.render(
+          <MemoryRouter initialEntries={["/play/quick"]}>
+            <LiveGamePage mode="quick" />
+          </MemoryRouter>,
+        );
+      });
+    }).not.toThrow();
+    expect(document.body.textContent).toContain("对手拒绝了重赛");
+
+    const terminalDialog = Array.from(
+      document.body.querySelectorAll<HTMLElement>(
+        '[role="dialog"], [role="alertdialog"]',
+      ),
+    ).find((dialog) =>
+      dialog.textContent?.includes("对手拒绝了重赛"),
+    );
+    act(() =>
+      Array.from(
+        terminalDialog?.querySelectorAll("button") ?? [],
+      )
+        .find((button) => button.textContent?.includes("查看对局"))
+        ?.click(),
+    );
+    expect(document.body.textContent).not.toContain("对手拒绝了重赛");
+
+    mocks.realtime.snapshot = {
+      ...snapshot,
+      seq: 2,
+      rematch: {
+        ...snapshot.rematch,
+        invitation_id: "rematch-2",
+      },
+    };
+    act(() => {
+      root.render(
+        <MemoryRouter initialEntries={["/play/quick"]}>
+          <LiveGamePage mode="quick" />
+        </MemoryRouter>,
+      );
+    });
+    expect(document.body.textContent).toContain("对手拒绝了重赛");
+    errorSpy.mockRestore();
+  });
 });

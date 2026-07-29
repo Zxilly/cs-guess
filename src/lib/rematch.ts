@@ -39,6 +39,13 @@ const REMATCH_DECISIONS = new Set<RematchDecision>([
   "declined",
 ]);
 
+const TERMINAL_REMATCH_STATUSES = new Set<RematchStatus>([
+  "declined",
+  "cancelled",
+  "expired",
+  "opponent_offline",
+]);
+
 export function readRematchState(
   snapshot: Record<string, unknown>,
 ): RematchState | null {
@@ -95,6 +102,20 @@ export function rematchPendingNames(rematch: RematchState) {
   return rematch.responses
     .filter((response) => response.decision === "pending")
     .map((response) => response.displayName);
+}
+
+export function terminalRematchKey(
+  rematch: RematchState | null,
+  requesterPlayerId: string,
+) {
+  if (
+    !rematch ||
+    rematch.requesterPlayerId !== requesterPlayerId ||
+    !TERMINAL_REMATCH_STATUSES.has(rematch.status)
+  ) {
+    return null;
+  }
+  return `${rematch.invitationId}:${rematch.status}`;
 }
 
 export function rematchStatusCopy(status: RematchStatus) {

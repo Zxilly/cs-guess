@@ -62,7 +62,7 @@ import {
   rematchPendingNames,
   rematchSecondsLeft,
   rematchStatusCopy,
-  type RematchState,
+  terminalRematchKey,
 } from "@/lib/rematch";
 import {
   markBattleResultViewed,
@@ -276,8 +276,10 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
   const [rematchActionPending, setRematchActionPending] = useState<
     "request" | "accept" | "decline" | "cancel" | null
   >(null);
-  const [terminalRematch, setTerminalRematch] =
-    useState<RematchState | null>(null);
+  const [
+    dismissedTerminalRematchKey,
+    setDismissedTerminalRematchKey,
+  ] = useState<string | null>(null);
   const resultSoundEnabled = useSoundStore((state) => state.enabled);
   const resultTitleRef = useRef<HTMLHeadingElement | null>(null);
   const closingTitleRef = useRef<HTMLHeadingElement | null>(null);
@@ -494,6 +496,15 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
   );
   const isRematchRequester =
     rematch?.requesterPlayerId === selfPlayerId;
+  const currentTerminalRematchKey =
+    mode === "quick"
+      ? terminalRematchKey(rematch, selfPlayerId)
+      : null;
+  const terminalRematch =
+    currentTerminalRematchKey !== null &&
+    currentTerminalRematchKey !== dismissedTerminalRematchKey
+      ? rematch
+      : null;
   const incomingRematch =
     mode === "quick" &&
     rematch?.status === "pending" &&
@@ -749,23 +760,6 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
     }
   }, [dismissCelebration, incomingRematch, showCelebration]);
 
-  useEffect(() => {
-    if (
-      rematch &&
-      isRematchRequester &&
-      (
-        rematch.status === "declined" ||
-        rematch.status === "cancelled" ||
-        rematch.status === "expired" ||
-        rematch.status === "opponent_offline"
-      )
-    ) {
-      setTerminalRematch(rematch);
-    }
-    if (rematch?.status === "pending") {
-      setTerminalRematch(null);
-    }
-  }, [isRematchRequester, rematch]);
   const roomSettings = friendRoomSettings({
     maxPlayers,
     visibility,
@@ -2196,7 +2190,11 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
             : "本次邀请已经结束。"
         }
         onOpenChange={(open) => {
-          if (!open) setTerminalRematch(null);
+          if (!open) {
+            setDismissedTerminalRematchKey(
+              currentTerminalRematchKey,
+            );
+          }
         }}
       >
         <Button
@@ -2204,7 +2202,9 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
           variant="outline"
           className="w-full rounded-none sm:w-auto"
           onClick={() => {
-            setTerminalRematch(null);
+            setDismissedTerminalRematchKey(
+              currentTerminalRematchKey,
+            );
             dismissCelebration();
           }}
         >
@@ -2214,7 +2214,9 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
           type="button"
           className="w-full rounded-none sm:w-auto"
           onClick={() => {
-            setTerminalRematch(null);
+            setDismissedTerminalRematchKey(
+              currentTerminalRematchKey,
+            );
             void requeue();
           }}
         >

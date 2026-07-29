@@ -5,6 +5,7 @@ import {
   rematchPendingNames,
   rematchSecondsLeft,
   rematchStatusCopy,
+  terminalRematchKey,
 } from "@/lib/rematch";
 
 describe("rematch state", () => {
@@ -51,5 +52,42 @@ describe("rematch state", () => {
     expect(rematchStatusCopy("declined").title).toContain("拒绝");
     expect(rematchStatusCopy("expired").title).toContain("超时");
     expect(rematchStatusCopy("opponent_offline").title).toContain("离线");
+  });
+
+  it.each([
+    "declined",
+    "cancelled",
+    "expired",
+    "opponent_offline",
+  ] as const)("keys requester-visible terminal status %s", (status) => {
+    expect(
+      terminalRematchKey(
+        {
+          invitationId: "invite-1",
+          requesterPlayerId: "self",
+          status,
+          expiresAt: 10_000,
+          responses: [],
+        },
+        "self",
+      ),
+    ).toBe(`invite-1:${status}`);
+  });
+
+  it("does not expose non-terminal or another player's state", () => {
+    const rematch = {
+      invitationId: "invite-1",
+      requesterPlayerId: "self",
+      status: "pending" as const,
+      expiresAt: 10_000,
+      responses: [],
+    };
+    expect(terminalRematchKey(rematch, "self")).toBeNull();
+    expect(
+      terminalRematchKey({ ...rematch, status: "starting" }, "self"),
+    ).toBeNull();
+    expect(
+      terminalRematchKey({ ...rematch, status: "declined" }, "rival"),
+    ).toBeNull();
   });
 });

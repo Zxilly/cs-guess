@@ -59,6 +59,16 @@ const statePairs = [
     from: "/play/quick?audit=live-series-win",
     to: "/play/quick?audit=live-series-loss",
   },
+  {
+    name: "重赛拒绝与离线",
+    from: "/play/quick?audit=live-rematch-declined",
+    to: "/play/quick?audit=live-rematch-offline",
+  },
+  {
+    name: "重赛超时与取消",
+    from: "/play/quick?audit=live-rematch-expired",
+    to: "/play/quick?audit=live-rematch-cancelled",
+  },
 ] as const;
 
 const viewports = [
@@ -76,6 +86,18 @@ async function captureDialog(
 ): Promise<DialogGeometry> {
   const context = await browser.newContext({ viewport });
   const page = await context.newPage();
+  const runtimeErrors: string[] = [];
+  page.on("console", (message) => {
+    if (
+      message.type() === "error" &&
+      /Maximum update depth|Too many re-renders/.test(message.text())
+    ) {
+      runtimeErrors.push(message.text());
+    }
+  });
+  page.on("pageerror", (error) => {
+    runtimeErrors.push(error.message);
+  });
 
   try {
     await page.goto(path);
@@ -116,6 +138,7 @@ async function captureDialog(
     };
   } finally {
     await context.close();
+    expect(runtimeErrors).toEqual([]);
   }
 }
 
