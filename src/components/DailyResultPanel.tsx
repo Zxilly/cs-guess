@@ -48,7 +48,7 @@ export function DailyResultPanel({
   const isDaily = context === "daily";
   const ResultIcon = won ? CheckCircleIcon : XCircleIcon;
   const teamName = displayTeamName(mysteryPlayer.team);
-  const soloLoss = soloLossCopy(lossReason);
+  const soloLoss = soloLossCopy(lossReason, maxGuesses);
   const dailyLossSummary =
     lossReason === "timeout"
       ? "三分钟倒计时已结束，今日答案已经揭晓。"
@@ -127,7 +127,7 @@ export function DailyResultPanel({
         </div>
       </div>
 
-      <dl className="border-t border-foreground/20 lg:grid lg:grid-cols-5">
+      <dl className="border-t border-foreground/20 lg:grid lg:grid-cols-6">
         <ResultItem label="战队">
           <span className="flex min-w-0 items-center gap-2">
             <TeamLogo
@@ -152,6 +152,9 @@ export function DailyResultPanel({
         </ResultItem>
         <ResultItem label="Major 次数" icon={<MedalIcon />}>
           {mysteryPlayer.majorAppearances}
+        </ResultItem>
+        <ResultItem label="Major 冠军" icon={<MedalIcon />}>
+          {mysteryPlayer.majorWins}
         </ResultItem>
       </dl>
       {!isDaily && onPlayAgain ? (

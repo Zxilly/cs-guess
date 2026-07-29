@@ -20,17 +20,26 @@ export function PlayerAvatar({
     player.imageUrl && failedUrl !== player.imageUrl
       ? player.imageUrl
       : undefined;
-  const initials = player.nickname.trim().slice(0, 2).toUpperCase() || "?";
 
   return (
     <span
       className={cn(
-        "relative grid shrink-0 place-items-center overflow-hidden border border-foreground/20 bg-muted font-mono text-xs font-semibold text-muted-foreground",
+        "relative grid shrink-0 place-items-center overflow-hidden border border-foreground/20 bg-muted text-muted-foreground",
         className,
       )}
       aria-hidden="true"
     >
-      {initials}
+      <svg
+        viewBox="0 0 48 48"
+        className="size-[68%] opacity-55"
+        data-slot="player-avatar-placeholder"
+      >
+        <circle cx="24" cy="17" r="9" fill="currentColor" />
+        <path
+          d="M8 42c0-9.4 7.2-15 16-15s16 5.6 16 15H8Z"
+          fill="currentColor"
+        />
+      </svg>
       {imageUrl ? (
         <img
           src={imageUrl}

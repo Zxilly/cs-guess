@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useRef, useState } from "react";
+import { useSearchParams } from "react-router";
 
-import { BattleContext } from "@/components/BattleContext";
 import { CelebrationOverlay } from "@/components/CelebrationOverlay";
 import { DailyGameLoading } from "@/components/DailyGameLoading";
 import { DailyResultPanel } from "@/components/DailyResultPanel";
@@ -25,11 +25,7 @@ import type { ServerDailyChallenge } from "@/lib/daily-challenge-api";
 import { focusDailyResultAfterDialog } from "@/lib/daily-result-focus";
 import { recordFinishedDailyRoundOnce } from "@/lib/daily-round-record";
 import type { SoloLossReason } from "@/lib/solo-result-copy";
-import {
-  MAX_GUESSES,
-  type GameMode,
-  type OpponentVisibility,
-} from "@/types/game";
+import { MAX_GUESSES, type GameMode } from "@/types/game";
 
 type GameState = DailyProgress;
 
@@ -70,71 +66,85 @@ function gameReducer(state: GameState, action: GameAction): GameState {
   }
 }
 
-const modeContent: Record<
-  GameMode,
-  { eyebrow: string; title: string; description: string; round: string }
-> = {
-  daily: {
-    eyebrow: "今日神秘选手",
-    title: "根据属性对比确定目标选手",
-    description: "所有玩家共享今日答案，在八次机会内完成挑战。",
-    round: "DAILY",
-  },
-  solo: {
-    eyebrow: "单人练习",
-    title: "根据属性线索确定目标选手",
-    description: "每局随机生成目标选手，结算后可开始下一题。",
-    round: "SOLO",
-  },
-  quick: {
-    eyebrow: "实时 1v1",
-    title: "竞速确定目标选手",
-    description: "双方猜测同一位神秘选手，先正确猜出的玩家赢得本局。",
-    round: "BO3 · ROUND 1",
-  },
-  room: {
-    eyebrow: "好友房间",
-    title: "好友房同题竞速",
-    description: "房间支持 2–8 位玩家，本轮使用相同题目与尝试上限。",
-    round: "ROOM · CS-207",
-  },
-};
-
 interface GamePageProps {
   mode: GameMode;
 }
 
 export function GamePage({ mode }: GamePageProps) {
+  const [searchParams] = useSearchParams();
+  const audit = import.meta.env.DEV ? searchParams.get("audit") : null;
   const { challenge, error, retry } = useDailyChallenge();
 
+  if (audit === "daily-loading") {
+    return <DailyGameLoading />;
+  }
+  if (audit === "daily-error") {
+    return (
+      <DailyGameLoading
+        error={new Error("今日题目加载失败，请检查网络后重试。")}
+        onRetry={() => undefined}
+      />
+    );
+  }
   if (!challenge) {
     return <DailyGameLoading error={error} onRetry={retry} />;
   }
 
-  return <DailyGame mode={mode} challenge={challenge} />;
+  return <DailyGame mode={mode} challenge={challenge} audit={audit} />;
 }
 
 function DailyGame({
   mode,
   challenge,
-}: GamePageProps & { challenge: ServerDailyChallenge }) {
+  audit,
+}: GamePageProps & {
+  challenge: ServerDailyChallenge;
+  audit: string | null;
+}) {
   const { recordRound } = useAnonymousProfile();
   const [game, dispatch] = useReducer(
     gameReducer,
     challenge,
-    (value) => loadDailyProgress(value, players),
+    (value) => {
+      const loaded = loadDailyProgress(value, players);
+      if (!import.meta.env.DEV || !audit?.startsWith("daily-")) {
+        return loaded;
+      }
+      if (audit === "daily-won" || audit === "daily-result-panel") {
+        return {
+          ...loaded,
+          guessedIds: [value.mysteryPlayer.id],
+          status: "won",
+          deadline: Date.now() + 3_600_000,
+        } satisfies DailyProgress;
+      }
+      if (audit === "daily-lost") {
+        return {
+          ...loaded,
+          guessedIds: players
+            .filter((player) => player.id !== value.mysteryPlayer.id)
+            .slice(0, MAX_GUESSES)
+            .map((player) => player.id),
+          status: "lost",
+          deadline: Date.now() + 3_600_000,
+        } satisfies DailyProgress;
+      }
+      return {
+        ...loaded,
+        guessedIds: [],
+        status: "playing",
+        deadline: Date.now() + 3_600_000,
+      } satisfies DailyProgress;
+    },
   );
   const [selectedId, setSelectedId] = useState<string>();
   const [searchOpen, setSearchOpen] = useState(false);
-  const [resultDismissed, setResultDismissed] = useState(false);
+  const [resultDismissed, setResultDismissed] = useState(
+    audit === "daily-result-panel",
+  );
   const resultTitleRef = useRef<HTMLHeadingElement>(null);
   const recordedDailyRoundRef = useRef<string | undefined>(undefined);
   const [now, setNow] = useState(Date.now);
-  const [opponentVisibility, setOpponentVisibility] =
-    useState<OpponentVisibility>("hidden");
-
-  const roomCode = "CS-207";
-  const isRoomHost = false;
   const mysteryPlayer = challenge.mysteryPlayer;
   const guesses = game.guessedIds.flatMap((id) =>
     players.filter((player) => player.id === id),
@@ -144,8 +154,6 @@ function DailyGame({
     (player) => !game.guessedIds.includes(player.id),
   );
   const selectedPlayer = players.find((player) => player.id === selectedId);
-  const content = modeContent[mode];
-  const roundLabel = `DAILY · ROUND #${challenge.roundNumber}`;
   const isFinished = game.status !== "playing";
   const resultOpen = isFinished && !resultDismissed;
   const secondsLeft = dailySecondsLeft(game, now);
@@ -155,7 +163,9 @@ function DailyGame({
       : game.guessedIds.length >= MAX_GUESSES
         ? "attempts-exhausted"
         : "timeout";
+
   useEffect(() => {
+    if (audit) return;
     if (game.status !== "playing" || game.deadline === null) return;
     const deadline = game.deadline;
     const update = () => {
@@ -166,7 +176,7 @@ function DailyGame({
     update();
     const timer = window.setInterval(update, 250);
     return () => window.clearInterval(timer);
-  }, [game.deadline, game.status]);
+  }, [audit, game.deadline, game.status]);
 
   useEffect(() => {
     saveDailyProgress(game);
@@ -207,64 +217,29 @@ function DailyGame({
         bestOf={1}
       />
 
-      <main className="min-w-0">
+      <main className="app-game-main">
         <div className="app-game-container min-w-0">
-          <header className="mb-7 flex flex-col justify-between gap-3 sm:flex-row sm:items-start sm:gap-6">
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary">
-                  {content.eyebrow}
-                </p>
-                <InfoTip
-                  label={`${content.eyebrow}规则`}
-                  side="right"
-                  className="size-6 hover:bg-transparent hover:text-primary"
-                >
-                  {content.description}
-                </InfoTip>
+          {!isFinished ? (
+            <>
+              <h1 className="sr-only">今日挑战</h1>
+
+              <div className="mb-5 flex items-center justify-between border-y border-foreground/15 py-3 lg:hidden">
+                <span className="text-xs text-muted-foreground">
+                  剩余时间
+                </span>
+                <Timer
+                  seconds={secondsLeft}
+                  className="text-lg text-primary"
+                />
+                <span className="font-mono text-xs">
+                  {game.guessedIds.length} / {MAX_GUESSES}
+                </span>
               </div>
-              <h1 className="mt-3 text-3xl font-bold tracking-[-0.03em] sm:text-4xl">
-                {content.title}
-              </h1>
-            </div>
-
-            <div className="shrink-0 text-right">
-              <p className="font-mono text-xs font-medium uppercase tracking-[0.08em]">
-                {roundLabel}
-              </p>
-            </div>
-          </header>
-
-          <div className="mb-5 flex items-center justify-between border-y border-foreground/15 py-3 lg:hidden">
-            <span className="text-xs text-muted-foreground">
-              {isFinished ? "挑战结果" : "剩余时间"}
-            </span>
-            {isFinished ? (
-              <span className="font-mono text-xs font-semibold text-primary">
-                {game.status === "won" ? "挑战完成" : "挑战结束"}
-              </span>
-            ) : (
-              <Timer
-                seconds={secondsLeft}
-                className="text-lg text-primary"
-              />
-            )}
-            <span className="font-mono text-xs">
-              {game.guessedIds.length} / {MAX_GUESSES}
-            </span>
-          </div>
-
-          <BattleContext
-            mode={mode}
-            guesses={game.guessedIds.length}
-            opponentGuesses={opponentGuesses.length}
-            maxGuesses={MAX_GUESSES}
-            roomCode={roomCode}
-            isRoomHost={isRoomHost}
-          />
+            </>
+          ) : null}
 
           {isFinished ? (
-            <div className="mt-6">
+            <div>
               <DailyResultPanel
                 outcome={game.status === "won" ? "won" : "lost"}
                 attempts={game.guessedIds.length}
@@ -276,7 +251,7 @@ function DailyGame({
             </div>
           ) : (
             <>
-              <div className="mt-6 min-w-0">
+              <div className="min-w-0">
                 <PlayerSearch
                   players={availablePlayers}
                   selectedPlayer={selectedPlayer}
@@ -294,15 +269,15 @@ function DailyGame({
                 <GuessTable
                   guesses={guesses}
                   opponentGuesses={opponentGuesses}
-                  opponentVisibility={opponentVisibility}
+                  opponentVisibility="hidden"
                   mysteryPlayer={mysteryPlayer}
                   mode={mode}
                   maxGuesses={MAX_GUESSES}
-                  onOpponentVisibilityChange={setOpponentVisibility}
+                  showProgressCount={false}
                 />
               </div>
 
-              <div className="mt-5 flex flex-col gap-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+              <div className="mt-5 flex items-center text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <span>结果图例</span>
                   <InfoTip
@@ -313,7 +288,6 @@ function DailyGame({
                     蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。向上箭头表示目标数值更高，向下箭头表示更低。
                   </InfoTip>
                 </div>
-                <p className="font-mono">每日题目 · 上海时间刷新</p>
               </div>
             </>
           )}

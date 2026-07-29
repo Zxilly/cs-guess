@@ -1,6 +1,24 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+html[data-audit] *,
+html[data-audit] *::before,
+html[data-audit] *::after {
+  animation-play-state: paused !important;
+  caret-color: transparent !important;
+}
+
+html[data-audit] [data-slot="dialog-overlay"],
+html[data-audit] [data-slot="dialog-content"],
+html[data-audit] .identity-roulette-result,
+html[data-audit] [data-slot="spinner"] {
+  animation-play-state: running !important;
+}
+
+html[data-audit] :is(input, textarea, [contenteditable="true"]) {
+  caret-color: auto !important;
+}
+
 @keyframes match-found-progress {
   from {
     transform: scaleX(0);
@@ -33,6 +51,8 @@
   --color-chart-1: var(--chart-1);
   --color-warning: var(--warning);
   --color-success: var(--success);
+  --color-outcome-win: var(--outcome-win);
+  --color-outcome-loss: var(--outcome-loss);
   --color-comparison-higher: var(--comparison-higher);
   --color-comparison-lower: var(--comparison-lower);
   --color-comparison-near: var(--comparison-near);
@@ -80,6 +100,8 @@
   --input: oklch(0.79 0.012 260);
   --ring: oklch(0.5 0.23 260);
   --success: oklch(0.5 0.23 260);
+  --outcome-win: oklch(0.47 0.13 155);
+  --outcome-loss: oklch(0.53 0.17 27);
   --warning: oklch(0.62 0.16 245);
   --comparison-higher: oklch(0.55 0.17 55);
   --comparison-lower: oklch(0.5 0.14 180);
@@ -161,6 +183,10 @@
     max-width: var(--layout-game-live);
   }
 
+  .app-game-main {
+    min-width: 0;
+  }
+
   .app-eyebrow {
     @apply font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary;
   }
@@ -184,9 +210,9 @@
 }
 
 /*
- * Mobile/coarse-pointer interaction contract. Desktop keeps the compact
- * shadcn visual density; touch devices get a measurable 44px target without
- * changing the width allocation of segmented and three-column controls.
+ * Compact variants stay available for dense desktop contexts. Touch devices
+ * promote every maintained button size to the shared 44px interaction target
+ * without changing segmented-control width allocation.
  */
 @media (max-width: 39.999rem), (pointer: coarse) {
   [data-slot="button"][data-size="default"],
@@ -243,6 +269,12 @@
   .app-game-container {
     padding: 2.5rem;
   }
+
+  .app-game-main {
+    min-height: 100svh;
+    display: grid;
+    align-items: center;
+  }
 }
 
 @keyframes celebration-enter {
@@ -258,6 +290,89 @@
 
 .celebration-enter {
   animation: celebration-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.result-dialog {
+  --result-accent: var(--primary);
+  --result-accent-strong: color-mix(
+    in oklch,
+    var(--result-accent),
+    var(--foreground) 14%
+  );
+  --result-accent-foreground: var(--primary-foreground);
+  --result-accent-soft: color-mix(
+    in oklch,
+    var(--result-accent) 8%,
+    var(--background)
+  );
+}
+
+.result-dialog--win {
+  --result-accent: var(--outcome-win);
+  --result-accent-foreground: oklch(0.99 0 0);
+}
+
+.result-dialog--loss {
+  --result-accent: var(--outcome-loss);
+  --result-accent-foreground: oklch(0.99 0 0);
+}
+
+.result-dialog__accent {
+  background-color: var(--result-accent);
+}
+
+.result-dialog__header {
+  background-image: linear-gradient(
+    180deg,
+    var(--result-accent-soft),
+    transparent 78%
+  );
+}
+
+.result-dialog__icon {
+  border-color: color-mix(in oklch, var(--result-accent) 38%, transparent);
+  background-color: var(--result-accent-soft);
+  color: var(--result-accent);
+}
+
+.result-dialog__eyebrow,
+.result-dialog__score {
+  color: var(--result-accent);
+}
+
+.result-dialog__answer {
+  margin-inline: -0.75rem;
+  border-inline-start: 2px solid var(--result-accent);
+  padding: 0.75rem;
+  background-image: linear-gradient(
+    90deg,
+    var(--result-accent-soft),
+    transparent 72%
+  );
+}
+
+.result-dialog__footer {
+  background-color: color-mix(
+    in oklch,
+    var(--result-accent) 2.5%,
+    var(--background)
+  );
+}
+
+.result-dialog__action {
+  border-color: var(--result-accent);
+  background-color: var(--result-accent);
+  color: var(--result-accent-foreground);
+}
+
+.result-dialog__action:hover {
+  background-color: var(--result-accent-strong);
+}
+
+.result-dialog__action:focus-visible {
+  border-color: var(--result-accent);
+  box-shadow: 0 0 0 3px
+    color-mix(in oklch, var(--result-accent) 24%, transparent);
 }
 
 @keyframes identity-roulette-roll {
@@ -293,14 +408,6 @@
     black 92%,
     transparent
   );
-}
-
-.identity-draw-dialog {
-  right: max(0.75rem, calc((100vw - 56rem) / 2));
-  left: max(0.75rem, calc((100vw - 56rem) / 2));
-  width: auto;
-  max-width: none;
-  translate: 0 -50%;
 }
 
 .identity-roulette-track {

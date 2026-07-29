@@ -12,6 +12,19 @@ const css = readFileSync(
 );
 
 describe("Button mobile touch contract", () => {
+  it("uses the shared 44px default, 36px compact, and 48px prominent size scale", () => {
+    expect(renderToStaticMarkup(<Button>默认</Button>)).toContain("h-11");
+    expect(
+      renderToStaticMarkup(<Button size="sm">紧凑</Button>),
+    ).toContain("h-9");
+    expect(
+      renderToStaticMarkup(<Button size="lg">强调</Button>),
+    ).toContain("h-12");
+    expect(
+      renderToStaticMarkup(<Button size="icon" aria-label="图标" />),
+    ).toContain("size-11");
+  });
+
   it("keeps only the celebration animation that is referenced by the UI", () => {
     expect(css).toContain("@keyframes celebration-enter");
     expect(css).not.toContain("celebration-trophy");
@@ -50,7 +63,7 @@ describe("Button mobile touch contract", () => {
     }
   });
 
-  it("gives maintained button sizes a 44px minimum on narrow or coarse-pointer devices", () => {
+  it("raises compact button sizes to a 44px minimum on narrow or coarse-pointer devices", () => {
     const mediaContract = css.match(
       /@media \(max-width: 39\.999rem\), \(pointer: coarse\) \{([\s\S]*?)\n\}/,
     )?.[1];

@@ -81,7 +81,7 @@ function CommandInput({
             />
           </CommandPrimitive.Input>
         </div>
-        <InputGroupAddon>
+        <InputGroupAddon className="pr-2">
           <SearchIcon className="size-5 shrink-0 text-primary" />
         </InputGroupAddon>
       </InputGroup>

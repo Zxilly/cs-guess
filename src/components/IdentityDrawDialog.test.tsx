@@ -6,7 +6,17 @@ vi.mock("@/components/ui/dialog", () => ({
   Dialog: ({ children }: PropsWithChildren) => <>{children}</>,
   DialogContent: ({
     children,
-  }: PropsWithChildren<ComponentProps<"div">>) => <div>{children}</div>,
+    overlayClassName: _overlayClassName,
+    showCloseButton: _showCloseButton,
+    ...props
+  }: PropsWithChildren<
+    ComponentProps<"div"> & {
+      overlayClassName?: string;
+      showCloseButton?: boolean;
+    }
+  >) => (
+    <div {...props}>{children}</div>
+  ),
   DialogDescription: ({
     children,
   }: PropsWithChildren<ComponentProps<"p">>) => <p>{children}</p>,
@@ -35,6 +45,38 @@ const winner: Player = {
 };
 
 describe("IdentityDrawDialog accessibility", () => {
+  it("uses the shared centered-dialog positioning contract", () => {
+    const markup = renderToStaticMarkup(
+      <IdentityDrawDialog
+        open
+        poolLabel="Major 参赛池"
+        rollKey={1}
+        items={Array.from({ length: 29 }, () => winner)}
+        winner={winner}
+        winnerIndex={23}
+        revealed={false}
+        remainingCredits={0}
+        onOpenChange={vi.fn()}
+        onKeep={vi.fn()}
+        onReroll={vi.fn()}
+        onAccept={vi.fn()}
+      />,
+    );
+
+    expect(markup).toContain("sm:max-w-4xl");
+    expect(markup).not.toContain("identity-draw-dialog");
+    expect(markup).toContain("正在抽取");
+    expect(markup).toContain("锁定中…");
+    expect(markup).toContain(
+      'data-slot="identity-draw-result-shell"',
+    );
+    expect(markup).toContain(
+      'data-slot="identity-draw-result-content"',
+    );
+    expect(markup).toContain('aria-hidden="true"');
+    expect(markup).toContain("使用新身份");
+  });
+
   it("announces winner text in an isolated live region, outside the actions", () => {
     const markup = renderToStaticMarkup(
       <IdentityDrawDialog

@@ -183,9 +183,9 @@ describe("RoomEntry submission lifecycle", () => {
     expect(container.querySelector("section")?.getAttribute("aria-busy")).toBe(
       "true",
     );
-    expect(container.querySelector('[role="status"]')?.textContent).toContain(
-      "donk 加入 CS-654321",
-    );
+    expect(
+      document.body.querySelector('[role="dialog"]')?.textContent,
+    ).toContain("donk 加入 CS-654321");
     expect(input.disabled).toBe(true);
     const frozenButtons = container.querySelectorAll<HTMLButtonElement>(
       '[data-testid="identity-entry"], form button[type="submit"], section [role="group"] button, section [role="radiogroup"] button, [data-testid="create-room-button"]',
@@ -229,9 +229,9 @@ describe("RoomEntry submission lifecycle", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(container.querySelector('[role="status"]')?.textContent).toContain(
-      "donk 创建 4 人 · 简单 · BO3 · 隐藏猜测",
-    );
+    expect(
+      document.body.querySelector('[role="dialog"]')?.textContent,
+    ).toContain("donk 创建 4 人 · 简单 · BO3 · 隐藏猜测");
     const [, init] = fetchMock.mock.calls[0] as unknown as [
       string,
       RequestInit,
@@ -245,7 +245,7 @@ describe("RoomEntry submission lifecycle", () => {
     });
   });
 
-  it("restores the matching focus target after errors and clears stale errors on edits", async () => {
+  it("focuses error dialogs and restores the matching control after recovery", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -277,12 +277,22 @@ describe("RoomEntry submission lifecycle", () => {
       await Promise.resolve();
     });
 
-    expect(container.querySelector('[role="alert"]')?.textContent).toBe(
+    expect(
+      document.body.querySelector('[role="alertdialog"]')?.textContent,
+    ).toContain(
       "没有找到这个房间，请检查 6 位房间号后重试。",
     );
+    expect(document.activeElement?.textContent).toContain("未能加入房间");
+    const checkRoomButton = Array.from(
+      document.body.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((button) => button.textContent?.includes("检查房间号"))!;
+    act(() => checkRoomButton.click());
+    await flush();
     expect(document.activeElement).toBe(input);
     act(() => setInput(input, "123456"));
-    expect(container.querySelector('[role="alert"]')).toBeNull();
+    expect(
+      document.body.querySelector('[role="alertdialog"]'),
+    ).toBeNull();
 
     const createButton = container.querySelector<HTMLButtonElement>(
       '[data-testid="create-room-button"]',
@@ -293,16 +303,26 @@ describe("RoomEntry submission lifecycle", () => {
       await Promise.resolve();
       await Promise.resolve();
     });
-    expect(container.querySelector('[role="alert"]')?.textContent).toBe(
+    expect(
+      document.body.querySelector('[role="alertdialog"]')?.textContent,
+    ).toContain(
       "对战服务暂时不可用，请稍后重新创建。",
     );
+    expect(document.activeElement?.textContent).toContain("未能创建房间");
+    const returnButton = Array.from(
+      document.body.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((button) => button.textContent?.includes("返回设置"))!;
+    act(() => returnButton.click());
+    await flush();
     expect(document.activeElement).toBe(createButton);
 
     const visibilityButton = container.querySelector<HTMLButtonElement>(
       '[role="group"][aria-label="对手猜测显示方式"] button:nth-child(2)',
     )!;
     act(() => visibilityButton.click());
-    expect(container.querySelector('[role="alert"]')).toBeNull();
+    expect(
+      document.body.querySelector('[role="alertdialog"]'),
+    ).toBeNull();
   });
 
   it("times out after 15 seconds, unlocks join, and restores input focus", async () => {
@@ -331,10 +351,15 @@ describe("RoomEntry submission lifecycle", () => {
       await vi.advanceTimersByTimeAsync(15_000);
     });
 
-    expect(container.querySelector('[role="alert"]')?.textContent).toContain(
-      "加入房间超时",
-    );
+    expect(
+      document.body.querySelector('[role="alertdialog"]')?.textContent,
+    ).toContain("加入房间超时");
     expect(input.disabled).toBe(false);
+    const checkRoomButton = Array.from(
+      document.body.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((button) => button.textContent?.includes("检查房间号"))!;
+    act(() => checkRoomButton.click());
+    await flush();
     expect(document.activeElement).toBe(input);
   });
 

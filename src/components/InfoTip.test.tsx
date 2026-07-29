@@ -9,21 +9,28 @@ import { InfoTip } from "@/components/InfoTip";
 let container: HTMLDivElement;
 let root: Root;
 
-function pointerEvent(
-  type: string,
-  {
-    pointerType = "mouse",
-    relatedTarget,
-  }: { pointerType?: string; relatedTarget?: EventTarget | null } = {},
-) {
-  const event = new MouseEvent(type, {
+function mockTouchPresentation(matches: boolean) {
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn().mockImplementation((query: string) => ({
+      matches,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  );
+}
+
+function pointerMove(pointerType = "mouse") {
+  const event = new MouseEvent("pointermove", {
     bubbles: true,
     cancelable: true,
-    relatedTarget,
   });
   Object.defineProperty(event, "pointerType", { value: pointerType });
-  Object.defineProperty(event, "pointerId", { value: 1 });
-  Object.defineProperty(event, "isPrimary", { value: true });
   return event;
 }
 
@@ -35,7 +42,11 @@ function trigger() {
   return button;
 }
 
-function content() {
+function tooltipContent() {
+  return document.querySelector<HTMLElement>('[data-slot="tooltip-content"]');
+}
+
+function popoverContent() {
   return document.querySelector<HTMLElement>('[data-slot="popover-content"]');
 }
 
@@ -50,14 +61,9 @@ async function renderInfoTip() {
   });
 }
 
-async function flush() {
-  await act(async () => {
-    await Promise.resolve();
-  });
-}
-
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  mockTouchPresentation(false);
   vi.stubGlobal(
     "ResizeObserver",
     class {
@@ -83,210 +89,68 @@ afterEach(async () => {
 });
 
 describe("InfoTip interaction contract", () => {
-  it("opens on desktop hover and stays open while crossing into its content", async () => {
+  it("uses the shadcn tooltip on desktop hover", async () => {
     vi.useFakeTimers();
     await renderInfoTip();
 
+    expect(window.matchMedia).toHaveBeenCalledWith("(any-hover: none)");
     await act(async () => {
-      trigger().dispatchEvent(pointerEvent("pointerover"));
+      trigger().dispatchEvent(pointerMove());
+      vi.advanceTimersByTime(200);
+      await Promise.resolve();
     });
-    expect(trigger().getAttribute("aria-expanded")).toBe("true");
-    const popover = content();
-    expect(popover?.textContent).toContain("帮助用户做决定");
 
-    await act(async () => {
-      trigger().dispatchEvent(
-        pointerEvent("pointerout", { relatedTarget: popover }),
-      );
-      popover?.dispatchEvent(
-        pointerEvent("pointerover", { relatedTarget: trigger() }),
-      );
-      vi.advanceTimersByTime(150);
-    });
-    expect(content()).not.toBeNull();
-
-    await act(async () => {
-      popover?.dispatchEvent(
-        pointerEvent("pointerout", { relatedTarget: document.body }),
-      );
-      vi.advanceTimersByTime(150);
-    });
-    expect(content()).toBeNull();
+    expect(tooltipContent()?.textContent).toContain("帮助用户做决定");
+    expect(tooltipContent()?.className).toContain("data-closed:hidden");
+    expect(trigger().getAttribute("data-slot")).toBe("tooltip-trigger");
   });
 
-  it("opens on keyboard focus and closes after focus leaves the tip", async () => {
-    await renderInfoTip();
-    const outside = container.querySelector<HTMLButtonElement>(
-      "button:last-of-type",
-    )!;
-
-    await act(async () => trigger().focus());
-    expect(trigger().getAttribute("aria-expanded")).toBe("true");
-    expect(content()).not.toBeNull();
-
-    await act(async () => outside.focus());
-    await flush();
-    expect(content()).toBeNull();
-    expect(document.activeElement).toBe(outside);
-  });
-
-  it("uses click for a stable touch path without opening on touch hover", async () => {
-    await renderInfoTip();
-
-    await act(async () => {
-      trigger().dispatchEvent(
-        pointerEvent("pointerover", { pointerType: "touch" }),
-      );
-    });
-    expect(content()).toBeNull();
-
-    await act(async () => trigger().click());
-    expect(content()).not.toBeNull();
-
-    await act(async () => trigger().click());
-    expect(content()).toBeNull();
-  });
-
-  it("provides a visible mobile close action and returns focus to the trigger", async () => {
+  it("opens from keyboard focus and closes on Escape", async () => {
     await renderInfoTip();
     const button = trigger();
 
-    await act(async () => button.click());
-    const closeButton = content()?.querySelector<HTMLButtonElement>(
+    await act(async () => button.focus());
+    expect(tooltipContent()?.getAttribute("role")).toBe("tooltip");
+
+    await act(async () => {
+      document.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+      );
+    });
+    expect(tooltipContent()).toBeNull();
+  });
+
+  it("uses a quiet neutral trigger hover instead of a solid primary block", async () => {
+    await renderInfoTip();
+
+    expect(trigger().className).toContain("hover:bg-muted");
+    expect(trigger().className).toContain("hover:text-foreground");
+    expect(trigger().className).not.toContain("hover:bg-primary");
+  });
+
+  it("keeps a stable tap-to-open popover with a close action on touch layouts", async () => {
+    mockTouchPresentation(true);
+    await renderInfoTip();
+
+    await act(async () => trigger().click());
+    expect(popoverContent()?.textContent).toContain("帮助用户做决定");
+
+    const closeButton = popoverContent()?.querySelector<HTMLButtonElement>(
       '[data-slot="info-tip-close"]',
     );
     expect(closeButton?.getAttribute("aria-label")).toBe("关闭说明");
-    expect(closeButton?.className).toContain("max-sm:grid");
 
     await act(async () => closeButton?.click());
-    await flush();
-
-    expect(content()).toBeNull();
-    expect(document.activeElement).toBe(button);
+    expect(popoverContent()).toBeNull();
   });
 
-  it("keeps hover, click pinning, and click dismissal in one state", async () => {
-    vi.useFakeTimers();
+  it("opts tooltip motion out when reduced motion is requested", async () => {
     await renderInfoTip();
+    await act(async () => trigger().focus());
 
-    await act(async () => {
-      trigger().dispatchEvent(pointerEvent("pointerover"));
-      trigger().click();
-      trigger().dispatchEvent(
-        pointerEvent("pointerout", { relatedTarget: document.body }),
-      );
-      vi.advanceTimersByTime(150);
-    });
-    expect(content()).not.toBeNull();
-
-    await act(async () => {
-      trigger().dispatchEvent(pointerEvent("pointerover"));
-      trigger().click();
-      vi.advanceTimersByTime(150);
-    });
-    expect(content()).toBeNull();
-
-    await act(async () => {
-      trigger().dispatchEvent(
-        pointerEvent("pointerout", { relatedTarget: document.body }),
-      );
-      trigger().dispatchEvent(
-        pointerEvent("pointerover", { relatedTarget: document.body }),
-      );
-    });
-    expect(content()).not.toBeNull();
-  });
-
-  it("closes on Escape, restores trigger focus, and exposes a valid ARIA relationship", async () => {
-    await renderInfoTip();
-    const button = trigger();
-
-    await act(async () => {
-      button.focus();
-      button.click();
-    });
-    const popover = content();
-    expect(button.getAttribute("aria-haspopup")).toBe("dialog");
-    expect(button.getAttribute("aria-expanded")).toBe("true");
-    expect(button.getAttribute("aria-controls")).toBe(popover?.id);
-    expect(button.getAttribute("aria-describedby")).toBe(popover?.id);
-    expect(popover?.getAttribute("role")).toBe("dialog");
-
-    await act(async () => {
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
-      );
-    });
-    await flush();
-
-    expect(content()).toBeNull();
-    expect(button.getAttribute("aria-expanded")).toBe("false");
-    expect(button.hasAttribute("aria-controls")).toBe(false);
-    expect(button.hasAttribute("aria-describedby")).toBe(false);
-    expect(document.activeElement).toBe(button);
-  });
-
-  it("keeps a pure hover preview closed after Escape restores trigger focus", async () => {
-    await renderInfoTip();
-    const button = trigger();
-
-    await act(async () => {
-      button.dispatchEvent(pointerEvent("pointerover"));
-    });
-    expect(content()).not.toBeNull();
-    expect(document.activeElement).not.toBe(button);
-
-    await act(async () => {
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
-      );
-    });
-    await flush();
-
-    expect(content()).toBeNull();
-    expect(document.activeElement).toBe(button);
-    expect(button.getAttribute("aria-expanded")).toBe("false");
-
-    const outside = container.querySelector<HTMLButtonElement>(
-      "button:last-of-type",
-    )!;
-    await act(async () => {
-      outside.focus();
-      button.focus();
-    });
-    expect(content()).not.toBeNull();
-  });
-
-  it("closes on outside pointer interaction without stealing the new focus", async () => {
-    await renderInfoTip();
-    const outside = container.querySelector<HTMLButtonElement>(
-      "button:last-of-type",
-    )!;
-
-    await act(async () => trigger().click());
-    expect(content()).not.toBeNull();
-
-    await act(async () => {
-      outside.dispatchEvent(pointerEvent("pointerdown"));
-      outside.focus();
-      outside.dispatchEvent(pointerEvent("pointerup"));
-      outside.click();
-    });
-    await flush();
-
-    expect(content()).toBeNull();
-    expect(document.activeElement).toBe(outside);
-  });
-
-  it("opts the popover animation out when reduced motion is requested", async () => {
-    await renderInfoTip();
-    await act(async () => trigger().click());
-
-    const popover = content();
-    expect(popover?.className).toContain("motion-reduce:animate-none");
-    expect(popover?.className).toContain("motion-reduce:transition-none");
-
-    await act(async () => trigger().click());
-    expect(content()).toBeNull();
+    expect(tooltipContent()?.className).toContain("motion-reduce:animate-none");
+    expect(tooltipContent()?.className).toContain(
+      "motion-reduce:transition-none",
+    );
   });
 });

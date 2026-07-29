@@ -72,18 +72,14 @@ describe("RoomEntry", () => {
     expect(markup).toContain("比赛赛制");
   });
 
-  it("keeps both room-capacity actions and their value on the same 44px control row", () => {
+  it("offers only the supported 2-player and 4-player room sizes", () => {
     const markup = renderRoomEntry();
 
-    expect(markup).toContain('aria-label="减少房间人数"');
-    expect(markup).toContain('aria-label="增加房间人数"');
-    expect(markup.match(/data-size="icon-sm"/g)).toHaveLength(2);
-    expect(markup).toContain(
-      "min-h-11 grid-cols-[2.75rem_1fr_2.75rem]",
-    );
-    expect(markup.match(/h-11 w-11 rounded-none/g)).toHaveLength(2);
-    expect(markup).toContain(
-      'class="flex h-11 items-center justify-center font-mono text-xs"',
-    );
+    expect(markup).toContain('aria-label="房间人数"');
+    expect(markup).toContain("grid-cols-2");
+    expect(markup).toContain(">2 人</button>");
+    expect(markup).toContain(">4 人</button>");
+    expect(markup).not.toContain('aria-label="减少房间人数"');
+    expect(markup).not.toContain('aria-label="增加房间人数"');
   });
 });

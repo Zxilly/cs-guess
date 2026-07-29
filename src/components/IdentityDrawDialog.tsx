@@ -88,7 +88,7 @@ export function IdentityDrawDialog({
           acceptButtonRef.current?.focus();
         }}
         onCloseAutoFocus={onCloseAutoFocus}
-        className="identity-draw-dialog max-h-[calc(100svh-1.5rem)] min-w-0 gap-0 overflow-x-hidden overflow-y-auto rounded-none border border-foreground/30 bg-background p-0 shadow-2xl ring-0"
+        className="max-h-[calc(100svh-1.5rem)] min-w-0 gap-0 overflow-x-hidden overflow-y-auto rounded-none border border-foreground/30 bg-background p-0 shadow-2xl ring-0 sm:max-w-4xl"
       >
         <DialogHeader className="flex-row items-center justify-between gap-4 border-b border-foreground/20 px-5 py-4 text-left">
           <div>
@@ -152,13 +152,30 @@ export function IdentityDrawDialog({
         </div>
 
         <div
-          className={cn(
-            "grid min-h-24 items-center border-t border-foreground/20 px-5 py-4",
-            revealed && "identity-roulette-result",
-          )}
+          data-slot="identity-draw-result-shell"
+          className="grid min-h-24 items-center border-t border-foreground/20 px-5 py-4"
         >
-          {revealed ? (
-            <div>
+          <p
+            className={cn(
+              "self-center text-center font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground [grid-area:1/1]",
+              revealed && "invisible",
+            )}
+            aria-hidden={revealed}
+          >
+            锁定中…
+          </p>
+          <div
+            data-slot="identity-draw-result-content"
+            className={cn(
+              "min-w-0 [grid-area:1/1]",
+              revealed
+                ? "identity-roulette-result"
+                : "invisible pointer-events-none",
+            )}
+            aria-hidden={!revealed}
+            inert={!revealed}
+          >
+            {revealed ? (
               <p
                 className="sr-only"
                 role="status"
@@ -168,84 +185,77 @@ export function IdentityDrawDialog({
               >
                 抽取结果：{winner.nickname}
               </p>
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 items-center gap-3">
-                  <div className="relative shrink-0">
-                    <PlayerAvatar player={winner} className="size-14" eager />
-                    <CheckCircleIcon
-                      className="absolute -right-1 -bottom-1 size-5 bg-background text-primary"
-                      weight="fill"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-xl font-semibold">
-                      {winner.nickname}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {countryNameZh(winner.countryCode)} · {winner.team}
-                    </p>
-                  </div>
+            ) : null}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="relative shrink-0">
+                  <PlayerAvatar player={winner} className="size-14" eager />
+                  <CheckCircleIcon
+                    className="absolute -right-1 -bottom-1 size-5 bg-background text-primary"
+                    weight="fill"
+                  />
                 </div>
-                <div
-                  className={cn(
-                    "grid gap-2 sm:flex",
-                    allowKeepCurrent || allowReroll
-                      ? "grid-cols-2"
-                      : "grid-cols-1",
-                  )}
-                >
-                  {allowKeepCurrent ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="rounded-none"
-                      onClick={onKeep}
-                    >
-                      保留当前
-                    </Button>
-                  ) : null}
-                  {allowReroll ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="rounded-none"
-                      disabled={remainingCredits < 1 || !rerollReady}
-                      onClick={onReroll}
-                    >
-                      {remainingCredits < 1
-                        ? "无法重抽"
-                        : rerollReady
-                          ? `重抽 · ${remainingCredits}`
-                          : "准备重抽…"}
-                    </Button>
-                  ) : null}
-                  <Button
-                    ref={acceptButtonRef}
-                    type="button"
-                    className={cn(
-                      "rounded-none",
-                      (allowKeepCurrent || allowReroll) && "col-span-2",
-                    )}
-                    onClick={onAccept}
-                  >
-                    {acceptLabel}
-                  </Button>
+                <div className="min-w-0">
+                  <p className="truncate text-xl font-semibold">
+                    {winner.nickname}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {countryNameZh(winner.countryCode)} · {winner.team}
+                  </p>
                 </div>
               </div>
-              {errorMessage ? (
-                <p
-                  className="mt-3 text-sm text-destructive"
-                  role="alert"
+              <div
+                className={cn(
+                  "grid gap-2 sm:flex",
+                  allowKeepCurrent || allowReroll
+                    ? "grid-cols-2"
+                    : "grid-cols-1",
+                )}
+              >
+                {allowKeepCurrent ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-none"
+                    onClick={onKeep}
+                  >
+                    保留当前
+                  </Button>
+                ) : null}
+                {allowReroll ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-none"
+                    disabled={remainingCredits < 1 || !rerollReady}
+                    onClick={onReroll}
+                  >
+                    {remainingCredits < 1
+                      ? "无法重抽"
+                      : rerollReady
+                        ? `重抽 · ${remainingCredits}`
+                        : "准备重抽…"}
+                  </Button>
+                ) : null}
+                <Button
+                  ref={acceptButtonRef}
+                  type="button"
+                  className={cn(
+                    "rounded-none",
+                    (allowKeepCurrent || allowReroll) && "col-span-2",
+                  )}
+                  onClick={onAccept}
                 >
-                  {errorMessage}
-                </p>
-              ) : null}
+                  {acceptLabel}
+                </Button>
+              </div>
             </div>
-          ) : (
-            <p className="text-center font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-              锁定中…
-            </p>
-          )}
+            {errorMessage ? (
+              <p className="mt-3 text-sm text-destructive" role="alert">
+                {errorMessage}
+              </p>
+            ) : null}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

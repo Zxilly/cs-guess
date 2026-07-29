@@ -84,6 +84,28 @@ async function renderHarness() {
   });
 }
 
+async function renderDrawState(revealed: boolean) {
+  await act(async () => {
+    root.render(
+      <IdentityDrawDialog
+        open
+        poolLabel="Major 参赛池"
+        rollKey={1}
+        items={items}
+        winner={winner}
+        winnerIndex={23}
+        revealed={revealed}
+        remainingCredits={2}
+        onOpenChange={vi.fn()}
+        onKeep={vi.fn()}
+        onReroll={vi.fn()}
+        onAccept={vi.fn()}
+      />,
+    );
+    await Promise.resolve();
+  });
+}
+
 async function flushClose() {
   for (let pass = 0; pass < 3; pass += 1) {
     await act(async () => {
@@ -120,6 +142,35 @@ afterEach(() => {
 });
 
 describe("IdentityDrawDialog Radix focus integration", () => {
+  it("keeps the result shell mounted and inert until the roulette reveals", async () => {
+    await renderDrawState(false);
+
+    const shell = document.querySelector(
+      '[data-slot="identity-draw-result-shell"]',
+    );
+    const hiddenResult = document.querySelector<HTMLElement>(
+      '[data-slot="identity-draw-result-content"]',
+    );
+    expect(shell).toBeTruthy();
+    expect(hiddenResult?.hasAttribute("inert")).toBe(true);
+    expect(hiddenResult?.getAttribute("aria-hidden")).toBe("true");
+    expect(hiddenResult?.className).toContain("invisible");
+
+    await renderDrawState(true);
+
+    const revealedShell = document.querySelector(
+      '[data-slot="identity-draw-result-shell"]',
+    );
+    const revealedResult = document.querySelector<HTMLElement>(
+      '[data-slot="identity-draw-result-content"]',
+    );
+    expect(revealedShell).toBe(shell);
+    expect(revealedResult).toBe(hiddenResult);
+    expect(revealedResult?.hasAttribute("inert")).toBe(false);
+    expect(revealedResult?.getAttribute("aria-hidden")).toBe("false");
+    expect(revealedResult?.className).not.toContain("invisible");
+  });
+
   it("traps Tab in the real dialog and restores focus after Escape replaces the opener", async () => {
     await renderHarness();
 

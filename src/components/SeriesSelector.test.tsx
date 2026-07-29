@@ -4,6 +4,18 @@ import { describe, expect, it, vi } from "vitest";
 import { SeriesSelector } from "@/components/SeriesSelector";
 
 describe("SeriesSelector mobile layout", () => {
+  it("uses one shared height for compact controls and option cards", () => {
+    const compact = renderToStaticMarkup(
+      <SeriesSelector value={3} onChange={vi.fn()} compact />,
+    );
+    const full = renderToStaticMarkup(
+      <SeriesSelector value={3} onChange={vi.fn()} />,
+    );
+
+    expect(compact.match(/min-h-11/g)).toHaveLength(3);
+    expect(full.match(/min-h-24/g)).toHaveLength(3);
+  });
+
   it("keeps non-compact BO1, BO3 and BO5 in three equal columns at 390px", () => {
     const markup = renderToStaticMarkup(
       <SeriesSelector

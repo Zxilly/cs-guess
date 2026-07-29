@@ -1,7 +1,6 @@
 import { createActor } from "xstate";
 import { describe, expect, it } from "vitest";
 
-import auditTodo from "../../docs/user-journey-state-audit.md?raw";
 import {
   describeUserJourney,
   USER_CONNECTION_STATES,
@@ -426,19 +425,20 @@ describe("userJourneyMachine", () => {
     );
   });
 
-  it("keeps the executable audit TODO synchronized with the state catalog", () => {
-    for (const state of USER_JOURNEY_STATES) {
-      const exactOrExpandedState = new RegExp(
-        `\`${state.id.replaceAll(".", String.raw`\.`)}(?:\\.[^\\\`]+)?\``,
-      );
-      expect(
-        auditTodo,
-        `missing ${state.id} from user journey audit TODO`,
-      ).toMatch(exactOrExpandedState);
-    }
+  it("keeps state catalog entries unique and self-describing", () => {
+    const experienceIds = USER_JOURNEY_STATES.map((state) => state.id);
+    const connectionIds = USER_CONNECTION_STATES.map((state) => state.id);
 
+    expect(new Set(experienceIds).size).toBe(experienceIds.length);
+    expect(new Set(connectionIds).size).toBe(connectionIds.length);
+    for (const state of USER_JOURNEY_STATES) {
+      expect(state.label.trim()).not.toBe("");
+      expect(state.description.trim()).not.toBe("");
+      expect(state.route).toMatch(/^\//);
+    }
     for (const state of USER_CONNECTION_STATES) {
-      expect(auditTodo).toContain(`\`connection.${state.id}\``);
+      expect(state.label.trim()).not.toBe("");
+      expect(state.description.trim()).not.toBe("");
     }
   });
 

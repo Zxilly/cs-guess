@@ -3,6 +3,7 @@ import type {
   BestOf,
   GameDifficulty,
   OpponentVisibility,
+  PartySize,
 } from "@/types/game";
 
 export interface JoinRoomSnapshot {
@@ -17,7 +18,7 @@ export interface CreateRoomSnapshot {
   identityId: string;
   identityNickname: string;
   visibility: OpponentVisibility;
-  maxPlayers: number;
+  maxPlayers: PartySize;
   bestOf: BestOf;
   difficulty: GameDifficulty;
 }

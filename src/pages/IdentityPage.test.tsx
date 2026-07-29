@@ -78,7 +78,7 @@ describe("IdentityPage onboarding", () => {
     );
 
     expect(markup).toContain(
-      "首次进入需设置匿名身份；确认后返回此前选择的页面。",
+      "抽取并确认一个匿名身份，用于对战昵称与战绩记录。",
     );
     expect(markup).toContain(">抽取初始身份</button>");
   });

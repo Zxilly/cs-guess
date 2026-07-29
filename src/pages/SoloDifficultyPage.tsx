@@ -120,11 +120,11 @@ export function SoloDifficultyPage() {
                 </p>
                 <p className="mt-1">
                   <strong>完整：</strong>
-                  目标可能是任意参加过 Major 的选手。
+                  所有参加过 Major 的选手，包括退役与无队伍选手。
                 </p>
                 <p className="mt-1">
                   <strong>困难：</strong>
-                  目标可能来自完整选手目录，包括退役与无队伍选手。
+                  完整职业选手目录，包含未参加过 Major 的选手。
                 </p>
               </InfoTip>
             }

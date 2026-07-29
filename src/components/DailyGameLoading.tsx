@@ -2,6 +2,7 @@ import { ArrowLeftIcon, CrosshairIcon } from "@phosphor-icons/react";
 import { Link } from "react-router";
 
 import { Button } from "@/components/ui/button";
+import { OperationStatusDialog } from "@/components/OperationStatusDialog";
 
 interface DailyGameLoadingProps {
   error?: Error;
@@ -32,7 +33,7 @@ export function DailyGameLoading({
   return (
     <div
       className="min-h-svh bg-background text-foreground lg:grid lg:grid-cols-[280px_minmax(0,1fr)]"
-      role={error ? "alert" : "status"}
+      role="status"
       aria-label={error ? "每日挑战载入失败" : "正在载入今日题目"}
       data-daily-game-surface={error ? "error" : "loading"}
     >
@@ -109,22 +110,9 @@ export function DailyGameLoading({
         </div>
       </aside>
 
-      <main className="min-w-0">
+      <main className="app-game-main">
         <div className="app-game-container min-w-0">
-          <header className="mb-7 flex flex-col justify-between gap-3 sm:flex-row sm:items-start sm:gap-6">
-            <div>
-              <p className="font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary">
-                今日神秘选手
-              </p>
-              <h1 className="mt-3 text-3xl font-bold tracking-[-0.03em] sm:text-4xl">
-                根据对比，锁定神秘选手。
-              </h1>
-            </div>
-            <LoadingBlock
-              className="h-3 w-32 shrink-0"
-              animate={pending}
-            />
-          </header>
+          <h1 className="sr-only">今日挑战</h1>
 
           <div className="mb-5 flex items-center justify-between border-y border-foreground/15 py-3 lg:hidden">
             <span className="text-xs text-muted-foreground">剩余时间</span>
@@ -134,7 +122,7 @@ export function DailyGameLoading({
 
           <div className="flex min-h-16 items-center justify-between border-y border-foreground/20 px-5 py-4">
             <p className="text-sm font-medium">
-              {error ? "今日题目暂时不可用" : "正在获取今日统一题目"}
+              正在获取今日统一题目
             </p>
             <div className="flex gap-1" aria-hidden="true">
               {Array.from({ length: 8 }, (_, index) => (
@@ -147,49 +135,27 @@ export function DailyGameLoading({
             </div>
           </div>
 
-          {error ? (
-            <section className="mt-6 border border-foreground/25 p-5 sm:p-6">
-              <p className="font-mono text-xs uppercase tracking-[0.08em] text-primary">
-                DAILY CHALLENGE
-              </p>
-              <h2 className="mt-3 text-xl font-bold">每日挑战载入失败</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                请检查网络连接后重新载入。
-              </p>
-              {onRetry ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-6 rounded-none"
-                  onClick={onRetry}
-                >
-                  重新载入
-                </Button>
-              ) : null}
-            </section>
-          ) : (
-            <>
-              <div className="mt-6 h-12 border border-foreground/25">
-                <LoadingBlock className="h-full w-full" animate />
+          <>
+            <div className="mt-6 h-12 border border-foreground/25">
+              <LoadingBlock className="h-full w-full" animate={pending} />
+            </div>
+            <div className="mt-6 border border-foreground/25">
+              <div className="flex h-12 items-center justify-between border-b border-foreground/20 px-4">
+                <LoadingBlock className="h-4 w-20" animate={pending} />
+                <LoadingBlock className="h-3 w-10" animate={pending} />
               </div>
-              <div className="mt-6 border border-foreground/25">
-                <div className="flex h-12 items-center justify-between border-b border-foreground/20 px-4">
-                  <LoadingBlock className="h-4 w-20" animate />
-                  <LoadingBlock className="h-3 w-10" animate />
-                </div>
-                <div className="grid h-12 grid-cols-[2.5rem_8.5rem_repeat(5,minmax(4rem,1fr))] divide-x divide-foreground/15 border-b border-foreground/15">
-                  {Array.from({ length: 7 }, (_, index) => (
-                    <LoadingBlock
-                      key={index}
-                      className="m-auto h-3 w-8"
-                      animate
-                    />
-                  ))}
-                </div>
-                <div className="h-15 bg-muted/20" aria-hidden="true" />
+              <div className="grid h-12 grid-cols-[2.5rem_8.5rem_repeat(5,minmax(4rem,1fr))] divide-x divide-foreground/15 border-b border-foreground/15">
+                {Array.from({ length: 7 }, (_, index) => (
+                  <LoadingBlock
+                    key={index}
+                    className="m-auto h-3 w-8"
+                    animate={pending}
+                  />
+                ))}
               </div>
-            </>
-          )}
+              <div className="h-15 bg-muted/20" aria-hidden="true" />
+            </div>
+          </>
 
           <span className="sr-only">
             {error
@@ -198,6 +164,30 @@ export function DailyGameLoading({
           </span>
         </div>
       </main>
+      <OperationStatusDialog
+        open={pending}
+        kind="progress"
+        eyebrow="DAILY CHALLENGE"
+        title="正在载入今日题目"
+        description="正在同步今日统一题目、轮次与计时信息。"
+      />
+      <OperationStatusDialog
+        open={Boolean(error)}
+        kind="error"
+        eyebrow="DAILY CHALLENGE"
+        title="每日挑战载入失败"
+        description={error?.message ?? "请检查网络连接后重新载入。"}
+      >
+        {onRetry ? (
+          <Button
+            type="button"
+            className="w-full rounded-none sm:w-auto"
+            onClick={onRetry}
+          >
+            重新载入
+          </Button>
+        ) : null}
+      </OperationStatusDialog>
     </div>
   );
 }

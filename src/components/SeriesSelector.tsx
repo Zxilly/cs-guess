@@ -79,8 +79,8 @@ export function SeriesSelector({
             className={cn(
               "relative min-w-0 bg-background text-left transition-colors focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-55",
               compact
-                ? "border-r border-foreground/20 px-3 py-2.5 last:border-r-0"
-                : "min-h-20 p-3 sm:p-4",
+                ? "min-h-11 border-r border-foreground/20 px-3 py-2 last:border-r-0"
+                : "min-h-24 p-3 sm:p-4",
               selected ? "bg-primary text-primary-foreground" : "hover:bg-primary/[0.04]",
             )}
           >

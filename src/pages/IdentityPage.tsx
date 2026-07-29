@@ -82,11 +82,34 @@ export function IdentityPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const returnTo = normalizeIdentityReturnTo(searchParams.get("return"));
-  const onboarding = !identity.profile.identityConfirmed;
+  const audit = import.meta.env.DEV ? searchParams.get("audit") : null;
+  const onboarding =
+    audit === "identity-onboarding" ||
+    audit === "onboarding-rolling" ||
+    audit === "onboarding-result" ||
+    !identity.profile.identityConfirmed;
   const visiblePools = onboarding ? IDENTITY_POOLS.slice(0, 1) : IDENTITY_POOLS;
-  const [draw, setDraw] = useState<DrawSequence | null>(() =>
-    onboarding ? null : restorePendingDraw(identity.profile.pendingDraw),
-  );
+  const [draw, setDraw] = useState<DrawSequence | null>(() => {
+    if (
+      audit === "identity-rolling" ||
+      audit === "identity-result" ||
+      audit === "onboarding-rolling" ||
+      audit === "onboarding-result"
+    ) {
+      const prepared = prepareDraw("common", identity.player.id);
+      return prepared
+        ? {
+            rollKey: 1,
+            poolId: "common",
+            ...prepared,
+            revealed:
+              audit === "identity-result" ||
+              audit === "onboarding-result",
+          }
+        : null;
+    }
+    return onboarding ? null : restorePendingDraw(identity.profile.pendingDraw);
+  });
   const [drawError, setDrawError] = useState<string | null>(null);
   const [readyPools, setReadyPools] = useState<Set<IdentityPoolId>>(
     () => new Set(),
@@ -180,6 +203,9 @@ export function IdentityPage() {
 
   useEffect(() => {
     if (onboarding) return;
+    if (audit === "identity-rolling" || audit === "identity-result") {
+      return;
+    }
     const reconciliation = reconcilePendingIdentityDraw(
       draw,
       identity.profile.pendingDraw,
@@ -206,7 +232,7 @@ export function IdentityPage() {
       poolId: reconciliation.draw.poolId as IdentityPoolId,
       revealed: true,
     });
-  }, [draw, identity.profile.pendingDraw, onboarding]);
+  }, [audit, draw, identity.profile.pendingDraw, onboarding]);
 
   useEffect(() => {
     if (!import.meta.env.DEV || previewCreditsAppliedRef.current) return;
@@ -383,7 +409,7 @@ export function IdentityPage() {
           title={onboarding ? "设置初始身份" : "我的身份"}
           description={
             onboarding
-              ? "首次进入需设置匿名身份；确认后返回此前选择的页面。"
+              ? "抽取并确认一个匿名身份，用于对战昵称与战绩记录。"
               : undefined
           }
           help={
@@ -453,7 +479,7 @@ export function IdentityPage() {
 
             {onboarding ? (
               <div className="border-t border-foreground/20 px-5 py-4 text-xs text-muted-foreground">
-                确认抽取结果后返回此前页面。
+                身份确认后将持续用于后续对局。
               </div>
             ) : (
               <div className="grid grid-cols-3 border-t border-foreground/20">

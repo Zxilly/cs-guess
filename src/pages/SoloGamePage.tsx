@@ -1,7 +1,6 @@
 import { useEffect, useReducer, useRef, useState } from "react";
 import { Navigate, useSearchParams } from "react-router";
 
-import { BattleContext } from "@/components/BattleContext";
 import { CelebrationOverlay } from "@/components/CelebrationOverlay";
 import { DailyResultPanel } from "@/components/DailyResultPanel";
 import { GuessTable } from "@/components/GuessTable";
@@ -24,19 +23,66 @@ import {
 } from "@/lib/solo-game";
 import { focusDailyResultAfterDialog } from "@/lib/daily-result-focus";
 import { recordFinishedSoloRoundOnce } from "@/lib/solo-round-record";
-import { MAX_GUESSES } from "@/types/game";
+import { maxGuessesForDifficulty } from "@/types/game";
 
 export function SoloGamePage() {
   const [searchParams] = useSearchParams();
   const difficulty = parseSoloDifficulty(searchParams.get("difficulty"));
+  const audit = import.meta.env.DEV ? searchParams.get("audit") : null;
 
   if (!difficulty) return <Navigate to="/solo" replace />;
-  return <SoloGame key={difficulty} difficulty={difficulty} />;
+  return (
+    <SoloGame key={difficulty} difficulty={difficulty} audit={audit} />
+  );
 }
 
-function SoloGame({ difficulty }: { difficulty: SoloDifficulty }) {
+function SoloGame({
+  difficulty,
+  audit,
+}: {
+  difficulty: SoloDifficulty;
+  audit: string | null;
+}) {
   const { profile, recordRound } = useAnonymousProfile();
-  const [initialProgress] = useState(() => loadSoloProgress(difficulty));
+  const [initialProgress] = useState(() => {
+    const loaded = loadSoloProgress(difficulty);
+    if (!import.meta.env.DEV || !audit?.startsWith("solo-")) return loaded;
+    const mysteryId = soloMysteryPool(difficulty)[0]?.id ?? "donk";
+    const base = {
+      ...loaded.state,
+      mysteryId,
+      guessedIds: [] as string[],
+      status: "playing" as const,
+      deadline: Date.now() + 3_600_000,
+      resultDismissed: false,
+    };
+    if (audit === "solo-won" || audit === "solo-result-panel") {
+      return {
+        state: {
+          ...base,
+          guessedIds: [mysteryId],
+          status: "won" as const,
+          resultReason: "guessed" as const,
+          resultDismissed: audit === "solo-result-panel",
+        },
+      };
+    }
+    if (audit === "solo-lost") {
+      const maxGuesses = maxGuessesForDifficulty(difficulty);
+      return {
+        state: {
+          ...base,
+          guessedIds: players
+            .filter((player) => player.id !== mysteryId)
+            .slice(0, maxGuesses)
+            .map((player) => player.id),
+          status: "lost" as const,
+          resultReason: "attempts-exhausted" as const,
+        },
+      };
+    }
+    return { state: base };
+  });
   const [game, dispatch] = useReducer(soloGameReducer, initialProgress.state);
   const [selectedId, setSelectedId] = useState<string>();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -61,6 +107,7 @@ function SoloGame({ difficulty }: { difficulty: SoloDifficulty }) {
   );
   const selectedPlayer = players.find((player) => player.id === selectedId);
   const isFinished = game.status !== "playing";
+  const maxGuesses = maxGuessesForDifficulty(difficulty);
   const secondsLeft = soloSecondsUntil(game.deadline, now);
   const resultOpen = isFinished && !game.resultDismissed;
   const lossReason =
@@ -78,6 +125,7 @@ function SoloGame({ difficulty }: { difficulty: SoloDifficulty }) {
   }, [game]);
 
   useEffect(() => {
+    if (audit) return;
     if (game.status !== "playing") return;
     const update = () => {
       const current = Date.now();
@@ -87,7 +135,7 @@ function SoloGame({ difficulty }: { difficulty: SoloDifficulty }) {
     update();
     const timer = window.setInterval(update, 250);
     return () => window.clearInterval(timer);
-  }, [game.deadline, game.status]);
+  }, [audit, game.deadline, game.status]);
 
   useEffect(() => {
     recordedRoundRef.current = recordFinishedSoloRoundOnce(
@@ -119,7 +167,7 @@ function SoloGame({ difficulty }: { difficulty: SoloDifficulty }) {
         mode="solo"
         secondsLeft={secondsLeft}
         guesses={game.guessedIds.length}
-        maxGuesses={MAX_GUESSES}
+        maxGuesses={maxGuesses}
         status={game.status}
         roundNumber={game.roundNumber}
         bestOf={1}
@@ -128,7 +176,7 @@ function SoloGame({ difficulty }: { difficulty: SoloDifficulty }) {
         backLabel="难度选择"
       />
 
-      <main className="min-w-0">
+      <main className="app-game-main">
         <div className="app-game-container min-w-0">
           {resetReason === "catalog-changed" ? (
             <p
@@ -145,74 +193,37 @@ function SoloGame({ difficulty }: { difficulty: SoloDifficulty }) {
               旧练习进度无法恢复，已安全开始新的练习回合。
             </p>
           ) : null}
-          <header className="mb-7 flex flex-col justify-between gap-3 sm:flex-row sm:items-start sm:gap-6">
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="font-mono text-xs font-medium uppercase tracking-[0.08em] text-primary">
-                  单人练习 · {difficultyOption.label}
-                </p>
-                <InfoTip
-                  label="单人练习规则"
-                  side="right"
-                  className="size-6 hover:bg-transparent hover:text-primary"
-                >
-                  {difficulty === "easy"
-                    ? "目标来自 Major 冠军或参赛至少 5 次的知名选手。"
-                    : difficulty === "full"
-                      ? "目标可能是任意参加过 Major 的选手。"
-                      : "目标可能来自完整选手目录，包括退役与无队伍选手。"}
-                  在三分钟和八次机会内完成猜测。
-                </InfoTip>
+          {!isFinished ? (
+            <>
+              <h1 className="sr-only">单人练习</h1>
+
+              <div className="mb-5 flex items-center justify-between border-y border-foreground/15 py-3 lg:hidden">
+                <span className="text-xs text-muted-foreground">
+                  剩余时间
+                </span>
+                <Timer seconds={secondsLeft} className="text-lg text-primary" />
+                <span className="font-mono text-xs">
+                  {game.guessedIds.length} / {maxGuesses}
+                </span>
               </div>
-              <h1 className="mt-3 text-balance text-[2rem] leading-[1.15] font-bold tracking-[-0.04em] sm:text-4xl">
-                根据属性线索确定目标选手
-              </h1>
-            </div>
 
-            <p className="shrink-0 text-right font-mono text-xs font-medium uppercase tracking-[0.08em]">
-              SOLO · ROUND #{game.roundNumber}
-            </p>
-          </header>
-
-          <div className="mb-5 flex items-center justify-between border-y border-foreground/15 py-3 lg:hidden">
-            <span className="text-xs text-muted-foreground">
-              {isFinished ? "练习结果" : "剩余时间"}
-            </span>
-            {isFinished ? (
-              <span className="font-mono text-xs font-semibold text-primary">
-                {game.status === "won" ? "练习完成" : "练习结束"}
-              </span>
-            ) : (
-              <Timer seconds={secondsLeft} className="text-lg text-primary" />
-            )}
-            <span className="font-mono text-xs">
-              {game.guessedIds.length} / {MAX_GUESSES}
-            </span>
-          </div>
-
-          <BattleContext
-            mode="solo"
-            guesses={game.guessedIds.length}
-            opponentGuesses={0}
-            maxGuesses={MAX_GUESSES}
-          />
+            </>
+          ) : null}
 
           {isFinished ? (
-            <div className="mt-6">
-              <DailyResultPanel
-                context="solo"
-                outcome={game.status === "won" ? "won" : "lost"}
-                attempts={game.guessedIds.length}
-                maxGuesses={MAX_GUESSES}
-                mysteryPlayer={mysteryPlayer}
-                onPlayAgain={restart}
-                titleRef={resultTitleRef}
-                lossReason={lossReason}
-              />
-            </div>
+            <DailyResultPanel
+              context="solo"
+              outcome={game.status === "won" ? "won" : "lost"}
+              attempts={game.guessedIds.length}
+              maxGuesses={maxGuesses}
+              mysteryPlayer={mysteryPlayer}
+              onPlayAgain={restart}
+              titleRef={resultTitleRef}
+              lossReason={lossReason}
+            />
           ) : (
             <>
-              <div className="mt-6 min-w-0">
+              <div className="min-w-0">
                 <PlayerSearch
                   players={availablePlayers}
                   selectedPlayer={selectedPlayer}
@@ -233,11 +244,12 @@ function SoloGame({ difficulty }: { difficulty: SoloDifficulty }) {
                   opponentVisibility="hidden"
                   mysteryPlayer={mysteryPlayer}
                   mode="solo"
-                  maxGuesses={MAX_GUESSES}
+                  maxGuesses={maxGuesses}
+                  showProgressCount={false}
                 />
               </div>
 
-              <div className="mt-5 flex flex-col gap-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+              <div className="mt-5 flex items-center text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <span>结果图例</span>
                   <InfoTip
@@ -248,9 +260,6 @@ function SoloGame({ difficulty }: { difficulty: SoloDifficulty }) {
                     蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。向上箭头表示目标数值更高，向下箭头表示更低。
                   </InfoTip>
                 </div>
-                <p className="font-mono">
-                  {difficultyOption.poolLabel} · 结算后可继续
-                </p>
               </div>
             </>
           )}
@@ -262,7 +271,8 @@ function SoloGame({ difficulty }: { difficulty: SoloDifficulty }) {
           context="solo"
           outcome={game.status === "won" ? "win" : "loss"}
           seriesComplete
-          score={`${game.guessedIds.length} / ${MAX_GUESSES}`}
+          score={`${game.guessedIds.length} / ${maxGuesses}`}
+          maxGuesses={maxGuesses}
           mysteryPlayer={mysteryPlayer}
           onClose={() => dispatch({ type: "dismiss-result" })}
           onCloseAutoFocus={(event) =>

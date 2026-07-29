@@ -8,9 +8,7 @@ import {
 import {
   ArrowRightIcon,
   DoorOpenIcon,
-  MinusIcon,
   PlusIcon,
-  SpinnerGapIcon,
   UsersThreeIcon,
 } from "@phosphor-icons/react";
 import { useNavigate } from "react-router";
@@ -20,10 +18,12 @@ import { DifficultySelector } from "@/components/DifficultySelector";
 import { InfoTip } from "@/components/InfoTip";
 import { PageIntro } from "@/components/PageIntro";
 import { PlayerIdentity } from "@/components/PlayerIdentity";
+import { OperationStatusDialog } from "@/components/OperationStatusDialog";
 import { SeriesSelector } from "@/components/SeriesSelector";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { useAnonymousProfile } from "@/hooks/use-anonymous-profile";
 import {
   createRoom,
@@ -51,12 +51,16 @@ import type {
   BestOf,
   GameDifficulty,
   OpponentVisibility,
+  PartySize,
 } from "@/types/game";
 
 const ROOM_NUMBER_PATTERN = /^\d{6}$/;
 
 export function RoomEntry() {
   const navigate = useNavigate();
+  const audit = import.meta.env.DEV && typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search).get("audit")
+    : null;
   const navigateRef = useRef(navigate);
   const roomInputRef = useRef<HTMLInputElement | null>(null);
   const createButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -82,14 +86,32 @@ export function RoomEntry() {
     useState<GameDifficulty>(
       savedPreferences.current?.difficulty ?? loadSoloDifficulty(),
     );
-  const [maxPlayers, setMaxPlayers] = useState(
+  const [maxPlayers, setMaxPlayers] = useState<PartySize>(
     savedPreferences.current?.maxPlayers ?? 4,
   );
   const [joinError, setJoinError] = useState("");
-  const [createError, setCreateError] = useState("");
-  const [pending, setPending] = useState<"join" | "create" | null>(null);
+  const [createError, setCreateError] = useState(
+    audit === "room-error"
+      ? "创建房间失败，请检查网络后重试。"
+      : "",
+  );
+  const [pending, setPending] = useState<"join" | "create" | null>(
+    audit === "room-submitting" ? "create" : null,
+  );
   const [submittedSettings, setSubmittedSettings] =
-    useState<Readonly<RoomSubmissionSnapshot> | null>(null);
+    useState<Readonly<RoomSubmissionSnapshot> | null>(() =>
+      audit === "room-submitting"
+        ? {
+            kind: "create",
+            identityId: identity.player.id,
+            identityNickname: identity.player.nickname,
+            visibility,
+            maxPlayers,
+            bestOf,
+            difficulty,
+          }
+        : null,
+    );
   navigateRef.current = navigate;
 
   useLayoutEffect(() => {
@@ -143,9 +165,11 @@ export function RoomEntry() {
   }, []);
 
   useEffect(() => {
+    if (audit === "room-error") return;
     setJoinError("");
     setCreateError("");
   }, [
+    audit,
     identity.player.id,
     visibility,
     bestOf,
@@ -162,18 +186,23 @@ export function RoomEntry() {
     });
   }, [bestOf, difficulty, maxPlayers, visibility]);
 
-  useEffect(() => {
-    if (pending !== null) return;
-    if (joinError) {
-      roomInputRef.current?.focus({ preventScroll: true });
-    } else if (createError) {
-      createButtonRef.current?.focus({ preventScroll: true });
-    }
-  }, [createError, joinError, pending]);
-
   function handleRoomCodeChange(value: string) {
     setRoomNumber(value.replace(/\D/g, "").slice(0, 6));
     if (joinError) setJoinError("");
+  }
+
+  function dismissJoinError() {
+    setJoinError("");
+    queueMicrotask(() =>
+      roomInputRef.current?.focus({ preventScroll: true }),
+    );
+  }
+
+  function dismissCreateError() {
+    setCreateError("");
+    queueMicrotask(() =>
+      createButtonRef.current?.focus({ preventScroll: true }),
+    );
   }
 
   async function handleJoin(event: FormEvent<HTMLFormElement>) {
@@ -305,9 +334,6 @@ export function RoomEntry() {
                     autoComplete="off"
                     disabled={pending !== null}
                     aria-invalid={Boolean(joinError)}
-                    aria-describedby={
-                      joinError ? "room-code-error" : undefined
-                    }
                     className="app-control h-12 rounded-none border-foreground/30 font-mono text-base tracking-[0.12em] focus-visible:z-10"
                   />
                   <Button
@@ -316,7 +342,7 @@ export function RoomEntry() {
                     disabled={pending !== null}
                   >
                     {pending === "join" ? (
-                      <SpinnerGapIcon className="animate-spin motion-reduce:animate-none" />
+                      <Spinner role="presentation" aria-hidden="true" />
                     ) : (
                       <DoorOpenIcon />
                     )}
@@ -326,15 +352,6 @@ export function RoomEntry() {
                     )}
                   </Button>
                 </div>
-                {joinError ? (
-                  <p
-                    id="room-code-error"
-                    className="mt-2 text-xs text-destructive"
-                    role="alert"
-                  >
-                    {joinError}
-                  </p>
-                ) : null}
               </div>
             </form>
           </Card>
@@ -372,11 +389,10 @@ export function RoomEntry() {
                       <Button
                         key={option}
                         type="button"
-                        size="sm"
                         variant={visibility === option ? "default" : "ghost"}
                         aria-pressed={visibility === option}
                         disabled={pending !== null}
-                        className="min-w-0 flex-1 rounded-none border-r border-foreground/20 px-2 last:border-r-0"
+                        className="h-11 min-w-0 flex-1 rounded-none border-r border-foreground/20 px-2 last:border-r-0"
                         onClick={() => setVisibility(option)}
                       >
                         {option === "hidden" ? "隐藏猜测" : "明牌模式"}
@@ -390,42 +406,23 @@ export function RoomEntry() {
                     房间人数
                   </p>
                   <div
-                    className="mt-2 grid min-h-11 grid-cols-[2.75rem_1fr_2.75rem] border border-foreground/25"
+                    className="mt-2 grid min-h-11 grid-cols-2 border border-foreground/25"
                     role="group"
                     aria-label="房间人数"
                   >
-                    <Button
-                      type="button"
-                      size="icon-sm"
-                      variant="ghost"
-                      aria-label="减少房间人数"
-                      className="h-11 w-11 rounded-none border-r border-foreground/20"
-                      disabled={pending !== null || maxPlayers <= 2}
-                      onClick={() =>
-                        setMaxPlayers((value) => Math.max(2, value - 1))
-                      }
-                    >
-                      <MinusIcon />
-                    </Button>
-                    <output
-                      className="flex h-11 items-center justify-center font-mono text-xs"
-                      aria-live="polite"
-                    >
-                      {maxPlayers} 人
-                    </output>
-                    <Button
-                      type="button"
-                      size="icon-sm"
-                      variant="ghost"
-                      aria-label="增加房间人数"
-                      className="h-11 w-11 rounded-none border-l border-foreground/20"
-                      disabled={pending !== null || maxPlayers >= 8}
-                      onClick={() =>
-                        setMaxPlayers((value) => Math.min(8, value + 1))
-                      }
-                    >
-                      <PlusIcon />
-                    </Button>
+                    {([2, 4] as const).map((size) => (
+                      <Button
+                        key={size}
+                        type="button"
+                        variant={maxPlayers === size ? "default" : "ghost"}
+                        aria-pressed={maxPlayers === size}
+                        disabled={pending !== null}
+                        className="h-11 min-w-0 rounded-none border-r border-foreground/20 font-mono text-xs last:border-r-0"
+                        onClick={() => setMaxPlayers(size)}
+                      >
+                        {size} 人
+                      </Button>
+                    ))}
                   </div>
                 </div>
                 <div className="lg:col-span-6">
@@ -472,35 +469,69 @@ export function RoomEntry() {
                       </span>
                     </span>
                     {pending === "create" ? (
-                      <SpinnerGapIcon className="shrink-0 animate-spin motion-reduce:animate-none" />
+                      <Spinner
+                        className="shrink-0"
+                        role="presentation"
+                        aria-hidden="true"
+                      />
                     ) : (
                       <ArrowRightIcon className="shrink-0" />
                     )}
                   </Button>
-                  {createError ? (
-                    <p className="mt-2 text-sm text-destructive" role="alert">
-                      {createError}
-                    </p>
-                  ) : null}
                 </div>
               </div>
             </section>
           </Card>
-          {pending ? (
-            <div
-              className="flex min-w-0 items-center gap-2 border border-primary/35 bg-primary/[0.04] px-4 py-3 text-sm"
-              role="status"
-              aria-live="polite"
-            >
-              <SpinnerGapIcon
-                className="size-4 shrink-0 animate-spin text-primary motion-reduce:animate-none"
-                aria-hidden="true"
-              />
-              <span className="min-w-0">{pendingSummary}</span>
-            </div>
-          ) : null}
         </div>
       </main>
+      <OperationStatusDialog
+        open={pending !== null}
+        kind="progress"
+        eyebrow="FRIEND ROOM"
+        title={pending === "join" ? "正在加入房间" : "正在创建房间"}
+        description={
+          pendingSummary ??
+          "正在向服务器确认房间设置，完成后会自动进入等待页面。"
+        }
+      />
+      <OperationStatusDialog
+        open={Boolean(joinError)}
+        kind="error"
+        eyebrow="FRIEND ROOM"
+        title="未能加入房间"
+        description={joinError}
+        returnFocusRef={roomInputRef}
+        onOpenChange={(open) => {
+          if (!open) dismissJoinError();
+        }}
+      >
+        <Button
+          type="button"
+          className="w-full rounded-none sm:w-auto"
+          onClick={dismissJoinError}
+        >
+          检查房间号
+        </Button>
+      </OperationStatusDialog>
+      <OperationStatusDialog
+        open={Boolean(createError)}
+        kind="error"
+        eyebrow="FRIEND ROOM"
+        title="未能创建房间"
+        description={createError}
+        returnFocusRef={createButtonRef}
+        onOpenChange={(open) => {
+          if (!open) dismissCreateError();
+        }}
+      >
+        <Button
+          type="button"
+          className="w-full rounded-none sm:w-auto"
+          onClick={dismissCreateError}
+        >
+          返回设置
+        </Button>
+      </OperationStatusDialog>
     </div>
   );
 }

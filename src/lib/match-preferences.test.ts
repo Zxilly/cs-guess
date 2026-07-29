@@ -49,17 +49,32 @@ describe("match preferences", () => {
     expect(loadQuickMatchPreferences(storage)).toBeUndefined();
   });
 
-  it("round-trips room creation preferences within the supported capacity", () => {
+  it("round-trips a supported room capacity", () => {
     const storage = new MemoryStorage();
     const settings = {
       bestOf: 3 as const,
       difficulty: "full" as const,
       visibility: "hidden" as const,
-      maxPlayers: 8,
+      maxPlayers: 4 as const,
     };
 
     saveRoomPreferences(settings, storage);
 
     expect(loadRoomPreferences(storage)).toEqual(settings);
+  });
+
+  it("ignores legacy room capacities outside the supported 2/4 choices", () => {
+    const storage = new MemoryStorage();
+    storage.setItem(
+      "cs-guess:room-preferences:v1",
+      JSON.stringify({
+        bestOf: 3,
+        difficulty: "full",
+        visibility: "hidden",
+        maxPlayers: 3,
+      }),
+    );
+
+    expect(loadRoomPreferences(storage)).toBeUndefined();
   });
 });

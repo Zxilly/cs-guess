@@ -12,6 +12,7 @@
     "lint": "oxlint .",
     "test": "vitest run",
     "test:frontend": "vitest run",
+    "test:layout": "playwright test",
     "typecheck": "tsc -b",
     "test:server": "cargo test --manifest-path server/Cargo.toml",
     "test:socketio": "node scripts/socketio-e2e.mjs",
@@ -39,6 +40,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@playwright/test": "1.62.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
