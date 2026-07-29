@@ -19,11 +19,13 @@ type SocketHandler = (...args: unknown[]) => void;
 
 const socketIo = vi.hoisted(() => ({
   io: vi.fn(),
+  msgpackParser: { protocol: 5 },
 }));
 
 vi.mock("socket.io-client", () => ({
   io: socketIo.io,
 }));
+vi.mock("socket.io-msgpack-parser", () => socketIo.msgpackParser);
 
 class MockSocket {
   connected = false;
@@ -155,6 +157,15 @@ afterEach(() => {
 });
 
 describe("useMatchmakingQueue socket ownership", () => {
+  it("uses the MsgPack parser for public queue telemetry", () => {
+    renderQueue();
+
+    expect(socketIo.io).toHaveBeenCalledWith(
+      expect.stringContaining("/queue"),
+      expect.objectContaining({ parser: socketIo.msgpackParser }),
+    );
+  });
+
   it("reuses the initial connecting socket when the browser reports online", () => {
     renderQueue();
 

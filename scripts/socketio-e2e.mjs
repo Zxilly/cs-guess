@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawn } from "node:child_process";
 import { io } from "socket.io-client";
+import * as msgpackParser from "socket.io-msgpack-parser";
 
 const timeout = (promise, ms, label) =>
   Promise.race([
@@ -77,6 +78,7 @@ function waitForMatchingEvent(socket, event, predicate) {
 function createSocket(baseUrl, namespace, auth = undefined, reconnect = false) {
   return io(`${baseUrl}${namespace}`, {
     path: "/socket.io",
+    parser: msgpackParser,
     auth,
     forceNew: true,
     reconnection: reconnect,

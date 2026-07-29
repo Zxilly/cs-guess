@@ -27,11 +27,15 @@ import { useDebugStore } from "@/stores/debug-store";
 
 type SocketHandler = (...args: any[]) => void;
 
-const socketIo = vi.hoisted(() => ({ io: vi.fn() }));
+const socketIo = vi.hoisted(() => ({
+  io: vi.fn(),
+  msgpackParser: { protocol: 5 },
+}));
 
 vi.mock("socket.io-client", () => ({
   io: socketIo.io,
 }));
+vi.mock("socket.io-msgpack-parser", () => socketIo.msgpackParser);
 
 class MockSocket {
   connected = false;
@@ -348,7 +352,10 @@ describe("useRealtimeRoom socket ownership and synchronization", () => {
 
     expect(socketIo.io).toHaveBeenCalledWith(
       expect.stringContaining("/room"),
-      expect.objectContaining({ forceNew: true }),
+      expect.objectContaining({
+        forceNew: true,
+        parser: socketIo.msgpackParser,
+      }),
     );
     expect(sockets).toHaveLength(2);
     expect(sockets[0]?.disconnectCalls).toBe(1);
