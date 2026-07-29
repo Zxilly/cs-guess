@@ -398,9 +398,9 @@ impl AppState {
     ) -> Result<SessionResponse, AppError> {
         validate_identity_id(&identity_id)?;
         validate_best_of(best_of)?;
-        if !(2..=8).contains(&max_players) {
+        if !matches!(max_players, 2 | 4) {
             return Err(AppError::BadRequest(
-                "max_players must be between 2 and 8".to_owned(),
+                "max_players must be 2 or 4".to_owned(),
             ));
         }
 

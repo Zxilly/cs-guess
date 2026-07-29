@@ -27,7 +27,7 @@ async fn public_api_rejects_invalid_input_and_reports_readiness() {
                     json!({
                         "identity_id": "",
                         "visibility": "hidden",
-                        "max_players": 9
+                        "max_players": 3
                     })
                     .to_string(),
                 ))

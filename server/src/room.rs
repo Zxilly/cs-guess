@@ -20,9 +20,10 @@ use crate::{
     config::Config,
     error::AppError,
     protocol::{
-        ClientMessage, Difficulty, FinishReason, GuessView, MAX_GUESSES, OpponentProgressView,
-        Phase, PlayerView, RoomKind, RoundResultView, RoundStandingView, ScoreView,
-        SeriesFinishReason, SeriesStandingView, SeriesStatus, ServerMessage, Snapshot, Visibility,
+        ClientMessage, Difficulty, FinishReason, GuessView, OpponentProgressView, Phase,
+        PlayerView, RematchDecision, RematchResponseView, RematchStatus, RematchView, RoomKind,
+        RoundResultView, RoundStandingView, ScoreView, SeriesFinishReason, SeriesStandingView,
+        SeriesStatus, ServerMessage, Snapshot, Visibility,
     },
     state::QueueTelemetry,
 };
@@ -243,6 +244,9 @@ enum RoomCommand {
         reply: oneshot::Sender<Result<CancelledMatch, AppError>>,
     },
     StartIfReady,
+    FinalizeRematch {
+        invitation_id: Uuid,
+    },
     #[cfg(test)]
     Target {
         reply: oneshot::Sender<&'static str>,
@@ -276,6 +280,17 @@ struct CachedGuess {
     correct: bool,
 }
 
+struct RematchInvitation {
+    invitation_id: Uuid,
+    requester_player_id: Uuid,
+    status: RematchStatus,
+    expires_at: Instant,
+    expires_at_unix_ms: u64,
+    responses: HashMap<Uuid, RematchDecision>,
+    transition_at: Option<Instant>,
+    clear_at: Option<Instant>,
+}
+
 struct RoomActor {
     room_code: String,
     kind: RoomKind,
@@ -305,6 +320,8 @@ struct RoomActor {
     config: Config,
     queue_telemetry: Arc<QueueTelemetry>,
     telemetry_active: bool,
+    rematch: Option<RematchInvitation>,
+    command_tx: mpsc::Sender<RoomCommand>,
 }
 
 pub struct RoomSpec {
@@ -372,6 +389,8 @@ pub fn spawn_room(spec: RoomSpec, config: Config, shutdown: CancellationToken) -
         config,
         queue_telemetry,
         telemetry_active: false,
+        rematch: None,
+        command_tx: tx.clone(),
     };
     tokio::spawn(actor.run(rx, shutdown));
     RoomHandle { tx }
@@ -483,6 +502,9 @@ impl RoomActor {
                     self.start_round();
                 }
             }
+            RoomCommand::FinalizeRematch { invitation_id } => {
+                self.finalize_rematch(invitation_id);
+            }
             #[cfg(test)]
             RoomCommand::Target { reply } => {
                 let _ = reply.send(self.target_id);
@@ -548,6 +570,7 @@ impl RoomActor {
             .find(|player| bool::from(player.token_hash.ct_eq(&token_hash)))
             .map(|player| player.player_id)
             .ok_or(AppError::Unauthorized)?;
+        self.fail_rematch_for_disconnect(player_id);
         let was_waiting = self.phase == Phase::Waiting;
         let was_playing = self.phase == Phase::Playing;
         let mut final_standings = (!was_waiting).then(|| {
@@ -673,7 +696,13 @@ impl RoomActor {
 
         let seq = self.next_seq();
         let snapshot = self.snapshot_for(player_id);
-        self.send_to(player_id, ServerMessage::Snapshot { seq, snapshot });
+        self.send_to(
+            player_id,
+            ServerMessage::Snapshot {
+                seq,
+                snapshot: Box::new(snapshot),
+            },
+        );
         let seq = self.next_seq();
         self.broadcast_except(
             player_id,
@@ -726,7 +755,28 @@ impl RoomActor {
                         .and_then(|player| player.disconnect_deadline_unix_ms),
                 },
             );
+            if self.fail_rematch_for_disconnect(player_id) {
+                self.broadcast_snapshots();
+            }
         }
+    }
+
+    fn fail_rematch_for_disconnect(&mut self, player_id: Uuid) -> bool {
+        let should_fail = self.rematch.as_ref().is_some_and(|invitation| {
+            matches!(
+                invitation.status,
+                RematchStatus::Pending | RematchStatus::Starting
+            ) && invitation.responses.contains_key(&player_id)
+        });
+        if !should_fail {
+            return false;
+        }
+        if let Some(invitation) = self.rematch.as_mut() {
+            invitation.status = RematchStatus::OpponentOffline;
+            invitation.transition_at = None;
+            invitation.clear_at = Some(Instant::now() + self.config.rematch_terminal_retention);
+        }
+        true
     }
 
     fn handle_client(&mut self, player_id: Uuid, message: ClientMessage) {
@@ -821,11 +871,225 @@ impl RoomActor {
                     self.ack(player_id, request_id);
                 }
             }
+            ClientMessage::RequestRematch { request_id } => {
+                if self.is_duplicate(player_id, request_id) {
+                    self.ack(player_id, request_id);
+                    return;
+                }
+                self.request_rematch(player_id, request_id);
+            }
+            ClientMessage::RespondRematch {
+                request_id,
+                invitation_id,
+                accept,
+            } => {
+                if self.is_duplicate(player_id, request_id) {
+                    self.ack(player_id, request_id);
+                    return;
+                }
+                self.respond_rematch(player_id, request_id, invitation_id, accept);
+            }
+            ClientMessage::CancelRematch {
+                request_id,
+                invitation_id,
+            } => {
+                if self.is_duplicate(player_id, request_id) {
+                    self.ack(player_id, request_id);
+                    return;
+                }
+                self.cancel_rematch(player_id, request_id, invitation_id);
+            }
             ClientMessage::Guess {
                 request_id,
                 player_id: guessed_player_id,
             } => self.guess(player_id, request_id, guessed_player_id),
         }
+    }
+
+    fn request_rematch(&mut self, player_id: Uuid, request_id: Uuid) {
+        if self.kind != RoomKind::Quick {
+            self.error(
+                player_id,
+                Some(request_id),
+                "forbidden",
+                "rematch invitations are only available in quick matches",
+            );
+            return;
+        }
+        if self.phase != Phase::Finished || self.series_status == SeriesStatus::Active {
+            self.error(
+                player_id,
+                Some(request_id),
+                "series_not_finished",
+                "the series is not ready for a rematch",
+            );
+            return;
+        }
+        if self.rematch.is_some() {
+            self.error(
+                player_id,
+                Some(request_id),
+                "rematch_pending",
+                "a rematch invitation is already active",
+            );
+            return;
+        }
+
+        self.mark_seen(player_id, request_id);
+        let now = Instant::now();
+        let expires_at = now + self.config.rematch_invite_timeout;
+        let expires_at_unix_ms = unix_ms() + self.config.rematch_invite_timeout.as_millis() as u64;
+        let all_opponents_connected = self.players.len() == usize::from(self.max_players)
+            && self.players.values().all(|player| {
+                player.player_id == player_id
+                    || (player.outbound.is_some() && player.disconnected_at.is_none())
+            });
+        let responses = self
+            .players
+            .keys()
+            .map(|candidate| {
+                (
+                    *candidate,
+                    if *candidate == player_id {
+                        RematchDecision::Accepted
+                    } else {
+                        RematchDecision::Pending
+                    },
+                )
+            })
+            .collect();
+        self.rematch = Some(RematchInvitation {
+            invitation_id: Uuid::new_v4(),
+            requester_player_id: player_id,
+            status: if all_opponents_connected {
+                RematchStatus::Pending
+            } else {
+                RematchStatus::OpponentOffline
+            },
+            expires_at,
+            expires_at_unix_ms,
+            responses,
+            transition_at: None,
+            clear_at: (!all_opponents_connected)
+                .then(|| now + self.config.rematch_terminal_retention),
+        });
+        self.broadcast_snapshots();
+        self.ack(player_id, request_id);
+    }
+
+    fn respond_rematch(
+        &mut self,
+        player_id: Uuid,
+        request_id: Uuid,
+        invitation_id: Uuid,
+        accept: bool,
+    ) {
+        let valid = self.rematch.as_ref().is_some_and(|invitation| {
+            invitation.invitation_id == invitation_id
+                && invitation.status == RematchStatus::Pending
+                && invitation.requester_player_id != player_id
+                && invitation.responses.contains_key(&player_id)
+        });
+        if !valid {
+            self.error(
+                player_id,
+                Some(request_id),
+                "rematch_not_pending",
+                "the rematch invitation is no longer awaiting this response",
+            );
+            return;
+        }
+
+        self.mark_seen(player_id, request_id);
+        let now = Instant::now();
+        if let Some(invitation) = self.rematch.as_mut() {
+            invitation.responses.insert(
+                player_id,
+                if accept {
+                    RematchDecision::Accepted
+                } else {
+                    RematchDecision::Declined
+                },
+            );
+            if !accept {
+                invitation.status = RematchStatus::Declined;
+                invitation.clear_at = Some(now + self.config.rematch_terminal_retention);
+            } else if invitation
+                .responses
+                .values()
+                .all(|decision| *decision == RematchDecision::Accepted)
+            {
+                invitation.status = RematchStatus::Starting;
+                invitation.transition_at = Some(now + self.config.rematch_start_transition);
+            }
+        }
+        let start = self.rematch.as_ref().and_then(|invitation| {
+            (invitation.status == RematchStatus::Starting).then_some(invitation.invitation_id)
+        });
+        if let Some(invitation_id) = start {
+            let command_tx = self.command_tx.clone();
+            let delay = self.config.rematch_start_transition;
+            tokio::spawn(async move {
+                tokio::time::sleep(delay).await;
+                let _ = command_tx
+                    .send(RoomCommand::FinalizeRematch { invitation_id })
+                    .await;
+            });
+        }
+        self.broadcast_snapshots();
+        self.ack(player_id, request_id);
+    }
+
+    fn finalize_rematch(&mut self, invitation_id: Uuid) {
+        let valid = self.rematch.as_ref().is_some_and(|invitation| {
+            invitation.invitation_id == invitation_id
+                && invitation.status == RematchStatus::Starting
+        });
+        if !valid {
+            return;
+        }
+        let ready = self.players.len() == usize::from(self.max_players)
+            && self
+                .players
+                .values()
+                .all(|player| player.outbound.is_some() && player.disconnected_at.is_none());
+        if ready {
+            self.rematch = None;
+            self.restart_series();
+            self.start_round();
+        } else {
+            if let Some(invitation) = self.rematch.as_mut() {
+                invitation.status = RematchStatus::OpponentOffline;
+                invitation.transition_at = None;
+                invitation.clear_at = Some(Instant::now() + self.config.rematch_terminal_retention);
+            }
+            self.broadcast_snapshots();
+        }
+    }
+
+    fn cancel_rematch(&mut self, player_id: Uuid, request_id: Uuid, invitation_id: Uuid) {
+        let valid = self.rematch.as_ref().is_some_and(|invitation| {
+            invitation.invitation_id == invitation_id
+                && invitation.requester_player_id == player_id
+                && invitation.status == RematchStatus::Pending
+        });
+        if !valid {
+            self.error(
+                player_id,
+                Some(request_id),
+                "rematch_not_pending",
+                "the rematch invitation can no longer be cancelled",
+            );
+            return;
+        }
+
+        self.mark_seen(player_id, request_id);
+        if let Some(invitation) = self.rematch.as_mut() {
+            invitation.status = RematchStatus::Cancelled;
+            invitation.clear_at = Some(Instant::now() + self.config.rematch_terminal_retention);
+        }
+        self.broadcast_snapshots();
+        self.ack(player_id, request_id);
     }
 
     fn guess(&mut self, actor_id: Uuid, request_id: Uuid, guessed_player_id: String) {
@@ -876,7 +1140,8 @@ impl RoomActor {
         let Some(participant) = self.players.get_mut(&actor_id) else {
             return;
         };
-        if participant.guesses.len() >= MAX_GUESSES {
+        let max_guesses = self.difficulty.max_guesses();
+        if participant.guesses.len() >= max_guesses {
             self.error(
                 actor_id,
                 Some(request_id),
@@ -945,7 +1210,7 @@ impl RoomActor {
         } else if self
             .players
             .values()
-            .all(|player| player.forfeited_round || player.guesses.len() >= MAX_GUESSES)
+            .all(|player| player.forfeited_round || player.guesses.len() >= max_guesses)
         {
             self.finish_round(None, FinishReason::MaxGuesses);
         }
@@ -1120,6 +1385,7 @@ impl RoomActor {
         self.deadline_unix_ms = None;
         self.next_round_at = None;
         self.next_round_unix_ms = None;
+        self.rematch = None;
         self.rotate_target();
         for player in self.players.values_mut() {
             player.score = 0;
@@ -1135,7 +1401,13 @@ impl RoomActor {
         for player_id in recipients {
             let seq = self.next_seq();
             let snapshot = self.snapshot_for(player_id);
-            self.send_to(player_id, ServerMessage::Snapshot { seq, snapshot });
+            self.send_to(
+                player_id,
+                ServerMessage::Snapshot {
+                    seq,
+                    snapshot: Box::new(snapshot),
+                },
+            );
         }
     }
 
@@ -1213,7 +1485,13 @@ impl RoomActor {
         for player_id in recipients {
             let seq = self.next_seq();
             let snapshot = self.snapshot_for(player_id);
-            self.send_to(player_id, ServerMessage::Snapshot { seq, snapshot });
+            self.send_to(
+                player_id,
+                ServerMessage::Snapshot {
+                    seq,
+                    snapshot: Box::new(snapshot),
+                },
+            );
         }
     }
 
@@ -1335,6 +1613,55 @@ impl RoomActor {
     }
 
     fn maintain(&mut self) {
+        let now = Instant::now();
+        let rematch_action = self.rematch.as_ref().and_then(|invitation| {
+            if invitation.status == RematchStatus::Pending && now >= invitation.expires_at {
+                Some("expire")
+            } else if invitation.status == RematchStatus::Starting
+                && invitation
+                    .transition_at
+                    .is_some_and(|deadline| now >= deadline)
+            {
+                Some("start")
+            } else if invitation.clear_at.is_some_and(|deadline| now >= deadline) {
+                Some("clear")
+            } else {
+                None
+            }
+        });
+        match rematch_action {
+            Some("expire") => {
+                if let Some(invitation) = self.rematch.as_mut() {
+                    invitation.status = RematchStatus::Expired;
+                    invitation.clear_at = Some(now + self.config.rematch_terminal_retention);
+                }
+                self.broadcast_snapshots();
+            }
+            Some("start") => {
+                let ready = self.players.len() == usize::from(self.max_players)
+                    && self.players.values().all(|player| {
+                        player.outbound.is_some() && player.disconnected_at.is_none()
+                    });
+                if ready {
+                    self.rematch = None;
+                    self.restart_series();
+                    self.start_round();
+                } else {
+                    if let Some(invitation) = self.rematch.as_mut() {
+                        invitation.status = RematchStatus::OpponentOffline;
+                        invitation.transition_at = None;
+                        invitation.clear_at = Some(now + self.config.rematch_terminal_retention);
+                    }
+                    self.broadcast_snapshots();
+                }
+            }
+            Some("clear") => {
+                self.rematch = None;
+                self.broadcast_snapshots();
+            }
+            _ => {}
+        }
+
         if self.phase == Phase::Playing {
             let forfeit_after = self.config.disconnect_forfeit;
             let mut newly_forfeited = Vec::new();
@@ -1480,7 +1807,7 @@ impl RoomActor {
             self_player_id,
             host_player_id: self.host_player_id,
             max_players: self.max_players,
-            max_guesses: MAX_GUESSES,
+            max_guesses: self.difficulty.max_guesses(),
             best_of: self.best_of,
             round_number: self.round_number,
             deadline_unix_ms: self.deadline_unix_ms,
@@ -1513,7 +1840,40 @@ impl RoomActor {
             round_results: self.round_results.clone(),
             finish_reason: self.finish_reason,
             mystery_id: reveal.then(|| self.target_id.to_owned()),
+            rematch: self.rematch_view(),
         }
+    }
+
+    fn rematch_view(&self) -> Option<RematchView> {
+        let invitation = self.rematch.as_ref()?;
+        let mut responses = self
+            .players
+            .values()
+            .filter_map(|player| {
+                invitation
+                    .responses
+                    .get(&player.player_id)
+                    .copied()
+                    .map(|decision| RematchResponseView {
+                        player_id: player.player_id,
+                        display_name: player.display_name.clone(),
+                        decision,
+                    })
+            })
+            .collect::<Vec<_>>();
+        responses.sort_by_key(|response| {
+            self.players
+                .get(&response.player_id)
+                .map(|player| player.seat_index)
+                .unwrap_or(u8::MAX)
+        });
+        Some(RematchView {
+            invitation_id: invitation.invitation_id,
+            requester_player_id: invitation.requester_player_id,
+            status: invitation.status,
+            expires_at_unix_ms: invitation.expires_at_unix_ms,
+            responses,
+        })
     }
 
     fn send_guess_ack(&mut self, actor_id: Uuid, request_id: Uuid, cached: &CachedGuess) {
@@ -1774,6 +2134,9 @@ fn matched_fields(guess: &CatalogPlayer, target: &CatalogPlayer) -> Vec<&'static
     if guess.majors == target.majors {
         result.push("major_appearances");
     }
+    if guess.major_wins == target.major_wins {
+        result.push("major_wins");
+    }
     result
 }
 
@@ -1830,6 +2193,91 @@ mod tests {
     use super::*;
     use tokio::time::timeout;
 
+    struct CompletedQuickRoom {
+        room: RoomHandle,
+        host: NewPlayer,
+        guest: NewPlayer,
+        host_connection: Uuid,
+        guest_connection: Uuid,
+        _host_rx: mpsc::Receiver<OutboundMessage>,
+        _guest_rx: mpsc::Receiver<OutboundMessage>,
+    }
+
+    async fn completed_quick_room(room_code: &str, mut config: Config) -> CompletedQuickRoom {
+        config.rematch_invite_timeout = Duration::from_secs(1);
+        config.rematch_terminal_retention = Duration::from_secs(1);
+        config.rematch_start_transition = Duration::from_millis(20);
+        let host = NewPlayer::new("0samas".to_owned()).unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: room_code.to_owned(),
+                kind: RoomKind::Quick,
+                visibility: Visibility::Hidden,
+                difficulty: Difficulty::Hard,
+                max_players: 2,
+                best_of: 1,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+            },
+            config,
+            CancellationToken::new(),
+        );
+        let guest = room.reserve_player("1nvisiblee".to_owned()).await.unwrap();
+        let (host_tx, host_rx) = mpsc::channel(64);
+        let (guest_tx, guest_rx) = mpsc::channel(64);
+        let (_, host_connection) = room
+            .connect(host.session_token.clone(), host_tx)
+            .await
+            .unwrap();
+        let (_, guest_connection) = room
+            .connect(guest.session_token.clone(), guest_tx)
+            .await
+            .unwrap();
+        timeout(Duration::from_secs(1), async {
+            loop {
+                if room.snapshot(host.player_id).await.unwrap().phase == Phase::Playing {
+                    break;
+                }
+                tokio::time::sleep(Duration::from_millis(5)).await;
+            }
+        })
+        .await
+        .expect("quick room starts");
+        let target_id = room.target_id().await.to_owned();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::Guess {
+                request_id: Uuid::new_v4(),
+                player_id: target_id,
+            },
+        )
+        .await
+        .unwrap();
+        timeout(Duration::from_secs(1), async {
+            loop {
+                let snapshot = room.snapshot(host.player_id).await.unwrap();
+                if snapshot.phase == Phase::Finished
+                    && snapshot.series_status == SeriesStatus::Completed
+                {
+                    break;
+                }
+                tokio::time::sleep(Duration::from_millis(5)).await;
+            }
+        })
+        .await
+        .expect("quick series completes");
+        CompletedQuickRoom {
+            room,
+            host,
+            guest,
+            host_connection,
+            guest_connection,
+            _host_rx: host_rx,
+            _guest_rx: guest_rx,
+        }
+    }
+
     #[test]
     fn comparison_only_returns_exact_fields() {
         let guess = CatalogPlayer {
@@ -1854,7 +2302,7 @@ mod tests {
         };
 
         let result = matched_fields(&guess, &target);
-        assert_eq!(result, vec!["team"]);
+        assert_eq!(result, vec!["team", "major_wins"]);
     }
 
     #[test]
@@ -1911,6 +2359,187 @@ mod tests {
                 .token_hash
                 .ct_eq(&hash_token(&first.session_token))
         ));
+    }
+
+    #[tokio::test]
+    async fn quick_rematch_restarts_only_after_every_opponent_accepts() {
+        let fixture = completed_quick_room("CS-515151", Config::for_test()).await;
+        fixture
+            .room
+            .client_message(
+                fixture.host.player_id,
+                fixture.host_connection,
+                ClientMessage::RequestRematch {
+                    request_id: Uuid::new_v4(),
+                },
+            )
+            .await
+            .unwrap();
+        let invitation = timeout(Duration::from_secs(1), async {
+            loop {
+                if let Some(invitation) = fixture
+                    .room
+                    .snapshot(fixture.guest.player_id)
+                    .await
+                    .unwrap()
+                    .rematch
+                {
+                    break invitation;
+                }
+                tokio::time::sleep(Duration::from_millis(5)).await;
+            }
+        })
+        .await
+        .expect("guest receives the invitation");
+        assert_eq!(invitation.status, RematchStatus::Pending);
+        assert_eq!(invitation.requester_player_id, fixture.host.player_id);
+
+        fixture
+            .room
+            .client_message(
+                fixture.guest.player_id,
+                fixture.guest_connection,
+                ClientMessage::RespondRematch {
+                    request_id: Uuid::new_v4(),
+                    invitation_id: invitation.invitation_id,
+                    accept: true,
+                },
+            )
+            .await
+            .unwrap();
+        timeout(Duration::from_secs(1), async {
+            loop {
+                let snapshot = fixture.room.snapshot(fixture.host.player_id).await.unwrap();
+                if snapshot.phase == Phase::Playing
+                    && snapshot.series_status == SeriesStatus::Active
+                    && snapshot.round_number == 1
+                    && snapshot.rematch.is_none()
+                    && snapshot.players.iter().all(|player| player.score == 0)
+                {
+                    break;
+                }
+                tokio::time::sleep(Duration::from_millis(5)).await;
+            }
+        })
+        .await
+        .expect("accepted rematch starts a fresh series");
+    }
+
+    #[tokio::test]
+    async fn quick_rematch_reports_decline_without_resetting_the_series() {
+        let fixture = completed_quick_room("CS-525252", Config::for_test()).await;
+        fixture
+            .room
+            .client_message(
+                fixture.host.player_id,
+                fixture.host_connection,
+                ClientMessage::RequestRematch {
+                    request_id: Uuid::new_v4(),
+                },
+            )
+            .await
+            .unwrap();
+        let invitation = timeout(Duration::from_secs(1), async {
+            loop {
+                if let Some(invitation) = fixture
+                    .room
+                    .snapshot(fixture.guest.player_id)
+                    .await
+                    .unwrap()
+                    .rematch
+                {
+                    break invitation;
+                }
+                tokio::time::sleep(Duration::from_millis(5)).await;
+            }
+        })
+        .await
+        .expect("guest receives the invitation");
+        fixture
+            .room
+            .client_message(
+                fixture.guest.player_id,
+                fixture.guest_connection,
+                ClientMessage::RespondRematch {
+                    request_id: Uuid::new_v4(),
+                    invitation_id: invitation.invitation_id,
+                    accept: false,
+                },
+            )
+            .await
+            .unwrap();
+        let declined = timeout(Duration::from_secs(1), async {
+            loop {
+                let snapshot = fixture.room.snapshot(fixture.host.player_id).await.unwrap();
+                if snapshot
+                    .rematch
+                    .as_ref()
+                    .is_some_and(|rematch| rematch.status == RematchStatus::Declined)
+                {
+                    break snapshot;
+                }
+                tokio::time::sleep(Duration::from_millis(5)).await;
+            }
+        })
+        .await
+        .expect("requester sees the decline");
+        assert_eq!(declined.phase, Phase::Finished);
+        assert_eq!(declined.series_status, SeriesStatus::Completed);
+    }
+
+    #[tokio::test]
+    async fn quick_rematch_reports_an_opponent_disconnect() {
+        let fixture = completed_quick_room("CS-535353", Config::for_test()).await;
+        fixture
+            .room
+            .client_message(
+                fixture.host.player_id,
+                fixture.host_connection,
+                ClientMessage::RequestRematch {
+                    request_id: Uuid::new_v4(),
+                },
+            )
+            .await
+            .unwrap();
+        timeout(Duration::from_secs(1), async {
+            loop {
+                if fixture
+                    .room
+                    .snapshot(fixture.host.player_id)
+                    .await
+                    .unwrap()
+                    .rematch
+                    .is_some()
+                {
+                    break;
+                }
+                tokio::time::sleep(Duration::from_millis(5)).await;
+            }
+        })
+        .await
+        .expect("request is active");
+        fixture
+            .room
+            .disconnect(fixture.guest.player_id, fixture.guest_connection)
+            .await;
+        timeout(Duration::from_secs(1), async {
+            loop {
+                if fixture
+                    .room
+                    .snapshot(fixture.host.player_id)
+                    .await
+                    .unwrap()
+                    .rematch
+                    .as_ref()
+                    .is_some_and(|rematch| rematch.status == RematchStatus::OpponentOffline)
+                {
+                    break;
+                }
+                tokio::time::sleep(Duration::from_millis(5)).await;
+            }
+        })
+        .await
+        .expect("requester sees the opponent offline state");
     }
 
     #[tokio::test]
@@ -2385,10 +3014,10 @@ mod tests {
         let misses = PLAYERS
             .iter()
             .filter(|player| player.id != target)
-            .take(MAX_GUESSES)
+            .take(Difficulty::Hard.max_guesses())
             .map(|player| player.id.clone())
             .collect::<Vec<_>>();
-        assert_eq!(misses.len(), MAX_GUESSES);
+        assert_eq!(misses.len(), Difficulty::Hard.max_guesses());
         for miss in &misses {
             room.client_message(
                 host.player_id,

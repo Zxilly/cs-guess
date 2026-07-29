@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-pub const MAX_GUESSES: usize = 8;
+pub const STANDARD_MAX_GUESSES: usize = 8;
+pub const MAX_GUESSES: usize = 10;
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "snake_case")]
@@ -18,6 +19,15 @@ pub enum Difficulty {
     Easy,
     Full,
     Hard,
+}
+
+impl Difficulty {
+    pub const fn max_guesses(self) -> usize {
+        match self {
+            Self::Easy | Self::Full => STANDARD_MAX_GUESSES,
+            Self::Hard => MAX_GUESSES,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -60,6 +70,41 @@ pub enum SeriesFinishReason {
     ScoreLimit,
     MemberLeftForfeit,
     MemberLeftAbandoned,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum RematchStatus {
+    Pending,
+    Starting,
+    Declined,
+    Cancelled,
+    Expired,
+    OpponentOffline,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum RematchDecision {
+    Pending,
+    Accepted,
+    Declined,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct RematchResponseView {
+    pub player_id: Uuid,
+    pub display_name: String,
+    pub decision: RematchDecision,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct RematchView {
+    pub invitation_id: Uuid,
+    pub requester_player_id: Uuid,
+    pub status: RematchStatus,
+    pub expires_at_unix_ms: u64,
+    pub responses: Vec<RematchResponseView>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -239,6 +284,8 @@ pub struct Snapshot {
     pub finish_reason: Option<FinishReason>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mystery_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rematch: Option<RematchView>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -294,6 +341,18 @@ pub enum ClientMessage {
     RestartSeries {
         request_id: Uuid,
     },
+    RequestRematch {
+        request_id: Uuid,
+    },
+    RespondRematch {
+        request_id: Uuid,
+        invitation_id: Uuid,
+        accept: bool,
+    },
+    CancelRematch {
+        request_id: Uuid,
+        invitation_id: Uuid,
+    },
 }
 
 impl ClientMessage {
@@ -302,7 +361,10 @@ impl ClientMessage {
             Self::StartRound { request_id }
             | Self::Guess { request_id, .. }
             | Self::SetVisibility { request_id, .. }
-            | Self::RestartSeries { request_id } => *request_id,
+            | Self::RestartSeries { request_id }
+            | Self::RequestRematch { request_id }
+            | Self::RespondRematch { request_id, .. }
+            | Self::CancelRematch { request_id, .. } => *request_id,
         }
     }
 }
@@ -312,7 +374,7 @@ impl ClientMessage {
 pub enum ServerMessage {
     Snapshot {
         seq: u64,
-        snapshot: Snapshot,
+        snapshot: Box<Snapshot>,
     },
     PlayerJoined {
         seq: u64,
@@ -393,7 +455,7 @@ pub enum ServerMessage {
 }
 
 fn default_max_players() -> u8 {
-    8
+    4
 }
 
 fn default_best_of() -> u8 {
