@@ -1,0 +1,24 @@
+{{Infobox player
+|id=MachineWJQ
+|ids=Machine, WJQ, 6657, 玩机器, C9的Shroud本人
+|name=刘亦博
+|romanized_name=Liu Yibo
+|image=MachineWJQ at prohouse 2020.jpg
+|birth_date=1996-01-11
+|country=China
+|csgo=y
+|cs2=y
+|team=
+|status=Active
+|years_active=2017 – 2020
+|years_active_talent=2017 – '''Present'''
+|roles=caster
+|steam64ID=76561198146323670
+|faceitdb=7a891824-0967-4d59-b0c1-660bbf45c6a6
+|team_history=
+{{TH|2020-02-?? — 2020-11-?? |Team Zero (Chinese team)}}
+}}
+
+Liu "'''MachineWJQ'''" Yibo (also known as '''6657''' and '''玩机器''')
+is a Chinese professional Counter-Strike 2 caster and a former professional
+Counter-Strike: Global Offensive player.

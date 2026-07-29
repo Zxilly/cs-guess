@@ -44,6 +44,28 @@ def test_app_catalog_derives_age_country_name_and_stable_public_fields():
     ]
 
 
+def test_app_catalog_preserves_searchable_player_aliases():
+    [player] = build_app_catalog(
+        [
+            {
+                "id": "internal-machine",
+                "nickname": "MachineWJQ",
+                "aliases": ["6657", "玩机器", "刘亦博"],
+                "fullName": "Liu Yibo",
+                "countryCode": "CN",
+                "birthDate": "1996-01-11",
+                "currentTeam": None,
+                "role": "Unknown",
+                "majorAppearances": 0,
+                "majorWins": 0,
+            }
+        ],
+        today=date(2026, 7, 29),
+    )
+
+    assert player["aliases"] == ["6657", "玩机器", "刘亦博"]
+
+
 def test_duplicate_nicknames_receive_deterministic_disambiguated_ids():
     records = [
         {

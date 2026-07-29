@@ -5,7 +5,7 @@ import { players } from "@/data/players";
 describe("generated player catalog", () => {
   it("keeps the reviewed snapshot structurally valid", () => {
     const invalidTeamNames = new Set(["", "undefined", "null", "none", "n/a"]);
-    expect(players).toHaveLength(2_754);
+    expect(players).toHaveLength(2_774);
     expect(new Set(players.map((player) => player.id)).size).toBe(
       players.length,
     );
@@ -17,6 +17,22 @@ describe("generated player catalog", () => {
           invalidTeamNames.has(player.team.trim().toLocaleLowerCase()),
       ),
     ).toEqual([]);
+  });
+
+  it("includes verified former Chinese players outside the active player category", () => {
+    const machineWjq = players.find(
+      (player) => player.nickname === "MachineWJQ",
+    );
+
+    expect(machineWjq).toMatchObject({
+      name: "Liu Yibo",
+      countryCode: "CN",
+      role: "Unknown",
+      team: "无队伍",
+    });
+    expect(machineWjq?.aliases).toEqual(
+      expect.arrayContaining(["6657", "玩机器", "刘亦博"]),
+    );
   });
 
   it("never presents a departed roster as a current team", () => {

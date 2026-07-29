@@ -52,6 +52,22 @@
     "imageUrl": "https://files.bo3.gg/uploads/player/36613/image/webp-95d0d12e3322ce419654c353cf5e760e.webp"
   },
   {
+    "id": "117",
+    "nickname": "117",
+    "name": "Shen Weirong",
+    "team": "TYLOO",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 43,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "沈伟荣"
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/757/image/17873415da0f03df35299283b43408d7.png"
+  },
+  {
     "id": "18ym",
     "nickname": "18yM",
     "name": "Liu Yuchao",
@@ -174,14 +190,14 @@
     "id": "333ed2k",
     "nickname": "333ed2k",
     "name": "Sun Shuhao",
-    "team": "Triumphant Song",
+    "team": "Triumphant Song Gaming",
     "nationality": "China",
     "countryCode": "CN",
     "age": 26,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/904/image/e316a39aecd6e10dbd0fa72bc1a7ed74.png",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/20539/image/webp-13b34ddc844e98b50bbe3867bce4b892.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/32185/333ed2k_at_wesg_2016_chn.png"
   },
   {
@@ -299,6 +315,22 @@
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0
+  },
+  {
+    "id": "813",
+    "nickname": "813",
+    "name": "Yu Zhaoheng",
+    "team": "无队伍",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 35,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "于照衡"
+    ],
+    "imageUrl": "https://cdn-api.pandascore.co/images/player/image/24439/813_at_wesg_2016_chn.png"
   },
   {
     "id": "9",
@@ -935,6 +967,23 @@
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/5933/image/webp-089e08fe66827d3e29f67ffa656ef43a.webp"
   },
   {
+    "id": "aiwa",
+    "nickname": "aiwa",
+    "name": "Zheng Aiping",
+    "team": "无队伍",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 43,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "aihua",
+      "爱华",
+      "郑霭平"
+    ]
+  },
+  {
     "id": "aizy",
     "nickname": "aizy",
     "name": "Philip Aistrup Larsen",
@@ -1086,6 +1135,22 @@
     "role": "IGL",
     "majorAppearances": 0,
     "majorWins": 0
+  },
+  {
+    "id": "alex-cn-bian-zhengwei",
+    "nickname": "alex",
+    "name": "Bian Zhengwei",
+    "team": "无队伍",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 44,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "老帅哥",
+      "卞正伟"
+    ]
   },
   {
     "id": "alex",
@@ -2148,6 +2213,16 @@
     "role": "Rifler",
     "majorAppearances": 6,
     "majorWins": 0,
+    "aliases": [
+      "Attacker!!!",
+      "ATTACKER23",
+      "AttackerwOw",
+      "f0restwOw <ref>https://www.hltv.org/news/14000-rising-stars-asia-1-announced</ref>",
+      "fattacker",
+      "白菜",
+      "高考状元",
+      "盛元璋"
+    ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/757/image/17873415da0f03df35299283b43408d7.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17802/attacker_at_e_xtremesland_2019.png"
   },
@@ -2162,6 +2237,16 @@
     "role": "Rifler",
     "majorAppearances": 1,
     "majorWins": 0,
+    "aliases": [
+      "ActIIIMOTTE",
+      "AUMANFEELIT",
+      "aumaNxD",
+      "Missuki",
+      "steV",
+      "uki",
+      "苦行憎-",
+      "刘治宏"
+    ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/22125/image/webp-8eca97650de03df12698cbf78d223d43.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17811/auma_n_at_e_xtremesland_2019.png"
   },
@@ -2712,6 +2797,21 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "imageUrl": "https://files.bo3.gg/uploads/player/18333/image/webp-8608aa18a0a2708c8d9a02796562c3e4.webp"
+  },
+  {
+    "id": "banga",
+    "nickname": "BanGa",
+    "name": "Ying Yilun",
+    "team": "无队伍",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 31,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "应依伦"
+    ]
   },
   {
     "id": "banjo",
@@ -3722,6 +3822,24 @@
     "imageUrl": "https://files.bo3.gg/uploads/player/77875/image/webp-73e5d8d6234b17fc513247af18c1f741.webp"
   },
   {
+    "id": "bottle",
+    "nickname": "bottle",
+    "name": "Mao Lei",
+    "team": "无队伍",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 32,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "bottlejr",
+      "bottleljr",
+      "毛磊"
+    ],
+    "imageUrl": "https://cdn-api.pandascore.co/images/player/image/18197/900px_bottle_at_wesg_2017_china_finals.png"
+  },
+  {
     "id": "bouchard",
     "nickname": "Bouchard",
     "name": "Julie Bouchard",
@@ -4335,7 +4453,7 @@
     "id": "c4llm3su3",
     "nickname": "C4LLM3SU3",
     "name": "Su Qihao",
-    "team": "Lynn Vision Gaming",
+    "team": "Lynn Vision",
     "nationality": "China",
     "countryCode": "CN",
     "age": 22,
@@ -4581,6 +4699,10 @@
     "role": "Rifler",
     "majorAppearances": 1,
     "majorWins": 0,
+    "aliases": [
+      "Mo",
+      "刘珂"
+    ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/1286/image/9646d46cc91c194003cfa724ef54096f.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17678/mo-65fde35a-057d-434c-ab9d-6ab565d5ce43.png"
   },
@@ -4694,7 +4816,7 @@
     "team": "无队伍",
     "nationality": "Taiwan, Province of China",
     "countryCode": "TW",
-    "age": 36,
+    "age": 37,
     "role": "AWPer",
     "majorAppearances": 0,
     "majorWins": 0
@@ -6375,7 +6497,7 @@
     "team": "Bushido Wildcats",
     "nationality": "Türkiye",
     "countryCode": "TR",
-    "age": 21,
+    "age": 22,
     "role": "Entry",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -8524,6 +8646,23 @@
     "majorWins": 0
   },
   {
+    "id": "ed101",
+    "nickname": "ed101",
+    "name": "Han Tianqi",
+    "team": "无队伍",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 38,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "ed101sg",
+      "sg101",
+      "韩天奇"
+    ]
+  },
+  {
     "id": "ed1k",
     "nickname": "Ed1k",
     "name": "Eduard Ivanov",
@@ -8926,7 +9065,7 @@
     "id": "emiliaqaq",
     "nickname": "EmiliaQAQ",
     "name": "Tang Junjie",
-    "team": "Lynn Vision Gaming",
+    "team": "Lynn Vision",
     "nationality": "China",
     "countryCode": "CN",
     "age": 21,
@@ -11543,6 +11682,24 @@
     "imageUrl": "https://files.bo3.gg/uploads/player/30639/image/webp-2e47fd1fe60f99cce41dde457850dfb3.webp"
   },
   {
+    "id": "god-seven",
+    "nickname": "God Seven",
+    "name": "Wei Yufeng",
+    "team": "无队伍",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 34,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "x7",
+      "XiaoQi",
+      "小柒",
+      "魏煜峰"
+    ]
+  },
+  {
     "id": "goddess",
     "nickname": "goddess",
     "name": "Lara Baceiredo",
@@ -13277,7 +13434,7 @@
     "team": "Natus Vincere",
     "nationality": "Romania",
     "countryCode": "RO",
-    "age": 26,
+    "age": 27,
     "role": "Entry",
     "majorAppearances": 7,
     "majorWins": 1,
@@ -15188,6 +15345,26 @@
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/18308/600px_k1to___iem_cologne_2021.png"
   },
   {
+    "id": "k4mi",
+    "nickname": "k4Mi",
+    "name": "Zhu Xielin",
+    "team": "ViCi Gaming",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 25,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "Cyberangel",
+      "k4Mi74",
+      "Kami",
+      "卡斯弥",
+      "朱谢霖"
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/732/image/webp-dcacdb7addc685ea6021f700393e21bd.webp"
+  },
+  {
     "id": "kaahsensei",
     "nickname": "kaahSENSEI",
     "name": "Karina Takahashi",
@@ -15578,6 +15755,16 @@
     "role": "Rifler",
     "majorAppearances": 1,
     "majorWins": 0,
+    "aliases": [
+      "fershits",
+      "KarsaJESUS",
+      "Karsamzing",
+      "kstanlens",
+      "kSTANLENSs",
+      "mafia",
+      "牛人",
+      "苏麒芳"
+    ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/504/image/webp-3b974c99f13748b596839b5e4953c4fe.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/22005/600px_karsaonethree.png"
   },
@@ -16073,6 +16260,26 @@
     "majorWins": 0,
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/1654/image/webp-8957d8fa6aeaf297e95089a7cdc63255.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/29223/image/webp-9c25337f12b928a0988d379640e0e825.webp"
+  },
+  {
+    "id": "kingz",
+    "nickname": "KingZ",
+    "name": "Luo Likan",
+    "team": "无队伍",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 39,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "Kz",
+      "K{{!}}ngz",
+      "Rabbit",
+      "ryk",
+      "大头",
+      "罗利勘"
+    ]
   },
   {
     "id": "kinqie",
@@ -16716,7 +16923,7 @@
     "team": "System5",
     "nationality": "Latvia",
     "countryCode": "LV",
-    "age": 27,
+    "age": 28,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -18599,6 +18806,26 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/28881/get_player_picture.png"
+  },
+  {
+    "id": "machinewjq",
+    "nickname": "MachineWJQ",
+    "name": "Liu Yibo",
+    "team": "无队伍",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 30,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "6657",
+      "C9的Shroud本人",
+      "Machine",
+      "WJQ",
+      "玩机器",
+      "刘亦博"
+    ]
   },
   {
     "id": "mad",
@@ -24838,6 +25065,26 @@
     "imageUrl": "https://files.bo3.gg/uploads/player/50733/image/webp-929bbfee25318f973fad1913def03092.webp"
   },
   {
+    "id": "qz",
+    "nickname": "qz",
+    "name": "Wu Quanqing",
+    "team": "WDNMD",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 35,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "Qiezi",
+      "年轻人",
+      "茄子",
+      "吴权清"
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/2646/image/webp-faaa4ec64942d9e8f9495b713d3774bd.webp",
+    "imageUrl": "https://cdn-api.pandascore.co/images/player/image/24475/900px_qz_at_omen_challenger_series_2019.png"
+  },
+  {
     "id": "r-go",
     "nickname": "R!Go",
     "name": "Mathieu Bridet",
@@ -26242,6 +26489,23 @@
     "imageUrl": "https://files.bo3.gg/uploads/player/38220/image/webp-c8b189130d1e7c57758e637933d743ff.webp"
   },
   {
+    "id": "rita",
+    "nickname": "Rita",
+    "name": "Huang Biaohong",
+    "team": "无队伍",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 38,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "LT",
+      "waerjili",
+      "黄镖洪"
+    ]
+  },
+  {
     "id": "ritchiee",
     "nickname": "ritchiEE",
     "name": "Richard Mestdagh",
@@ -27090,6 +27354,24 @@
     "majorWins": 0,
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/637/image/bbca8149e4329579128f8ace16cc729c.png",
     "imageUrl": "https://files.bo3.gg/uploads/player/28000/image/webp-7abb4a2191347e4a4b671b816011c97b.webp"
+  },
+  {
+    "id": "sakula",
+    "nickname": "sakula",
+    "name": "Wu Runbo",
+    "team": "Let's Quit",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 42,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "6kula",
+      "小波",
+      "吴润波"
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/468/image/9511c536ef89f09eed41f42fceb5e739.png"
   },
   {
     "id": "salazar",
@@ -30018,7 +30300,7 @@
     "id": "starry",
     "nickname": "Starry",
     "name": "Ye Lizhi",
-    "team": "Lynn Vision Gaming",
+    "team": "Lynn Vision",
     "nationality": "China",
     "countryCode": "CN",
     "age": 21,
@@ -30113,7 +30395,7 @@
     "team": "无队伍",
     "nationality": "United States",
     "countryCode": "US",
-    "age": 29,
+    "age": 30,
     "role": "IGL",
     "majorAppearances": 0,
     "majorWins": 0
@@ -30903,6 +31185,23 @@
     "majorWins": 0,
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/5716/image/webp-c20a9e1610e88a415162a8763a1b5430.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/33339/image/webp-ad2c0cde3f812e2d5cf8631b742d0081.webp"
+  },
+  {
+    "id": "t3rry",
+    "nickname": "T3rry",
+    "name": "Wang Hanyao",
+    "team": "Tianjin E9 Esports",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 36,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "ppcol",
+      "T3rrymeister",
+      "王汉尧"
+    ]
   },
   {
     "id": "t4gg3d",
@@ -32091,6 +32390,22 @@
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0
+  },
+  {
+    "id": "tracefire",
+    "nickname": "traceFIRE",
+    "name": "KaiTian Tang",
+    "team": "无队伍",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 31,
+    "role": "Rifler",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "tkt",
+      "唐开天"
+    ]
   },
   {
     "id": "trash",
@@ -33751,7 +34066,7 @@
     "id": "westmelon",
     "nickname": "westmelon",
     "name": "Niu Zhe",
-    "team": "Lynn Vision Gaming",
+    "team": "Lynn Vision",
     "nationality": "China",
     "countryCode": "CN",
     "age": 25,
@@ -34471,6 +34786,22 @@
     "imageUrl": "https://files.bo3.gg/uploads/player/32059/image/webp-b82dee94fa441aedf7551e44ddf451b5.webp"
   },
   {
+    "id": "xf",
+    "nickname": "xf",
+    "name": "Lai Xuefeng",
+    "team": "Steel Helmet",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 38,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "赖雪峰"
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/1286/image/9646d46cc91c194003cfa724ef54096f.png"
+  },
+  {
     "id": "xfl0ud",
     "nickname": "xfl0ud",
     "name": "Yasin Koç",
@@ -34549,6 +34880,22 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17740/xig_n_berlin_minor.png"
+  },
+  {
+    "id": "xinkoing",
+    "nickname": "XinKoiNg",
+    "name": "Cai Zhouxing",
+    "team": "Lynn Vision",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 29,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "蔡周星"
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/476/image/webp-dc07b6696fe9fa7c009eea7649fe1985.webp"
   },
   {
     "id": "xizt",
@@ -34803,6 +35150,21 @@
     "majorWins": 0,
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/9974/image/webp-13470ab4ee340469f4a8784168a5e295.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/26731/image/webp-9c1e8b4410fdaeb8b363a411eb367a36.webp"
+  },
+  {
+    "id": "yancher",
+    "nickname": "yancher",
+    "name": "Zhu Yancheng",
+    "team": "Guangdong UT",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 25,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "朱炎城"
+    ]
   },
   {
     "id": "yanli",
@@ -35200,7 +35562,7 @@
     "id": "z4kr",
     "nickname": "z4kr",
     "name": "Zhang Sike",
-    "team": "Lynn Vision Gaming",
+    "team": "Lynn Vision",
     "nationality": "China",
     "countryCode": "CN",
     "age": 23,
@@ -35692,6 +36054,11 @@
     "role": "Rifler",
     "majorAppearances": 1,
     "majorWins": 0,
+    "aliases": [
+      "osok1",
+      "zhonG",
+      "钟伟杰"
+    ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/757/image/17873415da0f03df35299283b43408d7.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17809/zhoki_ng_at_e_xtremesland_2019.png"
   },
@@ -36141,6 +36508,26 @@
     "majorWins": 3,
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/667/image/webp-292c1f6c6dcfca35c7a52da7e02cef0a.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/18452/900px_zyw_oo_esl_one_cologne_2019.png"
+  },
+  {
+    "id": "zzw",
+    "nickname": "ZZW",
+    "name": "Zheng Zhewei",
+    "team": "无队伍",
+    "nationality": "China",
+    "countryCode": "CN",
+    "age": 29,
+    "role": "Unknown",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "aliases": [
+      "nifty",
+      "Weiwei",
+      "伟伟",
+      "白给奇侠",
+      "锤子",
+      "郑哲伟"
+    ]
   },
   {
     "id": "sego",

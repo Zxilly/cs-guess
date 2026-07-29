@@ -1035,6 +1035,53 @@ def test_merge_matches_exact_nickname_birth_country_across_stale_teams(
     assert players[0]["image_url"] == "https://cdn.example/snax.png"
 
 
+def test_verified_former_player_without_weapon_role_is_guessable_as_unknown(
+    tmp_path,
+):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "MachineWJQ",
+                "nickname": "MachineWJQ",
+                "full_name": "Liu Yibo",
+                "country_code": "CN",
+                "birth_date": "1996-01-11",
+                "status": "active",
+                "roles": [],
+                "aliases": ["Machine", "WJQ", "6657", "玩机器", "刘亦博"],
+                "native_name": "刘亦博",
+                "has_player_career_evidence": True,
+            },
+        )
+
+        store.merge_all()
+        player = store.connection.execute(
+            """
+            SELECT is_guessable, exclusion_reason,
+                   has_player_career_evidence
+            FROM players WHERE id = ?
+            """,
+            (player_id,),
+        ).fetchone()
+        [record] = store.export_game_records()
+
+    assert dict(player) == {
+        "is_guessable": 1,
+        "exclusion_reason": None,
+        "has_player_career_evidence": 1,
+    }
+    assert record["nickname"] == "MachineWJQ"
+    assert record["role"] == "Unknown"
+    assert record["aliases"] == [
+        "6657",
+        "Machine",
+        "WJQ",
+        "玩机器",
+        "刘亦博",
+    ]
+
+
 def test_merge_accepts_exact_name_nickname_country_with_provider_date_typo(
     tmp_path,
 ):

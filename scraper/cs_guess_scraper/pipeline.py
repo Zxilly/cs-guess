@@ -233,6 +233,8 @@ def sync_liquipedia(
     stats: dict[str, Any] = {
         "seen": 0,
         "stored": 0,
+        "chinese_former_players_seen": 0,
+        "chinese_former_players_stored": 0,
         "errors": 0,
         "error_details": [],
         "major_rows": 0,
@@ -244,11 +246,13 @@ def sync_liquipedia(
         "major_player_fetch_errors": 0,
     }
     try:
+        seen_titles: set[str] = set()
         for page in client.iter_player_pages():
             if limit is not None and stats["seen"] >= limit:
                 break
             stats["seen"] += 1
             title = str(page.get("title") or "")
+            seen_titles.add(title.replace("_", " ").strip().casefold())
             try:
                 wikitext = str(page.get("wikitext") or "")
                 parsed = parse_player_page(title, wikitext)
@@ -277,6 +281,48 @@ def sync_liquipedia(
                     f"{stats['seen']} seen, {stats['stored']} stored, "
                     f"{stats['errors']} skipped"
                 )
+
+        supplemental_pages = getattr(
+            client,
+            "iter_chinese_former_player_pages",
+            None,
+        )
+        if callable(supplemental_pages) and (
+            limit is None or stats["seen"] < limit
+        ):
+            for page in supplemental_pages():
+                if limit is not None and stats["seen"] >= limit:
+                    break
+                title = str(page.get("title") or "")
+                title_key = title.replace("_", " ").strip().casefold()
+                if title_key in seen_titles:
+                    continue
+                seen_titles.add(title_key)
+                stats["seen"] += 1
+                stats["chinese_former_players_seen"] += 1
+                try:
+                    wikitext = str(page.get("wikitext") or "")
+                    parsed = parse_player_page(title, wikitext)
+                    store.upsert_source_player(
+                        "liquipedia",
+                        parsed,
+                        {
+                            "fetched_at": _now(),
+                            "source_modified_at": page.get("timestamp"),
+                            "source_revision_id": page.get("revid"),
+                            "source_url": parsed.get("source_url"),
+                            "payload_sha256": hashlib.sha256(
+                                wikitext.encode("utf-8")
+                            ).hexdigest(),
+                        },
+                    )
+                    stats["stored"] += 1
+                    stats["chinese_former_players_stored"] += 1
+                except (KeyError, TypeError, ValueError) as error:
+                    stats["errors"] += 1
+                    stats["error_details"].append(
+                        {"external_id": title, "error": str(error)}
+                    )
 
         if include_majors:
             major_page = client.fetch_major_player_database()

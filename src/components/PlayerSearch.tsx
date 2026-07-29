@@ -91,8 +91,13 @@ export function PlayerSearch({
       ? visiblePlayers.find((player) => player.id === highlightedId)
       : undefined;
   const effectiveHighlightedId = highlightedPlayer?.id;
+  const highlightedCompletion = highlightedPlayer
+    ? completionSuffix(query, highlightedPlayer.nickname)
+    : "";
   const completion = highlightedPlayer
-    ? completionSuffix(query, highlightedPlayer.nickname) || "  ↵ 提交"
+    ? highlightedCompletion
+      ? `${highlightedCompletion}  ⇥ 补全`
+      : "  ↵ 提交"
     : "";
   const listboxVisible =
     open &&
@@ -182,6 +187,23 @@ export function PlayerSearch({
     selectedPlayer?.id,
     selectedPlayer?.nickname,
   ]);
+
+  useEffect(() => {
+    const firstPlayer = visiblePlayers[0];
+    if (!listboxVisible || !firstPlayer) return;
+    if (
+      highlightInteractionRef.current !== "none" &&
+      highlightQueryRef.current === query &&
+      visiblePlayers.some((player) => player.id === highlightedId)
+    ) {
+      return;
+    }
+
+    highlightInteractionRef.current = "keyboard";
+    highlightQueryRef.current = query;
+    setHighlightedId(firstPlayer.id);
+    setHighlightInteraction("keyboard");
+  }, [highlightedId, listboxVisible, query, visiblePlayers]);
 
   useEffect(() => {
     if (!open) return;
@@ -423,6 +445,17 @@ export function PlayerSearch({
                 event.preventDefault();
                 event.stopPropagation();
                 moveHighlight(event.key === "ArrowDown" ? 1 : -1);
+                return;
+              }
+
+              if (
+                event.key === "Tab" &&
+                highlightedPlayer &&
+                highlightedCompletion
+              ) {
+                event.preventDefault();
+                event.stopPropagation();
+                handleSelect(highlightedPlayer);
                 return;
               }
 

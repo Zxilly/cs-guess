@@ -99,6 +99,12 @@ class PlayerStore:
                     "is_coach INTEGER NOT NULL DEFAULT 0 "
                     "CHECK (is_coach IN (0, 1))"
                 )
+            if "has_player_career_evidence" not in player_columns:
+                self._connection.execute(
+                    "ALTER TABLE players ADD COLUMN "
+                    "has_player_career_evidence INTEGER NOT NULL DEFAULT 0 "
+                    "CHECK (has_player_career_evidence IN (0, 1))"
+                )
             self._connection.commit()
             self._migrate_provider_constraints()
         return self
@@ -388,8 +394,9 @@ class PlayerStore:
                     INSERT INTO players (
                         id, canonical_nickname, full_name, country_code,
                         birth_date, status, image_url, is_coach,
+                        has_player_career_evidence,
                         created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         player_id,
@@ -400,6 +407,7 @@ class PlayerStore:
                         status,
                         parsed.get("image_url"),
                         int(bool(parsed.get("is_coach"))),
+                        int(bool(parsed.get("has_player_career_evidence"))),
                         timestamp,
                         timestamp,
                     ),
@@ -445,6 +453,11 @@ class PlayerStore:
                         if parsed.get("is_coach") is not None
                         else None
                     ),
+                    "has_player_career_evidence": (
+                        bool(parsed.get("has_player_career_evidence"))
+                        if parsed.get("has_player_career_evidence") is not None
+                        else None
+                    ),
                 }
                 for field_name, value in fields.items():
                     if value is not None:
@@ -465,6 +478,38 @@ class PlayerStore:
                                 timestamp,
                             ),
                         )
+            aliases = parsed.get("aliases") or []
+            native_name = str(parsed.get("native_name") or "").strip()
+            if isinstance(aliases, list):
+                for raw_alias in aliases:
+                    alias = str(raw_alias or "").strip()
+                    if not alias or normalize_identity_text(alias) == (
+                        normalize_identity_text(nickname)
+                    ):
+                        continue
+                    self.connection.execute(
+                        """
+                        INSERT INTO player_aliases (
+                            player_id, alias, alias_kind, source_record_id,
+                            observed_at
+                        ) VALUES (?, ?, ?, ?, ?)
+                        ON CONFLICT(player_id, alias) DO UPDATE SET
+                            alias_kind = excluded.alias_kind,
+                            source_record_id = excluded.source_record_id,
+                            observed_at = excluded.observed_at
+                        """,
+                        (
+                            player_id,
+                            alias,
+                            (
+                                "native_name"
+                                if alias == native_name
+                                else "alternate"
+                            ),
+                            source_record_id,
+                            timestamp,
+                        ),
+                    )
             self._ingest_player_relationships(
                 source=source,
                 player_id=player_id,
@@ -2907,6 +2952,21 @@ class PlayerStore:
             "UPDATE player_team_tenures SET player_id = ? WHERE player_id = ?",
             (survivor_id, duplicate_id),
         )
+        self.connection.execute(
+            """
+            INSERT OR IGNORE INTO player_aliases (
+                player_id, alias, alias_kind, source_record_id, observed_at
+            )
+            SELECT ?, alias, alias_kind, source_record_id, observed_at
+            FROM player_aliases
+            WHERE player_id = ?
+            """,
+            (survivor_id, duplicate_id),
+        )
+        self.connection.execute(
+            "DELETE FROM player_aliases WHERE player_id = ?",
+            (duplicate_id,),
+        )
 
         duplicate_roles = list(
             self.connection.execute(
@@ -3124,6 +3184,7 @@ class PlayerStore:
             "status": "status",
             "image_url": "image_url",
             "is_coach": "is_coach",
+            "has_player_career_evidence": "has_player_career_evidence",
         }
         updates: dict[str, Any] = {}
         conflicts_created = 0
@@ -3227,7 +3288,14 @@ class PlayerStore:
             (player_id,),
         ).fetchone() is not None
         missing = []
-        if bool(player["is_coach"]) and not has_major_appearance:
+        has_player_career_evidence = bool(
+            player["has_player_career_evidence"]
+        )
+        if (
+            bool(player["is_coach"])
+            and not has_major_appearance
+            and not has_player_career_evidence
+        ):
             missing.append("not_player:coach")
         for field_name, value in (
             ("nickname", player["canonical_nickname"]),
@@ -3248,7 +3316,11 @@ class PlayerStore:
                 or parsed_birth_date.isoformat() != birth_date
             ):
                 missing.append("birth_date_full")
-        if game_role is None and not has_major_appearance:
+        if (
+            game_role is None
+            and not has_major_appearance
+            and not has_player_career_evidence
+        ):
             missing.append("game_role")
         is_guessable = not missing
         self.connection.execute(
@@ -3499,10 +3571,31 @@ class PlayerStore:
             role = derive_game_role(
                 player["game_role_override"],
                 roles,
-                fallback_to_rifler=True,
+                fallback_to_rifler=int(player["major_appearances"]) > 0,
             )
-            if role is None and int(player["major_appearances"]) > 0:
+            if role is None and (
+                int(player["major_appearances"]) > 0
+                or bool(player["has_player_career_evidence"])
+            ):
                 role = "Unknown"
+            aliases = [
+                str(row["alias"])
+                for row in self.connection.execute(
+                    """
+                    SELECT alias
+                    FROM player_aliases
+                    WHERE player_id = ?
+                    ORDER BY
+                        CASE alias_kind
+                            WHEN 'alternate' THEN 0
+                            ELSE 1
+                        END,
+                        lower(alias),
+                        alias
+                    """,
+                    (player_id,),
+                )
+            ]
             team_history = []
             for tenure in self.connection.execute(
                 """
@@ -3552,6 +3645,7 @@ class PlayerStore:
                     "schemaVersion": 1,
                     "id": player_id,
                     "nickname": player["canonical_nickname"],
+                    "aliases": aliases,
                     "fullName": player["full_name"],
                     "countryCode": player["country_code"],
                     "birthDate": player["birth_date"],

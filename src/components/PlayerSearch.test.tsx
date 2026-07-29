@@ -276,6 +276,16 @@ describe("PlayerSearch combobox ARIA", () => {
     vi.unstubAllGlobals();
   });
 
+  it("keeps a full spacing step between the search icon and input text", async () => {
+    const container = await mountSearch();
+    const addon = container.querySelector<HTMLElement>(
+      '[data-slot="input-group-addon"]',
+    );
+
+    expect(addon?.classList).toContain("pr-2");
+    expect(inputIn(container).classList).toContain("px-1");
+  });
+
   it("does not claim an absent listbox for an empty query", async () => {
     const container = await mountSearch();
     const input = inputIn(container);
@@ -295,7 +305,7 @@ describe("PlayerSearch combobox ARIA", () => {
     const resultList = container.querySelector<HTMLElement>('[role="listbox"]');
     expect(input.getAttribute("aria-expanded")).toBe("true");
     expect(input.getAttribute("aria-controls")).toBe(resultList?.id);
-    expect(input.hasAttribute("aria-activedescendant")).toBe(false);
+    expect(input.hasAttribute("aria-activedescendant")).toBe(true);
 
     await enterQuery(input, "definitely-no-player");
     const emptyList = container.querySelector<HTMLElement>('[role="listbox"]');
@@ -411,24 +421,78 @@ describe("PlayerSearch combobox ARIA", () => {
     );
   });
 
-  it("keeps cmdk's initial result selection out of the visual and ARIA state", async () => {
+  it("automatically highlights the first ranked result", async () => {
     const candidates = players.filter((player) =>
       ["donk", "Dosia", "doto"].includes(player.nickname),
     );
     const container = await mountMutableSearch(candidates, "do");
     const input = inputIn(container);
+    const firstOption =
+      container.querySelector<HTMLElement>('[role="option"]');
 
     expect(container.querySelectorAll('[role="option"]').length).toBe(3);
-    expect(input.hasAttribute("aria-activedescendant")).toBe(false);
+    expect(input.getAttribute("aria-activedescendant")).toBe(
+      firstOption?.id,
+    );
     expect(
       container.querySelectorAll('[role="option"][aria-selected="true"]'),
-    ).toHaveLength(0);
+    ).toHaveLength(1);
     expect(
       container.querySelectorAll('[role="option"][data-selected="true"]'),
-    ).toHaveLength(0);
+    ).toHaveLength(1);
+    expect(firstOption?.getAttribute("aria-selected")).toBe("true");
+    const firstPlayer = candidates.find(
+      (player) => player.id === firstOption?.dataset.value,
+    );
     expect(
-      container.querySelector('[data-slot="command-input-completion"]'),
-    ).toBeNull();
+      container.querySelector(
+        '[data-slot="command-input-completion"]',
+      )?.textContent,
+    ).toBe(
+      `do${completionSuffix("do", firstPlayer?.nickname ?? "")}  ⇥ 补全`,
+    );
+  });
+
+  it("accepts the highlighted inline completion with Tab without submitting", async () => {
+    const candidate = players.find((player) => player.nickname === "donk")!;
+    const onSubmit = vi.fn(() => true);
+    const container = await mountMutableSearch([candidate], "don", onSubmit);
+    const input = inputIn(container);
+
+    expect(
+      container.querySelector(
+        '[data-slot="command-input-completion"]',
+      )?.textContent,
+    ).toBe("donk  ⇥ 补全");
+
+    await pressKey(input, "Tab");
+
+    expect(input.value).toBe("donk");
+    expect(input.getAttribute("aria-expanded")).toBe("false");
+    expect(container.querySelector('[role="listbox"]')).toBeNull();
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(
+      Array.from(container.querySelectorAll("button")).find(
+        (button) => button.textContent?.includes("提交猜测"),
+      )?.disabled,
+    ).toBe(false);
+  });
+
+  it("submits an exact first result on Enter without an arrow key", async () => {
+    const candidate = players.find((player) => player.nickname === "donk")!;
+    const onSubmit = vi.fn(() => true);
+    const container = await mountMutableSearch([candidate], "donk", onSubmit);
+    const input = inputIn(container);
+
+    expect(
+      container.querySelector('[role="option"][aria-selected="true"]')
+        ?.getAttribute("data-value"),
+    ).toBe(candidate.id);
+
+    await pressKey(input, "Enter");
+
+    expect(onSubmit).toHaveBeenCalledOnce();
+    expect(onSubmit).toHaveBeenCalledWith(candidate.id);
   });
 
   it("keeps pointer, keyboard, completion and ARIA highlight in one state", async () => {
@@ -459,7 +523,7 @@ describe("PlayerSearch combobox ARIA", () => {
         "do",
         candidates.find((player) => player.id === options[0].dataset.value)
           ?.nickname ?? "",
-      )}`,
+      )}  ⇥ 补全`,
     );
 
     await pressKey(input, "ArrowDown");
@@ -652,13 +716,13 @@ describe("PlayerSearch combobox ARIA", () => {
         ?.click();
     });
     expect(input.value).toBe("zyw");
-    expect(input.hasAttribute("aria-activedescendant")).toBe(false);
+    expect(input.hasAttribute("aria-activedescendant")).toBe(true);
     expect(
       container.querySelectorAll('[role="option"][aria-selected="true"]'),
-    ).toHaveLength(0);
+    ).toHaveLength(1);
     expect(
       container.querySelector('[data-slot="command-input-completion"]'),
-    ).toBeNull();
+    ).not.toBeNull();
 
     const zywOoOption =
       container.querySelector<HTMLElement>('[role="option"]');

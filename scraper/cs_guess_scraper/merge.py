@@ -48,6 +48,7 @@ FIELD_SOURCE_PRIORITIES: dict[str, tuple[str, ...]] = {
         "hltv",
     ),
     "is_coach": ("manual", "bo3"),
+    "has_player_career_evidence": ("manual", "liquipedia"),
     "image_url": ("manual", "pandascore", "bo3", "liquipedia", "hltv"),
     "current_team_id": (
         "manual",
@@ -319,6 +320,8 @@ def derive_game_role(
         "igl": "IGL",
         "entry": "Entry",
     }
+    if override == "unknown":
+        return "Unknown"
     if override:
         return labels.get(override)
 

@@ -17,6 +17,7 @@ export function playerRoleNameZh(role: PlayerRole) {
 export interface Player {
   id: string;
   nickname: string;
+  aliases?: readonly string[];
   name: string;
   team: string;
   teamLogoUrl?: string;
