@@ -1,4 +1,4 @@
-import { lazy, Suspense, useLayoutEffect } from "react";
+import { lazy, Suspense, useLayoutEffect, useRef } from "react";
 import { CrosshairIcon } from "@phosphor-icons/react";
 import {
   Navigate,
@@ -9,7 +9,13 @@ import {
 } from "react-router";
 
 import { DailyGameLoading } from "@/components/DailyGameLoading";
-import { loadCredentials } from "@/lib/realtime";
+import { GlobalSoundManager } from "@/components/GlobalSoundManager";
+import { MatchmakingQueueProvider } from "@/hooks/use-matchmaking-queue";
+import { RealtimeRoomProvider } from "@/hooks/use-realtime-room";
+import {
+  loadCredentials,
+  realtimeCredentialsMatch,
+} from "@/lib/realtime";
 import { hasConfirmedIdentity } from "@/lib/identity-profile";
 
 const ModeLobby = lazy(() =>
@@ -92,6 +98,41 @@ function QuickGameRoute() {
   }
 
   return <LiveGamePage mode="quick" />;
+}
+
+function QuickFlowScope() {
+  const location = useLocation();
+  const sessionRef = useRef<ReturnType<typeof loadCredentials>>(null);
+  const storedSession = loadCredentials("quick");
+
+  if (!storedSession) {
+    sessionRef.current = null;
+  } else if (
+    !sessionRef.current ||
+    !realtimeCredentialsMatch(
+      sessionRef.current.credentials,
+      storedSession.credentials,
+    )
+  ) {
+    sessionRef.current = storedSession;
+  }
+
+  const session = sessionRef.current;
+  const inGame = location.pathname === "/play/quick";
+  const realtimeEnabled =
+    location.pathname === "/matching" || inGame;
+
+  return (
+    <MatchmakingQueueProvider enabled={!inGame}>
+      <RealtimeRoomProvider
+        credentials={realtimeEnabled ? (session?.credentials ?? null) : null}
+        initialSnapshot={realtimeEnabled ? session?.snapshot : undefined}
+        enabled={realtimeEnabled}
+      >
+        <Outlet />
+      </RealtimeRoomProvider>
+    </MatchmakingQueueProvider>
+  );
 }
 
 function IdentityRequired() {
@@ -206,6 +247,7 @@ export function App() {
   return (
     <>
       <ScrollToTop />
+      <GlobalSoundManager />
       <Suspense fallback={<RouteLoading />}>
         <Routes>
           <Route
@@ -228,9 +270,11 @@ export function App() {
             />
             <Route path="solo" element={<SoloDifficultyPage />} />
             <Route path="play/solo" element={<SoloGamePage />} />
-            <Route path="quick" element={<QuickMatch />} />
-            <Route path="matching" element={<MatchmakingPage />} />
-            <Route path="play/quick" element={<QuickGameRoute />} />
+            <Route element={<QuickFlowScope />}>
+              <Route path="quick" element={<QuickMatch />} />
+              <Route path="matching" element={<MatchmakingPage />} />
+              <Route path="play/quick" element={<QuickGameRoute />} />
+            </Route>
             <Route path="play/room" element={<RoomGameRoute />} />
             <Route path="room" element={<RoomEntry />} />
             <Route path="stats" element={<StatsPage />} />

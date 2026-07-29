@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  createElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useMachine } from "@xstate/react";
 import { io, type Socket } from "socket.io-client";
 
@@ -156,9 +165,10 @@ export function isFatalRealtimeConnectError(value: unknown) {
   return fatalRealtimeConnectReason(value) !== null;
 }
 
-export function useRealtimeRoom(
+function useRealtimeRoomConnection(
   credentials: RealtimeCredentials | null,
   initialSnapshot?: Record<string, unknown>,
+  disabled = false,
 ) {
   const [connectionSnapshot, sendConnection] = useMachine(
     realtimeConnectionMachine,
@@ -198,6 +208,8 @@ export function useRealtimeRoom(
   }, []);
 
   const connect = useCallback(() => {
+    if (disabled) return;
+
     if (!credentials) {
       setOfflineReason("session_invalid");
       sendConnection({ type: "FATAL_CLOSE" });
@@ -449,11 +461,14 @@ export function useRealtimeRoom(
     return owner;
   }, [
     credentials,
+    disabled,
     retire,
     sendConnection,
   ]);
 
   useEffect(() => {
+    if (disabled) return;
+
     const initialSeq = initialSnapshot?.seq;
     lastSeqRef.current =
       typeof initialSeq === "number" && Number.isFinite(initialSeq)
@@ -474,11 +489,18 @@ export function useRealtimeRoom(
       generationRef.current += 1;
       if (owner) retire(owner, true);
     };
-  }, [connect, initialSnapshot, retire]);
+  }, [connect, disabled, initialSnapshot, retire]);
 
   const send = useCallback(
     (
-      type: "start_round" | "guess" | "set_visibility" | "restart_series",
+      type:
+        | "start_round"
+        | "guess"
+        | "set_visibility"
+        | "restart_series"
+        | "request_rematch"
+        | "respond_rematch"
+        | "cancel_rematch",
       payload = {},
       onAcknowledged?: (accepted: boolean) => void,
     ) => {
@@ -573,4 +595,46 @@ export function useRealtimeRoom(
     retry,
     close,
   };
+}
+
+type RealtimeRoomState = ReturnType<typeof useRealtimeRoomConnection>;
+
+const RealtimeRoomContext = createContext<RealtimeRoomState | undefined>(
+  undefined,
+);
+
+export function RealtimeRoomProvider({
+  children,
+  credentials,
+  initialSnapshot,
+  enabled = true,
+}: {
+  children: ReactNode;
+  credentials: RealtimeCredentials | null;
+  initialSnapshot?: Record<string, unknown>;
+  enabled?: boolean;
+}) {
+  const realtime = useRealtimeRoomConnection(
+    credentials,
+    initialSnapshot,
+    !enabled,
+  );
+  return createElement(
+    RealtimeRoomContext.Provider,
+    { value: realtime },
+    children,
+  );
+}
+
+export function useRealtimeRoom(
+  credentials: RealtimeCredentials | null,
+  initialSnapshot?: Record<string, unknown>,
+) {
+  const scopedRealtime = useContext(RealtimeRoomContext);
+  const localRealtime = useRealtimeRoomConnection(
+    scopedRealtime ? null : credentials,
+    scopedRealtime ? undefined : initialSnapshot,
+    Boolean(scopedRealtime),
+  );
+  return scopedRealtime ?? localRealtime;
 }

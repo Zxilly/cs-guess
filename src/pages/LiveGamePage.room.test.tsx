@@ -14,6 +14,7 @@ import {
 const mocks = vi.hoisted(() => ({
   recordRound: vi.fn(),
   celebrationProps: null as Record<string, unknown> | null,
+  battleContextProps: null as Record<string, unknown> | null,
   playerSearchProps: null as Record<string, any> | null,
   realtime: {
     connection: "connected",
@@ -48,7 +49,10 @@ vi.mock("@/hooks/use-realtime-room", () => ({
 }));
 
 vi.mock("@/components/BattleContext", () => ({
-  BattleContext: () => <div data-testid="battle-context" />,
+  BattleContext: (props: Record<string, unknown>) => {
+    mocks.battleContextProps = props;
+    return <div data-testid="battle-context" />;
+  },
 }));
 
 vi.mock("@/components/GuessTable", () => ({
@@ -167,7 +171,7 @@ async function flush() {
 }
 
 function findButton(text: string) {
-  return Array.from(container.querySelectorAll("button")).find((button) =>
+  return Array.from(document.body.querySelectorAll("button")).find((button) =>
     button.textContent?.includes(text),
   );
 }
@@ -221,9 +225,60 @@ describe("LiveGamePage friend-room waiting state", () => {
     });
 
     const title = container.querySelector<HTMLHeadingElement>("h1");
-    expect(title?.textContent).toContain("等待玩家准备");
+    expect(title?.textContent).toContain("好友房间");
     expect(title?.tabIndex).toBe(-1);
     expect(document.activeElement).toBe(title);
+  });
+
+  it("renders a dedicated waiting lobby without mounting the active battle UI", () => {
+    renderPage();
+
+    const lobby = container.querySelector(
+      '[aria-label="好友房设置与成员"]',
+    );
+    expect(lobby).not.toBeNull();
+    expect(lobby?.textContent).toContain("房间成员");
+    expect(lobby?.textContent).toContain("1 / 4");
+    expect(lobby?.querySelectorAll('[aria-label="房间席位"] > li')).toHaveLength(
+      4,
+    );
+    expect(lobby?.textContent).toContain("等待加入");
+    expect(findButton("开始本轮")).toBeTruthy();
+
+    expect(container.querySelector("[data-testid='battle-context']")).toBeNull();
+    expect(container.querySelector("[data-testid='guess-table']")).toBeNull();
+    expect(container.querySelector("[data-testid='player-search']")).toBeNull();
+    expect(container.textContent).not.toContain("神秘选手");
+    expect(container.textContent).not.toContain("WAITING FOR ROUND");
+  });
+
+  it("hides answer and legend chrome during play and restores it after the round", () => {
+    mocks.realtime.snapshot = {
+      ...roomSnapshot({ maxPlayers: 2 }),
+      phase: "playing",
+      round_number: 1,
+      deadline_unix_ms: Date.now() + 60_000,
+    };
+    storeRoomSession();
+    renderPage();
+
+    expect(container.textContent).not.toContain("神秘选手");
+    expect(container.textContent).not.toContain("结果图例");
+    expect(container.textContent).not.toContain("SERVER AUTHORITATIVE");
+
+    mocks.realtime.snapshot = {
+      ...mocks.realtime.snapshot,
+      phase: "finished",
+      winner_player_id: "player-1",
+      mystery_id: "donk",
+      series_status: "active",
+    };
+    renderPage();
+
+    expect(container.textContent).toContain("神秘选手");
+    expect(container.textContent).toContain("结果图例");
+    expect(container.textContent).toContain("Major 参赛");
+    expect(container.textContent).toContain("Major 冠军");
   });
 
   it("restores result focus after review but focuses the closing shell after exit", () => {
@@ -278,8 +333,8 @@ describe("LiveGamePage friend-room waiting state", () => {
     const exitEvent = { preventDefault: vi.fn() };
     act(() => exitAutoFocus?.(exitEvent));
 
-    const closingTitle = container.querySelector<HTMLHeadingElement>(
-      "#closing-room-title",
+    const closingTitle = document.body.querySelector<HTMLHeadingElement>(
+      '[role="dialog"] h2',
     );
     expect(exitEvent.preventDefault).toHaveBeenCalledOnce();
     expect(closingTitle?.textContent).toContain("正在完成退出");
@@ -479,7 +534,8 @@ describe("LiveGamePage friend-room waiting state", () => {
     expect(container.textContent).toContain("连接恢复后会重新同步房间");
     expect(container.textContent).not.toContain("正在连接对战服务器");
     expect(container.querySelectorAll('[role="status"]')).toHaveLength(1);
-    expect(container.querySelector('[role="alert"]')).toBeNull();
+    expect(document.body.querySelector('[role="alertdialog"]')).toBeNull();
+    expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
 
     mocks.realtime.connection = "offline";
     mocks.realtime.error =
@@ -488,10 +544,12 @@ describe("LiveGamePage friend-room waiting state", () => {
 
     expect(container.textContent).toContain("实时连接不可用");
     expect(container.textContent).toContain("尚未取得可用的房间状态");
-    expect(container.querySelector("[role='alert']")?.textContent).toContain(
-      "连接超时",
-    );
-    expect(container.querySelectorAll('[role="alert"]')).toHaveLength(1);
+    expect(
+      document.body.querySelector("[role='alertdialog']")?.textContent,
+    ).toContain("连接超时");
+    expect(
+      document.body.querySelectorAll('[role="alertdialog"]'),
+    ).toHaveLength(1);
     expect(container.querySelectorAll('[role="status"]')).toHaveLength(0);
     expect(findButton("重试连接")).toBeTruthy();
   });
@@ -505,8 +563,11 @@ describe("LiveGamePage friend-room waiting state", () => {
       container.querySelectorAll('[role="status"]'),
     ).filter((node) => node.textContent?.includes("连接中断"));
     expect(connectionStatuses).toHaveLength(1);
-    expect(container.querySelector('[role="alert"]')).toBeNull();
-    expect(container.textContent).toContain("实时连接中断，正在自动重连。");
+    expect(document.body.querySelector('[role="alertdialog"]')).toBeNull();
+    expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.body.textContent).toContain(
+      "实时连接中断，正在自动重连。",
+    );
     expect(findButton("立即重连")).toBeTruthy();
   });
 
@@ -548,9 +609,9 @@ describe("LiveGamePage friend-room waiting state", () => {
     act(() => findLink("模式大厅")?.click());
     await flush();
 
-    expect(container.querySelector('[role="alert"]')?.textContent).toContain(
-      "退出房间失败，凭证已保留",
-    );
+    expect(
+      document.body.querySelector('[role="alertdialog"]')?.textContent,
+    ).toContain("退出房间失败，凭证已保留");
     expect(findButton("重试退出")).toBeTruthy();
     expect(mocks.realtime.close).toHaveBeenCalled();
     expect(sessionStorage.getItem("cs-guess:realtime-session")).not.toBeNull();
@@ -574,9 +635,9 @@ describe("LiveGamePage friend-room waiting state", () => {
       act(() => findLink("模式大厅")?.click());
       await flush();
 
-      expect(container.querySelector('[role="alert"]')?.textContent).toContain(
-        "退出房间失败，凭证已保留",
-      );
+      expect(
+        document.body.querySelector('[role="alertdialog"]')?.textContent,
+      ).toContain("退出房间失败，凭证已保留");
       expect(mocks.realtime.close).toHaveBeenCalled();
       expect(
         sessionStorage.getItem("cs-guess:realtime-session"),
@@ -607,9 +668,14 @@ describe("LiveGamePage friend-room waiting state", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     renderPage();
-    expect(container.textContent).toContain("正在完成退出");
+    expect(document.body.textContent).toContain("正在完成退出");
     expect(container.textContent).not.toContain("凭证已保存");
-    expect(container.querySelector("[data-testid='guess-table']")).toBeNull();
+    expect(
+      container.querySelector("[data-testid='guess-table']"),
+    ).toBeNull();
+    expect(
+      container.querySelector('[aria-label="好友房设置与成员"]'),
+    ).not.toBeNull();
     await flush();
 
     expect(fetchMock).toHaveBeenCalledOnce();
@@ -841,7 +907,6 @@ describe("LiveGamePage friend-room waiting state", () => {
     let start = findButton("开始本轮")!;
     expect(start.disabled).toBe(true);
     expect(container.textContent).toContain("还需 3 位成员连接");
-    expect(container.textContent).toContain("由你开始本轮");
     expect(container.textContent).not.toContain("自动开始");
 
     mocks.realtime.snapshot = roomSnapshot({
@@ -866,7 +931,6 @@ describe("LiveGamePage friend-room waiting state", () => {
     start = findButton("开始本轮")!;
     expect(start.disabled).toBe(true);
     expect(container.textContent).toContain("仅房主可以开始");
-    expect(container.textContent).toContain("等待房主 m0NESY 开始本轮");
 
     mocks.realtime.connection = "connecting";
     renderPage();
@@ -893,7 +957,6 @@ describe("LiveGamePage friend-room waiting state", () => {
 
     expect(findButton("开始本轮")?.disabled).toBe(true);
     expect(container.textContent).toContain("还需 2 位成员连接");
-    expect(container.textContent).toContain("还需 2 位成员加入");
     expect(container.textContent).not.toContain("成员已就位");
 
     mocks.realtime.snapshot = roomSnapshot({
@@ -916,9 +979,7 @@ describe("LiveGamePage friend-room waiting state", () => {
     renderPage();
 
     expect(findButton("开始本轮")?.disabled).toBe(false);
-    expect(container.textContent).toContain(
-      "4 / 4 位成员已就位，由你开始本轮",
-    );
+    expect(container.textContent).toContain("房主可以开始本轮");
   });
 
   it("single-flights the host start request and preserves ack errors for retry", () => {
@@ -954,9 +1015,9 @@ describe("LiveGamePage friend-room waiting state", () => {
 
     mocks.realtime.error = "服务器未接受本次操作，请重试。";
     renderPage();
-    expect(container.querySelector('[role="alert"]')?.textContent).toContain(
-      "服务器未接受本次操作，请重试。",
-    );
+    expect(
+      document.body.querySelector('[role="alertdialog"]')?.textContent,
+    ).toContain("服务器未接受本次操作，请重试。");
   });
 
   it("recovers after consecutive identical start ack failures", () => {
@@ -1397,13 +1458,14 @@ describe("LiveGamePage friend-room waiting state", () => {
     expect(mocks.realtime.send).not.toHaveBeenCalled();
     expect(document.activeElement?.textContent).toContain("连接需要处理");
 
-    const persistentResultButton = findButton("查看对局")!;
-    act(() => persistentResultButton.focus());
     mocks.realtime.connection = "connected";
     mocks.realtime.offlineReason = null;
     mocks.realtime.error = "";
     renderPage();
-    expect(document.activeElement).toBe(persistentResultButton);
+    expect(
+      document.body.querySelector('[role="alertdialog"]'),
+    ).toBeNull();
+    expect(findButton("查看对局")).toBeTruthy();
   });
 
   it("replaces a fatal room session with a clean join entry", () => {
@@ -1452,9 +1514,7 @@ describe("LiveGamePage friend-room waiting state", () => {
     };
     renderPage();
     expect(findButton("开始下一场")).toBeUndefined();
-    expect(
-      container.querySelector('[data-player-id="player-1"]')?.textContent,
-    ).toContain("房主");
+    expect(mocks.battleContextProps?.hostPlayerId).toBe("player-1");
 
     mocks.realtime.snapshot = {
       ...mocks.realtime.snapshot,
@@ -1472,10 +1532,7 @@ describe("LiveGamePage friend-room waiting state", () => {
     };
     renderPage();
 
-    expect(
-      container.querySelector('[data-player-id="player-2"]')?.textContent,
-    ).toContain("房主");
-    expect(container.querySelector('[data-player-id="player-1"]')).toBeNull();
+    expect(mocks.battleContextProps?.hostPlayerId).toBe("player-2");
     expect(findButton("开始下一场")).toBeTruthy();
     act(() => findButton("开始下一场")?.click());
     expect(mocks.realtime.send.mock.calls.at(-1)?.[0]).toBe("restart_series");
@@ -1526,9 +1583,7 @@ describe("LiveGamePage friend-room waiting state", () => {
     ];
     renderPage();
 
-    expect(
-      container.querySelector('[data-player-id="player-2"]')?.textContent,
-    ).toContain("房主");
+    expect(mocks.battleContextProps?.hostPlayerId).toBe("player-2");
     expect(findButton("开始下一场")).toBeTruthy();
   });
 

@@ -1,4 +1,11 @@
-import { useEffect, useState } from "react";
+import {
+  createContext,
+  createElement,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { io, type Socket } from "socket.io-client";
 
 import {
@@ -76,6 +83,14 @@ const EMPTY_COUNTS: MatchmakingQueueCounts = {
   hard: { ...EMPTY_DIFFICULTY_COUNTS },
 };
 
+interface MatchmakingQueueState {
+  counts: MatchmakingQueueCounts;
+  live: boolean;
+}
+
+const MatchmakingQueueContext =
+  createContext<MatchmakingQueueState | null>(null);
+
 function isDifficultyCounts(value: unknown): value is MatchmakingDifficultyCounts {
   if (!value || typeof value !== "object") return false;
   return Object.values(value).every(
@@ -123,13 +138,17 @@ function isQueueCounts(value: unknown): value is MatchmakingQueueCounts {
     && isDifficultyCounts(counts.hard);
 }
 
-export function useMatchmakingQueue() {
+function useMatchmakingQueueConnection(
+  enabled: boolean,
+): MatchmakingQueueState {
   const [counts, setCounts] = useState(EMPTY_COUNTS);
   const [live, setLive] = useState(false);
   const debugCounts = useDebugStore((state) => state.queueCounts);
   const debugLive = useDebugStore((state) => state.queueLive);
 
   useEffect(() => {
+    if (!enabled) return;
+
     let closed = false;
     let generation = 0;
 
@@ -261,10 +280,35 @@ export function useMatchmakingQueue() {
       }
       createdSockets.clear();
     };
-  }, []);
+  }, [enabled]);
 
   return {
     counts: debugCounts ?? counts,
     live: debugLive ?? live,
   };
+}
+
+export function MatchmakingQueueProvider({
+  children,
+  enabled = true,
+}: {
+  children: ReactNode;
+  enabled?: boolean;
+}) {
+  const queue = useMatchmakingQueueConnection(enabled);
+  return createElement(
+    MatchmakingQueueContext.Provider,
+    { value: queue },
+    children,
+  );
+}
+
+export function useMatchmakingQueue() {
+  const queue = useContext(MatchmakingQueueContext);
+  if (!queue) {
+    throw new Error(
+      "useMatchmakingQueue must be used within MatchmakingQueueProvider",
+    );
+  }
+  return queue;
 }

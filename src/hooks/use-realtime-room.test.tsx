@@ -16,6 +16,7 @@ import {
   isFatalRealtimeConnectError,
   parseRealtimeAck,
   REALTIME_RECONNECT_TIMEOUT_MS,
+  RealtimeRoomProvider,
   realtimeEventErrorMessage,
   socketIoAckResult,
   useRealtimeRoom,
@@ -228,6 +229,8 @@ function authoritativeSnapshot(
   };
 }
 
+const QUICK_FLOW_INITIAL_SNAPSHOT = authoritativeSnapshot();
+
 let container: HTMLDivElement;
 let root: Root;
 let sockets: MockSocket[];
@@ -255,6 +258,14 @@ function RealtimeProbe({
   );
 }
 
+function MatchingRealtimeProbe() {
+  return <RealtimeProbe initialSnapshot={QUICK_FLOW_INITIAL_SNAPSHOT} />;
+}
+
+function LiveGameRealtimeProbe() {
+  return <RealtimeProbe initialSnapshot={QUICK_FLOW_INITIAL_SNAPSHOT} />;
+}
+
 function renderProbe({
   credentials = credentialsA,
   initialSnapshot = {},
@@ -279,6 +290,23 @@ function renderProbe({
           initialSnapshot={initialSnapshot}
         />
       ),
+    );
+  });
+}
+
+function renderQuickFlowPage(page: "matching" | "playing") {
+  act(() => {
+    root.render(
+      <RealtimeRoomProvider
+        credentials={credentialsA}
+        initialSnapshot={QUICK_FLOW_INITIAL_SNAPSHOT}
+      >
+        {page === "matching" ? (
+          <MatchingRealtimeProbe />
+        ) : (
+          <LiveGameRealtimeProbe />
+        )}
+      </RealtimeRoomProvider>,
     );
   });
 }
@@ -327,6 +355,29 @@ describe("useRealtimeRoom socket ownership and synchronization", () => {
     expect(sockets[0]?.listenerCount()).toBe(0);
     expect(sockets[1]?.disconnectCalls).toBe(0);
     expect(sockets[1]?.listenerCount()).toBe(4);
+  });
+
+  it("keeps the connected room socket and snapshot across matching-to-game handoff", () => {
+    renderQuickFlowPage("matching");
+    const socket = sockets[0]!;
+    connectSocket(socket);
+
+    act(() => {
+      socket.syncCallbacks[0]?.(
+        null,
+        {
+          accepted: true,
+          snapshot: authoritativeSnapshot({ seq: 3, phase: "playing" }),
+        },
+      );
+    });
+    expect(container.textContent).toContain("connected:ready:playing");
+
+    renderQuickFlowPage("playing");
+
+    expect(sockets).toHaveLength(1);
+    expect(socket.disconnectCalls).toBe(0);
+    expect(container.textContent).toContain("connected:ready:playing");
   });
 
   it("ignores a delayed sync acknowledgement from an older credential generation", () => {

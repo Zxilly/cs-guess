@@ -2,16 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowClockwiseIcon,
   ArrowLeftIcon,
-  SpinnerGapIcon,
 } from "@phosphor-icons/react";
 import { Navigate, useNavigate } from "react-router";
 
 import { AppHeader } from "@/components/AppHeader";
 import { InfoTip } from "@/components/InfoTip";
 import { MatchFoundOverlay } from "@/components/MatchFoundOverlay";
+import { OperationStatusDialog } from "@/components/OperationStatusDialog";
 import { PageIntro } from "@/components/PageIntro";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { useAnonymousProfile } from "@/hooks/use-anonymous-profile";
 import { useMatchmakingQueue } from "@/hooks/use-matchmaking-queue";
 import { useRealtimeRoom } from "@/hooks/use-realtime-room";
@@ -57,6 +58,9 @@ function roomConnectionLabel(connection: ConnectionState) {
 }
 
 export function MatchmakingPage() {
+  const audit = import.meta.env.DEV
+    ? new URLSearchParams(window.location.search).get("audit")
+    : null;
   const navigate = useNavigate();
   const [session] = useState(() => loadCredentials("quick"));
   const [closingIntent, setClosingIntent] = useState(() =>
@@ -68,8 +72,14 @@ export function MatchmakingPage() {
       ? Math.max(0, Math.floor((Date.now() - session.startedAt) / 1000))
       : 0,
   );
-  const [cancelPending, setCancelPending] = useState(false);
-  const [cancelError, setCancelError] = useState("");
+  const [cancelPending, setCancelPending] = useState(
+    audit === "matching-canceling",
+  );
+  const [cancelError, setCancelError] = useState(
+    audit === "matching-cancel-error"
+      ? "取消匹配失败，请稍后重试。"
+      : "",
+  );
   const [showMatchFound, setShowMatchFound] = useState(false);
   const cancelButtonRef = useRef<HTMLButtonElement | null>(null);
   const recoveryTitleRef = useRef<HTMLHeadingElement | null>(null);
@@ -240,6 +250,9 @@ export function MatchmakingPage() {
       return;
     }
     setShowMatchFound(true);
+    if (audit === "matching-found") {
+      return;
+    }
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -252,9 +265,10 @@ export function MatchmakingPage() {
       reducedMotion ? 0 : 1_700,
     );
     return () => window.clearTimeout(timer);
-  }, [cancelPending, closingIntent, matched, navigate]);
+  }, [audit, cancelPending, closingIntent, matched, navigate]);
 
   useEffect(() => {
+    if (audit) return;
     if (!session) return;
     const timer = window.setInterval(
       () =>
@@ -267,7 +281,7 @@ export function MatchmakingPage() {
       1000,
     );
     return () => window.clearInterval(timer);
-  }, [session]);
+  }, [audit, session]);
 
   useEffect(() => {
     if (!session || !closingIntent) return;
@@ -343,7 +357,7 @@ export function MatchmakingPage() {
               disabled={cancelPending}
             >
               {cancelPending ? (
-                <SpinnerGapIcon className="animate-spin motion-reduce:animate-none" />
+                <Spinner role="presentation" aria-hidden="true" />
               ) : (
                 <ArrowLeftIcon />
               )}
@@ -382,69 +396,6 @@ export function MatchmakingPage() {
               </div>
             </div>
 
-            {showConnectionRecovery && (
-              <div
-                className="border-b border-foreground/20 px-5 py-4"
-                role={announceConnectionAlert ? "alert" : undefined}
-              >
-                <h2
-                  ref={recoveryTitleRef}
-                  tabIndex={-1}
-                  className="text-sm font-semibold text-destructive outline-none"
-                >
-                  {closingIntent
-                    ? "正在完成退出"
-                    : fatalOffline
-                      ? "当前匹配会话已失效"
-                      : "连接需要处理"}
-                </h2>
-                <p className="mt-1 text-sm text-destructive">
-                  {recoveryMessage}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {closingIntent ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={cancel}
-                      disabled={cancelPending}
-                    >
-                      {cancelPending ? "正在退出…" : "重试退出"}
-                    </Button>
-                  ) : fatalOffline ? (
-                    <Button
-                      type="button"
-                      onClick={discardInvalidSession}
-                    >
-                      {realtime.offlineReason === "profile_invalid"
-                        ? "重新设置身份"
-                        : "清除失效会话并返回"}
-                    </Button>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={realtime.retry}
-                      disabled={cancelPending}
-                    >
-                      <ArrowClockwiseIcon />
-                      重试房间连接
-                    </Button>
-                  )}
-                  {!closingIntent && !fatalOffline ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={cancel}
-                      disabled={cancelPending}
-                    >
-                      安全返回
-                    </Button>
-                  ) : null}
-                </div>
-              </div>
-            )}
-
             <div className="grid sm:grid-cols-3">
               {([1, 3, 5] as const).map((option, index) => {
                 const selected = option === bestOf;
@@ -461,7 +412,7 @@ export function MatchmakingPage() {
                       </p>
                       {selected ? (
                         <span className="inline-flex items-center gap-2 text-xs">
-                          <SpinnerGapIcon className="animate-spin motion-reduce:animate-none" />
+                          <Spinner role="presentation" aria-hidden="true" />
                           正在匹配
                         </span>
                       ) : null}
@@ -534,6 +485,68 @@ export function MatchmakingPage() {
           </section>
         </Card>
       </main>
+      <OperationStatusDialog
+        open={cancelPending}
+        kind="progress"
+        eyebrow="MATCHMAKING"
+        title="正在取消匹配"
+        description="正在通知服务器释放当前队列席位，请勿重复操作。"
+      />
+      <OperationStatusDialog
+        open={showConnectionRecovery && !cancelPending}
+        kind={reconnecting && !cancelError && !closingIntent ? "progress" : "error"}
+        eyebrow="MATCHMAKING"
+        titleRef={recoveryTitleRef}
+        title={
+          closingIntent
+            ? "未能退出匹配"
+            : reconnecting && !cancelError
+              ? "正在恢复连接"
+            : fatalOffline
+              ? "当前匹配会话已失效"
+              : "连接需要处理"
+        }
+        description={recoveryMessage}
+      >
+        {closingIntent ? (
+          <Button
+            type="button"
+            className="w-full rounded-none sm:w-auto"
+            onClick={cancel}
+          >
+            重试退出
+          </Button>
+        ) : fatalOffline ? (
+          <Button
+            type="button"
+            className="w-full rounded-none sm:w-auto"
+            onClick={discardInvalidSession}
+          >
+            {realtime.offlineReason === "profile_invalid"
+              ? "重新设置身份"
+              : "清除失效会话并返回"}
+          </Button>
+        ) : (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full rounded-none sm:w-auto"
+              onClick={cancel}
+            >
+              安全返回
+            </Button>
+            <Button
+              type="button"
+              className="w-full rounded-none sm:w-auto"
+              onClick={realtime.retry}
+            >
+              <ArrowClockwiseIcon />
+              重试连接
+            </Button>
+          </>
+        )}
+      </OperationStatusDialog>
       {showMatchFound ? (
         <MatchFoundOverlay
           playerNames={playerNames}

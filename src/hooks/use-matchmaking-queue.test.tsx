@@ -4,7 +4,10 @@ import { act, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useMatchmakingQueue } from "@/hooks/use-matchmaking-queue";
+import {
+  MatchmakingQueueProvider,
+  useMatchmakingQueue,
+} from "@/hooks/use-matchmaking-queue";
 import { useDebugStore } from "@/stores/debug-store";
 
 type SocketEvent =
@@ -75,16 +78,37 @@ function QueueProbe() {
   );
 }
 
+function QuickQueueProbe() {
+  return <QueueProbe />;
+}
+
+function MatchingQueueProbe() {
+  return <QueueProbe />;
+}
+
 function renderQueue(strict = false) {
   act(() => {
+    const queue = (
+      <MatchmakingQueueProvider>
+        <QueueProbe />
+      </MatchmakingQueueProvider>
+    );
     root.render(
       strict ? (
-        <StrictMode>
-          <QueueProbe />
-        </StrictMode>
+        <StrictMode>{queue}</StrictMode>
       ) : (
-        <QueueProbe />
+        queue
       ),
+    );
+  });
+}
+
+function renderQueuePage(page: "quick" | "matching") {
+  act(() => {
+    root.render(
+      <MatchmakingQueueProvider>
+        {page === "quick" ? <QuickQueueProbe /> : <MatchingQueueProbe />}
+      </MatchmakingQueueProvider>,
     );
   });
 }
@@ -217,6 +241,24 @@ describe("useMatchmakingQueue socket ownership", () => {
     });
     expect(container.textContent).toBe("live:9");
     expect(first.listenerCount()).toBe(0);
+  });
+
+  it("keeps the connected public queue snapshot across the quick-to-matching handoff", () => {
+    renderQueuePage("quick");
+    const socket = sockets[0]!;
+
+    act(() => {
+      socket.connected = true;
+      socket.emit("connect");
+      socket.emit("queue_counts", queueCounts(9));
+    });
+    expect(container.textContent).toBe("live:9");
+
+    renderQueuePage("matching");
+
+    expect(sockets).toHaveLength(1);
+    expect(socket.disconnectCalls).toBe(0);
+    expect(container.textContent).toBe("live:9");
   });
 });
 

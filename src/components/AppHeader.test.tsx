@@ -17,6 +17,7 @@ describe("AppHeader mobile contract", () => {
     expect(markup).toContain('aria-label="CS GUESS · 职业选手竞猜"');
     expect(markup).toContain(">CS GUESS</p>");
     expect(markup).toContain("whitespace-nowrap");
+    expect(markup).toContain('aria-label="静音全站音效"');
     expect(markup).not.toContain("truncate text-lg font-bold");
   });
 

@@ -8,7 +8,7 @@ import {
   TrophyIcon,
   XCircleIcon,
 } from "@phosphor-icons/react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { PlayerAvatar } from "@/components/PlayerAvatar";
@@ -29,10 +29,12 @@ import {
   soloLossCopy,
   type SoloLossReason,
 } from "@/lib/solo-result-copy";
-import type {
-  BattleFinishReason,
-  BattleSeriesFinishReason,
-  BattleSeriesStatus,
+import { playBattleResultSound } from "@/lib/app-sound";
+import {
+  MAX_GUESSES,
+  type BattleFinishReason,
+  type BattleSeriesFinishReason,
+  type BattleSeriesStatus,
 } from "@/types/game";
 
 type ResultOutcome = "win" | "loss" | "draw";
@@ -47,6 +49,7 @@ interface CelebrationOverlayProps {
   outcome: ResultOutcome;
   seriesComplete: boolean;
   score: string;
+  maxGuesses?: number;
   mysteryPlayer: Player;
   context?: "battle" | "daily" | "solo";
   nextRoundSeconds?: number;
@@ -57,6 +60,7 @@ interface CelebrationOverlayProps {
   onExit?: () => void;
   exitLabel?: string;
   onRematch?: () => void;
+  rematchLabel?: string;
   rematchDisabled?: boolean;
   rematchDisabledReason?: string;
   onCloseAutoFocus?: (event: { preventDefault(): void }) => void;
@@ -64,6 +68,7 @@ interface CelebrationOverlayProps {
   finishReason?: BattleFinishReason;
   seriesStatus?: BattleSeriesStatus;
   seriesFinishReason?: BattleSeriesFinishReason;
+  soundEnabled?: boolean;
   standings?: readonly {
     label: string;
     name: string;
@@ -146,6 +151,7 @@ function resultCopy(
   finishReason?: BattleFinishReason,
   seriesStatus?: BattleSeriesStatus,
   seriesFinishReason?: BattleSeriesFinishReason,
+  maxGuesses = MAX_GUESSES,
 ) {
   if (context === "daily") {
     return outcome === "win"
@@ -173,7 +179,7 @@ function resultCopy(
           summary: "你成功锁定了本局的神秘选手。",
       };
     }
-    const lossCopy = soloLossCopy(lossReason);
+    const lossCopy = soloLossCopy(lossReason, maxGuesses);
     return {
       eyebrow: "Solo complete",
       title: lossCopy.title,
@@ -274,6 +280,7 @@ export function CelebrationOverlay({
   outcome,
   seriesComplete,
   score,
+  maxGuesses = MAX_GUESSES,
   mysteryPlayer,
   context = "battle",
   nextRoundSeconds,
@@ -284,6 +291,7 @@ export function CelebrationOverlay({
   onExit,
   exitLabel = "返回模式大厅",
   onRematch,
+  rematchLabel = "邀请重赛",
   rematchDisabled = false,
   rematchDisabledReason,
   onCloseAutoFocus,
@@ -291,9 +299,11 @@ export function CelebrationOverlay({
   finishReason,
   seriesStatus = "active",
   seriesFinishReason,
+  soundEnabled = true,
   standings,
 }: CelebrationOverlayProps) {
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const playedSoundKeyRef = useRef("");
   const copy = resultCopy(
     outcome,
     seriesComplete,
@@ -302,13 +312,33 @@ export function CelebrationOverlay({
     finishReason,
     seriesStatus,
     seriesFinishReason,
+    maxGuesses,
   );
+  useEffect(() => {
+    const soundKey = `${outcome}:${score}`;
+    const auditMode =
+      typeof document !== "undefined" &&
+      document.documentElement.hasAttribute("data-audit");
+    if (
+      context !== "battle" ||
+      outcome === "draw" ||
+      !soundEnabled ||
+      auditMode ||
+      playedSoundKeyRef.current === soundKey
+    ) {
+      return;
+    }
+
+    playedSoundKeyRef.current = soundKey;
+    return playBattleResultSound(outcome);
+  }, [context, outcome, score, soundEnabled]);
   const ResultIcon =
     outcome === "win"
       ? TrophyIcon
       : outcome === "loss"
         ? XCircleIcon
         : ScalesIcon;
+  const outcomeClassName = `result-dialog--${outcome}`;
   const details = [
     {
       label: "战队",
@@ -331,6 +361,11 @@ export function CelebrationOverlay({
       value: mysteryPlayer.majorAppearances,
       icon: MedalIcon,
     },
+    {
+      label: "Major 冠军",
+      value: mysteryPlayer.majorWins,
+      icon: MedalIcon,
+    },
   ];
   const hasNextRoundStatus =
     context === "battle" &&
@@ -351,14 +386,14 @@ export function CelebrationOverlay({
           focusCelebrationTitleOnOpen(event, titleRef.current)
         }
         onCloseAutoFocus={onCloseAutoFocus}
-        className="celebration-enter !left-4 !right-4 max-h-[calc(100svh-2rem)] min-w-0 max-w-[calc(100%-2rem)] !w-auto !translate-x-0 gap-0 overflow-x-hidden overflow-y-auto rounded-none border border-foreground/30 bg-background p-0 shadow-2xl ring-0 sm:!left-1/2 sm:!right-auto sm:!w-[calc(100%-2rem)] sm:max-w-3xl sm:!-translate-x-1/2"
+        className={`celebration-enter result-dialog ${outcomeClassName} !left-4 !right-4 max-h-[calc(100svh-2rem)] min-w-0 max-w-[calc(100%-2rem)] !w-auto !translate-x-0 gap-0 overflow-x-hidden overflow-y-auto rounded-none border border-foreground/30 bg-background p-0 shadow-2xl ring-0 sm:!left-1/2 sm:!right-auto sm:!w-[calc(100%-2rem)] sm:max-w-3xl sm:!-translate-x-1/2`}
       >
-        <div className="h-1 bg-primary" aria-hidden="true" />
-        <DialogHeader className="min-w-0 max-w-full items-center gap-0 border-b border-foreground/15 px-5 pb-5 pt-6 text-center sm:px-10 sm:pb-6 sm:pt-7">
-          <div className="grid size-10 place-items-center border border-primary/35 bg-primary/[0.06] text-primary">
+        <div className="result-dialog__accent h-1" aria-hidden="true" />
+        <DialogHeader className="result-dialog__header min-w-0 max-w-full items-center gap-0 border-b border-foreground/15 px-5 pb-5 pt-6 text-center sm:px-10 sm:pb-6 sm:pt-7">
+          <div className="result-dialog__icon grid size-10 place-items-center border">
             <ResultIcon className="size-5" weight="duotone" />
           </div>
-          <p className="mt-4 font-mono text-xs uppercase tracking-[0.12em] text-primary">
+          <p className="result-dialog__eyebrow mt-4 font-mono text-xs uppercase tracking-[0.12em]">
             {copy.eyebrow}
           </p>
           <DialogTitle
@@ -439,7 +474,7 @@ export function CelebrationOverlay({
               <span className="text-xs uppercase tracking-[0.08em] text-muted-foreground">
                 {context === "battle" ? "当前比分" : "已用尝试"}
               </span>
-              <strong className="text-xl tracking-[-0.04em] text-foreground">
+              <strong className="result-dialog__score text-xl tracking-[-0.04em]">
                 {score}
               </strong>
             </div>
@@ -447,7 +482,7 @@ export function CelebrationOverlay({
         </DialogHeader>
 
         <div className="px-5 py-5 sm:px-10 sm:py-6">
-          <div className="mb-4 flex min-w-0 items-center gap-4">
+          <div className="result-dialog__answer mb-4 flex min-w-0 items-center gap-4">
             <PlayerAvatar
               player={mysteryPlayer}
               className="size-20"
@@ -484,7 +519,7 @@ export function CelebrationOverlay({
           </dl>
         </div>
 
-        <DialogFooter className="sticky bottom-0 z-10 m-0 min-w-0 flex-col justify-center rounded-none border-t border-foreground/15 bg-background px-5 py-4 sm:flex-row sm:justify-center sm:px-10">
+        <DialogFooter className="result-dialog__footer sticky bottom-0 z-10 m-0 min-w-0 flex-col justify-center rounded-none border-t border-foreground/15 px-5 py-4 sm:flex-row sm:justify-center sm:px-10">
           {context === "battle" && seriesComplete && (onRematch || onExit) ? (
             <>
               <Button
@@ -497,7 +532,7 @@ export function CelebrationOverlay({
               {onRematch ? (
                 <div className="w-full sm:w-auto">
                   <Button
-                    className="w-full rounded-none sm:w-auto"
+                    className="result-dialog__action w-full rounded-none sm:w-auto"
                     onClick={onRematch}
                     disabled={rematchDisabled}
                     aria-describedby={
@@ -506,7 +541,7 @@ export function CelebrationOverlay({
                         : undefined
                     }
                   >
-                    再次对战
+                    {rematchLabel}
                     <ArrowRightIcon />
                   </Button>
                   {rematchDisabled && rematchDisabledReason ? (
@@ -529,7 +564,7 @@ export function CelebrationOverlay({
             </>
           ) : (
             <Button
-              className="w-full rounded-none sm:w-auto"
+              className="result-dialog__action w-full rounded-none sm:w-auto"
               onClick={onClose}
             >
               {context !== "battle"
