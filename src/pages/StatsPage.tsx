@@ -1,4 +1,5 @@
 import { Fragment, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import {
   ChartBarIcon,
   ClockCounterClockwiseIcon,
@@ -7,8 +8,6 @@ import {
   TrophyIcon,
   WarningCircleIcon,
 } from "@phosphor-icons/react";
-import { Link } from "react-router";
-
 import { AppHeader } from "@/components/AppHeader";
 import { GuessTable } from "@/components/GuessTable";
 import { InfoTip } from "@/components/InfoTip";
@@ -215,11 +214,21 @@ export function ReplayDetails({ entry }: { entry: MatchHistoryEntry }) {
 
 export function StatsPage() {
   const identity = useAnonymousProfile();
-  const [replay, setReplay] = useState<MatchHistoryEntry | null>(null);
+  const [searchParams] = useSearchParams();
+  const auditEmpty =
+    import.meta.env.DEV && searchParams.get("audit") === "stats-empty";
+  const history = auditEmpty
+    ? []
+    : [...identity.profile.matchHistory].reverse();
+  const [replay, setReplay] = useState<MatchHistoryEntry | null>(() =>
+    import.meta.env.DEV &&
+    searchParams.get("audit") === "stats-replay"
+      ? history[0] ?? null
+      : null,
+  );
   const replayTitleRef = useRef<HTMLHeadingElement>(null);
-  const history = [...identity.profile.matchHistory].reverse();
   const historyGroups = groupRoundHistory(history);
-  const hasCompletedRounds = identity.completedRounds > 0;
+  const hasCompletedRounds = !auditEmpty && identity.completedRounds > 0;
 
   return (
     <div className="min-h-svh bg-background text-foreground">
@@ -260,8 +269,10 @@ export function StatsPage() {
             },
             {
               label: "胜局最佳猜数",
-              value: identity.bestGuessCount ?? "暂无",
-              empty: identity.bestGuessCount === null,
+              value: auditEmpty
+                ? "暂无"
+                : identity.bestGuessCount ?? "暂无",
+              empty: auditEmpty || identity.bestGuessCount === null,
               icon: CrosshairSimpleIcon,
             },
           ].map((stat) => (
@@ -291,7 +302,7 @@ export function StatsPage() {
           <PanelHeader
             title="最近回合"
             description={
-              identity.winningGuessSampleSize > 0
+              !auditEmpty && identity.winningGuessSampleSize > 0
                 ? `有猜测记录的胜利回合 ${identity.winningGuessSampleSize} 个 · 平均 ${identity.averageWinningGuesses} 次`
                 : "胜局猜数暂无 · 仅统计有猜测记录的胜利回合"
             }

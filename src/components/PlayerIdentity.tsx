@@ -82,8 +82,8 @@ export function PlayerIdentity({
             variant="ghost"
             className={
               compact
-                ? "h-auto justify-center rounded-none border-l border-foreground/20 px-3 text-primary sm:px-5"
-                : "h-12 justify-center rounded-none border-t border-foreground/20 px-5 text-primary sm:h-auto sm:border-t-0 sm:border-l"
+                ? "h-auto justify-center rounded-none px-3 text-primary sm:px-5"
+                : "h-12 justify-center rounded-none px-5 text-primary sm:h-auto"
             }
             disabled
           >
@@ -97,8 +97,8 @@ export function PlayerIdentity({
             variant="ghost"
             className={
               compact
-                ? "h-auto justify-center rounded-none border-l border-foreground/20 px-3 text-primary sm:px-5"
-                : "h-12 justify-center rounded-none border-t border-foreground/20 px-5 text-primary sm:h-auto sm:border-t-0 sm:border-l"
+                ? "h-auto justify-center rounded-none px-3 text-primary sm:px-5"
+                : "h-12 justify-center rounded-none px-5 text-primary sm:h-auto"
             }
           >
             <Link to={manageHref}>

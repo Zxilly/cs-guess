@@ -183,7 +183,9 @@ describe("QuickMatch submission lifecycle", () => {
     expect(Array.from(frozenControls).every((button) => button.disabled)).toBe(
       true,
     );
-    expect(container.textContent).toContain("1v1 · 简单 ·BO3 · 隐藏");
+    expect(
+      container.querySelector('button[type="submit"]')?.textContent,
+    ).toContain("正在加入队列");
 
     const [, init] = fetchMock.mock.calls[0] as unknown as [
       string,
@@ -210,7 +212,7 @@ describe("QuickMatch submission lifecycle", () => {
     });
   });
 
-  it("restores focus to the CTA after an error and clears stale errors on setting changes", async () => {
+  it("shows errors in a focused dialog and returns to the unchanged settings", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -231,19 +233,19 @@ describe("QuickMatch submission lifecycle", () => {
       await Promise.resolve();
     });
 
-    const cta = container.querySelector<HTMLButtonElement>(
-      'button[type="submit"]',
-    )!;
-    expect(container.querySelector('[role="alert"]')).not.toBeNull();
-    expect(document.activeElement).toBe(cta);
+    const alertDialog = document.body.querySelector('[role="alertdialog"]');
+    expect(alertDialog?.textContent).toContain("未能加入匹配队列");
+    expect(alertDialog?.textContent).toContain("对战服务暂时不可用");
+    expect(document.activeElement?.textContent).toContain(
+      "未能加入匹配队列",
+    );
 
-    const groupButton = Array.from(
-      container.querySelectorAll<HTMLButtonElement>(
-        '[role="group"][aria-label="对战规模"] button',
-      ),
-    )[1];
-    act(() => groupButton.click());
-    expect(container.querySelector('[role="alert"]')).toBeNull();
+    const closeButton = Array.from(
+      document.body.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((button) => button.textContent?.includes("返回设置"))!;
+    act(() => closeButton.click());
+    expect(document.body.querySelector('[role="alertdialog"]')).toBeNull();
+    expect(container.querySelector('button[type="submit"]')).not.toBeNull();
   });
 
   it("cancels and discards a ticket that arrives after unmount", async () => {

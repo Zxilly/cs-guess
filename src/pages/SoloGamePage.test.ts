@@ -43,6 +43,31 @@ describe("soloGameReducer", () => {
     expect(next.guessedIds).toHaveLength(8);
   });
 
+  it("gives hard rounds ten guesses", () => {
+    const hard: SoloGameState = {
+      ...playingState(),
+      difficulty: "hard",
+    };
+    const afterEight = Array.from(
+      { length: 8 },
+      (_, index) => `wrong-${index}`,
+    ).reduce<SoloGameState>(
+      (state, playerId) =>
+        soloGameReducer(state, { type: "guess", playerId }),
+      hard,
+    );
+    const finished = ["wrong-8", "wrong-9"].reduce<SoloGameState>(
+      (state, playerId) =>
+        soloGameReducer(state, { type: "guess", playerId }),
+      afterEight,
+    );
+
+    expect(afterEight.status).toBe("playing");
+    expect(finished.status).toBe("lost");
+    expect(finished.resultReason).toBe("attempts-exhausted");
+    expect(finished.guessedIds).toHaveLength(10);
+  });
+
   it("marks a timer expiry separately from exhausted guesses", () => {
     const next = soloGameReducer(playingState(), { type: "expire" });
 

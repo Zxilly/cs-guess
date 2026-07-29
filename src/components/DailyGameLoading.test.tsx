@@ -4,10 +4,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "@/App";
 import { DailyGameLoading } from "@/components/DailyGameLoading";
+import { players } from "@/data/players";
+import type { ServerDailyChallenge } from "@/lib/daily-challenge-api";
 import { GamePage } from "@/pages/GamePage";
 
 const dailyState = vi.hoisted(() => ({
-  challenge: undefined,
+  challenge: undefined as ServerDailyChallenge | undefined,
   error: undefined as Error | undefined,
   retry: vi.fn(),
 }));
@@ -28,6 +30,7 @@ function renderInRouter(node: React.ReactNode) {
 
 describe("DailyGameLoading", () => {
   afterEach(() => {
+    dailyState.challenge = undefined;
     dailyState.error = undefined;
     dailyState.retry.mockClear();
     vi.unstubAllGlobals();
@@ -40,7 +43,8 @@ describe("DailyGameLoading", () => {
     expect(markup).toContain('data-daily-game-surface="loading"');
     expect(markup).toContain("lg:grid-cols-[280px_minmax(0,1fr)]");
     expect(markup).toContain("今日挑战");
-    expect(markup).toContain("根据对比，锁定神秘选手。");
+    expect(markup).toContain("app-game-main");
+    expect(markup).not.toContain("根据对比，锁定神秘选手。");
     expect(markup).toContain("motion-reduce:animate-none");
     expect(markup).not.toContain("DAILY · ROUND #");
     expect(markup).not.toContain("#—");
@@ -71,15 +75,35 @@ describe("DailyGameLoading", () => {
     expect(dataMarkup).toContain("lg:grid-cols-[280px_minmax(0,1fr)]");
   });
 
-  it("keeps failures in the daily frame with alert and retry semantics", () => {
+  it("keeps the daily frame stable while the client portal owns error recovery", () => {
     dailyState.error = new Error("offline");
 
     const markup = renderInRouter(<GamePage mode="daily" />);
 
-    expect(markup).toContain('role="alert"');
+    expect(markup).toContain('role="status"');
     expect(markup).toContain('data-daily-game-surface="error"');
     expect(markup).toContain("每日挑战载入失败");
     expect(markup).toContain("重新载入");
     expect(markup).not.toContain("animate-pulse");
+  });
+
+  it("does not repeat daily progress in a separate question strip", () => {
+    const mysteryPlayer = players[0];
+    dailyState.challenge = {
+      date: "2026-07-29",
+      roundNumber: 210,
+      mysteryPlayerId: mysteryPlayer.id,
+      mysteryPlayer,
+      catalogVersion: "test-catalog",
+    };
+
+    const markup = renderInRouter(<GamePage mode="daily" />);
+
+    expect(markup).not.toContain("今日统一题目");
+    expect(markup).not.toContain("已使用 0 次机会");
+    expect(markup).not.toContain("DAILY · ROUND");
+    expect(markup).not.toContain("今日神秘选手");
+    expect(markup).not.toContain("DAILY · ROUND #210");
+    expect(markup).not.toContain("今日神秘选手");
   });
 });

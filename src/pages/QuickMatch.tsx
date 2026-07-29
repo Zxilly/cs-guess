@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   ArrowCounterClockwiseIcon,
   LightningIcon,
-  SpinnerGapIcon,
   UsersIcon,
   UsersThreeIcon,
 } from "@phosphor-icons/react";
@@ -13,9 +12,11 @@ import { DifficultySelector } from "@/components/DifficultySelector";
 import { InfoTip } from "@/components/InfoTip";
 import { PageIntro } from "@/components/PageIntro";
 import { PlayerIdentity } from "@/components/PlayerIdentity";
+import { OperationStatusDialog } from "@/components/OperationStatusDialog";
 import { SeriesSelector } from "@/components/SeriesSelector";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { useAnonymousProfile } from "@/hooks/use-anonymous-profile";
 import { useMatchmakingQueue } from "@/hooks/use-matchmaking-queue";
 import {
@@ -44,7 +45,6 @@ import {
   loadSoloDifficulty,
   parseSoloDifficulty,
   saveSoloDifficulty,
-  SOLO_DIFFICULTIES,
 } from "@/lib/solo-game";
 import type {
   BestOf,
@@ -56,6 +56,7 @@ import type {
 export function QuickMatch() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const audit = import.meta.env.DEV ? searchParams.get("audit") : null;
   const existingSession = useRef(loadCredentials("quick"));
   const navigateRef = useRef(navigate);
   const submitButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -92,10 +93,24 @@ export function QuickMatch() {
       ? (searchParams.get("visibility") as OpponentVisibility)
       : lastPreferences.current?.visibility ?? "hidden",
   );
-  const [error, setError] = useState("");
-  const [pending, setPending] = useState(false);
+  const [error, setError] = useState(
+    audit === "quick-error"
+      ? "加入匹配队列失败，请检查网络后重试。"
+      : "",
+  );
+  const [pending, setPending] = useState(audit === "quick-submitting");
   const [submittedSettings, setSubmittedSettings] =
-    useState<Readonly<QuickMatchSnapshot> | null>(null);
+    useState<Readonly<QuickMatchSnapshot> | null>(() =>
+      audit === "quick-submitting"
+        ? {
+            identityId: identity.player.id,
+            visibility,
+            bestOf,
+            partySize,
+            difficulty,
+          }
+        : null,
+    );
   const queue = useMatchmakingQueue();
   navigateRef.current = navigate;
 
@@ -159,14 +174,16 @@ export function QuickMatch() {
   }, [navigate]);
 
   useEffect(() => {
+    if (audit === "quick-error") return;
     setError("");
-  }, [partySize, visibility, difficulty, bestOf, identity.player.id]);
-
-  useEffect(() => {
-    if (!pending && error) {
-      submitButtonRef.current?.focus({ preventScroll: true });
-    }
-  }, [error, pending]);
+  }, [
+    audit,
+    partySize,
+    visibility,
+    difficulty,
+    bestOf,
+    identity.player.id,
+  ]);
 
   function startMatching(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -205,11 +222,6 @@ export function QuickMatch() {
           partySize,
           difficulty,
         };
-  const displayedDifficultyLabel =
-    SOLO_DIFFICULTIES.find(
-      (option) => option.id === displayedSettings.difficulty,
-    )?.label ?? "简单";
-
   const waitingCounts: Record<BestOf, number> = {
     1: queueCountFor(queue.counts, partySize, 1, visibility, difficulty),
     3: queueCountFor(queue.counts, partySize, 3, visibility, difficulty),
@@ -220,9 +232,6 @@ export function QuickMatch() {
     3: playingCountFor(queue.counts, partySize, 3, difficulty, visibility),
     5: playingCountFor(queue.counts, partySize, 5, difficulty, visibility),
   };
-  const difficultyLabel =
-    SOLO_DIFFICULTIES.find((option) => option.id === difficulty)?.label ??
-    "简单";
   const canRestoreLastPreferences =
     Boolean(lastPreferences.current) &&
     (partySize !== lastPreferences.current?.partySize ||
@@ -348,7 +357,7 @@ export function QuickMatch() {
                         aria-pressed={visibility === option}
                         disabled={pending}
                         onClick={() => setVisibility(option)}
-                        className="min-h-20 rounded-none border-r border-foreground/20 text-sm last:border-r-0"
+                        className="min-h-24 rounded-none border-r border-foreground/20 text-sm last:border-r-0"
                       >
                         {option === "hidden" ? "隐藏猜测" : "明牌模式"}
                       </Button>
@@ -384,7 +393,8 @@ export function QuickMatch() {
                       题库难度
                     </p>
                     <InfoTip label="题库难度说明" side="right" className="size-9">
-                      简单为高成就选手，完整为 Major 参赛选手，困难包含全部选手。
+                      简单为高成就选手；完整包含所有参加过 Major
+                      的选手，包括退役与无队伍选手；困难包含全部选手。
                     </InfoTip>
                   </div>
                   <div className="mt-2">
@@ -417,36 +427,22 @@ export function QuickMatch() {
               </section>
             </div>
 
-            {error ? (
-              <p
-                className="border-t border-foreground/20 px-5 py-3 text-sm text-destructive sm:px-6"
-                role="alert"
-              >
-                {error}
-              </p>
-            ) : null}
-
             <p className="sr-only" role="status" aria-live="polite">
               {pending ? "正在加入队列，请稍候。" : ""}
             </p>
 
-            <footer className="fixed inset-x-0 bottom-0 z-30 flex flex-col gap-2 border-t border-foreground/20 bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-12px_30px_rgba(0,0,0,0.08)] backdrop-blur sm:flex-row sm:items-center sm:justify-end lg:static lg:gap-4 lg:bg-transparent lg:p-6 lg:shadow-none lg:backdrop-blur-none">
-              <p className="font-mono text-xs uppercase tracking-[0.06em] text-muted-foreground sm:text-right">
-                {displayedSettings.partySize === 4 ? "4 人乱斗" : "1v1"} ·{" "}
-                {displayedDifficultyLabel} ·BO{displayedSettings.bestOf} ·{" "}
-                {displayedSettings.visibility === "hidden" ? "隐藏" : "明牌"}
-              </p>
+            <footer className="fixed inset-x-0 bottom-0 z-30 flex border-t border-foreground/20 bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-12px_30px_rgba(0,0,0,0.08)] backdrop-blur sm:justify-end lg:static lg:grid lg:grid-cols-2 lg:gap-6 lg:bg-transparent lg:p-6 lg:shadow-none lg:backdrop-blur-none">
               <Button
                 ref={submitButtonRef}
                 type="submit"
-                className="h-12 w-full justify-between rounded-none sm:max-w-sm"
+                className="h-12 w-full justify-between rounded-none sm:max-w-sm lg:col-start-2 lg:max-w-none"
                 disabled={pending}
               >
                 {pending
                   ? "正在加入队列…"
-                  : `开始匹配 · ${difficultyLabel} · BO${bestOf}`}
+                  : "开始匹配"}
                 {pending ? (
-                  <SpinnerGapIcon className="animate-spin motion-reduce:animate-none" />
+                  <Spinner role="presentation" aria-hidden="true" />
                 ) : (
                   <LightningIcon />
                 )}
@@ -455,6 +451,32 @@ export function QuickMatch() {
           </form>
         </Card>
       </main>
+      <OperationStatusDialog
+        open={pending}
+        kind="progress"
+        eyebrow="MATCHMAKING"
+        title="正在加入匹配队列"
+        description="正在确认身份与对战参数，完成后会自动进入等待页面。"
+      />
+      <OperationStatusDialog
+        open={Boolean(error)}
+        kind="error"
+        eyebrow="MATCHMAKING"
+        title="未能加入匹配队列"
+        description={error}
+        returnFocusRef={submitButtonRef}
+        onOpenChange={(open) => {
+          if (!open) setError("");
+        }}
+      >
+        <Button
+          type="button"
+          className="w-full rounded-none sm:w-auto"
+          onClick={() => setError("")}
+        >
+          返回设置
+        </Button>
+      </OperationStatusDialog>
     </div>
   );
 }

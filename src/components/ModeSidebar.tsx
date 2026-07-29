@@ -2,6 +2,8 @@ import {
   ArrowLeftIcon,
   ClockIcon,
   CrosshairIcon,
+  EyeIcon,
+  EyeSlashIcon,
   HourglassMediumIcon,
   InfoIcon,
   ScalesIcon,
@@ -10,6 +12,8 @@ import {
 } from "@phosphor-icons/react";
 import { Link } from "react-router";
 
+import { InfoTip } from "@/components/InfoTip";
+import { SoundToggle } from "@/components/SoundToggle";
 import { Timer } from "@/components/Timer";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +21,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { GameMode } from "@/types/game";
+import type { GameMode, OpponentVisibility } from "@/types/game";
 
 const modeNames: Record<GameMode, string> = {
   daily: "今日挑战",
@@ -38,6 +42,9 @@ interface ModeSidebarProps {
   backHref?: string;
   backLabel?: string;
   onExit?: () => void;
+  connectionLabel?: string;
+  connectionTone?: "connected" | "connecting" | "warning" | "offline";
+  opponentVisibility?: OpponentVisibility;
 }
 
 export function ModeSidebar({
@@ -47,11 +54,13 @@ export function ModeSidebar({
   maxGuesses,
   status = "playing",
   roundNumber,
-  bestOf,
   modeLabel,
   backHref = "/",
   backLabel = "模式大厅",
   onExit,
+  connectionLabel,
+  connectionTone = "connected",
+  opponentVisibility,
 }: ModeSidebarProps) {
   const today = new Intl.DateTimeFormat("sv-SE", {
     timeZone: "Asia/Shanghai",
@@ -90,6 +99,20 @@ export function ModeSidebar({
     },
   }[status === "playing" ? "waiting" : status];
   const FinishedStatusIcon = finishedStatus.icon;
+  const finishedStatusTone =
+    status === "won"
+      ? "text-outcome-win"
+      : status === "lost"
+        ? "text-outcome-loss"
+        : "text-primary";
+  const connectionToneClass =
+    connectionTone === "offline"
+      ? "text-destructive"
+      : connectionTone === "warning"
+        ? "text-warning"
+        : connectionTone === "connecting"
+          ? "text-muted-foreground"
+          : "text-primary";
 
   return (
     <aside className="border-b border-foreground/20 bg-sidebar lg:sticky lg:top-0 lg:h-screen lg:border-r lg:border-b-0">
@@ -111,17 +134,20 @@ export function ModeSidebar({
             </Link>
           </div>
 
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="rounded-none lg:mt-7"
-          >
-            <Link to={backHref} onClick={onExit}>
-              <ArrowLeftIcon />
-              {backLabel}
-            </Link>
-          </Button>
+          <div className="flex items-center gap-1 lg:mt-7">
+            <SoundToggle />
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="rounded-none"
+            >
+              <Link to={backHref} onClick={onExit}>
+                <ArrowLeftIcon />
+                {backLabel}
+              </Link>
+            </Button>
+          </div>
         </div>
 
         <div className="mt-4 flex flex-wrap items-end justify-between gap-x-4 gap-y-3 border-t-2 border-primary pt-4 lg:mt-8 lg:block lg:pt-5">
@@ -132,27 +158,44 @@ export function ModeSidebar({
             <p className="mt-1 text-sm font-semibold lg:mt-2 lg:text-lg">
               {modeLabel ?? modeNames[mode]}
             </p>
+            {opponentVisibility ? (
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                {opponentVisibility === "open" ? (
+                  <EyeIcon className="size-3.5 shrink-0" />
+                ) : (
+                  <EyeSlashIcon className="size-3.5 shrink-0" />
+                )}
+                <span>
+                  {opponentVisibility === "open" ? "明牌模式" : "隐藏猜测"}
+                </span>
+                <InfoTip
+                  label="查看对手信息规则"
+                  side="right"
+                  className="size-6 hover:bg-transparent hover:text-primary"
+                >
+                  {opponentVisibility === "open"
+                    ? "所有玩家都能看到彼此猜测的具体选手。"
+                    : "只公开对手命中的属性，不显示具体猜测选手。"}
+                </InfoTip>
+              </div>
+            ) : null}
           </div>
-          <div className="grid shrink-0 grid-cols-2 gap-3 border-l border-foreground/15 pl-3 font-mono text-xs uppercase tracking-[0.08em] sm:gap-4 sm:pl-4 lg:mt-5 lg:gap-5 lg:border-t lg:border-l-0 lg:pt-5 lg:pl-0">
-            <div>
-              <p className="text-muted-foreground">
-                {isNumberedRound ? "Round" : "Series"}
-              </p>
-              <p className="mt-1 text-sm font-medium text-foreground">
-                {isNumberedRound
-                  ? `#${roundNumber ?? "—"}`
-                  : roundNumber
-                    ? `R${roundNumber} · BO${bestOf ?? 3}`
-                    : `READY · BO${bestOf ?? 3}`}
-              </p>
+          {isNumberedRound ? (
+            <div className="grid shrink-0 grid-cols-2 gap-3 border-l border-foreground/15 pl-3 font-mono text-xs uppercase tracking-[0.08em] sm:gap-4 sm:pl-4 lg:mt-5 lg:gap-5 lg:border-t lg:border-l-0 lg:pt-5 lg:pl-0">
+              <div>
+                <p className="text-muted-foreground">Round</p>
+                <p className="mt-1 text-sm font-medium text-foreground">
+                  #{roundNumber ?? "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Date</p>
+                <p className="mt-1 whitespace-nowrap text-xs font-medium text-foreground sm:text-sm">
+                  {today}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-muted-foreground">Date</p>
-              <p className="mt-1 whitespace-nowrap text-xs font-medium text-foreground sm:text-sm">
-                {today}
-              </p>
-            </div>
-          </div>
+          ) : null}
         </div>
 
         {status === "playing" ? (
@@ -168,23 +211,27 @@ export function ModeSidebar({
               />
             </div>
 
-            <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
-              <p className="text-sm">猜测进度</p>
-              <p className="mt-2 font-mono text-3xl font-medium">
-                {guesses} / {maxGuesses}
-              </p>
-            </div>
+            {isNumberedRound ? (
+              <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
+                <p className="text-sm">猜测进度</p>
+                <p className="mt-2 font-mono text-3xl font-medium">
+                  {guesses} / {maxGuesses}
+                </p>
+              </div>
+            ) : null}
           </>
         ) : (
           <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
             <p className="text-xs text-muted-foreground">对局状态</p>
             <div className="mt-3 flex items-start gap-3">
               <FinishedStatusIcon
-                className="mt-0.5 size-5 shrink-0 text-primary"
+                className={`mt-0.5 size-5 shrink-0 ${finishedStatusTone}`}
                 weight="regular"
               />
               <div>
-                <p className="font-semibold">{finishedStatus.label}</p>
+                <p className={`font-semibold ${finishedStatusTone}`}>
+                  {finishedStatus.label}
+                </p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {finishedStatus.detail}
                 </p>
@@ -192,6 +239,24 @@ export function ModeSidebar({
             </div>
           </div>
         )}
+
+        {connectionLabel ? (
+          <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
+            <p className="text-xs text-muted-foreground">连接状态</p>
+            <p
+              className={`mt-3 flex items-center gap-2 text-sm font-medium ${connectionToneClass}`}
+              role={connectionTone === "offline" ? undefined : "status"}
+              aria-live={connectionTone === "offline" ? "off" : "polite"}
+              aria-atomic="true"
+            >
+              <span
+                className="size-2 shrink-0 bg-current"
+                aria-hidden="true"
+              />
+              {connectionLabel}
+            </p>
+          </div>
+        ) : null}
 
         <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
           <Popover>
@@ -212,7 +277,7 @@ export function ModeSidebar({
               <ul className="space-y-1 leading-5">
                 <li>搜索职业选手并提交猜测。</li>
                 <li>蓝色代表完全一致，箭头表示数值方向。</li>
-                <li>在八次机会与三分钟内锁定答案。</li>
+                <li>在 {maxGuesses} 次机会与三分钟内锁定答案。</li>
               </ul>
             </PopoverContent>
           </Popover>

@@ -49,6 +49,7 @@ describe("solo difficulty pools", () => {
       ),
     ).toBe(true);
     expect(full.every((player) => player.majorAppearances > 0)).toBe(true);
+    expect(full.some((player) => player.team === "无队伍")).toBe(true);
     expect(hard).toHaveLength(players.length);
   });
 
@@ -188,14 +189,14 @@ describe("solo progress persistence", () => {
     expect(loaded.state.roundId).toBe(legacyState.roundId);
   });
 
-  it("infers a migrated v1 loss with eight guesses as exhausted", () => {
+  it("infers a migrated hard loss with ten guesses as exhausted", () => {
     const storage = new MemoryStorage();
     const legacyState = {
       roundId: "solo:hard:v1-exhausted",
       roundNumber: 3,
       difficulty: "hard" as const,
       mysteryId: soloMysteryPool("hard")[20].id,
-      guessedIds: players.slice(0, 8).map(({ id }) => id),
+      guessedIds: players.slice(0, 10).map(({ id }) => id),
       status: "lost" as const,
       deadline: 50_000,
       resultDismissed: false,
@@ -210,7 +211,7 @@ describe("solo progress persistence", () => {
 
     expect(loaded.state.status).toBe("lost");
     expect(loaded.state.resultReason).toBe("attempts-exhausted");
-    expect(loaded.state.guessedIds).toHaveLength(8);
+    expect(loaded.state.guessedIds).toHaveLength(10);
   });
 
   it("infers a migrated expired v1 loss as a timeout", () => {
@@ -377,6 +378,29 @@ describe("solo progress persistence", () => {
     expect(loaded.state.status).toBe("lost");
     expect(loaded.state.resultDismissed).toBe(true);
     expect(loaded.state.roundId).toBe(progress.roundId);
+  });
+
+  it("resets a legacy hard exhaustion recorded before the ten-guess rule", () => {
+    const storage = new MemoryStorage();
+    const progress = {
+      roundId: "solo:hard:old-eight-guess-limit",
+      roundNumber: 3,
+      difficulty: "hard" as const,
+      mysteryId: soloMysteryPool("hard")[20].id,
+      guessedIds: players.slice(0, 8).map(({ id }) => id),
+      status: "lost" as const,
+      resultReason: "attempts-exhausted" as const,
+      deadline: 50_000,
+      resultDismissed: true,
+    };
+
+    saveSoloProgress(progress, storage);
+    const loaded = loadSoloProgress("hard", storage, 10_000);
+
+    expect(loaded.resetReason).toBe("progress-reset");
+    expect(loaded.state.status).toBe("playing");
+    expect(loaded.state.roundNumber).toBe(3);
+    expect(loaded.state.guessedIds).toEqual([]);
   });
 
   it("starts the next partitioned round when switching difficulty", () => {

@@ -24,7 +24,7 @@ export interface RoomPreferences {
   bestOf: BestOf;
   difficulty: GameDifficulty;
   visibility: OpponentVisibility;
-  maxPlayers: number;
+  maxPlayers: PartySize;
 }
 
 function browserStorage(): PreferencesStorage | undefined {
@@ -103,10 +103,7 @@ export function loadRoomPreferences(
     !isBestOf(value.bestOf) ||
     !isDifficulty(value.difficulty) ||
     !isVisibility(value.visibility) ||
-    typeof value.maxPlayers !== "number" ||
-    !Number.isInteger(value.maxPlayers) ||
-    value.maxPlayers < 2 ||
-    value.maxPlayers > 8
+    (value.maxPlayers !== 2 && value.maxPlayers !== 4)
   ) {
     return undefined;
   }

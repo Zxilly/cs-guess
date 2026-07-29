@@ -65,4 +65,20 @@ describe("DailyResultPanel", () => {
     expect(markup).toContain("Solo result");
     expect(markup).not.toContain("Daily result");
   });
+
+  it("shows Major appearances and championships separately", () => {
+    const markup = renderToStaticMarkup(
+      <DailyResultPanel
+        outcome="won"
+        attempts={2}
+        maxGuesses={8}
+        mysteryPlayer={{ ...legacyPlayer, majorAppearances: 7, majorWins: 2 }}
+      />,
+    );
+
+    expect(markup).toContain("Major 次数");
+    expect(markup).toContain("Major 冠军");
+    expect(markup).toContain(">7<");
+    expect(markup).toContain(">2<");
+  });
 });

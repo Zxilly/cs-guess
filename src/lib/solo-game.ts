@@ -1,6 +1,6 @@
 import { players } from "@/data/players";
 import {
-  MAX_GUESSES,
+  maxGuessesForDifficulty,
   type GameDifficulty,
   type GameStatus,
 } from "@/types/game";
@@ -21,7 +21,7 @@ export const SOLO_DIFFICULTIES = [
   {
     id: "full",
     label: "完整",
-    poolLabel: "Major 全池",
+    poolLabel: "Major 参赛选手",
     recommended: false,
   },
   {
@@ -162,6 +162,7 @@ function migrateLegacySoloProgress(
 ): Map<SoloDifficulty, MigrationIssue> {
   const issues = new Map<SoloDifficulty, MigrationIssue>();
   for (const difficulty of ["easy", "full", "hard"] as const) {
+    const maxGuesses = maxGuessesForDifficulty(difficulty);
     if (storage.getItem(soloProgressKey(difficulty))) continue;
     const legacyKey = legacySoloProgressKey(difficulty);
     const raw = storage.getItem(legacyKey);
@@ -211,7 +212,7 @@ function migrateLegacySoloProgress(
         issues.set(difficulty, { reason: "catalog-changed", roundNumber });
         continue;
       }
-      if (!uniqueGuesses || state.guessedIds.length > MAX_GUESSES) {
+      if (!uniqueGuesses || state.guessedIds.length > maxGuesses) {
         issues.set(difficulty, { reason: "progress-reset", roundNumber });
         continue;
       }
@@ -219,7 +220,7 @@ function migrateLegacySoloProgress(
       if (
         (state.status === "playing" &&
           (guessedMystery ||
-            state.guessedIds.length >= MAX_GUESSES ||
+            state.guessedIds.length >= maxGuesses ||
             state.resultDismissed)) ||
         (state.status === "won" && !guessedMystery) ||
         (state.status === "lost" && guessedMystery)
@@ -232,7 +233,7 @@ function migrateLegacySoloProgress(
       let resultReason: SoloGameState["resultReason"];
       if (status === "won") {
         resultReason = "guessed";
-      } else if (status === "lost" && state.guessedIds.length >= MAX_GUESSES) {
+      } else if (status === "lost" && state.guessedIds.length >= maxGuesses) {
         resultReason = "attempts-exhausted";
       } else if (state.deadline <= now) {
         status = "lost";
@@ -403,6 +404,33 @@ export function loadSoloProgress(
         resetReason: "catalog-changed",
       };
     }
+    const maxGuesses = maxGuessesForDifficulty(difficulty);
+    const guessedMystery = restored.guessedIds.includes(restored.mysteryId);
+    const uniqueGuesses =
+      new Set(restored.guessedIds).size === restored.guessedIds.length;
+    const invalidRoundState =
+      !uniqueGuesses ||
+      restored.guessedIds.length > maxGuesses ||
+      (restored.status === "playing" &&
+        (guessedMystery ||
+          restored.guessedIds.length >= maxGuesses ||
+          restored.resultDismissed)) ||
+      (restored.status === "won" && !guessedMystery) ||
+      (restored.status === "lost" && guessedMystery) ||
+      (restored.status === "lost" &&
+        restored.resultReason === "attempts-exhausted" &&
+        restored.guessedIds.length < maxGuesses);
+    if (invalidRoundState) {
+      return {
+        state: createSoloRound(
+          difficulty,
+          restored.roundNumber,
+          undefined,
+          now,
+        ),
+        resetReason: "progress-reset",
+      };
+    }
     return {
       state:
         restored.status === "playing" && restored.deadline <= now
@@ -427,10 +455,11 @@ export function soloGameReducer(
         return state;
       }
       const guessedIds = [...state.guessedIds, action.playerId];
+      const maxGuesses = maxGuessesForDifficulty(state.difficulty);
       const status =
         action.playerId === state.mysteryId
           ? "won"
-          : guessedIds.length >= MAX_GUESSES
+          : guessedIds.length >= maxGuesses
             ? "lost"
             : "playing";
       const resultReason =

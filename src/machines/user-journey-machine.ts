@@ -520,7 +520,7 @@ export const USER_JOURNEY_STATES = [
     id: "daily.playing",
     label: "今日挑战进行中",
     route: "/play/daily",
-    description: "计时、搜索选手并在八次机会内提交猜测。",
+    description: "计时、搜索选手并在当前题库规定的机会内提交猜测。",
   },
   {
     id: "daily.won",

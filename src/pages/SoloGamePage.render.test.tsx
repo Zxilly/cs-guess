@@ -60,7 +60,8 @@ describe("SoloGamePage persistence", () => {
       </MemoryRouter>,
     );
 
-    expect(markup).toContain("SOLO · ROUND #4");
+    expect(markup).toContain("#4");
+    expect(markup).not.toContain("SOLO · ROUND #4");
     expect(markup).toContain("1 / 8");
     expect(markup).toContain("01:00");
     expect(markup).toContain(guessedPlayer.nickname);
@@ -117,5 +118,43 @@ describe("SoloGamePage persistence", () => {
       "选手目录已更新，已安全开始新的练习回合。",
     );
     expect(markup).not.toContain("旧练习进度无法安全恢复");
+  });
+
+  it("removes playing context once the result panel replaces the game", () => {
+    const storage = new MemoryStorage();
+    vi.stubGlobal("localStorage", storage);
+
+    const markup = renderToStaticMarkup(
+      <MemoryRouter
+        initialEntries={[
+          "/play/solo?difficulty=full&audit=solo-result-panel",
+        ]}
+      >
+        <SoloGamePage />
+      </MemoryRouter>,
+    );
+
+    expect(markup).toContain("单人练习完成");
+    expect(markup).toContain("已用尝试");
+    expect(markup).not.toContain("根据属性线索确定目标选手");
+    expect(markup).not.toContain("随机个人题目");
+    expect(markup).not.toContain("已使用 1 次机会");
+  });
+
+  it("does not repeat solo progress in a separate question strip", () => {
+    const storage = new MemoryStorage();
+    vi.stubGlobal("localStorage", storage);
+
+    const markup = renderToStaticMarkup(
+      <MemoryRouter
+        initialEntries={["/play/solo?difficulty=hard&audit=solo-playing"]}
+      >
+        <SoloGamePage />
+      </MemoryRouter>,
+    );
+
+    expect(markup).not.toContain("随机个人题目");
+    expect(markup).not.toContain("已使用 0 次机会");
+    expect(markup).not.toContain("SOLO · ROUND");
   });
 });

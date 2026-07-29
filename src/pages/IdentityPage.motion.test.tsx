@@ -186,7 +186,10 @@ describe("IdentityPage reduced-motion draw state", () => {
     const liveResult = document.querySelector('[role="status"]');
     const confirm = findButton("确认身份并进入大厅");
     expect(liveResult?.textContent).toBe("抽取结果：Candidate");
-    expect(document.body.textContent).not.toContain("锁定中…");
+    expect(
+      document.querySelector('[data-slot="identity-draw-result-shell"] > p')
+        ?.className,
+    ).toContain("invisible");
     expect(confirm).toBeTruthy();
     expect(document.activeElement).toBe(confirm);
     expect(
@@ -195,8 +198,10 @@ describe("IdentityPage reduced-motion draw state", () => {
         ?.getAttribute("data-rolling"),
     ).toBe("false");
     expect(
-      document.querySelector(".identity-roulette-card span")?.textContent,
-    ).toBe("CA");
+      document.querySelector(
+        ".identity-roulette-card [data-slot='player-avatar-placeholder']",
+      ),
+    ).not.toBeNull();
     expect(
       document.querySelector(".identity-roulette-card img")?.className,
     ).toContain("opacity-0");
@@ -293,7 +298,11 @@ describe("IdentityPage reduced-motion draw state", () => {
       findButton("抽取初始身份")?.click();
     });
     expect(document.body.textContent).toContain("锁定中…");
-    expect(findButton("确认身份并进入大厅")).toBeUndefined();
+    expect(
+      findButton("确认身份并进入大厅")
+        ?.closest('[data-slot="identity-draw-result-content"]')
+        ?.hasAttribute("inert"),
+    ).toBe(true);
     expect(
       document
         .querySelector(".identity-roulette-track")
