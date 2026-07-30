@@ -122,27 +122,34 @@ async fn profile_api_uses_authenticated_domain_operations() {
     assert_eq!(adopted.player_id, winner_id);
     assert!(adopted.pending_draw.is_none());
 
-    let round_payload = json!({
-        "roundId": "solo:test-round-1",
-        "result": "win",
-        "details": {
-            "mode": "solo",
-            "roundNumber": 1,
-            "bestOf": 1,
-            "answerId": initial_player_id(),
-            "guessIds": [initial_player_id()],
-            "opponentNames": [],
-            "selfScore": 1,
-            "opponentScore": 0,
-        },
+    let challenge = service
+        .clone()
+        .oneshot(
+            Request::post("/v1/daily-challenges/current/attempts")
+                .header(header::CONTENT_TYPE, "application/json")
+                .header("x-profile-token", SYNC_TOKEN)
+                .body(Body::from(
+                    json!({ "anonymousId": ANONYMOUS_ID }).to_string(),
+                ))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let challenge: serde_json::Value =
+        serde_json::from_slice(&challenge.into_body().collect().await.unwrap().to_bytes()).unwrap();
+    let mystery_player_id = challenge["mysteryPlayerId"].as_str().unwrap();
+    let completion_payload = json!({
+        "anonymousId": ANONYMOUS_ID,
+        "guessIds": [mystery_player_id],
+        "timedOut": false,
     });
     let recorded = service
         .clone()
         .oneshot(
-            Request::post(format!("/v1/profiles/{ANONYMOUS_ID}/rounds"))
+            Request::post("/v1/daily-challenges/current/completions")
                 .header(header::CONTENT_TYPE, "application/json")
                 .header("x-profile-token", SYNC_TOKEN)
-                .body(Body::from(round_payload.to_string()))
+                .body(Body::from(completion_payload.to_string()))
                 .unwrap(),
         )
         .await
@@ -156,10 +163,10 @@ async fn profile_api_uses_authenticated_domain_operations() {
     let replayed_round = service
         .clone()
         .oneshot(
-            Request::post(format!("/v1/profiles/{ANONYMOUS_ID}/rounds"))
+            Request::post("/v1/daily-challenges/current/completions")
                 .header(header::CONTENT_TYPE, "application/json")
                 .header("x-profile-token", SYNC_TOKEN)
-                .body(Body::from(round_payload.to_string()))
+                .body(Body::from(completion_payload.to_string()))
                 .unwrap(),
         )
         .await
@@ -167,6 +174,21 @@ async fn profile_api_uses_authenticated_domain_operations() {
     let replayed_round = response_profile(replayed_round).await;
     assert_eq!(replayed_round.stats.wins, 1);
     assert_eq!(replayed_round.match_history.len(), 1);
+
+    let generic_round_write = service
+        .clone()
+        .oneshot(
+            Request::post(format!("/v1/profiles/{ANONYMOUS_ID}/rounds"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .header("x-profile-token", SYNC_TOKEN)
+                .body(Body::from(
+                    json!({ "roundId": "forged", "result": "win" }).to_string(),
+                ))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(generic_round_write.status(), StatusCode::NOT_FOUND);
 
     let second_draw = service
         .clone()

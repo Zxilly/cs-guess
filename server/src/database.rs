@@ -8,15 +8,21 @@ use sqlx::{
 use subtle::ConstantTimeEq;
 use tokio::sync::Mutex;
 use tracing::error;
+use uuid::Uuid;
 
 use crate::{
     config::Config,
-    daily::{CatalogPlayer, DailyChallenge, DailyChallengeCandidate, catalog_player_by_id},
+    daily::{
+        CatalogPlayer, DAILY_ROUND_SECONDS, DailyChallenge, DailyChallengeAttempt,
+        DailyChallengeCandidate, catalog_player_by_id, catalog_players,
+    },
     error::AppError,
     profile::{
-        CreateProfileRequest, ProfileState, RecordRoundRequest, StartIdentityDrawRequest,
+        AuthoritativeRoundSettlement, CreateProfileRequest, ProfileState, StartIdentityDrawRequest,
         validate_anonymous_id, validate_sync_token,
     },
+    protocol::Difficulty,
+    solo::{SOLO_ROUND_SECONDS, SoloRound},
 };
 
 #[derive(Clone)]
@@ -71,6 +77,14 @@ impl DatabaseStore {
             .await
             .map_err(database_error)?;
         sqlx::raw_sql(include_str!("../migrations/0002_daily_challenges.sql"))
+            .execute(&self.pool)
+            .await
+            .map_err(database_error)?;
+        sqlx::raw_sql(include_str!("../migrations/0003_solo_rounds.sql"))
+            .execute(&self.pool)
+            .await
+            .map_err(database_error)?;
+        sqlx::raw_sql(include_str!("../migrations/0004_daily_attempts.sql"))
             .execute(&self.pool)
             .await
             .map_err(database_error)?;
@@ -221,16 +235,155 @@ impl DatabaseStore {
         self.replace_profile(profile, sync_token).await
     }
 
-    pub async fn record_round(
+    pub(crate) async fn settle_profile_round(
+        &self,
+        anonymous_id: &str,
+        settlement: AuthoritativeRoundSettlement,
+    ) -> Result<ProfileState, AppError> {
+        validate_anonymous_id(anonymous_id)?;
+        let _guard = self.profile_mutation_lock.lock().await;
+        let mut profile = self.load_profile_internal(anonymous_id).await?;
+        profile.settle_round(settlement)?;
+        self.replace_profile_internal(profile).await
+    }
+
+    pub async fn create_solo_round(
         &self,
         anonymous_id: &str,
         sync_token: &str,
-        request: RecordRoundRequest,
+        difficulty: Difficulty,
+    ) -> Result<SoloRound, AppError> {
+        let profile = self.load_profile(anonymous_id, sync_token).await?;
+        let round_number = profile
+            .match_history
+            .iter()
+            .filter(|entry| entry.mode == "solo")
+            .map(|entry| entry.round_number)
+            .max()
+            .unwrap_or(0)
+            .saturating_add(1);
+        let previous_mystery_id = profile
+            .match_history
+            .iter()
+            .rev()
+            .find(|entry| entry.mode == "solo")
+            .and_then(|entry| entry.answer_id.as_deref());
+        let candidates: Vec<&CatalogPlayer> = catalog_players()
+            .iter()
+            .filter(|player| solo_player_matches_difficulty(player, difficulty))
+            .filter(|player| Some(player.id.as_str()) != previous_mystery_id)
+            .collect();
+        let mystery_player = candidates
+            .get(rand::random_range(0..candidates.len()))
+            .ok_or(AppError::Internal)?
+            .to_owned()
+            .clone();
+        let created_at = unix_timestamp_millis();
+        let round = SoloRound {
+            round_id: format!("solo:{}:{}", difficulty_name(difficulty), Uuid::new_v4()),
+            round_number,
+            difficulty,
+            mystery_player,
+            deadline_unix_ms: created_at.saturating_add(SOLO_ROUND_SECONDS * 1_000),
+            max_guesses: difficulty.max_guesses(),
+        };
+        sqlx::query(
+            "INSERT INTO solo_rounds (
+                round_id, anonymous_id, round_number, difficulty,
+                mystery_player_id, deadline_unix_ms, created_at
+             ) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        )
+        .bind(&round.round_id)
+        .bind(anonymous_id)
+        .bind(i64::from(round.round_number))
+        .bind(difficulty_name(round.difficulty))
+        .bind(&round.mystery_player.id)
+        .bind(round.deadline_unix_ms as i64)
+        .bind(created_at as i64)
+        .execute(&self.pool)
+        .await
+        .map_err(database_error)?;
+        Ok(round)
+    }
+
+    pub async fn load_solo_round(
+        &self,
+        anonymous_id: &str,
+        sync_token: &str,
+        round_id: &str,
+    ) -> Result<SoloRound, AppError> {
+        self.load_profile(anonymous_id, sync_token).await?;
+        let row: Option<(i64, String, String, i64)> = sqlx::query_as(
+            "SELECT round_number, difficulty, mystery_player_id, deadline_unix_ms
+             FROM solo_rounds
+             WHERE round_id = ? AND anonymous_id = ?",
+        )
+        .bind(round_id)
+        .bind(anonymous_id)
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(database_error)?;
+        let Some((round_number, difficulty, mystery_player_id, deadline_unix_ms)) = row else {
+            return Err(AppError::ProfileNotFound);
+        };
+        let difficulty = parse_difficulty(&difficulty)?;
+        let mystery_player = catalog_player_by_id(&mystery_player_id)
+            .ok_or(AppError::Internal)?
+            .clone();
+        Ok(SoloRound {
+            round_id: round_id.to_owned(),
+            round_number: round_number.try_into().map_err(|_| AppError::Internal)?,
+            difficulty,
+            mystery_player,
+            deadline_unix_ms: deadline_unix_ms
+                .try_into()
+                .map_err(|_| AppError::Internal)?,
+            max_guesses: difficulty.max_guesses(),
+        })
+    }
+
+    async fn load_profile_internal(&self, anonymous_id: &str) -> Result<ProfileState, AppError> {
+        let state_json: Option<String> =
+            sqlx::query_scalar("SELECT state_json FROM profiles WHERE anonymous_id = ?")
+                .bind(anonymous_id)
+                .fetch_optional(&self.pool)
+                .await
+                .map_err(database_error)?;
+        let Some(state_json) = state_json else {
+            return Err(AppError::ProfileNotFound);
+        };
+        serde_json::from_str(&state_json).map_err(|error| {
+            error!(%error, %anonymous_id, "stored profile JSON is invalid");
+            AppError::Internal
+        })
+    }
+
+    async fn replace_profile_internal(
+        &self,
+        profile: ProfileState,
     ) -> Result<ProfileState, AppError> {
-        let _guard = self.profile_mutation_lock.lock().await;
-        let mut profile = self.load_profile(anonymous_id, sync_token).await?;
-        profile.record_round(request)?;
-        self.replace_profile(profile, sync_token).await
+        profile.validate()?;
+        let state_json = serde_json::to_string(&profile).map_err(|error| {
+            error!(%error, "failed to serialize profile");
+            AppError::Internal
+        })?;
+        let result = sqlx::query(
+            "UPDATE profiles
+             SET player_id = ?, identity_confirmed = ?, updated_at = ?, state_json = ?
+             WHERE anonymous_id = ?",
+        )
+        .bind(&profile.player_id)
+        .bind(profile.identity_confirmed)
+        .bind(profile.updated_at as i64)
+        .bind(state_json)
+        .bind(&profile.anonymous_id)
+        .execute(&self.pool)
+        .await
+        .map_err(database_error)?;
+        if result.rows_affected() != 1 {
+            return Err(AppError::ProfileNotFound);
+        }
+        Ok(profile)
     }
 
     async fn replace_profile(
@@ -339,6 +492,67 @@ impl DatabaseStore {
             catalog_version: row.3,
         })
     }
+
+    pub async fn start_daily_challenge_attempt(
+        &self,
+        anonymous_id: &str,
+        sync_token: &str,
+    ) -> Result<DailyChallengeAttempt, AppError> {
+        self.load_profile(anonymous_id, sync_token).await?;
+        let challenge = self.current_daily_challenge().await?;
+        let created_at = unix_timestamp_millis();
+        let deadline_unix_ms = created_at.saturating_add(DAILY_ROUND_SECONDS * 1_000);
+        sqlx::query(
+            "INSERT INTO daily_attempts (
+                anonymous_id, challenge_date, deadline_unix_ms, created_at
+             ) VALUES (?, ?, ?, ?)
+             ON CONFLICT(anonymous_id, challenge_date) DO NOTHING",
+        )
+        .bind(anonymous_id)
+        .bind(&challenge.date)
+        .bind(deadline_unix_ms as i64)
+        .bind(created_at as i64)
+        .execute(&self.pool)
+        .await
+        .map_err(database_error)?;
+        let deadline_unix_ms: i64 = sqlx::query_scalar(
+            "SELECT deadline_unix_ms
+             FROM daily_attempts
+             WHERE anonymous_id = ? AND challenge_date = ?",
+        )
+        .bind(anonymous_id)
+        .bind(&challenge.date)
+        .fetch_one(&self.pool)
+        .await
+        .map_err(database_error)?;
+        Ok(DailyChallengeAttempt {
+            challenge,
+            deadline_unix_ms: deadline_unix_ms
+                .try_into()
+                .map_err(|_| AppError::Internal)?,
+        })
+    }
+
+    pub async fn daily_attempt_deadline(
+        &self,
+        anonymous_id: &str,
+        challenge_date: &str,
+    ) -> Result<u64, AppError> {
+        let deadline: Option<i64> = sqlx::query_scalar(
+            "SELECT deadline_unix_ms
+             FROM daily_attempts
+             WHERE anonymous_id = ? AND challenge_date = ?",
+        )
+        .bind(anonymous_id)
+        .bind(challenge_date)
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(database_error)?;
+        deadline
+            .ok_or_else(|| AppError::BadRequest("daily challenge was not started".to_owned()))?
+            .try_into()
+            .map_err(|_| AppError::Internal)
+    }
 }
 
 fn authorize(stored_hash: &[u8], sync_token: &str) -> Result<(), AppError> {
@@ -359,6 +573,38 @@ fn hash_token(sync_token: &str) -> [u8; 32] {
 fn database_error(error: sqlx::Error) -> AppError {
     error!(%error, "SQLite operation failed");
     AppError::Internal
+}
+
+fn solo_player_matches_difficulty(player: &CatalogPlayer, difficulty: Difficulty) -> bool {
+    match difficulty {
+        Difficulty::Easy => player.major_wins > 0 || player.major_appearances >= 5,
+        Difficulty::Full => player.major_appearances > 0,
+        Difficulty::Hard => true,
+    }
+}
+
+const fn difficulty_name(difficulty: Difficulty) -> &'static str {
+    match difficulty {
+        Difficulty::Easy => "easy",
+        Difficulty::Full => "full",
+        Difficulty::Hard => "hard",
+    }
+}
+
+fn parse_difficulty(value: &str) -> Result<Difficulty, AppError> {
+    match value {
+        "easy" => Ok(Difficulty::Easy),
+        "full" => Ok(Difficulty::Full),
+        "hard" => Ok(Difficulty::Hard),
+        _ => Err(AppError::Internal),
+    }
+}
+
+fn unix_timestamp_millis() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|duration| duration.as_millis().try_into().unwrap_or(u64::MAX))
+        .unwrap_or(0)
 }
 
 #[cfg(test)]

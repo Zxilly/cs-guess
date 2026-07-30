@@ -6,6 +6,7 @@ pub mod profile;
 pub mod protocol;
 pub mod room;
 pub mod routes;
+pub mod solo;
 pub mod state;
 
 pub use config::Config;

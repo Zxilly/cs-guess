@@ -15,15 +15,16 @@ use uuid::Uuid;
 
 use crate::{
     config::Config,
-    daily::DailyChallenge,
+    daily::{CompleteDailyChallengeRequest, DailyChallenge, DailyChallengeAttempt},
     database::DatabaseStore,
     error::AppError,
-    profile::{CreateProfileRequest, ProfileState, RecordRoundRequest, StartIdentityDrawRequest},
+    profile::{CreateProfileRequest, ProfileState, StartIdentityDrawRequest},
     protocol::{
         Difficulty, DifficultyQueueCounts, QueueCounts, RoomKind, SessionResponse, Snapshot,
         Visibility,
     },
     room::{NewPlayer, RoomHandle, RoomSpec, spawn_room},
+    solo::{CompleteSoloRoundRequest, CreateSoloRoundRequest, SoloRound},
 };
 
 #[derive(Clone)]
@@ -54,6 +55,7 @@ struct QuickQueue {
 #[derive(Clone, PartialEq, Eq)]
 struct QuickRequestFingerprint {
     identity_id: String,
+    profile_id: Option<String>,
     visibility: Visibility,
     best_of: u8,
     party_size: u8,
@@ -386,20 +388,97 @@ impl AppState {
             .await
     }
 
-    pub async fn record_round(
+    pub async fn current_daily_challenge(&self) -> Result<DailyChallenge, AppError> {
+        self.inner.database.current_daily_challenge().await
+    }
+
+    pub async fn complete_daily_challenge(
         &self,
-        anonymous_id: &str,
         sync_token: &str,
-        request: RecordRoundRequest,
+        request: CompleteDailyChallengeRequest,
     ) -> Result<ProfileState, AppError> {
         self.inner
             .database
-            .record_round(anonymous_id, sync_token, request)
+            .load_profile(&request.anonymous_id, sync_token)
+            .await?;
+        let challenge = self.current_daily_challenge().await?;
+        if request.timed_out {
+            let deadline = self
+                .inner
+                .database
+                .daily_attempt_deadline(&request.anonymous_id, &challenge.date)
+                .await?;
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|duration| duration.as_millis().try_into().unwrap_or(u64::MAX))
+                .unwrap_or(0);
+            if now < deadline {
+                return Err(AppError::BadRequest(
+                    "daily challenge deadline has not elapsed".to_owned(),
+                ));
+            }
+        }
+        let settlement = challenge.settlement(request.guess_ids, request.timed_out)?;
+        self.inner
+            .database
+            .settle_profile_round(&request.anonymous_id, settlement)
             .await
     }
 
-    pub async fn current_daily_challenge(&self) -> Result<DailyChallenge, AppError> {
-        self.inner.database.current_daily_challenge().await
+    pub async fn start_daily_challenge_attempt(
+        &self,
+        anonymous_id: &str,
+        sync_token: &str,
+    ) -> Result<DailyChallengeAttempt, AppError> {
+        self.inner
+            .database
+            .start_daily_challenge_attempt(anonymous_id, sync_token)
+            .await
+    }
+
+    pub async fn create_solo_round(
+        &self,
+        sync_token: &str,
+        request: CreateSoloRoundRequest,
+    ) -> Result<SoloRound, AppError> {
+        self.inner
+            .database
+            .create_solo_round(&request.anonymous_id, sync_token, request.difficulty)
+            .await
+    }
+
+    pub async fn load_solo_round(
+        &self,
+        anonymous_id: &str,
+        sync_token: &str,
+        round_id: &str,
+    ) -> Result<SoloRound, AppError> {
+        self.inner
+            .database
+            .load_solo_round(anonymous_id, sync_token, round_id)
+            .await
+    }
+
+    pub async fn complete_solo_round(
+        &self,
+        round_id: &str,
+        sync_token: &str,
+        request: CompleteSoloRoundRequest,
+    ) -> Result<ProfileState, AppError> {
+        let round = self
+            .inner
+            .database
+            .load_solo_round(&request.anonymous_id, sync_token, round_id)
+            .await?;
+        let now_unix_ms = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|duration| duration.as_millis().try_into().unwrap_or(u64::MAX))
+            .unwrap_or(0);
+        let settlement = round.settlement(request.guess_ids, request.timed_out, now_unix_ms)?;
+        self.inner
+            .database
+            .settle_profile_round(&request.anonymous_id, settlement)
+            .await
     }
 
     pub fn set_ready(&self, value: bool) {
@@ -447,6 +526,26 @@ impl AppState {
         best_of: u8,
         difficulty: Difficulty,
     ) -> Result<SessionResponse, AppError> {
+        self.create_friend_room_for_profile(
+            identity_id,
+            visibility,
+            max_players,
+            best_of,
+            difficulty,
+            None,
+        )
+        .await
+    }
+
+    pub async fn create_friend_room_for_profile(
+        &self,
+        identity_id: String,
+        visibility: Visibility,
+        max_players: u8,
+        best_of: u8,
+        difficulty: Difficulty,
+        profile_id: Option<String>,
+    ) -> Result<SessionResponse, AppError> {
         validate_identity_id(&identity_id)?;
         validate_best_of(best_of)?;
         if !matches!(max_players, 2 | 4) {
@@ -462,6 +561,7 @@ impl AppState {
             max_players,
             best_of,
             difficulty,
+            profile_id,
         )?;
         self.session_response(&room_code, &room, host).await
     }
@@ -471,10 +571,22 @@ impl AppState {
         room_code: &str,
         identity_id: String,
     ) -> Result<SessionResponse, AppError> {
+        self.join_room_for_profile(room_code, identity_id, None)
+            .await
+    }
+
+    pub async fn join_room_for_profile(
+        &self,
+        room_code: &str,
+        identity_id: String,
+        profile_id: Option<String>,
+    ) -> Result<SessionResponse, AppError> {
         validate_identity_id(&identity_id)?;
         validate_room_code(room_code)?;
         let room = self.room(room_code).await?;
-        let player = room.reserve_player(identity_id).await?;
+        let (player, _) = room
+            .reserve_player_with_profile(identity_id, profile_id)
+            .await?;
         self.session_response(room_code, &room, player).await
     }
 
@@ -501,18 +613,49 @@ impl AppState {
         party_size: u8,
         difficulty: Difficulty,
     ) -> Result<SessionResponse, AppError> {
+        self.quick_match_for_profile(
+            identity_id,
+            client_request_id,
+            visibility,
+            best_of,
+            party_size,
+            difficulty,
+            None,
+        )
+        .await
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub async fn quick_match_for_profile(
+        &self,
+        identity_id: String,
+        client_request_id: Option<String>,
+        visibility: Visibility,
+        best_of: u8,
+        party_size: u8,
+        difficulty: Difficulty,
+        profile_id: Option<String>,
+    ) -> Result<SessionResponse, AppError> {
         validate_identity_id(&identity_id)?;
         validate_best_of(best_of)?;
         validate_party_size(party_size)?;
 
         let Some(client_request_id) = client_request_id else {
             return self
-                .quick_match_once(identity_id, visibility, best_of, party_size, difficulty)
+                .quick_match_once(
+                    identity_id,
+                    visibility,
+                    best_of,
+                    party_size,
+                    difficulty,
+                    profile_id,
+                )
                 .await;
         };
         validate_client_request_id(&client_request_id)?;
         let fingerprint = QuickRequestFingerprint {
             identity_id: identity_id.clone(),
+            profile_id: profile_id.clone(),
             visibility,
             best_of,
             party_size,
@@ -534,7 +677,14 @@ impl AppState {
                 return Ok(response);
             }
             let response = self
-                .quick_match_once(identity_id, visibility, best_of, party_size, difficulty)
+                .quick_match_once(
+                    identity_id,
+                    visibility,
+                    best_of,
+                    party_size,
+                    difficulty,
+                    profile_id,
+                )
                 .await?;
             self.prune_quick_request_results();
             self.inner.quick_request_results.insert(
@@ -599,6 +749,7 @@ impl AppState {
         best_of: u8,
         party_size: u8,
         difficulty: Difficulty,
+        profile_id: Option<String>,
     ) -> Result<SessionResponse, AppError> {
         let queue_key = (best_of, visibility, party_size, difficulty);
         loop {
@@ -611,6 +762,7 @@ impl AppState {
                     party_size,
                     best_of,
                     difficulty,
+                    profile_id.clone(),
                 )?;
                 queues.insert(
                     queue_key,
@@ -626,7 +778,7 @@ impl AppState {
 
             let reservation = match self.room(&queue.room_code).await {
                 Ok(room) => room
-                    .reserve_player_with_status(identity_id.clone())
+                    .reserve_player_with_profile(identity_id.clone(), profile_id.clone())
                     .await
                     .map(|(player, ready)| (room, player, ready)),
                 Err(error) => Err(error),
@@ -813,6 +965,7 @@ impl AppState {
         self.inner.queue_telemetry.publish_waiting(counts);
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn create_room_entry(
         &self,
         kind: RoomKind,
@@ -821,6 +974,7 @@ impl AppState {
         max_players: u8,
         best_of: u8,
         difficulty: Difficulty,
+        profile_id: Option<String>,
     ) -> Result<(String, RoomHandle, NewPlayer), AppError> {
         if self.inner.rooms.len() >= self.inner.config.max_rooms {
             self.inner.rooms.retain(|_, room| !room.is_closed());
@@ -829,7 +983,7 @@ impl AppState {
             }
         }
 
-        let host = NewPlayer::new(identity_id)?;
+        let host = NewPlayer::new_with_profile(identity_id, profile_id)?;
         let (room_code, room) = (0..64)
             .find_map(|_| {
                 let suffix = Uuid::new_v4().as_u128() % 1_000_000;
@@ -844,6 +998,7 @@ impl AppState {
                         best_of,
                         host: host.clone(),
                         queue_telemetry: Arc::clone(&self.inner.queue_telemetry),
+                        database: Some(self.inner.database.clone()),
                     },
                     self.inner.config.clone(),
                     self.inner.shutdown.child_token(),

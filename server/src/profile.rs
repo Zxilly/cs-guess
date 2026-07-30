@@ -104,34 +104,23 @@ pub struct StartIdentityDrawRequest {
     pub replaced_winner_id: Option<String>,
 }
 
-#[derive(Clone, Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RecordRoundRequest {
+#[derive(Clone, Debug)]
+pub(crate) struct AuthoritativeRoundSettlement {
     pub round_id: String,
     pub result: String,
-    #[serde(default)]
     pub details: Option<RoundRecordDetails>,
 }
 
-#[derive(Clone, Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RoundRecordDetails {
+#[derive(Clone, Debug)]
+pub(crate) struct RoundRecordDetails {
     pub mode: String,
-    #[serde(default)]
     pub room_code: Option<String>,
-    #[serde(default = "default_round_number")]
     pub round_number: u32,
-    #[serde(default = "default_best_of")]
     pub best_of: u8,
-    #[serde(default)]
     pub answer_id: Option<String>,
-    #[serde(default)]
     pub guess_ids: Vec<String>,
-    #[serde(default)]
     pub opponent_names: Vec<String>,
-    #[serde(default)]
     pub self_score: u32,
-    #[serde(default)]
     pub opponent_score: u32,
 }
 
@@ -306,8 +295,11 @@ impl ProfileState {
         Ok(())
     }
 
-    pub fn record_round(&mut self, request: RecordRoundRequest) -> Result<(), AppError> {
-        if !valid_short_text(&request.round_id, 160) {
+    pub(crate) fn settle_round(
+        &mut self,
+        settlement: AuthoritativeRoundSettlement,
+    ) -> Result<(), AppError> {
+        if !valid_short_text(&settlement.round_id, 160) {
             return Err(AppError::BadRequest(
                 "round_id has an invalid format".to_owned(),
             ));
@@ -315,52 +307,52 @@ impl ProfileState {
         if self
             .recorded_rounds
             .iter()
-            .any(|round_id| round_id == &request.round_id)
+            .any(|round_id| round_id == &settlement.round_id)
         {
             return Ok(());
         }
-        if !matches!(request.result.as_str(), "win" | "loss" | "draw") {
+        if !matches!(settlement.result.as_str(), "win" | "loss" | "draw") {
             return Err(AppError::BadRequest("round result is invalid".to_owned()));
         }
 
-        let next_streak = if request.result == "win" {
+        let next_streak = if settlement.result == "win" {
             self.stats.current_streak.saturating_add(1)
         } else {
             0
         };
-        let losses_toward_credit = if request.result == "loss" {
+        let losses_toward_credit = if settlement.result == "loss" {
             self.losses_toward_credit.saturating_add(1)
         } else {
             self.losses_toward_credit
         };
         let earned_credits = u32::from(
-            request.result == "win" || request.result == "loss" && losses_toward_credit >= 2,
+            settlement.result == "win" || settlement.result == "loss" && losses_toward_credit >= 2,
         );
         self.stats.wins = self
             .stats
             .wins
-            .saturating_add(u32::from(request.result == "win"));
+            .saturating_add(u32::from(settlement.result == "win"));
         self.stats.losses = self
             .stats
             .losses
-            .saturating_add(u32::from(request.result == "loss"));
+            .saturating_add(u32::from(settlement.result == "loss"));
         self.stats.draws = self
             .stats
             .draws
-            .saturating_add(u32::from(request.result == "draw"));
+            .saturating_add(u32::from(settlement.result == "draw"));
         self.stats.current_streak = next_streak;
         self.stats.best_streak = self.stats.best_streak.max(next_streak);
         self.draw_credits = self.draw_credits.saturating_add(earned_credits);
-        if request.result == "loss" {
+        if settlement.result == "loss" {
             self.losses_toward_credit = losses_toward_credit % 2;
         }
         push_bounded(
             &mut self.recorded_rounds,
-            request.round_id.clone(),
+            settlement.round_id.clone(),
             MAX_RECORDED_ROUNDS,
         );
 
-        if let Some(details) = request.details {
+        if let Some(details) = settlement.details {
             let answer_snapshot = details
                 .answer_id
                 .as_deref()
@@ -372,9 +364,9 @@ impl ProfileState {
                 .map(|id| catalog_player_by_id(id).map(history_snapshot))
                 .collect();
             let entry = MatchHistoryEntry {
-                id: request.round_id,
+                id: settlement.round_id,
                 completed_at: current_timestamp(),
-                result: request.result,
+                result: settlement.result,
                 mode: details.mode,
                 room_code: details.room_code,
                 round_number: details.round_number,
@@ -418,14 +410,6 @@ impl PendingIdentityDraw {
                 .iter()
                 .all(|player_id| validate_identity_id(player_id).is_ok())
     }
-}
-
-fn default_round_number() -> u32 {
-    1
-}
-
-fn default_best_of() -> u8 {
-    1
 }
 
 fn validate_request_id(value: &str) -> Result<(), AppError> {

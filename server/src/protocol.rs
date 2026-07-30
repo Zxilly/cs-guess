@@ -180,6 +180,8 @@ pub struct RoundResultView {
 pub struct CreateRoomRequest {
     pub identity_id: String,
     #[serde(default)]
+    pub anonymous_id: Option<String>,
+    #[serde(default)]
     pub visibility: Visibility,
     #[serde(default = "default_max_players")]
     pub max_players: u8,
@@ -192,11 +194,15 @@ pub struct CreateRoomRequest {
 #[derive(Debug, Deserialize)]
 pub struct JoinRoomRequest {
     pub identity_id: String,
+    #[serde(default)]
+    pub anonymous_id: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct QuickMatchRequest {
     pub identity_id: String,
+    #[serde(default)]
+    pub anonymous_id: Option<String>,
     #[serde(default)]
     pub client_request_id: Option<String>,
     #[serde(default)]

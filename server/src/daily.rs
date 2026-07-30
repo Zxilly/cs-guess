@@ -4,7 +4,13 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use time::{OffsetDateTime, UtcOffset};
 
-use crate::error::AppError;
+use crate::{
+    error::AppError,
+    profile::{AuthoritativeRoundSettlement, RoundRecordDetails},
+    protocol::STANDARD_MAX_GUESSES,
+};
+
+pub const DAILY_ROUND_SECONDS: u64 = 180;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -50,6 +56,24 @@ pub struct DailyChallenge {
     pub mystery_player_id: String,
     pub mystery_player: CatalogPlayer,
     pub catalog_version: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DailyChallengeAttempt {
+    #[serde(flatten)]
+    pub challenge: DailyChallenge,
+    pub deadline_unix_ms: u64,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CompleteDailyChallengeRequest {
+    pub anonymous_id: String,
+    #[serde(default)]
+    pub guess_ids: Vec<String>,
+    #[serde(default)]
+    pub timed_out: bool,
 }
 
 pub struct DailyChallengeCandidate {
@@ -112,6 +136,67 @@ impl DailyChallengeCandidate {
                 catalog_version: CATALOG_VERSION.clone(),
             },
             player_snapshot_json,
+        })
+    }
+}
+
+impl DailyChallenge {
+    pub(crate) fn settlement(
+        &self,
+        guess_ids: Vec<String>,
+        timed_out: bool,
+    ) -> Result<AuthoritativeRoundSettlement, AppError> {
+        if guess_ids.len() > STANDARD_MAX_GUESSES {
+            return Err(AppError::BadRequest(
+                "daily challenge has too many guesses".to_owned(),
+            ));
+        }
+        let mut unique_guesses = std::collections::HashSet::with_capacity(guess_ids.len());
+        for guess_id in &guess_ids {
+            if catalog_player_by_id(guess_id).is_none() {
+                return Err(AppError::BadRequest(
+                    "daily challenge contains an unknown guess".to_owned(),
+                ));
+            }
+            if !unique_guesses.insert(guess_id) {
+                return Err(AppError::BadRequest(
+                    "daily challenge guesses must be unique".to_owned(),
+                ));
+            }
+        }
+
+        let winning_index = guess_ids
+            .iter()
+            .position(|guess_id| guess_id == &self.mystery_player_id);
+        if winning_index.is_some_and(|index| index + 1 != guess_ids.len()) {
+            return Err(AppError::BadRequest(
+                "daily challenge cannot continue after the correct guess".to_owned(),
+            ));
+        }
+        let result = if winning_index.is_some() {
+            "win"
+        } else if timed_out || guess_ids.len() == STANDARD_MAX_GUESSES {
+            "loss"
+        } else {
+            return Err(AppError::BadRequest(
+                "daily challenge is not finished".to_owned(),
+            ));
+        };
+
+        Ok(AuthoritativeRoundSettlement {
+            round_id: format!("daily:{}", self.date),
+            result: result.to_owned(),
+            details: Some(RoundRecordDetails {
+                mode: "daily".to_owned(),
+                room_code: None,
+                round_number: u32::from(self.round_number),
+                best_of: 1,
+                answer_id: Some(self.mystery_player_id.clone()),
+                guess_ids,
+                opponent_names: Vec::new(),
+                self_score: u32::from(result == "win"),
+                opponent_score: u32::from(result == "loss"),
+            }),
         })
     }
 }

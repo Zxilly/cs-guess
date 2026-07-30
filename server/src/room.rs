@@ -14,11 +14,14 @@ use tokio::{
     time::{MissedTickBehavior, interval},
 };
 use tokio_util::sync::CancellationToken;
+use tracing::warn;
 use uuid::Uuid;
 
 use crate::{
     config::Config,
+    database::DatabaseStore,
     error::AppError,
+    profile::{AuthoritativeRoundSettlement, RoundRecordDetails},
     protocol::{
         ClientMessage, Difficulty, FinishReason, GuessView, OpponentProgressView, Phase,
         PlayerView, RematchDecision, RematchResponseView, RematchStatus, RematchView, RoomKind,
@@ -35,10 +38,18 @@ pub struct NewPlayer {
     pub player_id: Uuid,
     pub session_token: String,
     display_name: String,
+    profile_id: Option<String>,
 }
 
 impl NewPlayer {
     pub fn new(identity_id: String) -> Result<Self, AppError> {
+        Self::new_with_profile(identity_id, None)
+    }
+
+    pub fn new_with_profile(
+        identity_id: String,
+        profile_id: Option<String>,
+    ) -> Result<Self, AppError> {
         let display_name = player_by_id(identity_id.trim())
             .map(|player| player.nickname.clone())
             .ok_or_else(|| {
@@ -50,6 +61,7 @@ impl NewPlayer {
             player_id: Uuid::new_v4(),
             session_token: URL_SAFE_NO_PAD.encode(token),
             display_name,
+            profile_id,
         })
     }
 }
@@ -85,7 +97,15 @@ impl RoomHandle {
         &self,
         identity_id: String,
     ) -> Result<(NewPlayer, bool), AppError> {
-        let player = NewPlayer::new(identity_id)?;
+        self.reserve_player_with_profile(identity_id, None).await
+    }
+
+    pub async fn reserve_player_with_profile(
+        &self,
+        identity_id: String,
+        profile_id: Option<String>,
+    ) -> Result<(NewPlayer, bool), AppError> {
+        let player = NewPlayer::new_with_profile(identity_id, profile_id)?;
         let (reply_tx, reply_rx) = oneshot::channel();
         self.tx
             .send(RoomCommand::Reserve {
@@ -257,6 +277,7 @@ struct Participant {
     player_id: Uuid,
     seat_index: u8,
     display_name: String,
+    profile_id: Option<String>,
     token_hash: [u8; 32],
     outbound: Option<mpsc::Sender<OutboundMessage>>,
     connection_id: Option<Uuid>,
@@ -300,6 +321,7 @@ struct RoomActor {
     max_players: u8,
     best_of: u8,
     round_number: u8,
+    series_id: Uuid,
     host_player_id: Uuid,
     players: HashMap<Uuid, Participant>,
     target_id: &'static str,
@@ -322,6 +344,7 @@ struct RoomActor {
     telemetry_active: bool,
     rematch: Option<RematchInvitation>,
     command_tx: mpsc::Sender<RoomCommand>,
+    database: Option<DatabaseStore>,
 }
 
 pub struct RoomSpec {
@@ -333,6 +356,7 @@ pub struct RoomSpec {
     pub best_of: u8,
     pub host: NewPlayer,
     pub(crate) queue_telemetry: Arc<QueueTelemetry>,
+    pub(crate) database: Option<DatabaseStore>,
 }
 
 pub fn spawn_room(spec: RoomSpec, config: Config, shutdown: CancellationToken) -> RoomHandle {
@@ -345,6 +369,7 @@ pub fn spawn_room(spec: RoomSpec, config: Config, shutdown: CancellationToken) -
         best_of,
         host,
         queue_telemetry,
+        database,
     } = spec;
     let (tx, rx) = mpsc::channel(config.room_queue_capacity);
     let mystery_pool = PLAYERS
@@ -369,6 +394,7 @@ pub fn spawn_room(spec: RoomSpec, config: Config, shutdown: CancellationToken) -
         max_players,
         best_of,
         round_number: 0,
+        series_id: Uuid::new_v4(),
         host_player_id,
         players,
         target_id: mystery_pool[target_index].id.as_str(),
@@ -391,6 +417,7 @@ pub fn spawn_room(spec: RoomSpec, config: Config, shutdown: CancellationToken) -
         telemetry_active: false,
         rematch: None,
         command_tx: tx.clone(),
+        database,
     };
     tokio::spawn(actor.run(rx, shutdown));
     RoomHandle { tx }
@@ -598,7 +625,7 @@ impl RoomActor {
                 disconnect_deadline_unix_ms: None,
             },
         );
-        self.players.remove(&player_id);
+        let departed_player = self.players.remove(&player_id);
         if self.host_player_id == player_id {
             let next_host = if self.kind == RoomKind::Friend {
                 self.active_replacement_host()
@@ -655,6 +682,7 @@ impl RoomActor {
             self.series_final_standings = final_standings;
             if was_playing {
                 self.record_departure_round_result();
+                self.settle_round_profiles(departed_player.as_ref());
             }
             self.set_telemetry_active(false);
             self.broadcast_round_finished();
@@ -1269,6 +1297,7 @@ impl RoomActor {
             }
         }
         self.record_round_result(finish_reason);
+        self.settle_round_profiles(None);
         let terminal_friend_room =
             self.kind == RoomKind::Friend && self.series_status != SeriesStatus::Active;
         if terminal_friend_room {
@@ -1366,6 +1395,67 @@ impl RoomActor {
         });
     }
 
+    fn settle_round_profiles(&self, departed_player: Option<&Participant>) {
+        if self.round_number == 0 {
+            return;
+        }
+        let mut participants = self.players.values().collect::<Vec<_>>();
+        if let Some(departed_player) = departed_player {
+            participants.push(departed_player);
+        }
+        for participant in &participants {
+            let Some(profile_id) = participant.profile_id.clone() else {
+                continue;
+            };
+            let result = match self.winner_player_id {
+                Some(winner) if winner == participant.player_id => "win",
+                Some(_) => "loss",
+                None => "draw",
+            };
+            let opponent_names = participants
+                .iter()
+                .filter(|opponent| opponent.player_id != participant.player_id)
+                .map(|opponent| opponent.display_name.clone())
+                .collect();
+            let opponent_score = participants
+                .iter()
+                .filter(|opponent| opponent.player_id != participant.player_id)
+                .map(|opponent| opponent.score)
+                .max()
+                .unwrap_or(0);
+            let settlement = AuthoritativeRoundSettlement {
+                round_id: format!(
+                    "{}:{}:R{}",
+                    self.room_code, self.series_id, self.round_number
+                ),
+                result: result.to_owned(),
+                details: Some(RoundRecordDetails {
+                    mode: match self.kind {
+                        RoomKind::Friend => "room",
+                        RoomKind::Quick => "quick",
+                    }
+                    .to_owned(),
+                    room_code: Some(self.room_code.clone()),
+                    round_number: u32::from(self.round_number),
+                    best_of: self.best_of,
+                    answer_id: Some(self.target_id.to_owned()),
+                    guess_ids: participant.guesses.clone(),
+                    opponent_names,
+                    self_score: u32::from(participant.score),
+                    opponent_score: u32::from(opponent_score),
+                }),
+            };
+            let Some(database) = self.database.clone() else {
+                continue;
+            };
+            tokio::spawn(async move {
+                if let Err(error) = database.settle_profile_round(&profile_id, settlement).await {
+                    warn!(%error, %profile_id, "failed to settle realtime round profile");
+                }
+            });
+        }
+    }
+
     fn restart_series(&mut self) {
         // A terminal four-player series may still contain an expired disconnected
         // participant. Drop those seats so a replacement can join the waiting room.
@@ -1381,6 +1471,7 @@ impl RoomActor {
         }
         self.phase = Phase::Waiting;
         self.round_number = 0;
+        self.series_id = Uuid::new_v4();
         self.winner_player_id = None;
         self.series_winner_player_id = None;
         self.series_status = SeriesStatus::Active;
@@ -1597,6 +1688,7 @@ impl RoomActor {
             self.series_finish_reason = Some(SeriesFinishReason::MemberLeftAbandoned);
         }
         self.series_final_standings = Some(standings);
+        self.settle_round_profiles(None);
         self.evict_expired_friend_members(Some(missing_player_id));
         self.set_telemetry_active(false);
         if !self.closed {
@@ -2051,6 +2143,7 @@ fn participant_from(player: NewPlayer, seat_index: u8) -> Participant {
         player_id: player.player_id,
         seat_index,
         display_name: player.display_name,
+        profile_id: player.profile_id,
         token_hash: hash_token(&player.session_token),
         outbound: None,
         connection_id: None,
@@ -2225,6 +2318,7 @@ mod tests {
                 best_of: 1,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             config,
             CancellationToken::new(),
@@ -2562,6 +2656,7 @@ mod tests {
                 best_of: 1,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             Config::for_test(),
             CancellationToken::new(),
@@ -2650,6 +2745,7 @@ mod tests {
                 best_of: 3,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             config,
             shutdown,
@@ -2779,6 +2875,7 @@ mod tests {
                 best_of: 3,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             Config::for_test(),
             shutdown,
@@ -2881,6 +2978,7 @@ mod tests {
                 best_of: 3,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             config,
             CancellationToken::new(),
@@ -2992,6 +3090,7 @@ mod tests {
                 best_of: 1,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             config,
             CancellationToken::new(),
@@ -3077,6 +3176,7 @@ mod tests {
                 best_of: 5,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             Config::for_test(),
             CancellationToken::new(),
@@ -3202,6 +3302,7 @@ mod tests {
                 best_of: 1,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             config,
             CancellationToken::new(),
@@ -3293,6 +3394,7 @@ mod tests {
                 best_of: 3,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             config,
             CancellationToken::new(),
@@ -3428,6 +3530,7 @@ mod tests {
                 best_of: 3,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             Config::for_test(),
             CancellationToken::new(),
@@ -3502,6 +3605,7 @@ mod tests {
                 best_of: 5,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             Config::for_test(),
             CancellationToken::new(),
@@ -3586,6 +3690,7 @@ mod tests {
                 best_of: 3,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             Config::for_test(),
             CancellationToken::new(),
@@ -3681,6 +3786,7 @@ mod tests {
                 best_of: 1,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             config,
             CancellationToken::new(),
@@ -3791,6 +3897,7 @@ mod tests {
                 best_of: 3,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             config,
             CancellationToken::new(),
@@ -3922,6 +4029,7 @@ mod tests {
                 best_of: 5,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             Config::for_test(),
             CancellationToken::new(),
@@ -3982,6 +4090,7 @@ mod tests {
                 best_of: 3,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             Config::for_test(),
             CancellationToken::new(),
@@ -4133,6 +4242,7 @@ mod tests {
                     best_of: 3,
                     host: host.clone(),
                     queue_telemetry: Arc::new(QueueTelemetry::new()),
+                    database: None,
                 },
                 Config::for_test(),
                 CancellationToken::new(),
@@ -4190,6 +4300,7 @@ mod tests {
                 best_of: 3,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             config,
             CancellationToken::new(),
@@ -4245,6 +4356,7 @@ mod tests {
                 best_of: 1,
                 host: host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             config,
             CancellationToken::new(),
@@ -4285,6 +4397,7 @@ mod tests {
                 best_of: 1,
                 host: lone_host.clone(),
                 queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: None,
             },
             Config::for_test(),
             CancellationToken::new(),
@@ -4295,5 +4408,108 @@ mod tests {
             .unwrap();
         assert!(result.closed);
         assert_eq!(result.remaining_players, 0);
+    }
+
+    #[tokio::test]
+    async fn finished_realtime_round_settles_bound_profiles() {
+        use crate::{daily::catalog_players, profile::CreateProfileRequest};
+
+        let config = Config::for_test();
+        let database = DatabaseStore::new(&config);
+        database.initialize().await.unwrap();
+        let identities = catalog_players()
+            .iter()
+            .filter(|player| (1..=4).contains(&player.major_appearances) && player.major_wins == 0)
+            .take(2)
+            .map(|player| player.id.clone())
+            .collect::<Vec<_>>();
+        let host_profile_id = "anonymous-realtime-host-0001";
+        let guest_profile_id = "anonymous-realtime-guest-0001";
+        let host_token = "realtime_host_sync_token_abcdefghijklmnopqrstuvwxyz";
+        let guest_token = "realtime_guest_sync_token_abcdefghijklmnopqrstuvwxyz";
+        database
+            .create_profile(
+                CreateProfileRequest {
+                    anonymous_id: host_profile_id.to_owned(),
+                    initial_player_id: identities[0].clone(),
+                },
+                host_token,
+            )
+            .await
+            .unwrap();
+        database
+            .create_profile(
+                CreateProfileRequest {
+                    anonymous_id: guest_profile_id.to_owned(),
+                    initial_player_id: identities[1].clone(),
+                },
+                guest_token,
+            )
+            .await
+            .unwrap();
+
+        let host =
+            NewPlayer::new_with_profile(identities[0].clone(), Some(host_profile_id.to_owned()))
+                .unwrap();
+        let room = spawn_room(
+            RoomSpec {
+                room_code: "CS-858585".to_owned(),
+                kind: RoomKind::Quick,
+                visibility: Visibility::Hidden,
+                difficulty: Difficulty::Hard,
+                max_players: 2,
+                best_of: 1,
+                host: host.clone(),
+                queue_telemetry: Arc::new(QueueTelemetry::new()),
+                database: Some(database.clone()),
+            },
+            config,
+            CancellationToken::new(),
+        );
+        let (guest, _) = room
+            .reserve_player_with_profile(identities[1].clone(), Some(guest_profile_id.to_owned()))
+            .await
+            .unwrap();
+        let (host_tx, _host_rx) = mpsc::channel(16);
+        let (guest_tx, _guest_rx) = mpsc::channel(16);
+        let (_, host_connection) = room
+            .connect(host.session_token.clone(), host_tx)
+            .await
+            .unwrap();
+        room.connect(guest.session_token.clone(), guest_tx)
+            .await
+            .unwrap();
+        let target_id = room.target_id().await.to_owned();
+        room.client_message(
+            host.player_id,
+            host_connection,
+            ClientMessage::Guess {
+                request_id: Uuid::new_v4(),
+                player_id: target_id,
+            },
+        )
+        .await
+        .unwrap();
+
+        timeout(Duration::from_secs(2), async {
+            loop {
+                let host_profile = database
+                    .load_profile(host_profile_id, host_token)
+                    .await
+                    .unwrap();
+                let guest_profile = database
+                    .load_profile(guest_profile_id, guest_token)
+                    .await
+                    .unwrap();
+                if host_profile.stats.wins == 1 && guest_profile.stats.losses == 1 {
+                    assert_eq!(host_profile.match_history[0].mode, "quick");
+                    assert_eq!(guest_profile.match_history[0].mode, "quick");
+                    break;
+                }
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+        })
+        .await
+        .expect("room actor settles both profiles");
     }
 }

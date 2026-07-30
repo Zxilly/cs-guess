@@ -33,15 +33,16 @@ use tracing::warn;
 
 use crate::{
     AppState,
+    daily::{CompleteDailyChallengeRequest, DailyChallengeAttempt},
     error::AppError,
     profile::{
-        CreateProfileRequest, ProfileState, RecordRoundRequest, StartIdentityDrawRequest,
-        validate_anonymous_id,
+        CreateProfileRequest, ProfileState, StartIdentityDrawRequest, validate_anonymous_id,
     },
     protocol::{
         ClientMessage, CreateRoomRequest, JoinRoomRequest, QueueCounts, QuickMatchRequest,
         SessionResponse, Snapshot,
     },
+    solo::{CompleteSoloRoundRequest, CreateSoloRoundRequest, SoloRound},
     state::validate_room_code,
 };
 
@@ -83,6 +84,20 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/matches/quick/{code}", delete(cancel_quick_match))
         .route("/v1/matches/queue", get(queue_counts))
         .route("/v1/daily-challenges/current", get(current_daily_challenge))
+        .route(
+            "/v1/daily-challenges/current/completions",
+            post(complete_daily_challenge),
+        )
+        .route(
+            "/v1/daily-challenges/current/attempts",
+            post(start_daily_challenge_attempt),
+        )
+        .route("/v1/solo-rounds", post(create_solo_round))
+        .route("/v1/solo-rounds/{round_id}", get(load_solo_round))
+        .route(
+            "/v1/solo-rounds/{round_id}/completions",
+            post(complete_solo_round),
+        )
         .route("/v1/profiles", post(create_profile))
         .route("/v1/profiles/{anonymous_id}", get(load_profile))
         .route(
@@ -96,10 +111,6 @@ pub fn app(state: AppState) -> Router {
         .route(
             "/v1/profiles/{anonymous_id}/identity-draws/{winner_id}/adopt",
             post(adopt_identity_draw),
-        )
-        .route(
-            "/v1/profiles/{anonymous_id}/rounds",
-            post(record_profile_round),
         )
         .fallback(frontend_or_not_found)
         .with_state(state)
@@ -147,16 +158,25 @@ async fn ready(State(state): State<AppState>) -> Response {
 
 async fn create_room(
     State(state): State<AppState>,
+    headers: HeaderMap,
     Json(request): Json<CreateRoomRequest>,
 ) -> Result<(StatusCode, Json<SessionResponse>), AppError> {
     state.admit_session_request().await?;
+    let profile_id = realtime_profile_binding(
+        &state,
+        &headers,
+        request.anonymous_id.as_deref(),
+        &request.identity_id,
+    )
+    .await?;
     let response = state
-        .create_friend_room(
+        .create_friend_room_for_profile(
             request.identity_id,
             request.visibility,
             request.max_players,
             request.best_of,
             request.difficulty,
+            profile_id,
         )
         .await?;
     Ok((StatusCode::CREATED, Json(response)))
@@ -165,10 +185,20 @@ async fn create_room(
 async fn join_room(
     State(state): State<AppState>,
     Path(code): Path<String>,
+    headers: HeaderMap,
     Json(request): Json<JoinRoomRequest>,
 ) -> Result<Json<SessionResponse>, AppError> {
     state.admit_session_request().await?;
-    let response = state.join_room(&code, request.identity_id).await?;
+    let profile_id = realtime_profile_binding(
+        &state,
+        &headers,
+        request.anonymous_id.as_deref(),
+        &request.identity_id,
+    )
+    .await?;
+    let response = state
+        .join_room_for_profile(&code, request.identity_id, profile_id)
+        .await?;
     Ok(Json(response))
 }
 
@@ -184,17 +214,26 @@ async fn leave_friend_room(
 
 async fn quick_match(
     State(state): State<AppState>,
+    headers: HeaderMap,
     Json(request): Json<QuickMatchRequest>,
 ) -> Result<Json<SessionResponse>, AppError> {
     state.admit_session_request().await?;
+    let profile_id = realtime_profile_binding(
+        &state,
+        &headers,
+        request.anonymous_id.as_deref(),
+        &request.identity_id,
+    )
+    .await?;
     let response = state
-        .quick_match(
+        .quick_match_for_profile(
             request.identity_id,
             request.client_request_id,
             request.visibility,
             request.best_of,
             request.party_size,
             request.difficulty,
+            profile_id,
         )
         .await?;
     Ok(Json(response))
@@ -208,6 +247,85 @@ async fn current_daily_challenge(
     State(state): State<AppState>,
 ) -> Result<Json<crate::daily::DailyChallenge>, AppError> {
     Ok(Json(state.current_daily_challenge().await?))
+}
+
+async fn complete_daily_challenge(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(request): Json<CompleteDailyChallengeRequest>,
+) -> Result<Json<ProfileState>, AppError> {
+    let sync_token = profile_sync_token(&headers)?;
+    Ok(Json(
+        state.complete_daily_challenge(sync_token, request).await?,
+    ))
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct StartDailyChallengeAttemptRequest {
+    anonymous_id: String,
+}
+
+async fn start_daily_challenge_attempt(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(request): Json<StartDailyChallengeAttemptRequest>,
+) -> Result<(StatusCode, Json<DailyChallengeAttempt>), AppError> {
+    let sync_token = profile_sync_token(&headers)?;
+    Ok((
+        StatusCode::CREATED,
+        Json(
+            state
+                .start_daily_challenge_attempt(&request.anonymous_id, sync_token)
+                .await?,
+        ),
+    ))
+}
+
+async fn create_solo_round(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(request): Json<CreateSoloRoundRequest>,
+) -> Result<(StatusCode, Json<SoloRound>), AppError> {
+    let sync_token = profile_sync_token(&headers)?;
+    Ok((
+        StatusCode::CREATED,
+        Json(state.create_solo_round(sync_token, request).await?),
+    ))
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LoadSoloRoundQuery {
+    anonymous_id: String,
+}
+
+async fn load_solo_round(
+    State(state): State<AppState>,
+    Path(round_id): Path<String>,
+    Query(query): Query<LoadSoloRoundQuery>,
+    headers: HeaderMap,
+) -> Result<Json<SoloRound>, AppError> {
+    let sync_token = profile_sync_token(&headers)?;
+    Ok(Json(
+        state
+            .load_solo_round(&query.anonymous_id, sync_token, &round_id)
+            .await?,
+    ))
+}
+
+async fn complete_solo_round(
+    State(state): State<AppState>,
+    Path(round_id): Path<String>,
+    headers: HeaderMap,
+    Json(request): Json<CompleteSoloRoundRequest>,
+) -> Result<Json<ProfileState>, AppError> {
+    let sync_token = profile_sync_token(&headers)?;
+    Ok(Json(
+        state
+            .complete_solo_round(&round_id, sync_token, request)
+            .await?,
+    ))
 }
 
 async fn load_profile(
@@ -274,26 +392,32 @@ async fn discard_identity_draw(
     ))
 }
 
-async fn record_profile_round(
-    State(state): State<AppState>,
-    Path(anonymous_id): Path<String>,
-    headers: HeaderMap,
-    Json(request): Json<RecordRoundRequest>,
-) -> Result<Json<ProfileState>, AppError> {
-    validate_anonymous_id(&anonymous_id)?;
-    let sync_token = profile_sync_token(&headers)?;
-    Ok(Json(
-        state
-            .record_round(&anonymous_id, sync_token, request)
-            .await?,
-    ))
-}
-
 fn profile_sync_token(headers: &HeaderMap) -> Result<&str, AppError> {
     headers
         .get("x-profile-token")
         .and_then(|value| value.to_str().ok())
         .ok_or(AppError::Unauthorized)
+}
+
+async fn realtime_profile_binding(
+    state: &AppState,
+    headers: &HeaderMap,
+    anonymous_id: Option<&str>,
+    identity_id: &str,
+) -> Result<Option<String>, AppError> {
+    let Some(anonymous_id) = anonymous_id else {
+        return Ok(None);
+    };
+    validate_anonymous_id(anonymous_id)?;
+    let profile = state
+        .load_profile(anonymous_id, profile_sync_token(headers)?)
+        .await?;
+    if profile.player_id != identity_id {
+        return Err(AppError::BadRequest(
+            "identity_id does not match the bound profile".to_owned(),
+        ));
+    }
+    Ok(Some(anonymous_id.to_owned()))
 }
 
 #[derive(Deserialize)]
