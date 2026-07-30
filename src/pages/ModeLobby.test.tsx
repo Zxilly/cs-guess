@@ -87,6 +87,19 @@ describe("ModeLobby", () => {
     expect(markup).toContain(">战绩</");
   });
 
+  it("links the lobby to the GitHub repository in a new tab", () => {
+    const markup = renderToStaticMarkup(
+      <MemoryRouter>
+        <ModeLobby />
+      </MemoryRouter>,
+    );
+
+    expect(markup).toContain('href="https://github.com/Zxilly/cs-guess"');
+    expect(markup).toContain('target="_blank"');
+    expect(markup).toContain('rel="noreferrer"');
+    expect(markup).toContain("GitHub 源码");
+  });
+
   it("limits directional arrow motion to motion-safe environments", () => {
     const markup = renderToStaticMarkup(
       <MemoryRouter>

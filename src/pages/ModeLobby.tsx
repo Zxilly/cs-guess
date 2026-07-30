@@ -4,6 +4,7 @@ import {
   ChartBarIcon,
   CrosshairSimpleIcon,
   DoorOpenIcon,
+  GithubLogoIcon,
   IdentificationCardIcon,
   LightningIcon,
   SwordIcon,
@@ -209,6 +210,19 @@ export function ModeLobby() {
               />
             </section>
           </Card>
+        </div>
+
+        <div className="mt-7 flex justify-center border-t border-foreground/15 pt-5 sm:justify-end">
+          <a
+            href="https://github.com/Zxilly/cs-guess"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="在 GitHub 查看 CS Guess 源码（新标签页打开）"
+            className="inline-flex min-h-11 items-center gap-2 px-2 text-sm text-muted-foreground transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            <GithubLogoIcon className="size-5" weight="regular" />
+            GitHub 源码
+          </a>
         </div>
       </main>
     </div>
