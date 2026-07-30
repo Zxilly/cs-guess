@@ -65,3 +65,9 @@ server/               # Axum/Tokio 实时对战服务
 
 - [数据管线](scraper/README.md)
 - [后端协议与配置](server/README.md)
+
+## 容器发布
+
+Docker Hub 的正式镜像使用不可变日期标签 `YYYYMMDD-N`，其中 `N` 是当天从
+`1` 开始递增的发布序号，例如 `20260730-2`。生产环境应部署日期标签；
+`latest` 仅用于指向最近一次构建，不作为部署版本依据。
