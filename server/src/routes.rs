@@ -500,7 +500,7 @@ async fn frontend_or_not_found(State(state): State<AppState>, request: Request<B
                 let cache_policy = if path.starts_with("/assets/") {
                     HeaderValue::from_static("public, max-age=31536000, immutable")
                 } else {
-                    HeaderValue::from_static("public, max-age=3600")
+                    HeaderValue::from_static("public, max-age=604800")
                 };
                 response.headers_mut().insert(CACHE_CONTROL, cache_policy);
                 response
@@ -541,12 +541,14 @@ mod tests {
     async fn frontend_files_are_served_with_spa_fallback() {
         let static_dir = std::env::temp_dir().join(format!("cs-guess-static-{}", Uuid::new_v4()));
         fs::create_dir_all(static_dir.join("assets")).unwrap();
+        fs::create_dir_all(static_dir.join("audio")).unwrap();
         fs::write(
             static_dir.join("index.html"),
             "<!doctype html><title>CS Guess</title>",
         )
         .unwrap();
         fs::write(static_dir.join("assets/app.js"), "window.CS_GUESS = true;").unwrap();
+        fs::write(static_dir.join("audio/effect.mp3"), b"audio").unwrap();
 
         let mut config = crate::Config::for_test();
         config.static_dir = static_dir.clone();
@@ -585,6 +587,21 @@ mod tests {
         assert_eq!(
             asset.headers()[header::CACHE_CONTROL],
             "public, max-age=31536000, immutable"
+        );
+
+        let audio = service
+            .clone()
+            .oneshot(
+                Request::get("/audio/effect.mp3")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(audio.status(), StatusCode::OK);
+        assert_eq!(
+            audio.headers()[header::CACHE_CONTROL],
+            "public, max-age=604800"
         );
 
         let api_miss = service
