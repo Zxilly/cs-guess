@@ -71,8 +71,12 @@ export function PlayerIdentity({
             </p>
             <p className="mt-0.5 truncate text-xs text-muted-foreground">
               {countryNameZh(player.countryCode)} · {player.team}
-              {compact ? ` · ${drawCredits} 次抽取` : ""}
             </p>
+            {compact ? (
+              <p className="mt-1 truncate font-mono text-xs text-muted-foreground">
+                {drawCredits} 次抽取 · 胜 1 局或累计负 2 局 +1
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -142,13 +146,18 @@ export function PlayerIdentity({
             </div>
           </div>
 
-          <div className="flex items-center justify-between border-t border-foreground/20 px-4 py-2 sm:px-5">
-            <Badge
-              variant={drawCredits > 0 ? "default" : "outline"}
-              className="rounded-none font-mono"
-            >
-              {drawCredits} 次抽取
-            </Badge>
+          <div className="flex items-center justify-between gap-3 border-t border-foreground/20 px-4 py-2 sm:px-5">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <Badge
+                variant={drawCredits > 0 ? "default" : "outline"}
+                className="rounded-none font-mono"
+              >
+                {drawCredits} 次抽取
+              </Badge>
+              <span className="font-mono text-xs text-muted-foreground">
+                胜 1 局或累计负 2 局 +1
+              </span>
+            </div>
             <InfoTip
               label="查看身份与抽取规则"
               side="left"

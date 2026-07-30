@@ -420,13 +420,22 @@ export function IdentityPage() {
             </InfoTip>
           }
           aside={
-            <Badge
-              variant={identity.profile.drawCredits > 0 ? "default" : "outline"}
-              className="rounded-none px-3 py-1.5 font-mono"
-            >
-              <DiceFiveIcon />
-              {identity.profile.drawCredits} 次抽取
-            </Badge>
+            <div className="flex flex-col items-start gap-1.5 sm:items-end">
+              <Badge
+                variant={
+                  identity.profile.drawCredits > 0 ? "default" : "outline"
+                }
+                className="rounded-none px-3 py-1.5 font-mono"
+              >
+                <DiceFiveIcon />
+                {identity.profile.drawCredits} 次抽取
+              </Badge>
+              {!onboarding ? (
+                <p className="font-mono text-xs text-muted-foreground">
+                  胜 1 局或累计负 2 局，可获得 1 次
+                </p>
+              ) : null}
+            </div>
           }
         />
 

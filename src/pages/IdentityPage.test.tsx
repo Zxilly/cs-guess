@@ -98,5 +98,6 @@ describe("IdentityPage onboarding", () => {
     expect(markup).toContain("0胜");
     expect(markup).toContain("0平");
     expect(markup).toContain("0 连胜");
+    expect(markup).toContain("胜 1 局或累计负 2 局，可获得 1 次");
   });
 });
