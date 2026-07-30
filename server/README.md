@@ -43,15 +43,15 @@ GET    /v1/profiles/{anonymous_id}
 POST   /v1/profiles/{anonymous_id}/identity-draws
 POST   /v1/profiles/{anonymous_id}/identity-draws/{winner_id}/adopt
 DELETE /v1/profiles/{anonymous_id}/identity-draws/{winner_id}
-POST   /v1/profiles/{anonymous_id}/rounds
 ```
 
 The server creates the initial counters, generates identity draw results,
-deducts draw credits, applies or discards pending identities, and derives
-profile statistics from idempotent round records. Clients cannot replace an
-entire profile representation. Identity draw requests carry a UUID so retrying
-the same request never charges twice; round writes are deduplicated by
-`roundId`.
+deducts draw credits, and applies or discards pending identities. Clients
+cannot replace an entire profile representation or submit arbitrary match
+results. Daily challenge, solo-round, and realtime room state machines derive
+the result and write the Profile aggregate directly. Identity draw requests
+carry a UUID so retrying the same request never charges twice; authoritative
+settlements are deduplicated by their server-owned round ID.
 
 SQLite uses a bounded async connection pool, WAL journaling, `synchronous =
 NORMAL`, foreign keys, and a 5-second busy timeout. Profile domain mutations
@@ -63,12 +63,30 @@ is persisted. Override the database location and pool size with
 
 ```http
 GET /v1/daily-challenges/current
+POST /v1/daily-challenges/current/attempts
+POST /v1/daily-challenges/current/completions
 ```
 
 The server derives the current date in `Asia/Shanghai`, selects a player from
 the versioned catalog, and inserts the challenge once using the date as the
 SQLite primary key. Later requests and process restarts return the stored player
 snapshot, so catalog refreshes cannot change an already published challenge.
+The authenticated attempt endpoint persists a per-Profile deadline. The
+completion endpoint accepts only the guess trace and derives the win/loss
+before writing Profile; timeout losses are rejected until that deadline.
+
+### Solo rounds
+
+```http
+POST /v1/solo-rounds
+GET  /v1/solo-rounds/{round_id}?anonymousId={anonymous_id}
+POST /v1/solo-rounds/{round_id}/completions
+```
+
+Solo answers, difficulty, round number, ownership, and deadline are issued and
+persisted by the server. Completion accepts the guess trace and derives the
+result from that stored round. Unknown or cross-Profile round IDs cannot be
+settled.
 
 ### Create a friend room
 
@@ -78,11 +96,17 @@ Content-Type: application/json
 
 {
   "identity_id": "0samas",
+  "anonymous_id": "profile-anonymous-id",
   "visibility": "hidden",
   "max_players": 4,
   "best_of": 3
 }
 ```
+
+When `anonymous_id` is present, send its `X-Profile-Token`. The server verifies
+that the room identity matches the bound Profile. The room actor then writes
+each authoritative round result directly to every bound participant's Profile.
+The same optional binding applies to join and quick-match requests.
 
 `visibility` is `hidden` or `open`; `max_players` is 2 or 4; `best_of` is 1, 3,
 or 5.
