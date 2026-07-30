@@ -16,6 +16,8 @@ RUN --mount=type=cache,id=cs-guess-pnpm,target=/pnpm/store \
 COPY components.json index.html tsconfig.app.json tsconfig.json tsconfig.node.json vite.config.ts ./
 COPY public ./public
 COPY src ./src
+ARG VITE_API_BASE_URL=
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 RUN pnpm build
 
 FROM rust:1.97.1-bookworm AS server-build
