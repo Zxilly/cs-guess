@@ -65,9 +65,12 @@ def test_source_player_ingestion_is_auditable_and_keeps_provider_id_separate(tmp
         }
     ]
     assert report["source_records"]["pandascore"] == 1
-    assert {
-        item["field_name"] for item in report["evidence"]
-    } >= {"nickname", "full_name", "country_code", "birth_date"}
+    assert {item["field_name"] for item in report["evidence"]} >= {
+        "nickname",
+        "full_name",
+        "country_code",
+        "birth_date",
+    }
 
 
 def test_merge_cleans_html_separated_legal_name_aliases(tmp_path):
@@ -168,8 +171,7 @@ def test_merge_resolves_exact_identity_and_preserves_field_conflicts(tmp_path):
             "pandascore",
         }
         nickname_conflict = next(
-            item for item in report["conflicts"]
-            if item["field_name"] == "nickname"
+            item for item in report["conflicts"] if item["field_name"] == "nickname"
         )
         assert nickname_conflict["resolution_status"] == "automatic"
         assert nickname_conflict["resolved_value"] == "device"
@@ -302,8 +304,7 @@ def test_complete_player_exports_current_team_tenures_and_multiple_roles(tmp_pat
         {"kind": "weapon", "value": "awper", "primary": True},
     ]
     assert [
-        (item["team"]["name"], item["current"])
-        for item in record["teamHistory"]
+        (item["team"]["name"], item["current"]) for item in record["teamHistory"]
     ] == [
         ("Team Vitality", True),
         ("against All authority", False),
@@ -606,6 +607,77 @@ def test_reviewed_role_override_requires_a_citable_evidence_url(tmp_path):
             )
 
 
+def test_reviewed_player_override_is_cited_replayable_and_updates_guessability(
+    tmp_path,
+):
+    override = {
+        "player": {
+            "source": "liquipedia",
+            "external_id": "AdrieN",
+        },
+        "overrides": {"birth_date": "2002-07-07"},
+        "evidence": [
+            {"url": "https://prosettings.net/players/adrien/"},
+            {"url": "https://www.hltv.org/player/23767/adrien"},
+        ],
+        "basis": "Reviewed complete birthday with an independent identity check.",
+    }
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "AdrieN",
+                "nickname": "AdrieN",
+                "full_name": "Adrian Mucha",
+                "country_code": "PL",
+                "roles": ["rifler"],
+            },
+        )
+        first = store.apply_reviewed_player_overrides([override])
+        store.merge_all()
+        second = store.apply_reviewed_player_overrides([override])
+        report = store.audit(player_id)
+        manual_records = store.connection.execute(
+            """
+            SELECT COUNT(*)
+            FROM source_records
+            WHERE source = 'manual'
+              AND external_id = 'reviewed-player:liquipedia:AdrieN'
+            """
+        ).fetchone()[0]
+
+    assert first == {"applied": 1, "already_applied": 0}
+    assert second == {"applied": 0, "already_applied": 1}
+    assert report["player"]["birth_date"] == "2002-07-07"
+    assert report["player"]["is_guessable"] == 1
+    assert manual_records == 1
+
+
+def test_reviewed_player_override_rejects_partial_birth_date(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "year-only",
+                "nickname": "year-only",
+            },
+        )
+
+        with pytest.raises(ValueError, match="YYYY-MM-DD"):
+            store.apply_reviewed_player_overrides(
+                [
+                    {
+                        "player": {
+                            "source": "liquipedia",
+                            "external_id": "year-only",
+                        },
+                        "overrides": {"birth_date": "2003"},
+                        "evidence": [{"url": "https://example.com/player"}],
+                    }
+                ]
+            )
+
+
 def test_partial_birth_date_is_retained_but_not_marked_guessable(tmp_path):
     with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
         player_id = store.upsert_source_player(
@@ -761,8 +833,7 @@ def test_reviewed_major_winner_marks_every_player_on_winning_team(tmp_path):
                         "external_id": "falcons",
                     },
                     "source_url": (
-                        "https://www.hltv.org/events/8301/"
-                        "iem-cologne-major-2026"
+                        "https://www.hltv.org/events/8301/iem-cologne-major-2026"
                     ),
                 }
             ]
@@ -779,16 +850,12 @@ def test_reviewed_major_winner_marks_every_player_on_winning_team(tmp_path):
                         "external_id": "falcons",
                     },
                     "source_url": (
-                        "https://www.hltv.org/events/8301/"
-                        "iem-cologne-major-2026"
+                        "https://www.hltv.org/events/8301/iem-cologne-major-2026"
                     ),
                 }
             ]
         )
-        records = {
-            record["nickname"]: record
-            for record in store.export_game_records()
-        }
+        records = {record["nickname"]: record for record in store.export_game_records()}
 
     assert first == {"events": 1, "appearances": 2}
     assert second == first
@@ -983,12 +1050,100 @@ def test_data_quality_report_flags_incomplete_major_rosters(tmp_path):
 
     assert report["summary"]["guessablePlayers"] == 4
     assert report["summary"]["criticalIssues"] == 2
-    assert {
-        issue["code"] for issue in report["criticalIssues"]
-    } == {
+    assert {issue["code"] for issue in report["criticalIssues"]} == {
         "major_winner_roster_size",
         "underfilled_major_roster",
     }
+
+
+def test_data_quality_report_tracks_excluded_major_players_missing_birth_date(
+    tmp_path,
+):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "legacy",
+                "nickname": "legacy",
+                "full_name": "Legacy Player",
+                "country_code": "DK",
+            },
+        )
+        store.upsert_major_records(
+            "liquipedia",
+            [
+                {
+                    "external_id": "major-a",
+                    "canonical_name": "Major A",
+                    "game_title": "csgo",
+                    "starts_on": "2013-01-01",
+                    "appearances": [
+                        {
+                            "player_external_id": "legacy",
+                            "team": {
+                                "external_id": "team-a",
+                                "name": "Team A",
+                            },
+                        }
+                    ],
+                }
+            ],
+        )
+        store.merge_all()
+        report = store.data_quality_report()
+
+    assert {warning["code"] for warning in report["warnings"]} >= {
+        "excluded_major_player_missing_birth_date"
+    }
+    assert report["excludedMajorPlayersMissingBirthDate"] == [
+        {
+            "id": player_id,
+            "nickname": "legacy",
+            "majorAppearances": 1,
+        }
+    ]
+
+
+def test_data_quality_report_ignores_disabled_major_appearances(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        for index in range(6):
+            store.upsert_source_player(
+                "liquipedia",
+                {
+                    "external_id": f"player-{index}",
+                    "nickname": f"player-{index}",
+                    "full_name": f"Player {index}",
+                    "country_code": "DK",
+                    "birth_date": "2000-01-01",
+                },
+            )
+        store.upsert_major_records(
+            "liquipedia",
+            [
+                {
+                    "external_id": "major-a",
+                    "canonical_name": "Major A",
+                    "game_title": "cs2",
+                    "starts_on": "2026-01-01",
+                    "appearances": [
+                        {
+                            "player_external_id": f"player-{index}",
+                            "team": {
+                                "external_id": "team-a",
+                                "name": "Team A",
+                            },
+                            "placement": "1",
+                            "counts_toward_total": index < 5,
+                        }
+                        for index in range(6)
+                    ],
+                }
+            ],
+        )
+        store.merge_all()
+        report = store.data_quality_report()
+
+    assert report["criticalIssues"] == []
 
 
 def test_merge_matches_exact_nickname_birth_country_across_stale_teams(
@@ -1155,6 +1310,57 @@ def test_major_player_reference_matches_liquipedia_title_case_insensitively(
     assert player_id
 
 
+def test_major_player_reference_prefers_exact_case_when_nicknames_collide(
+    tmp_path,
+):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        retired_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "NOtA",
+                "nickname": "NOtA",
+                "full_name": "Kyle Saadi",
+                "country_code": "DZ",
+            },
+        )
+        active_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "Nota",
+                "nickname": "nota",
+                "full_name": "Emil Moskvitin",
+                "country_code": "RU",
+                "birth_date": "2007-04-28",
+            },
+        )
+
+        result = store.upsert_major_records(
+            "liquipedia",
+            [
+                {
+                    "external_id": "example-major",
+                    "canonical_name": "Example Major",
+                    "game_title": "cs2",
+                    "starts_on": "2025-11-24",
+                    "appearances": [
+                        {
+                            "player_external_id": "Nota",
+                            "counts_toward_total": True,
+                        }
+                    ],
+                }
+            ],
+        )
+        appearances = store.connection.execute(
+            "SELECT player_id FROM major_appearances"
+        ).fetchall()
+
+    assert result["appearances"] == 1
+    assert result["unresolved_players"] == []
+    assert [row["player_id"] for row in appearances] == [active_id]
+    assert retired_id != active_id
+
+
 def test_strong_platform_id_reuses_canonical_player_before_nickname_matching(tmp_path):
     with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
         first_id = store.upsert_source_player(
@@ -1178,9 +1384,7 @@ def test_strong_platform_id_reuses_canonical_player_before_nickname_matching(tmp
         report = store.audit(first_id)
 
     assert second_id == first_id
-    assert {
-        (item["source"], item["external_id"]) for item in report["source_ids"]
-    } == {
+    assert {(item["source"], item["external_id"]) for item in report["source_ids"]} == {
         ("liquipedia", "player-page"),
         ("pandascore", "999"),
         ("steam", "76561198000000001"),
@@ -1212,6 +1416,33 @@ def test_targeted_fallback_source_can_be_linked_to_known_canonical_player(
         )
 
     assert linked_id == player_id
+
+
+def test_merge_all_repeats_identity_passes_until_stable(
+    tmp_path,
+    monkeypatch,
+):
+    calls = 0
+
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+
+        def merge_once_then_stabilize():
+            nonlocal calls
+            calls += 1
+            return (1, 1) if calls == 1 else (0, 0)
+
+        monkeypatch.setattr(
+            store,
+            "_merge_exact_name_birth_date_identities",
+            merge_once_then_stabilize,
+        )
+
+        result = store.merge_all()
+
+    assert calls == 2
+    assert result["players_merged"] == 1
+    assert result["exact_identity_merges"] == 1
+    assert result["conflicts_created"] == 1
 
 
 def test_nickname_and_current_team_match_is_queued_not_auto_merged(tmp_path):
@@ -1470,9 +1701,7 @@ def test_export_uses_best_fields_from_global_team_alias_group(tmp_path):
         )
 
     assert record["currentTeam"]["name"] == "Team Liquid"
-    assert record["currentTeam"]["logoUrl"] == (
-        "https://cdn.example.com/liquid.png"
-    )
+    assert record["currentTeam"]["logoUrl"] == ("https://cdn.example.com/liquid.png")
 
 
 def test_export_does_not_share_assets_between_unconfirmed_team_names(tmp_path):
@@ -1554,9 +1783,9 @@ def test_cross_source_identity_accepts_conservative_legal_name_variants(tmp_path
         for item in report["conflicts"]
         if item["field_name"] == "identity:high_confidence_cross_source"
     )
-    assert {
-        candidate["match_basis"] for candidate in decision["candidates"]
-    } == {"compatible_legal_name_tokens"}
+    assert {candidate["match_basis"] for candidate in decision["candidates"]} == {
+        "compatible_legal_name_tokens"
+    }
 
 
 def test_cross_source_identity_accepts_exact_birth_date_when_names_diverge(
@@ -1599,9 +1828,9 @@ def test_cross_source_identity_accepts_exact_birth_date_when_names_diverge(
         for item in report["conflicts"]
         if item["field_name"] == "identity:high_confidence_cross_source"
     )
-    assert {
-        candidate["match_basis"] for candidate in decision["candidates"]
-    } == {"exact_birth_date"}
+    assert {candidate["match_basis"] for candidate in decision["candidates"]} == {
+        "exact_birth_date"
+    }
 
 
 def test_cross_source_identity_checks_unmerged_birth_date_evidence(tmp_path):
@@ -1807,6 +2036,8 @@ def test_reviewed_source_quarantine_removes_mixed_identity_evidence(tmp_path):
                 "nickname": "Koala",
                 "full_name": "Fahad Khaled Alkadyan",
                 "birth_date": "2005-02-26",
+                "aliases": ["Fahad Alias"],
+                "roles": ["rifler"],
                 "current_team": {
                     "external_id": "83723",
                     "name": "Sharks",
@@ -1818,11 +2049,25 @@ def test_reviewed_source_quarantine_removes_mixed_identity_evidence(tmp_path):
         second = store.apply_reviewed_source_quarantines([quarantine])
         store.merge_all()
         report = store.audit(player_id)
+        aliases = list(
+            store.connection.execute(
+                "SELECT alias FROM player_aliases WHERE player_id = ?",
+                (player_id,),
+            )
+        )
+        roles = list(
+            store.connection.execute(
+                "SELECT role FROM player_roles WHERE player_id = ?",
+                (player_id,),
+            )
+        )
 
     assert first == {"quarantined": 1, "already_quarantined": 0}
     assert second == {"quarantined": 0, "already_quarantined": 1}
     assert report["player"]["full_name"] == "João Pedro"
     assert report["team_history"] == []
+    assert aliases == []
+    assert roles == []
     assert any(
         item["field_name"] == "identity:quarantined_source"
         and item["resolution_status"] == "manual"
@@ -1933,9 +2178,9 @@ def test_hltv_can_triangulate_a_shorter_pandascore_legal_name(tmp_path):
         for item in report["conflicts"]
         if item["field_name"] == "identity:high_confidence_cross_source"
     )
-    assert {
-        candidate["match_basis"] for candidate in decision["candidates"]
-    } == {"hltv_triangulation"}
+    assert {candidate["match_basis"] for candidate in decision["candidates"]} == {
+        "hltv_triangulation"
+    }
 
 
 def test_hltv_can_triangulate_a_liquipedia_nickname_alias(tmp_path):
@@ -1986,9 +2231,9 @@ def test_hltv_can_triangulate_a_liquipedia_nickname_alias(tmp_path):
         for item in report["conflicts"]
         if item["field_name"] == "identity:high_confidence_cross_source"
     )
-    assert {
-        candidate["match_basis"] for candidate in decision["candidates"]
-    } == {"hltv_alias_triangulation"}
+    assert {candidate["match_basis"] for candidate in decision["candidates"]} == {
+        "hltv_alias_triangulation"
+    }
 
 
 def test_cross_source_identity_conflicts_remain_open_for_review(tmp_path):
@@ -2037,14 +2282,17 @@ def test_major_appearance_conflict_uses_liquipedia_field_precedence(tmp_path):
                 "platform_ids": {"steam": "76561198000000010"},
             },
         )
-        assert store.upsert_source_player(
-            "liquipedia",
-            {
-                "external_id": "Player",
-                "nickname": "player",
-                "platform_ids": {"steam": "76561198000000010"},
-            },
-        ) == player_id
+        assert (
+            store.upsert_source_player(
+                "liquipedia",
+                {
+                    "external_id": "Player",
+                    "nickname": "player",
+                    "platform_ids": {"steam": "76561198000000010"},
+                },
+            )
+            == player_id
+        )
         pandascore_major = {
             "external_id": "100",
             "canonical_name": "Example Major",

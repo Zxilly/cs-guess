@@ -20,6 +20,8 @@ pub struct CatalogPlayer {
     pub name: String,
     pub team: String,
     #[serde(default)]
+    pub historical_teams: Vec<String>,
+    #[serde(default)]
     pub team_logo_url: Option<String>,
     #[serde(default)]
     pub image_url: Option<String>,
@@ -212,6 +214,7 @@ mod tests {
             nickname: "jedqr".to_owned(),
             name: "Grzegorz Jędras".to_owned(),
             team: "undefined (American team)".to_owned(),
+            historical_teams: Vec::new(),
             team_logo_url: Some("https://cdn.example/undefined.png".to_owned()),
             image_url: None,
             nationality: "Poland".to_owned(),

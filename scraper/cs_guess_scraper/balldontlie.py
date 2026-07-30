@@ -106,17 +106,21 @@ class BallDontLieClient:
         token: str,
         transport: Transport | None = None,
         min_interval: float = 12.1,
+        start_cursor: int | None = None,
     ) -> None:
         if not token.strip():
             raise ValueError("BALLDONTLIE requires a non-empty API token")
         if min_interval < 0:
             raise ValueError("min_interval must be non-negative")
+        if start_cursor is not None and start_cursor <= 0:
+            raise ValueError("start_cursor must be positive")
         self._headers = {
             "Authorization": token,
             "Accept": "application/json",
         }
         self._transport = transport or _default_transport
         self._min_interval = min_interval
+        self._start_cursor = start_cursor
         self._last_request_at: float | None = None
 
     def _request(self, params: Mapping[str, object]) -> Mapping[str, Any]:
@@ -178,7 +182,7 @@ class BallDontLieClient:
     ) -> Iterator[dict[str, object]]:
         if not 1 <= per_page <= 100:
             raise ValueError("per_page must be between 1 and 100")
-        cursor: object | None = None
+        cursor: object | None = self._start_cursor
         while True:
             params: dict[str, object] = {"per_page": per_page}
             if cursor is not None:

@@ -5,7 +5,7 @@ import { players } from "@/data/players";
 describe("generated player catalog", () => {
   it("keeps the reviewed snapshot structurally valid", () => {
     const invalidTeamNames = new Set(["", "undefined", "null", "none", "n/a"]);
-    expect(players).toHaveLength(2_774);
+    expect(players).toHaveLength(3_422);
     expect(new Set(players.map((player) => player.id)).size).toBe(
       players.length,
     );
@@ -16,6 +16,33 @@ describe("generated player catalog", () => {
           !player.name.trim() ||
           invalidTeamNames.has(player.team.trim().toLocaleLowerCase()),
       ),
+    ).toEqual([]);
+  });
+
+  it("keeps historical teams deduplicated and separate from the current team", () => {
+    const invalidTeamNames = new Set([
+      "",
+      "无队伍",
+      "undefined",
+      "null",
+      "none",
+      "n/a",
+    ]);
+    const normalize = (team: string) =>
+      team.trim().replace(/\s+/g, " ").toLocaleLowerCase();
+
+    expect(
+      players.filter((player) => {
+        const historicalTeams = (player.historicalTeams ?? []).map(normalize);
+        return (
+          historicalTeams.some(
+            (team) =>
+              invalidTeamNames.has(team) ||
+              team === normalize(player.team),
+          ) ||
+          new Set(historicalTeams).size !== historicalTeams.length
+        );
+      }),
     ).toEqual([]);
   });
 

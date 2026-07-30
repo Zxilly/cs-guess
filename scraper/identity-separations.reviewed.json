@@ -124,5 +124,27 @@
         "url": "https://liquipedia.net/counterstrike/Rage_(Chinese_player)"
       }
     ]
+  },
+  {
+    "left": {
+      "source": "liquipedia",
+      "external_id": "Nbl"
+    },
+    "right": {
+      "source": "pandascore",
+      "external_id": "59654"
+    },
+    "basis": "Nabil nbl Aleua is an Argentine player born in 1996, while Grigoriy nbl Sherchenkov is Russian; their legal names and countries are distinct despite a current-team name collision."
+  },
+  {
+    "left": {
+      "source": "pandascore",
+      "external_id": "45981"
+    },
+    "right": {
+      "source": "pandascore",
+      "external_id": "43391"
+    },
+    "basis": "David dAVE Karivalis is from the United States, while David Dave Tereshin is Russian; their legal names and countries are distinct."
   }
 ]

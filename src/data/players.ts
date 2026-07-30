@@ -20,6 +20,7 @@ export interface Player {
   aliases?: readonly string[];
   name: string;
   team: string;
+  historicalTeams?: readonly string[];
   teamLogoUrl?: string;
   imageUrl?: string;
   nationality: string;

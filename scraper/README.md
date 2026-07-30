@@ -30,6 +30,12 @@ uv run cs-guess-scraper sync \
   --source balldontlie \
   --skip-majors
 
+# 从已验证的 BALLDONTLIE 分页 cursor 后继续，避免重拉已完成页面
+uv run cs-guess-scraper sync \
+  --source balldontlie \
+  --balldontlie-start-cursor 5326 \
+  --skip-majors
+
 # 全量同步，并更新应用共用目录
 uv run cs-guess-scraper sync \
   --db data/cs_guess.sqlite \
@@ -41,6 +47,7 @@ uv run cs-guess-scraper sync \
   --reviewed-identity-separations identity-separations.reviewed.json \
   --reviewed-major-winners reviewed-major-winners.json \
   --reviewed-major-appearances reviewed-major-appearances.json \
+  --reviewed-player-overrides reviewed-player-overrides.json \
   --reviewed-role-overrides reviewed-role-overrides.json
 
 # 审计或重新导出
@@ -55,6 +62,7 @@ uv run cs-guess-scraper export \
   --catalog-output ../src/data/players.generated.json \
   --reviewed-major-winners reviewed-major-winners.json \
   --reviewed-major-appearances reviewed-major-appearances.json \
+  --reviewed-player-overrides reviewed-player-overrides.json \
   --reviewed-role-overrides reviewed-role-overrides.json
 
 # 仅在 .env 显式启用后，为一个已知规范选手定向补字段
@@ -99,6 +107,8 @@ HLTV 清单中的每个目标都会在关联前核对身份，并保留月精度
 `reviewed-role-overrides.json` 则只收录有外部证据的历史角色修正，按 provider
 ID 重放并写入选手审计轨迹；没有可靠来源的缺失角色在游戏导出层统一归为步枪手，
 不会篡改原始角色记录。
+`reviewed-player-overrides.json` 保存有明确外部证据的生日等字段修正，同样按
+provider ID 重放，并把核验链接写入 source record，避免不可追溯的手工改库。
 来源优先级、清洗规则和后续候选见
 [SOURCE_EVALUATION.md](SOURCE_EVALUATION.md)。数据模型见
 [DATA_MODEL.md](DATA_MODEL.md)，SQLite 结构见 [schema.sql](schema.sql)。

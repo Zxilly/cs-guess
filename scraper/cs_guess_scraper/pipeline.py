@@ -90,9 +90,7 @@ def group_liquipedia_major_records(
         game_title = row.get("game_title")
         starts_on = row.get("starts_on")
         player_external_id = row.get("player_external_id")
-        if not all(
-            (external_id, name, game_title, starts_on, player_external_id)
-        ):
+        if not all((external_id, name, game_title, starts_on, player_external_id)):
             rejected += 1
             continue
         key = (str(external_id), str(game_title), str(starts_on))
@@ -113,15 +111,11 @@ def group_liquipedia_major_records(
         appearance: dict[str, Any] = {
             "player_source": "liquipedia",
             "player_external_id": str(player_external_id),
-            "participation_kind": row.get(
-                "participation_kind", "participant"
-            ),
+            "participation_kind": row.get("participation_kind", "participant"),
             "placement": row.get("placement"),
             "stage_reached": row.get("stage_reached"),
             "matches_played": row.get("matches_played"),
-            "counts_toward_total": bool(
-                row.get("counts_toward_total", True)
-            ),
+            "counts_toward_total": bool(row.get("counts_toward_total", True)),
         }
         team_external_id = row.get("team_external_id")
         team_name = row.get("team_name")
@@ -138,16 +132,19 @@ def supplement_liquipedia_major_players(
     store: PlayerStore,
     client: Any,
     rows: Iterable[Mapping[str, Any]],
+    *,
+    case_distinct_titles: Iterable[str] = (),
 ) -> dict[str, Any]:
     """Fetch known Major player titles absent from the category enumeration."""
 
+    def normalized_title(value: Any) -> str:
+        return str(value).replace("_", " ").strip()
+
     required = {
-        str(row["player_external_id"])
-        for row in rows
-        if row.get("player_external_id")
+        str(row["player_external_id"]) for row in rows if row.get("player_external_id")
     }
-    existing = {
-        str(row["external_id"]).replace("_", " ").strip().casefold()
+    existing_exact = {
+        normalized_title(row["external_id"])
         for row in store.connection.execute(
             """
             SELECT external_id
@@ -156,11 +153,17 @@ def supplement_liquipedia_major_players(
             """
         )
     }
+    existing_folded = {title.casefold() for title in existing_exact}
+    reviewed_exact = {normalized_title(title) for title in case_distinct_titles}
     missing = sorted(
         (
             external_id
             for external_id in required
-            if external_id.replace("_", " ").strip().casefold() not in existing
+            if (
+                normalized_title(external_id) not in existing_exact
+                if normalized_title(external_id) in reviewed_exact
+                else normalized_title(external_id).casefold() not in existing_folded
+            )
         ),
         key=str.casefold,
     )
@@ -177,9 +180,7 @@ def supplement_liquipedia_major_players(
     for page in client.iter_player_pages_by_titles(missing):
         title = str(page.get("title") or "")
         requested_titles = [
-            str(item)
-            for item in page.get("requested_titles", [title])
-            if item
+            str(item) for item in page.get("requested_titles", [title]) if item
         ]
         wikitext = str(page.get("wikitext") or "")
         try:
@@ -227,6 +228,7 @@ def sync_liquipedia(
     *,
     limit: int | None = None,
     include_majors: bool = True,
+    case_distinct_major_titles: Iterable[str] = (),
     progress: Progress | None = None,
 ) -> dict[str, Any]:
     run_id = _begin_run(store, "liquipedia")
@@ -287,9 +289,7 @@ def sync_liquipedia(
             "iter_chinese_former_player_pages",
             None,
         )
-        if callable(supplemental_pages) and (
-            limit is None or stats["seen"] < limit
-        ):
+        if callable(supplemental_pages) and (limit is None or stats["seen"] < limit):
             for page in supplemental_pages():
                 if limit is not None and stats["seen"] >= limit:
                     break
@@ -329,7 +329,10 @@ def sync_liquipedia(
             major_wikitext = str(major_page.get("wikitext") or "")
             major_rows = parse_major_player_database(major_wikitext)
             supplemental = supplement_liquipedia_major_players(
-                store, client, major_rows
+                store,
+                client,
+                major_rows,
+                case_distinct_titles=case_distinct_major_titles,
             )
             events, rejected = group_liquipedia_major_records(major_rows)
             major_result = store.upsert_major_records(
@@ -345,9 +348,7 @@ def sync_liquipedia(
             stats["major_rows"] = len(major_rows)
             stats["major_events"] = major_result["events"]
             stats["major_appearances"] = major_result["appearances"]
-            stats["major_unresolved_players"] = len(
-                major_result["unresolved_players"]
-            )
+            stats["major_unresolved_players"] = len(major_result["unresolved_players"])
             stats["major_rejected_rows"] = rejected
             stats["major_players_supplemented"] = supplemental["stored"]
             stats["major_player_fetch_errors"] = supplemental["errors"]
@@ -359,9 +360,7 @@ def sync_liquipedia(
                     f"{major_result['appearances']} linked appearances"
                 )
     except Exception as error:
-        stats["error_details"].append(
-            {"external_id": "*source*", "error": str(error)}
-        )
+        stats["error_details"].append({"external_id": "*source*", "error": str(error)})
         _finish_run(
             store,
             run_id,
@@ -417,8 +416,7 @@ def sync_pandascore(
                         "fetched_at": _now(),
                         "source_modified_at": parsed.get("modified_at"),
                         "source_url": (
-                            "https://api.pandascore.co/csgo/players/"
-                            f"{external_id}"
+                            f"https://api.pandascore.co/csgo/players/{external_id}"
                         ),
                         "payload": dict(parsed),
                     },
@@ -436,9 +434,7 @@ def sync_pandascore(
                     f"{stats['errors']} skipped"
                 )
     except Exception as error:
-        stats["error_details"].append(
-            {"external_id": "*source*", "error": str(error)}
-        )
+        stats["error_details"].append({"external_id": "*source*", "error": str(error)})
         _finish_run(
             store,
             run_id,
@@ -501,27 +497,25 @@ def sync_balldontlie(
                 nickname_matches = normalize_identity_text(
                     pandascore_player["canonical_nickname"]
                 ) == normalize_identity_text(parsed.get("nickname"))
-                parsed_name = person_name_token_signature(
-                    parsed.get("full_name")
-                )
+                parsed_name = person_name_token_signature(parsed.get("full_name"))
                 pandascore_name = person_name_token_signature(
                     pandascore_player["full_name"]
                 )
-                name_matches = bool(parsed_name) and bool(pandascore_name) and (
-                    parsed_name == pandascore_name
-                    or person_name_tokens_compatible(
-                        parsed.get("full_name"),
-                        pandascore_player["full_name"],
+                name_matches = (
+                    bool(parsed_name)
+                    and bool(pandascore_name)
+                    and (
+                        parsed_name == pandascore_name
+                        or person_name_tokens_compatible(
+                            parsed.get("full_name"),
+                            pandascore_player["full_name"],
+                        )
                     )
                 )
                 names_conflict = (
-                    bool(parsed_name)
-                    and bool(pandascore_name)
-                    and not name_matches
+                    bool(parsed_name) and bool(pandascore_name) and not name_matches
                 )
-                if names_conflict or (
-                    not nickname_matches and not name_matches
-                ):
+                if names_conflict or (not nickname_matches and not name_matches):
                     stats["errors"] += 1
                     stats["error_details"].append(
                         {
@@ -534,10 +528,7 @@ def sync_balldontlie(
                     )
                     continue
                 player_id = str(pandascore_player["id"])
-                source_url = (
-                    "https://api.balldontlie.io/cs/v1/players/"
-                    f"{external_id}"
-                )
+                source_url = f"https://api.balldontlie.io/cs/v1/players/{external_id}"
                 store.link_source_player(
                     player_id,
                     "balldontlie",
@@ -567,9 +558,7 @@ def sync_balldontlie(
                     f"{stats['unmatched']} unmatched"
                 )
     except Exception as error:
-        stats["error_details"].append(
-            {"external_id": "*source*", "error": str(error)}
-        )
+        stats["error_details"].append({"external_id": "*source*", "error": str(error)})
         _finish_run(
             store,
             run_id,
@@ -617,9 +606,7 @@ def sync_bo3(
             try:
                 player_id: str | None = None
                 match_basis: str | None = None
-                pandascore_external_id = parsed.get(
-                    "pandascore_external_id"
-                )
+                pandascore_external_id = parsed.get("pandascore_external_id")
                 if pandascore_external_id is not None:
                     pandascore_player = store.connection.execute(
                         """
@@ -641,19 +628,19 @@ def sync_bo3(
                         known_name = person_name_token_signature(
                             pandascore_player["full_name"]
                         )
-                        name_matches = bool(parsed_name) and bool(
-                            known_name
-                        ) and (
-                            parsed_name == known_name
-                            or person_name_tokens_compatible(
-                                parsed.get("full_name"),
-                                pandascore_player["full_name"],
+                        name_matches = (
+                            bool(parsed_name)
+                            and bool(known_name)
+                            and (
+                                parsed_name == known_name
+                                or person_name_tokens_compatible(
+                                    parsed.get("full_name"),
+                                    pandascore_player["full_name"],
+                                )
                             )
                         )
                         names_conflict = (
-                            bool(parsed_name)
-                            and bool(known_name)
-                            and not name_matches
+                            bool(parsed_name) and bool(known_name) and not name_matches
                         )
                         if names_conflict or (
                             not nickname_matches and not name_matches
@@ -698,9 +685,7 @@ def sync_bo3(
                             str(parsed.get("birth_date"))
                             == str(candidate["birth_date"] or "")
                         )
-                        country_matches = bool(
-                            parsed.get("country_code")
-                        ) and (
+                        country_matches = bool(parsed.get("country_code")) and (
                             str(parsed.get("country_code")).upper()
                             == str(candidate["country_code"] or "").upper()
                         )
@@ -712,13 +697,9 @@ def sync_bo3(
                         )
                         team_matches = bool(parsed_team_name) and (
                             normalize_identity_text(parsed_team_name)
-                            == normalize_identity_text(
-                                candidate["current_team_name"]
-                            )
+                            == normalize_identity_text(candidate["current_team_name"])
                         )
-                        if birth_matches or (
-                            country_matches and team_matches
-                        ):
+                        if birth_matches or (country_matches and team_matches):
                             candidates.append(str(candidate["id"]))
                     if len(candidates) == 1:
                         player_id = candidates[0]
@@ -759,9 +740,7 @@ def sync_bo3(
                     f"{stats['unmatched']} unmatched"
                 )
     except Exception as error:
-        stats["error_details"].append(
-            {"external_id": "*source*", "error": str(error)}
-        )
+        stats["error_details"].append({"external_id": "*source*", "error": str(error)})
         _finish_run(
             store,
             run_id,
@@ -797,12 +776,32 @@ def run_sync(
     reviewed_identity_merges: list[Mapping[str, Any]] | None = None,
     reviewed_source_quarantines: list[Mapping[str, Any]] | None = None,
     reviewed_identity_separations: list[Mapping[str, Any]] | None = None,
+    reviewed_player_overrides: list[Mapping[str, Any]] | None = None,
     reviewed_major_winners: list[Mapping[str, Any]] | None = None,
     reviewed_major_appearances: list[Mapping[str, Any]] | None = None,
     reviewed_role_overrides: list[Mapping[str, Any]] | None = None,
     progress: Progress | None = None,
 ) -> dict[str, Any]:
     """Synchronize configured sources, merge identities, and export game data."""
+
+    reviewed_liquipedia_titles: dict[str, set[str]] = {}
+    for review in reviewed_major_appearances or []:
+        player = review.get("player")
+        if not isinstance(player, Mapping):
+            continue
+        if str(player.get("source") or "liquipedia") != "liquipedia":
+            continue
+        external_id = player.get("external_id")
+        if external_id is None:
+            continue
+        title = str(external_id).replace("_", " ").strip()
+        reviewed_liquipedia_titles.setdefault(title.casefold(), set()).add(title)
+    case_distinct_major_titles = {
+        title
+        for titles in reviewed_liquipedia_titles.values()
+        if len(titles) > 1
+        for title in titles
+    }
 
     report: dict[str, Any] = {
         "startedAt": _now(),
@@ -818,6 +817,10 @@ def run_sync(
             "reviewed": 0,
             "created": 0,
             "updated": 0,
+        },
+        "reviewedPlayerOverrides": {
+            "applied": 0,
+            "already_applied": 0,
         },
         "identityReview": {
             "inconsistentBallDontLie": {
@@ -842,6 +845,7 @@ def run_sync(
             liquipedia_client,
             limit=limit,
             include_majors=include_majors,
+            case_distinct_major_titles=case_distinct_major_titles,
             progress=progress,
         )
     if pandascore_client is not None:
@@ -871,19 +875,19 @@ def run_sync(
     )
     if reviewed_source_quarantines:
         report["identityReview"]["quarantines"] = (
-            store.apply_reviewed_source_quarantines(
-                reviewed_source_quarantines
-            )
+            store.apply_reviewed_source_quarantines(reviewed_source_quarantines)
         )
     if reviewed_identity_merges:
-        report["identityReview"]["merges"] = (
-            store.apply_reviewed_identity_merges(reviewed_identity_merges)
+        report["identityReview"]["merges"] = store.apply_reviewed_identity_merges(
+            reviewed_identity_merges
         )
     if reviewed_identity_separations:
         report["identityReview"]["separations"] = (
-            store.apply_reviewed_identity_separations(
-                reviewed_identity_separations
-            )
+            store.apply_reviewed_identity_separations(reviewed_identity_separations)
+        )
+    if reviewed_player_overrides:
+        report["reviewedPlayerOverrides"] = store.apply_reviewed_player_overrides(
+            reviewed_player_overrides
         )
 
     merge_run_id = _begin_run(store, "merge")
@@ -908,14 +912,12 @@ def run_sync(
     )
 
     if reviewed_major_winners:
-        report["reviewedMajorWinners"] = (
-            store.apply_reviewed_major_winners(reviewed_major_winners)
+        report["reviewedMajorWinners"] = store.apply_reviewed_major_winners(
+            reviewed_major_winners
         )
     if reviewed_major_appearances:
-        report["reviewedMajorAppearances"] = (
-            store.apply_reviewed_major_appearances(
-                reviewed_major_appearances
-            )
+        report["reviewedMajorAppearances"] = store.apply_reviewed_major_appearances(
+            reviewed_major_appearances
         )
     if reviewed_role_overrides:
         report["reviewedRoleOverrides"] = store.apply_reviewed_role_overrides(

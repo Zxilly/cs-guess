@@ -66,6 +66,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="optional reviewed historical game-role corrections",
     )
     sync.add_argument(
+        "--reviewed-player-overrides",
+        type=Path,
+        help="optional cited player field corrections",
+    )
+    sync.add_argument(
         "--reviewed-identity-merges",
         type=Path,
         help="optional reviewed cross-source identity mappings",
@@ -114,6 +119,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--balldontlie-min-interval",
         type=float,
         default=12.1,
+    )
+    sync.add_argument(
+        "--balldontlie-start-cursor",
+        type=_positive_int,
+        help="resume BALLDONTLIE after a previously verified page cursor",
     )
     sync.add_argument(
         "--bo3-min-interval",
@@ -167,6 +177,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--reviewed-role-overrides",
         type=Path,
         help="optional reviewed historical game-role corrections",
+    )
+    export.add_argument(
+        "--reviewed-player-overrides",
+        type=Path,
+        help="optional cited player field corrections",
     )
     export.add_argument(
         "--include-incomplete",
@@ -255,8 +270,7 @@ def _read_reviewed_major_appearances(
         isinstance(item, dict) for item in loaded
     ):
         raise ValueError(
-            "reviewed Major appearances file must contain a JSON list "
-            "of objects"
+            "reviewed Major appearances file must contain a JSON list of objects"
         )
     return loaded
 
@@ -308,8 +322,7 @@ def _ingest_known_hltv_profile(
     )
     if mismatches:
         raise ValueError(
-            "HLTV profile contradicts the known player on: "
-            + ", ".join(mismatches)
+            "HLTV profile contradicts the known player on: " + ", ".join(mismatches)
         )
     store.link_source_player(
         player_id,
@@ -357,7 +370,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             args.reviewed_role_overrides,
             label="reviewed role overrides",
         )
+        reviewed_player_overrides = _read_object_list(
+            args.reviewed_player_overrides,
+            label="reviewed player overrides",
+        )
         with PlayerStore(args.db) as store:
+            reviewed_players = (
+                store.apply_reviewed_player_overrides(reviewed_player_overrides)
+                if reviewed_player_overrides
+                else {"applied": 0, "already_applied": 0}
+            )
             store.merge_all()
             reviewed = (
                 store.apply_reviewed_major_winners(reviewed_major_winners)
@@ -365,9 +387,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 else {"events": 0, "appearances": 0}
             )
             reviewed_appearances = (
-                store.apply_reviewed_major_appearances(
-                    reviewed_major_appearances
-                )
+                store.apply_reviewed_major_appearances(reviewed_major_appearances)
                 if reviewed_major_appearances
                 else {"reviewed": 0, "created": 0, "updated": 0}
             )
@@ -380,9 +400,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 guessable_only=not args.include_incomplete
             )
             catalog_records = (
-                store.export_game_records()
-                if args.catalog_output is not None
-                else []
+                store.export_game_records() if args.catalog_output is not None else []
             )
         _write_json(args.output, records)
         if args.catalog_output is not None:
@@ -390,9 +408,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.catalog_output,
                 build_app_catalog(
                     catalog_records,
-                    previous_catalog=read_previous_catalog(
-                        args.catalog_output
-                    ),
+                    previous_catalog=read_previous_catalog(args.catalog_output),
                 ),
             )
         _print_json(
@@ -403,6 +419,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "reviewedMajorWinners": reviewed,
                 "reviewedMajorAppearances": reviewed_appearances,
                 "reviewedRoleOverrides": reviewed_roles,
+                "reviewedPlayerOverrides": reviewed_players,
             }
         )
         return 0
@@ -413,8 +430,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             isinstance(mapping, dict) for mapping in raw_mappings
         ):
             raise ValueError(
-                "reviewed identity mappings file must contain a JSON list "
-                "of objects"
+                "reviewed identity mappings file must contain a JSON list of objects"
             )
         raw_quarantines: list[dict[str, object]] = []
         if args.quarantines is not None:
@@ -422,8 +438,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.quarantines.read_text(encoding="utf-8")
             )
             if not isinstance(loaded_quarantines, list) or not all(
-                isinstance(quarantine, dict)
-                for quarantine in loaded_quarantines
+                isinstance(quarantine, dict) for quarantine in loaded_quarantines
             ):
                 raise ValueError(
                     "reviewed source quarantines file must contain a JSON "
@@ -436,8 +451,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.separations.read_text(encoding="utf-8")
             )
             if not isinstance(loaded_separations, list) or not all(
-                isinstance(separation, dict)
-                for separation in loaded_separations
+                isinstance(separation, dict) for separation in loaded_separations
             ):
                 raise ValueError(
                     "reviewed identity separations file must contain a JSON "
@@ -445,16 +459,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             raw_separations = loaded_separations
         with PlayerStore(args.db) as store:
-            inconsistent = (
-                store.quarantine_inconsistent_balldontlie_identities()
-            )
-            quarantined = store.apply_reviewed_source_quarantines(
-                raw_quarantines
-            )
+            inconsistent = store.quarantine_inconsistent_balldontlie_identities()
+            quarantined = store.apply_reviewed_source_quarantines(raw_quarantines)
             reviewed = store.apply_reviewed_identity_merges(raw_mappings)
-            separated = store.apply_reviewed_identity_separations(
-                raw_separations
-            )
+            separated = store.apply_reviewed_identity_separations(raw_separations)
             merge = store.merge_all()
         _print_json(
             {
@@ -468,14 +476,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     settings = (
-        Settings.from_env_file(args.env_file)
-        if args.env_file
-        else Settings.discover()
+        Settings.from_env_file(args.env_file) if args.env_file else Settings.discover()
     )
-    if (
-        args.command in {"hltv", "hltv-batch"}
-        and not settings.allow_hltv_fallback
-    ):
+    if args.command in {"hltv", "hltv-batch"} and not settings.allow_hltv_fallback:
         raise SettingsError(
             "HLTV fallback is disabled; explicitly enable it in .env "
             "only after reviewing the known target"
@@ -552,14 +555,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     use_liquipedia = args.source in {"all", "liquipedia"}
     use_pandascore = args.source in {"all", "pandascore"}
     use_balldontlie = args.source == "balldontlie" or (
-        args.source == "all"
-        and settings.balldontlie_api_token is not None
+        args.source == "all" and settings.balldontlie_api_token is not None
     )
     use_bo3 = args.source in {"all", "bo3"}
     if args.source == "balldontlie" and not settings.balldontlie_api_token:
-        raise SettingsError(
-            "BALLDONTLIE_API_TOKEN is required for this source"
-        )
+        raise SettingsError("BALLDONTLIE_API_TOKEN is required for this source")
     liquipedia = (
         LiquipediaClient(
             settings.liquipedia_user_agent,
@@ -580,6 +580,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         BallDontLieClient(
             settings.balldontlie_api_token or "",
             min_interval=args.balldontlie_min_interval,
+            start_cursor=args.balldontlie_start_cursor,
         )
         if use_balldontlie
         else None
@@ -593,15 +594,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         else None
     )
     args.db.parent.mkdir(parents=True, exist_ok=True)
-    reviewed_major_winners = _read_reviewed_major_winners(
-        args.reviewed_major_winners
-    )
+    reviewed_major_winners = _read_reviewed_major_winners(args.reviewed_major_winners)
     reviewed_major_appearances = _read_reviewed_major_appearances(
         args.reviewed_major_appearances
     )
     reviewed_role_overrides = _read_object_list(
         args.reviewed_role_overrides,
         label="reviewed role overrides",
+    )
+    reviewed_player_overrides = _read_object_list(
+        args.reviewed_player_overrides,
+        label="reviewed player overrides",
     )
     reviewed_identity_merges = _read_object_list(
         args.reviewed_identity_merges,
@@ -630,6 +633,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             reviewed_identity_merges=reviewed_identity_merges,
             reviewed_source_quarantines=reviewed_source_quarantines,
             reviewed_identity_separations=reviewed_identity_separations,
+            reviewed_player_overrides=reviewed_player_overrides,
             reviewed_major_winners=reviewed_major_winners,
             reviewed_major_appearances=reviewed_major_appearances,
             reviewed_role_overrides=reviewed_role_overrides,

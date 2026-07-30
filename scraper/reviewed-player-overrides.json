@@ -1,0 +1,34 @@
+[
+  {
+    "player": {
+      "source": "liquipedia",
+      "external_id": "AdrieN"
+    },
+    "overrides": {
+      "birth_date": "2002-07-07"
+    },
+    "evidence": [
+      {
+        "url": "https://prosettings.net/players/adrien/",
+        "supports": [
+          "nickname",
+          "full_name",
+          "birth_date",
+          "country_code",
+          "current_team"
+        ]
+      },
+      {
+        "url": "https://www.hltv.org/player/23767/adrien",
+        "supports": [
+          "nickname",
+          "full_name",
+          "country_code",
+          "current_team",
+          "age_consistency"
+        ]
+      }
+    ],
+    "basis": "ProSettings lists Adrian \"AdrieN\" Mucha's complete birthday; HLTV independently matches the same Polish los kogutos player and a compatible age."
+  }
+]

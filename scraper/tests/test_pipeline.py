@@ -17,9 +17,9 @@ class FakeLiquipediaClient:
     def iter_player_pages(self):
         yield {
             "title": "S1mple",
-            "wikitext": (
-                FIXTURES / "liquipedia" / "s1mple.wiki"
-            ).read_text(encoding="utf-8"),
+            "wikitext": (FIXTURES / "liquipedia" / "s1mple.wiki").read_text(
+                encoding="utf-8"
+            ),
             "revid": 101,
             "timestamp": "2026-07-27T01:00:00Z",
         }
@@ -46,9 +46,9 @@ class FakeChineseFormerPlayerClient:
     def iter_chinese_former_player_pages(self):
         yield {
             "title": "MachineWJQ",
-            "wikitext": (
-                FIXTURES / "liquipedia" / "machinewjq.wiki"
-            ).read_text(encoding="utf-8"),
+            "wikitext": (FIXTURES / "liquipedia" / "machinewjq.wiki").read_text(
+                encoding="utf-8"
+            ),
             "revid": 3410216,
             "timestamp": "2026-07-04T08:09:11Z",
         }
@@ -214,8 +214,7 @@ def test_run_sync_uses_real_store_merges_sources_and_writes_auditable_report(
             "ORDER BY source"
         ).fetchall()
         runs = store.connection.execute(
-            "SELECT source, status, records_seen FROM ingestion_runs "
-            "ORDER BY source"
+            "SELECT source, status, records_seen FROM ingestion_runs ORDER BY source"
         ).fetchall()
         liquipedia_record = store.connection.execute(
             """
@@ -297,10 +296,13 @@ def test_run_sync_replays_reviewed_identity_separation_before_auto_merge(
             ],
         )
 
-        assert store.resolve_player_id(
-            "liquipedia",
-            "Zero (Chinese player, born 1998)",
-        ) == left_id
+        assert (
+            store.resolve_player_id(
+                "liquipedia",
+                "Zero (Chinese player, born 1998)",
+            )
+            == left_id
+        )
         assert store.resolve_player_id("pandascore", "100") == right_id
 
     assert left_id != right_id
@@ -338,10 +340,7 @@ def test_balldontlie_sync_links_verified_pandascore_id_and_fills_birth_date(
     assert report["sources"]["balldontlie"]["stored"] == 1
     assert report["sources"]["balldontlie"]["linked_pandascore"] == 1
     assert player["player"]["birth_date"] == "2000-11-09"
-    assert {
-        (item["source"], item["external_id"])
-        for item in player["source_ids"]
-    } >= {
+    assert {(item["source"], item["external_id"]) for item in player["source_ids"]} >= {
         ("pandascore", "18452"),
         ("balldontlie", "294"),
     }
@@ -433,8 +432,7 @@ def test_bo3_sync_links_an_exact_profile_without_creating_a_duplicate(
     }
     assert audit["player"]["birth_date"] == "2002-04-10"
     assert ("bo3", "36613") in {
-        (item["source"], item["external_id"])
-        for item in audit["source_ids"]
+        (item["source"], item["external_id"]) for item in audit["source_ids"]
     }
     assert report["audit"]["counts"]["players"] == 1
 
@@ -550,9 +548,7 @@ def test_missing_major_players_are_fetched_by_known_title_and_linked(tmp_path):
                 "timestamp": "2026-07-27T02:00:00Z",
             }
 
-    with PlayerStore(
-        tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH
-    ) as store:
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
         result = supplement_liquipedia_major_players(
             store,
             KnownTitleClient(),
@@ -567,3 +563,69 @@ def test_missing_major_players_are_fetched_by_known_title_and_linked(tmp_path):
         "error_details": [],
     }
     assert player_id.startswith("player_")
+
+
+def test_case_distinct_major_player_title_is_not_treated_as_existing(tmp_path):
+    class CaseDistinctTitleClient:
+        def iter_player_pages_by_titles(self, titles):
+            assert titles == ["maLeK"]
+            yield {
+                "title": "maLeK",
+                "requested_titles": ["maLeK"],
+                "wikitext": """
+                    {{Infobox player
+                    |id=maLeK
+                    |name=Damien Marcel
+                    |birth_date=1986-06-08
+                    |country=France
+                    |status=retired
+                    }}
+                """,
+                "revid": 202,
+                "timestamp": "2026-07-30T02:00:00Z",
+            }
+
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        other_player_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "MaleK",
+                "nickname": "maleK",
+                "full_name": "Malek Bennouioua",
+            },
+        )
+        result = supplement_liquipedia_major_players(
+            store,
+            CaseDistinctTitleClient(),
+            [{"player_external_id": "maLeK"}],
+            case_distinct_titles={"MaleK", "maLeK"},
+        )
+        coach_id = store.resolve_player_id("liquipedia", "maLeK")
+
+    assert result["requested"] == 1
+    assert result["stored"] == 1
+    assert coach_id != other_player_id
+
+
+def test_unreviewed_title_case_variant_reuses_existing_player(tmp_path):
+    class UnexpectedFetchClient:
+        def iter_player_pages_by_titles(self, titles):
+            raise AssertionError(f"unexpected title fetch: {titles}")
+
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "Centeks",
+                "nickname": "centeks",
+                "full_name": "Stian Ledal",
+            },
+        )
+        result = supplement_liquipedia_major_players(
+            store,
+            UnexpectedFetchClient(),
+            [{"player_external_id": "centeks"}],
+        )
+
+    assert result["requested"] == 0
+    assert player_id

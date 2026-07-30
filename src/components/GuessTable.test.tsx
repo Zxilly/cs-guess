@@ -63,4 +63,84 @@ describe("GuessTable", () => {
     expect(markup).not.toContain("隐藏模式");
     expect(markup).not.toContain("查看可见性规则");
   });
+
+  it("uses distinct directional labels for all historical-team relations", () => {
+    const target: Player = {
+      ...mysteryPlayer,
+      team: "MOUZ",
+      historicalTeams: ["NAVI", "Vitality"],
+    };
+    const guesses: Player[] = [
+      {
+        ...guess,
+        id: "target-history",
+        team: "NAVI",
+        historicalTeams: [],
+      },
+      {
+        ...guess,
+        id: "guess-history",
+        team: "Falcons",
+        historicalTeams: ["MOUZ"],
+      },
+      {
+        ...guess,
+        id: "shared-history",
+        team: "Spirit",
+        historicalTeams: ["Vitality"],
+      },
+    ];
+
+    const markup = renderToStaticMarkup(
+      <GuessTable
+        guesses={guesses}
+        opponentGuesses={[]}
+        opponentVisibility="hidden"
+        mysteryPlayer={target}
+        mode="solo"
+        maxGuesses={3}
+      />,
+    );
+
+    expect(markup).toContain("答案曾效力");
+    expect(markup).toContain("猜测曾效力");
+    expect(markup).toContain("共同历史队");
+    expect(markup).toContain("猜测选手的当前战队，是答案曾经效力过的战队");
+    expect(markup).toContain("答案的当前战队，是猜测选手曾经效力过的战队");
+    expect(markup).toContain("猜测选手和答案曾经效力过的战队有重叠");
+  });
+
+  it("keeps the three relation badges distinguishable when opponent guesses are hidden", () => {
+    const markup = renderToStaticMarkup(
+      <GuessTable
+        guesses={[]}
+        opponentGuesses={[]}
+        opponentVisibility="hidden"
+        opponentProgress={[
+          {
+            guessedPlayerId: null,
+            matchedFields: [],
+            teamRelation: "target_history",
+          },
+          {
+            guessedPlayerId: null,
+            matchedFields: [],
+            teamRelation: "guess_history",
+          },
+          {
+            guessedPlayerId: null,
+            matchedFields: [],
+            teamRelation: "shared_history",
+          },
+        ]}
+        mysteryPlayer={mysteryPlayer}
+        mode="quick"
+        maxGuesses={3}
+      />,
+    );
+
+    expect(markup).toContain("答案曾效力");
+    expect(markup).toContain("猜测曾效力");
+    expect(markup).toContain("共同历史队");
+  });
 });
