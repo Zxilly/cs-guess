@@ -22,6 +22,8 @@ pub enum AppError {
     Unauthorized,
     #[error("profile not found")]
     ProfileNotFound,
+    #[error("{0}")]
+    ProfileConflict(String),
     #[error("service is unavailable")]
     Unavailable,
     #[error("too many requests")]
@@ -48,6 +50,7 @@ impl IntoResponse for AppError {
             Self::IdempotencyConflict => (StatusCode::CONFLICT, "idempotency_conflict"),
             Self::Unauthorized => (StatusCode::UNAUTHORIZED, "unauthorized"),
             Self::ProfileNotFound => (StatusCode::NOT_FOUND, "profile_not_found"),
+            Self::ProfileConflict(_) => (StatusCode::CONFLICT, "profile_conflict"),
             Self::Unavailable => (StatusCode::SERVICE_UNAVAILABLE, "unavailable"),
             Self::RateLimited => (StatusCode::TOO_MANY_REQUESTS, "rate_limited"),
             Self::Config(_) | Self::Internal => {

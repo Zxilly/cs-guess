@@ -1,4 +1,4 @@
-use std::{path::PathBuf, time::Duration};
+use std::{path::PathBuf, sync::Arc, time::Duration};
 
 use sha2::{Digest, Sha256};
 use sqlx::{
@@ -6,13 +6,17 @@ use sqlx::{
     sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions, SqliteSynchronous},
 };
 use subtle::ConstantTimeEq;
+use tokio::sync::Mutex;
 use tracing::error;
 
 use crate::{
     config::Config,
     daily::{CatalogPlayer, DailyChallenge, DailyChallengeCandidate, catalog_player_by_id},
     error::AppError,
-    profile::{ProfileState, validate_anonymous_id, validate_sync_token},
+    profile::{
+        CreateProfileRequest, ProfileState, RecordRoundRequest, StartIdentityDrawRequest,
+        validate_anonymous_id, validate_sync_token,
+    },
 };
 
 #[derive(Clone)]
@@ -20,6 +24,7 @@ pub struct DatabaseStore {
     pool: SqlitePool,
     path: PathBuf,
     in_memory: bool,
+    profile_mutation_lock: Arc<Mutex<()>>,
 }
 
 impl DatabaseStore {
@@ -47,6 +52,7 @@ impl DatabaseStore {
             pool,
             path: config.database_path.clone(),
             in_memory,
+            profile_mutation_lock: Arc::new(Mutex::new(())),
         }
     }
 
@@ -108,7 +114,8 @@ impl DatabaseStore {
         })
     }
 
-    pub async fn save_profile(
+    #[cfg(test)]
+    async fn save_profile(
         &self,
         profile: ProfileState,
         sync_token: &str,
@@ -144,6 +151,117 @@ impl DatabaseStore {
         .map_err(database_error)?;
 
         self.load_profile(&profile.anonymous_id, sync_token).await
+    }
+
+    pub async fn create_profile(
+        &self,
+        request: CreateProfileRequest,
+        sync_token: &str,
+    ) -> Result<ProfileState, AppError> {
+        validate_sync_token(sync_token)?;
+        let _guard = self.profile_mutation_lock.lock().await;
+        let profile = ProfileState::new(request.anonymous_id, request.initial_player_id)?;
+        let token_hash = hash_token(sync_token);
+        let state_json = serde_json::to_string(&profile).map_err(|error| {
+            error!(%error, "failed to serialize initial profile");
+            AppError::Internal
+        })?;
+        sqlx::query(
+            "INSERT INTO profiles (
+                anonymous_id, token_hash, player_id, identity_confirmed,
+                updated_at, state_json
+             ) VALUES (?, ?, ?, ?, ?, ?)
+             ON CONFLICT(anonymous_id) DO NOTHING",
+        )
+        .bind(&profile.anonymous_id)
+        .bind(token_hash.as_slice())
+        .bind(&profile.player_id)
+        .bind(profile.identity_confirmed)
+        .bind(profile.updated_at as i64)
+        .bind(state_json)
+        .execute(&self.pool)
+        .await
+        .map_err(database_error)?;
+        self.load_profile(&profile.anonymous_id, sync_token).await
+    }
+
+    pub async fn start_identity_draw(
+        &self,
+        anonymous_id: &str,
+        sync_token: &str,
+        request: StartIdentityDrawRequest,
+    ) -> Result<ProfileState, AppError> {
+        let _guard = self.profile_mutation_lock.lock().await;
+        let mut profile = self.load_profile(anonymous_id, sync_token).await?;
+        profile.start_identity_draw(request)?;
+        self.replace_profile(profile, sync_token).await
+    }
+
+    pub async fn adopt_identity_draw(
+        &self,
+        anonymous_id: &str,
+        sync_token: &str,
+        winner_id: &str,
+    ) -> Result<ProfileState, AppError> {
+        let _guard = self.profile_mutation_lock.lock().await;
+        let mut profile = self.load_profile(anonymous_id, sync_token).await?;
+        profile.adopt_identity_draw(winner_id)?;
+        self.replace_profile(profile, sync_token).await
+    }
+
+    pub async fn discard_identity_draw(
+        &self,
+        anonymous_id: &str,
+        sync_token: &str,
+        winner_id: &str,
+    ) -> Result<ProfileState, AppError> {
+        let _guard = self.profile_mutation_lock.lock().await;
+        let mut profile = self.load_profile(anonymous_id, sync_token).await?;
+        profile.discard_identity_draw(winner_id)?;
+        self.replace_profile(profile, sync_token).await
+    }
+
+    pub async fn record_round(
+        &self,
+        anonymous_id: &str,
+        sync_token: &str,
+        request: RecordRoundRequest,
+    ) -> Result<ProfileState, AppError> {
+        let _guard = self.profile_mutation_lock.lock().await;
+        let mut profile = self.load_profile(anonymous_id, sync_token).await?;
+        profile.record_round(request)?;
+        self.replace_profile(profile, sync_token).await
+    }
+
+    async fn replace_profile(
+        &self,
+        profile: ProfileState,
+        sync_token: &str,
+    ) -> Result<ProfileState, AppError> {
+        profile.validate()?;
+        let token_hash = hash_token(sync_token);
+        let state_json = serde_json::to_string(&profile).map_err(|error| {
+            error!(%error, "failed to serialize profile");
+            AppError::Internal
+        })?;
+        let result = sqlx::query(
+            "UPDATE profiles
+             SET player_id = ?, identity_confirmed = ?, updated_at = ?, state_json = ?
+             WHERE anonymous_id = ? AND token_hash = ?",
+        )
+        .bind(&profile.player_id)
+        .bind(profile.identity_confirmed)
+        .bind(profile.updated_at as i64)
+        .bind(state_json)
+        .bind(&profile.anonymous_id)
+        .bind(token_hash.as_slice())
+        .execute(&self.pool)
+        .await
+        .map_err(database_error)?;
+        if result.rows_affected() != 1 {
+            return Err(AppError::Unauthorized);
+        }
+        Ok(profile)
     }
 
     pub async fn current_daily_challenge(&self) -> Result<DailyChallenge, AppError> {

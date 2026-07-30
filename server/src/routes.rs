@@ -34,7 +34,10 @@ use tracing::warn;
 use crate::{
     AppState,
     error::AppError,
-    profile::{ProfileState, validate_anonymous_id},
+    profile::{
+        CreateProfileRequest, ProfileState, RecordRoundRequest, StartIdentityDrawRequest,
+        validate_anonymous_id,
+    },
     protocol::{
         ClientMessage, CreateRoomRequest, JoinRoomRequest, QueueCounts, QuickMatchRequest,
         SessionResponse, Snapshot,
@@ -59,7 +62,7 @@ pub fn app(state: AppState) -> Router {
     let config = state.config().clone();
     let cors = CorsLayer::new()
         .allow_origin(config.allowed_origins)
-        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
+        .allow_methods([Method::GET, Method::POST, Method::DELETE])
         .allow_headers([
             axum::http::header::CONTENT_TYPE,
             request_id_header.clone(),
@@ -80,9 +83,23 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/matches/quick/{code}", delete(cancel_quick_match))
         .route("/v1/matches/queue", get(queue_counts))
         .route("/v1/daily-challenges/current", get(current_daily_challenge))
+        .route("/v1/profiles", post(create_profile))
+        .route("/v1/profiles/{anonymous_id}", get(load_profile))
         .route(
-            "/v1/profiles/{anonymous_id}",
-            get(load_profile).put(save_profile),
+            "/v1/profiles/{anonymous_id}/identity-draws",
+            post(start_identity_draw),
+        )
+        .route(
+            "/v1/profiles/{anonymous_id}/identity-draws/{winner_id}",
+            delete(discard_identity_draw),
+        )
+        .route(
+            "/v1/profiles/{anonymous_id}/identity-draws/{winner_id}/adopt",
+            post(adopt_identity_draw),
+        )
+        .route(
+            "/v1/profiles/{anonymous_id}/rounds",
+            post(record_profile_round),
         )
         .fallback(frontend_or_not_found)
         .with_state(state)
@@ -204,21 +221,72 @@ async fn load_profile(
     Ok(Json(profile))
 }
 
-async fn save_profile(
+async fn create_profile(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(request): Json<CreateProfileRequest>,
+) -> Result<(StatusCode, Json<ProfileState>), AppError> {
+    let sync_token = profile_sync_token(&headers)?;
+    let profile = state.create_profile(request, sync_token).await?;
+    Ok((StatusCode::CREATED, Json(profile)))
+}
+
+async fn start_identity_draw(
     State(state): State<AppState>,
     Path(anonymous_id): Path<String>,
     headers: HeaderMap,
-    Json(profile): Json<ProfileState>,
+    Json(request): Json<StartIdentityDrawRequest>,
 ) -> Result<Json<ProfileState>, AppError> {
     validate_anonymous_id(&anonymous_id)?;
-    if profile.anonymous_id != anonymous_id {
-        return Err(AppError::BadRequest(
-            "profile path and payload IDs do not match".to_owned(),
-        ));
-    }
     let sync_token = profile_sync_token(&headers)?;
-    let stored = state.save_profile(profile, sync_token).await?;
-    Ok(Json(stored))
+    Ok(Json(
+        state
+            .start_identity_draw(&anonymous_id, sync_token, request)
+            .await?,
+    ))
+}
+
+async fn adopt_identity_draw(
+    State(state): State<AppState>,
+    Path((anonymous_id, winner_id)): Path<(String, String)>,
+    headers: HeaderMap,
+) -> Result<Json<ProfileState>, AppError> {
+    validate_anonymous_id(&anonymous_id)?;
+    let sync_token = profile_sync_token(&headers)?;
+    Ok(Json(
+        state
+            .adopt_identity_draw(&anonymous_id, sync_token, &winner_id)
+            .await?,
+    ))
+}
+
+async fn discard_identity_draw(
+    State(state): State<AppState>,
+    Path((anonymous_id, winner_id)): Path<(String, String)>,
+    headers: HeaderMap,
+) -> Result<Json<ProfileState>, AppError> {
+    validate_anonymous_id(&anonymous_id)?;
+    let sync_token = profile_sync_token(&headers)?;
+    Ok(Json(
+        state
+            .discard_identity_draw(&anonymous_id, sync_token, &winner_id)
+            .await?,
+    ))
+}
+
+async fn record_profile_round(
+    State(state): State<AppState>,
+    Path(anonymous_id): Path<String>,
+    headers: HeaderMap,
+    Json(request): Json<RecordRoundRequest>,
+) -> Result<Json<ProfileState>, AppError> {
+    validate_anonymous_id(&anonymous_id)?;
+    let sync_token = profile_sync_token(&headers)?;
+    Ok(Json(
+        state
+            .record_round(&anonymous_id, sync_token, request)
+            .await?,
+    ))
 }
 
 fn profile_sync_token(headers: &HeaderMap) -> Result<&str, AppError> {

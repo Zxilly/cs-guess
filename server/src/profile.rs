@@ -1,9 +1,18 @@
+use rand::Rng;
 use serde::{Deserialize, Serialize};
+use time::OffsetDateTime;
+use uuid::Uuid;
 
-use crate::{error::AppError, state::validate_identity_id};
+use crate::{
+    daily::{CatalogPlayer, catalog_player_by_id, catalog_players},
+    error::AppError,
+    state::validate_identity_id,
+};
 
 const MAX_HISTORY: usize = 50;
 const MAX_RECORDED_ROUNDS: usize = 100;
+const DRAW_ITEM_COUNT: usize = 29;
+const DRAW_WINNER_INDEX: usize = 23;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -24,6 +33,8 @@ pub struct ProfileState {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct PendingIdentityDraw {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub request_id: Option<String>,
     pub pool_id: String,
     pub item_ids: Vec<String>,
     pub winner_id: String,
@@ -77,7 +88,81 @@ pub struct HistoryPlayerSnapshot {
     pub major_appearances: u32,
 }
 
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateProfileRequest {
+    pub anonymous_id: String,
+    pub initial_player_id: String,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StartIdentityDrawRequest {
+    pub request_id: String,
+    pub pool_id: String,
+    #[serde(default)]
+    pub replaced_winner_id: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RecordRoundRequest {
+    pub round_id: String,
+    pub result: String,
+    #[serde(default)]
+    pub details: Option<RoundRecordDetails>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RoundRecordDetails {
+    pub mode: String,
+    #[serde(default)]
+    pub room_code: Option<String>,
+    #[serde(default = "default_round_number")]
+    pub round_number: u32,
+    #[serde(default = "default_best_of")]
+    pub best_of: u8,
+    #[serde(default)]
+    pub answer_id: Option<String>,
+    #[serde(default)]
+    pub guess_ids: Vec<String>,
+    #[serde(default)]
+    pub opponent_names: Vec<String>,
+    #[serde(default)]
+    pub self_score: u32,
+    #[serde(default)]
+    pub opponent_score: u32,
+}
+
 impl ProfileState {
+    pub fn new(anonymous_id: String, initial_player_id: String) -> Result<Self, AppError> {
+        validate_anonymous_id(&anonymous_id)?;
+        if !is_common_identity(&initial_player_id) {
+            return Err(AppError::BadRequest(
+                "initial_player_id must belong to the common identity pool".to_owned(),
+            ));
+        }
+        Ok(Self {
+            anonymous_id,
+            player_id: initial_player_id,
+            identity_confirmed: false,
+            stats: ProfileStats {
+                wins: 0,
+                losses: 0,
+                draws: 0,
+                current_streak: 0,
+                best_streak: 0,
+            },
+            draw_credits: 1,
+            losses_toward_credit: 0,
+            recorded_rounds: Vec::new(),
+            match_history: Vec::new(),
+            pending_draw: None,
+            updated_at: unix_timestamp_millis(),
+        })
+    }
+
     pub fn validate(&self) -> Result<(), AppError> {
         validate_anonymous_id(&self.anonymous_id)?;
         validate_identity_id(&self.player_id)?;
@@ -113,11 +198,217 @@ impl ProfileState {
         }
         Ok(())
     }
+
+    pub fn start_identity_draw(
+        &mut self,
+        request: StartIdentityDrawRequest,
+    ) -> Result<(), AppError> {
+        validate_request_id(&request.request_id)?;
+        let unlock_wins = identity_pool_unlock_wins(&request.pool_id)?;
+        if !self.identity_confirmed && request.pool_id != "common" {
+            return Err(AppError::BadRequest(
+                "initial identity must be drawn from the common pool".to_owned(),
+            ));
+        }
+        if self.stats.wins < unlock_wins {
+            return Err(AppError::BadRequest(
+                "identity pool is still locked".to_owned(),
+            ));
+        }
+        if self
+            .pending_draw
+            .as_ref()
+            .and_then(|draw| draw.request_id.as_deref())
+            == Some(request.request_id.as_str())
+        {
+            return Ok(());
+        }
+        match (&self.pending_draw, &request.replaced_winner_id) {
+            (None, None) => {}
+            (Some(draw), Some(replaced))
+                if draw.pool_id == request.pool_id && draw.winner_id == *replaced => {}
+            _ => {
+                return Err(AppError::ProfileConflict(
+                    "pending identity draw changed".to_owned(),
+                ));
+            }
+        }
+        if self.draw_credits == 0 {
+            return Err(AppError::ProfileConflict(
+                "no identity draw credits remain".to_owned(),
+            ));
+        }
+
+        let candidates: Vec<&CatalogPlayer> = catalog_players()
+            .iter()
+            .filter(|player| {
+                player.id != self.player_id && player_belongs_to_pool(player, &request.pool_id)
+            })
+            .collect();
+        if candidates.is_empty() {
+            return Err(AppError::Internal);
+        }
+        let mut rng = rand::rng();
+        let winner = candidates[rng.random_range(0..candidates.len())];
+        let mut item_ids: Vec<String> = (0..DRAW_ITEM_COUNT)
+            .map(|_| candidates[rng.random_range(0..candidates.len())].id.clone())
+            .collect();
+        item_ids[DRAW_WINNER_INDEX] = winner.id.clone();
+
+        self.draw_credits -= 1;
+        self.pending_draw = Some(PendingIdentityDraw {
+            request_id: Some(request.request_id),
+            pool_id: request.pool_id,
+            item_ids,
+            winner_id: winner.id.clone(),
+            winner_index: DRAW_WINNER_INDEX,
+            created_at: unix_timestamp_millis(),
+        });
+        self.touch();
+        Ok(())
+    }
+
+    pub fn adopt_identity_draw(&mut self, winner_id: &str) -> Result<(), AppError> {
+        if self.pending_draw.is_none() && self.identity_confirmed && self.player_id == winner_id {
+            return Ok(());
+        }
+        let pending = self.pending_draw.as_ref().ok_or_else(|| {
+            AppError::ProfileConflict("no pending identity draw exists".to_owned())
+        })?;
+        if pending.winner_id != winner_id {
+            return Err(AppError::ProfileConflict(
+                "identity draw winner changed".to_owned(),
+            ));
+        }
+        self.player_id = winner_id.to_owned();
+        self.identity_confirmed = true;
+        self.pending_draw = None;
+        self.touch();
+        Ok(())
+    }
+
+    pub fn discard_identity_draw(&mut self, winner_id: &str) -> Result<(), AppError> {
+        let Some(pending) = &self.pending_draw else {
+            return Ok(());
+        };
+        if !self.identity_confirmed {
+            return Err(AppError::BadRequest(
+                "initial identity draw must be adopted".to_owned(),
+            ));
+        }
+        if pending.winner_id != winner_id {
+            return Err(AppError::ProfileConflict(
+                "identity draw winner changed".to_owned(),
+            ));
+        }
+        self.pending_draw = None;
+        self.touch();
+        Ok(())
+    }
+
+    pub fn record_round(&mut self, request: RecordRoundRequest) -> Result<(), AppError> {
+        if !valid_short_text(&request.round_id, 160) {
+            return Err(AppError::BadRequest(
+                "round_id has an invalid format".to_owned(),
+            ));
+        }
+        if self
+            .recorded_rounds
+            .iter()
+            .any(|round_id| round_id == &request.round_id)
+        {
+            return Ok(());
+        }
+        if !matches!(request.result.as_str(), "win" | "loss" | "draw") {
+            return Err(AppError::BadRequest("round result is invalid".to_owned()));
+        }
+
+        let next_streak = if request.result == "win" {
+            self.stats.current_streak.saturating_add(1)
+        } else {
+            0
+        };
+        let losses_toward_credit = if request.result == "loss" {
+            self.losses_toward_credit.saturating_add(1)
+        } else {
+            self.losses_toward_credit
+        };
+        let earned_credits = u32::from(
+            request.result == "win" || request.result == "loss" && losses_toward_credit >= 2,
+        );
+        self.stats.wins = self
+            .stats
+            .wins
+            .saturating_add(u32::from(request.result == "win"));
+        self.stats.losses = self
+            .stats
+            .losses
+            .saturating_add(u32::from(request.result == "loss"));
+        self.stats.draws = self
+            .stats
+            .draws
+            .saturating_add(u32::from(request.result == "draw"));
+        self.stats.current_streak = next_streak;
+        self.stats.best_streak = self.stats.best_streak.max(next_streak);
+        self.draw_credits = self.draw_credits.saturating_add(earned_credits);
+        if request.result == "loss" {
+            self.losses_toward_credit = losses_toward_credit % 2;
+        }
+        push_bounded(
+            &mut self.recorded_rounds,
+            request.round_id.clone(),
+            MAX_RECORDED_ROUNDS,
+        );
+
+        if let Some(details) = request.details {
+            let answer_snapshot = details
+                .answer_id
+                .as_deref()
+                .and_then(catalog_player_by_id)
+                .map(history_snapshot);
+            let guess_snapshots = details
+                .guess_ids
+                .iter()
+                .map(|id| catalog_player_by_id(id).map(history_snapshot))
+                .collect();
+            let entry = MatchHistoryEntry {
+                id: request.round_id,
+                completed_at: current_timestamp(),
+                result: request.result,
+                mode: details.mode,
+                room_code: details.room_code,
+                round_number: details.round_number,
+                best_of: details.best_of,
+                answer_id: details.answer_id,
+                answer_snapshot,
+                guess_ids: details.guess_ids,
+                guess_snapshots: Some(guess_snapshots),
+                opponent_names: details.opponent_names,
+                self_score: details.self_score,
+                opponent_score: details.opponent_score,
+            };
+            if !entry.is_valid() {
+                return Err(AppError::BadRequest(
+                    "round history contains invalid data".to_owned(),
+                ));
+            }
+            push_bounded(&mut self.match_history, entry, MAX_HISTORY);
+        }
+        self.touch();
+        Ok(())
+    }
+
+    fn touch(&mut self) {
+        self.updated_at = unix_timestamp_millis().max(self.updated_at.saturating_add(1));
+    }
 }
 
 impl PendingIdentityDraw {
     fn is_valid(&self) -> bool {
-        matches!(self.pool_id.as_str(), "common" | "advanced" | "star")
+        self.request_id
+            .as_deref()
+            .is_none_or(|request_id| validate_request_id(request_id).is_ok())
+            && matches!(self.pool_id.as_str(), "common" | "advanced" | "star")
             && self.item_ids.len() == 29
             && self.winner_index < self.item_ids.len()
             && self.item_ids[self.winner_index] == self.winner_id
@@ -127,6 +418,83 @@ impl PendingIdentityDraw {
                 .iter()
                 .all(|player_id| validate_identity_id(player_id).is_ok())
     }
+}
+
+fn default_round_number() -> u32 {
+    1
+}
+
+fn default_best_of() -> u8 {
+    1
+}
+
+fn validate_request_id(value: &str) -> Result<(), AppError> {
+    Uuid::parse_str(value)
+        .map(|_| ())
+        .map_err(|_| AppError::BadRequest("request_id must be a UUID".to_owned()))
+}
+
+fn identity_pool_unlock_wins(pool_id: &str) -> Result<u32, AppError> {
+    match pool_id {
+        "common" => Ok(0),
+        "advanced" => Ok(3),
+        "star" => Ok(10),
+        _ => Err(AppError::BadRequest("identity pool is invalid".to_owned())),
+    }
+}
+
+fn player_belongs_to_pool(player: &CatalogPlayer, pool_id: &str) -> bool {
+    match pool_id {
+        "common" => (1..=4).contains(&player.major_appearances) && player.major_wins == 0,
+        "advanced" => player.major_appearances >= 5 && player.major_wins == 0,
+        "star" => player.major_wins >= 1,
+        _ => false,
+    }
+}
+
+fn is_common_identity(player_id: &str) -> bool {
+    catalog_player_by_id(player_id).is_some_and(|player| player_belongs_to_pool(player, "common"))
+}
+
+fn history_snapshot(player: &CatalogPlayer) -> HistoryPlayerSnapshot {
+    HistoryPlayerSnapshot {
+        id: player.id.clone(),
+        nickname: player.nickname.clone(),
+        name: player.name.clone(),
+        team: player.team.clone(),
+        country_code: player.country_code.clone(),
+        age: player.age,
+        role: player.role.clone(),
+        major_appearances: u32::from(player.major_appearances),
+    }
+}
+
+fn push_bounded<T>(values: &mut Vec<T>, value: T, limit: usize) {
+    if values.len() >= limit {
+        values.remove(0);
+    }
+    values.push(value);
+}
+
+fn unix_timestamp_millis() -> u64 {
+    OffsetDateTime::now_utc()
+        .unix_timestamp_nanos()
+        .div_euclid(1_000_000)
+        .try_into()
+        .unwrap_or(1)
+}
+
+fn current_timestamp() -> String {
+    let now = OffsetDateTime::now_utc();
+    format!(
+        "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}Z",
+        now.year(),
+        u8::from(now.month()),
+        now.day(),
+        now.hour(),
+        now.minute(),
+        now.second(),
+    )
 }
 
 impl MatchHistoryEntry {

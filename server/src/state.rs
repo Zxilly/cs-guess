@@ -18,7 +18,7 @@ use crate::{
     daily::DailyChallenge,
     database::DatabaseStore,
     error::AppError,
-    profile::ProfileState,
+    profile::{CreateProfileRequest, ProfileState, RecordRoundRequest, StartIdentityDrawRequest},
     protocol::{
         Difficulty, DifficultyQueueCounts, QueueCounts, RoomKind, SessionResponse, Snapshot,
         Visibility,
@@ -339,12 +339,63 @@ impl AppState {
             .await
     }
 
-    pub async fn save_profile(
+    pub async fn create_profile(
         &self,
-        profile: ProfileState,
+        request: CreateProfileRequest,
         sync_token: &str,
     ) -> Result<ProfileState, AppError> {
-        self.inner.database.save_profile(profile, sync_token).await
+        self.inner
+            .database
+            .create_profile(request, sync_token)
+            .await
+    }
+
+    pub async fn start_identity_draw(
+        &self,
+        anonymous_id: &str,
+        sync_token: &str,
+        request: StartIdentityDrawRequest,
+    ) -> Result<ProfileState, AppError> {
+        self.inner
+            .database
+            .start_identity_draw(anonymous_id, sync_token, request)
+            .await
+    }
+
+    pub async fn adopt_identity_draw(
+        &self,
+        anonymous_id: &str,
+        sync_token: &str,
+        winner_id: &str,
+    ) -> Result<ProfileState, AppError> {
+        self.inner
+            .database
+            .adopt_identity_draw(anonymous_id, sync_token, winner_id)
+            .await
+    }
+
+    pub async fn discard_identity_draw(
+        &self,
+        anonymous_id: &str,
+        sync_token: &str,
+        winner_id: &str,
+    ) -> Result<ProfileState, AppError> {
+        self.inner
+            .database
+            .discard_identity_draw(anonymous_id, sync_token, winner_id)
+            .await
+    }
+
+    pub async fn record_round(
+        &self,
+        anonymous_id: &str,
+        sync_token: &str,
+        request: RecordRoundRequest,
+    ) -> Result<ProfileState, AppError> {
+        self.inner
+            .database
+            .record_round(anonymous_id, sync_token, request)
+            .await
     }
 
     pub async fn current_daily_challenge(&self) -> Result<DailyChallenge, AppError> {

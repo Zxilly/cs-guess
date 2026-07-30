@@ -75,6 +75,10 @@ pub fn catalog_player_by_id(id: &str) -> Option<&'static CatalogPlayer> {
     PLAYERS.iter().find(|player| player.id == id)
 }
 
+pub fn catalog_players() -> &'static [CatalogPlayer] {
+    &PLAYERS
+}
+
 impl DailyChallengeCandidate {
     pub fn current() -> Result<Self, AppError> {
         let shanghai_offset = UtcOffset::from_hms(8, 0, 0).map_err(|_| AppError::Internal)?;
