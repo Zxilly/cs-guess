@@ -46,13 +46,6 @@ interface DrawSequence {
   revealed: boolean;
 }
 
-interface PreparedDraw {
-  forPlayerId: string;
-  items: readonly Player[];
-  winner: Player;
-  winnerIndex: number;
-}
-
 function prepareDraw(poolId: IdentityPoolId, currentPlayerId: string) {
   return prepareIdentityDraw(playersInPool(poolId), currentPlayerId);
 }
@@ -111,10 +104,23 @@ export function IdentityPage() {
     return onboarding ? null : restorePendingDraw(identity.profile.pendingDraw);
   });
   const [drawError, setDrawError] = useState<string | null>(null);
-  const [readyPools, setReadyPools] = useState<Set<IdentityPoolId>>(
-    () => new Set(),
+  const readyPools = useMemo(
+    () =>
+      new Set(
+        visiblePools
+          .filter(
+            (pool) =>
+              identity.profile.stats.wins >= pool.unlockWins &&
+              identity.profile.drawCredits > 0,
+          )
+          .map((pool) => pool.id),
+      ),
+    [
+      identity.profile.drawCredits,
+      identity.profile.stats.wins,
+      visiblePools,
+    ],
   );
-  const [prepareVersion, setPrepareVersion] = useState(0);
   const revealTimerRef = useRef<number | null>(null);
   const drawInProgressRef = useRef(false);
   const rollSequenceRef = useRef(0);
@@ -129,81 +135,18 @@ export function IdentityPage() {
   pendingDrawRevisionRef.current = pendingDrawRevision(
     identity.profile.pendingDraw,
   );
-  const preparedDrawsRef = useRef(
-    new Map<IdentityPoolId, PreparedDraw>(),
-  );
   const setPreviewDrawCredits = identity.setPreviewDrawCredits;
-  const preparedOnboardingDraw = useMemo(
-    () =>
-      onboarding ? prepareDraw("common", identity.player.id) : null,
-    [identity.player.id, onboarding],
-  );
   if (draw) lastDrawRef.current = draw;
   const displayedDraw = draw ?? lastDrawRef.current;
 
   useEffect(() => {
-    if (!preparedOnboardingDraw) return;
-    const controller = new AbortController();
-    void preloadPlayerImages(preparedOnboardingDraw.items, {
-      signal: controller.signal,
-    });
-    return () => controller.abort();
-  }, [preparedOnboardingDraw]);
-
-  useEffect(() => {
-    if (onboarding) return;
-    const controller = new AbortController();
-    const newlyPreparedImages: Player[] = [];
-    const cachedImages: Player[] = [];
-    const nextReadyPools = new Set<IdentityPoolId>();
-
-    for (const pool of IDENTITY_POOLS) {
-      if (
-        identity.profile.stats.wins < pool.unlockWins ||
-        identity.profile.drawCredits < 1
-      ) {
-        preparedDrawsRef.current.delete(pool.id);
-        continue;
-      }
-      let cached = preparedDrawsRef.current.get(pool.id);
-      if (cached?.forPlayerId !== identity.player.id) {
-        const prepared = prepareDraw(pool.id, identity.player.id);
-        if (!prepared) continue;
-        cached = {
-          forPlayerId: identity.player.id,
-          ...prepared,
-        };
-        preparedDrawsRef.current.set(pool.id, cached);
-        newlyPreparedImages.push(...prepared.items);
-      } else {
-        cachedImages.push(...cached.items);
-      }
-      nextReadyPools.add(pool.id);
-    }
-    setReadyPools(nextReadyPools);
-
-    const imagesToPreload = [
-      ...newlyPreparedImages,
-      ...cachedImages,
-    ];
-    if (imagesToPreload.length > 0) {
-      void preloadPlayerImages(imagesToPreload, {
-        signal: controller.signal,
-      });
-    }
-
-    return () => controller.abort();
-  }, [
-    identity.player.id,
-    identity.profile.drawCredits,
-    identity.profile.stats.wins,
-    onboarding,
-    prepareVersion,
-  ]);
-
-  useEffect(() => {
-    if (onboarding) return;
-    if (audit === "identity-rolling" || audit === "identity-result") {
+    if (drawInProgressRef.current) return;
+    if (
+      audit === "identity-rolling" ||
+      audit === "identity-result" ||
+      audit === "onboarding-rolling" ||
+      audit === "onboarding-result"
+    ) {
       return;
     }
     const reconciliation = reconcilePendingIdentityDraw(
@@ -260,51 +203,25 @@ export function IdentityPage() {
   ) {
     if (drawInProgressRef.current || identity.profile.drawCredits < 1) return;
     if (onboarding && poolId !== "common") return;
-    const prepared =
-      onboarding && poolId === "common"
-        ? preparedOnboardingDraw
-        : preparedDrawsRef.current.get(poolId);
-    if (
-      !prepared ||
-      (!onboarding &&
-        (!("forPlayerId" in prepared) ||
-          prepared.forPlayerId !== identity.player.id))
-    ) {
-      return;
-    }
-
     drawInProgressRef.current = true;
     const startingPendingRevision = pendingDrawRevisionRef.current;
     setDrawError(null);
     rollSequenceRef.current += 1;
-    if (!onboarding) {
-      const pendingDraw: PendingIdentityDraw = {
-        poolId,
-        itemIds: prepared.items.map((player) => player.id),
-        winnerId: prepared.winner.id,
-        winnerIndex: prepared.winnerIndex,
-        createdAt: Date.now(),
-      };
-      const spent = await identity.spendDrawCredit(
-        poolId,
-        pendingDraw,
-        replacedWinnerId,
-      );
-      if (!spent) {
-        drawInProgressRef.current = false;
-        if (pendingDrawRevisionRef.current === startingPendingRevision) {
-          setDrawError("抽取次数已变化，请检查其他标签页后重试。");
-        }
-        return;
+    const pendingDraw = await identity.spendDrawCredit(
+      poolId,
+      replacedWinnerId,
+    );
+    const prepared = pendingDraw
+      ? restorePreparedIdentityDraw(pendingDraw, players)
+      : null;
+    if (!pendingDraw || !prepared) {
+      drawInProgressRef.current = false;
+      if (pendingDrawRevisionRef.current === startingPendingRevision) {
+        setDrawError("抽取次数已变化，请检查网络或其他标签页后重试。");
       }
-      preparedDrawsRef.current.delete(poolId);
-      setReadyPools((current) => {
-        const next = new Set(current);
-        next.delete(poolId);
-        return next;
-      });
-      setPrepareVersion((current) => current + 1);
+      return;
     }
+    void preloadPlayerImages(prepared.items);
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -343,14 +260,12 @@ export function IdentityPage() {
 
   function changeDrawDialog(open: boolean) {
     if (onboarding) return;
-    if (!open && draw?.revealed) keepCurrentIdentity();
+    if (!open && draw?.revealed) void keepCurrentIdentity();
   }
 
-  function keepCurrentIdentity() {
+  async function keepCurrentIdentity() {
     if (!draw?.revealed) return;
-    if (
-      !identity.discardPendingDraw(draw.poolId, draw.winner.id)
-    ) {
+    if (!(await identity.discardPendingDraw(draw.poolId, draw.winner.id))) {
       setDrawError("未能保存选择，请重试。");
       return;
     }
@@ -358,16 +273,19 @@ export function IdentityPage() {
     setDrawError(null);
   }
 
-  function acceptDrawnIdentity() {
+  async function acceptDrawnIdentity() {
     if (!draw?.revealed) return;
     if (onboarding) {
-      const completed = identity.completeIdentitySetup(draw.winner.id);
+      const completed = await identity.completeIdentitySetup(draw.winner.id);
       if (!completed) return;
       setDraw(null);
       navigate(returnTo, { replace: true });
       return;
     }
-    const adopted = identity.adoptIdentity(draw.poolId, draw.winner.id);
+    const adopted = await identity.adoptIdentity(
+      draw.poolId,
+      draw.winner.id,
+    );
     if (!adopted) {
       setDrawError("身份保存失败，请保留此窗口并重试。");
       return;
@@ -566,10 +484,7 @@ export function IdentityPage() {
                   unlocked &&
                   identity.profile.drawCredits > 0 &&
                   !draw &&
-                  (onboarding ||
-                    (readyPools.has(pool.id) &&
-                      preparedDrawsRef.current.get(pool.id)?.forPlayerId ===
-                        identity.player.id));
+                  readyPools.has(pool.id);
 
                 return (
                   <div
@@ -665,12 +580,7 @@ export function IdentityPage() {
           remainingCredits={onboarding ? 0 : identity.profile.drawCredits}
           allowKeepCurrent={!onboarding}
           allowReroll={!onboarding}
-          rerollReady={
-            readyPools.has(displayedDraw.poolId) &&
-            preparedDrawsRef.current.get(displayedDraw.poolId)
-              ?.forPlayerId ===
-              identity.player.id
-          }
+          rerollReady={readyPools.has(displayedDraw.poolId)}
           acceptLabel={
             onboarding
               ? returnTo === "/"
@@ -679,9 +589,9 @@ export function IdentityPage() {
               : "使用新身份"
           }
           onOpenChange={changeDrawDialog}
-          onKeep={keepCurrentIdentity}
+          onKeep={() => void keepCurrentIdentity()}
           onReroll={rerollIdentity}
-          onAccept={acceptDrawnIdentity}
+          onAccept={() => void acceptDrawnIdentity()}
           onCloseAutoFocus={
             onboarding ? undefined : restoreDrawButtonFocus
           }

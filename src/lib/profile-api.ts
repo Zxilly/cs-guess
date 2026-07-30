@@ -1,41 +1,120 @@
-import type { AnonymousProfile } from "@/hooks/use-anonymous-profile";
+import type {
+  AnonymousProfile,
+  IdentityPoolId,
+  RoundRecordDetails,
+  SeriesResult,
+} from "@/hooks/use-anonymous-profile";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 
-type ServerProfile = Omit<AnonymousProfile, "syncToken">;
+export type ServerProfile = Omit<AnonymousProfile, "syncToken">;
+
+type ProfileCredentials = Pick<AnonymousProfile, "anonymousId" | "syncToken">;
+
+async function readProfileResponse(response: Response, operation: string) {
+  if (!response.ok) {
+    throw new Error(`${operation} failed: ${response.status}`);
+  }
+  return (await response.json()) as ServerProfile;
+}
+
+function profileUrl(anonymousId: string, suffix = "") {
+  return `${API_BASE}/v1/profiles/${encodeURIComponent(anonymousId)}${suffix}`;
+}
+
+function profileHeaders(syncToken: string, json = false) {
+  return {
+    ...(json ? { "Content-Type": "application/json" } : {}),
+    "X-Profile-Token": syncToken,
+  };
+}
 
 export async function loadServerProfile(
   anonymousId: string,
   syncToken: string,
   signal?: AbortSignal,
 ): Promise<ServerProfile | null> {
-  const response = await fetch(
-    `${API_BASE}/v1/profiles/${encodeURIComponent(anonymousId)}`,
-    {
-      headers: { "X-Profile-Token": syncToken },
-      signal,
-    },
-  );
+  const response = await fetch(profileUrl(anonymousId), {
+    headers: profileHeaders(syncToken),
+    signal,
+  });
   if (response.status === 404) return null;
-  if (!response.ok) throw new Error(`profile load failed: ${response.status}`);
-  return (await response.json()) as ServerProfile;
+  return readProfileResponse(response, "profile load");
 }
 
-export async function saveServerProfile(
+export async function createServerProfile(
   profile: AnonymousProfile,
+  initialPlayerId = profile.playerId,
 ): Promise<ServerProfile> {
-  const { syncToken, ...payload } = profile;
+  const response = await fetch(`${API_BASE}/v1/profiles`, {
+    method: "POST",
+    headers: profileHeaders(profile.syncToken, true),
+    body: JSON.stringify({
+      anonymousId: profile.anonymousId,
+      initialPlayerId,
+    }),
+  });
+  return readProfileResponse(response, "profile creation");
+}
+
+export async function startServerIdentityDraw(
+  profile: ProfileCredentials,
+  poolId: IdentityPoolId,
+  requestId: string,
+  replacedWinnerId?: string,
+): Promise<ServerProfile> {
+  const response = await fetch(profileUrl(profile.anonymousId, "/identity-draws"), {
+    method: "POST",
+    headers: profileHeaders(profile.syncToken, true),
+    body: JSON.stringify({ requestId, poolId, replacedWinnerId }),
+  });
+  return readProfileResponse(response, "identity draw");
+}
+
+export async function adoptServerIdentityDraw(
+  profile: ProfileCredentials,
+  winnerId: string,
+): Promise<ServerProfile> {
   const response = await fetch(
-    `${API_BASE}/v1/profiles/${encodeURIComponent(profile.anonymousId)}`,
+    profileUrl(
+      profile.anonymousId,
+      `/identity-draws/${encodeURIComponent(winnerId)}/adopt`,
+    ),
     {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Profile-Token": syncToken,
-      },
-      body: JSON.stringify(payload),
+      method: "POST",
+      headers: profileHeaders(profile.syncToken),
     },
   );
-  if (!response.ok) throw new Error(`profile save failed: ${response.status}`);
-  return (await response.json()) as ServerProfile;
+  return readProfileResponse(response, "identity adoption");
+}
+
+export async function discardServerIdentityDraw(
+  profile: ProfileCredentials,
+  winnerId: string,
+): Promise<ServerProfile> {
+  const response = await fetch(
+    profileUrl(
+      profile.anonymousId,
+      `/identity-draws/${encodeURIComponent(winnerId)}`,
+    ),
+    {
+      method: "DELETE",
+      headers: profileHeaders(profile.syncToken),
+    },
+  );
+  return readProfileResponse(response, "identity draw discard");
+}
+
+export async function recordServerRound(
+  profile: ProfileCredentials,
+  roundId: string,
+  result: SeriesResult,
+  details?: RoundRecordDetails,
+): Promise<ServerProfile> {
+  const response = await fetch(profileUrl(profile.anonymousId, "/rounds"), {
+    method: "POST",
+    headers: profileHeaders(profile.syncToken, true),
+    body: JSON.stringify({ roundId, result, details }),
+  });
+  return readProfileResponse(response, "round recording");
 }

@@ -40,9 +40,13 @@ const mocks = vi.hoisted(() => {
       | undefined,
     currentPlayer,
     candidate,
-    spendDrawCredit: vi.fn().mockResolvedValue(true),
+    spendDrawCredit: vi.fn(),
   };
 });
+
+vi.mock("@/data/players", () => ({
+  players: [mocks.currentPlayer, mocks.candidate],
+}));
 
 vi.mock("@/hooks/use-anonymous-profile", () => {
   const pool = {
@@ -152,13 +156,17 @@ beforeEach(() => {
   mocks.pendingDraw = undefined;
   mocks.spendDrawCredit.mockClear();
   mocks.spendDrawCredit.mockImplementation(
-    async (
-      _poolId: "common",
-      pendingDraw: NonNullable<typeof mocks.pendingDraw>,
-    ) => {
+    async (_poolId: "common") => {
+      const pendingDraw = {
+        poolId: "common" as const,
+        itemIds: Array.from({ length: 29 }, () => mocks.candidate.id),
+        winnerId: mocks.candidate.id,
+        winnerIndex: 23,
+        createdAt: Date.now(),
+      };
       mocks.pendingDraw = pendingDraw;
       mocks.drawCredits -= 1;
-      return true;
+      return pendingDraw;
     },
   );
   container = document.createElement("div");
@@ -174,6 +182,27 @@ afterEach(() => {
 });
 
 describe("IdentityPage reduced-motion draw state", () => {
+  it("restores a charged onboarding draw after a reload", async () => {
+    mocks.drawCredits = 0;
+    mocks.pendingDraw = {
+      poolId: "common",
+      itemIds: Array.from({ length: 29 }, () => mocks.candidate.id),
+      winnerId: mocks.candidate.id,
+      winnerIndex: 23,
+      createdAt: 101,
+    };
+    renderPage(true);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(document.querySelector('[role="status"]')?.textContent).toBe(
+      "抽取结果：Candidate",
+    );
+    expect(findButton("确认身份并进入大厅")).toBeTruthy();
+  });
+
   it("reveals and announces immediately, then focuses confirmation", async () => {
     renderPage(true);
 
@@ -208,7 +237,7 @@ describe("IdentityPage reduced-motion draw state", () => {
     expect(pendingImageDecodes).toBeGreaterThan(0);
   });
 
-  it("makes a non-onboarding pool ready while image decode is still pending", async () => {
+  it("makes a non-onboarding pool ready before requesting a server draw", async () => {
     mocks.identityConfirmed = true;
     renderPage(true);
 
@@ -219,40 +248,40 @@ describe("IdentityPage reduced-motion draw state", () => {
     const drawButton = findButton("抽取 · 消耗 1 次");
     expect(drawButton).toBeTruthy();
     expect(drawButton?.getAttribute("aria-disabled")).toBe("false");
-    expect(pendingImageDecodes).toBeGreaterThan(0);
+    expect(pendingImageDecodes).toBe(0);
     expect(document.body.textContent).not.toContain("正在准备头像");
   });
 
-  it("restarts onboarding preloading after StrictMode cleanup", async () => {
+  it("preloads the server-selected onboarding sequence in StrictMode", async () => {
     renderPage(true, true);
 
     await act(async () => {
+      findButton("抽取初始身份")?.click();
       await Promise.resolve();
       await Promise.resolve();
     });
 
-    expect(preloadImages.length).toBeGreaterThanOrEqual(2);
-    expect(preloadImages[0]?.src).toBe("");
+    expect(preloadImages.length).toBeGreaterThanOrEqual(1);
     expect(preloadImages.at(-1)?.src).toBe(
       "https://example.com/candidate.webp",
     );
   });
 
-  it("restarts cached pool preloading after StrictMode cleanup", async () => {
+  it("preloads the server-selected regular sequence in StrictMode", async () => {
     mocks.identityConfirmed = true;
     renderPage(true, true);
 
     await act(async () => {
+      findButton("抽取 · 消耗 1 次")?.click();
       await Promise.resolve();
       await Promise.resolve();
     });
 
-    expect(preloadImages.length).toBeGreaterThanOrEqual(2);
-    expect(preloadImages[0]?.src).toBe("");
+    expect(preloadImages.length).toBeGreaterThanOrEqual(1);
     expect(preloadImages.at(-1)?.src).toBe(
       "https://example.com/candidate.webp",
     );
-    expect(findButton("抽取 · 消耗 1 次")).toBeTruthy();
+    expect(findButton("使用新身份")).toBeTruthy();
   });
 
   it("focuses and re-announces every reduced-motion reroll result", async () => {
@@ -294,8 +323,10 @@ describe("IdentityPage reduced-motion draw state", () => {
     vi.useFakeTimers();
     renderPage(false);
 
-    act(() => {
+    await act(async () => {
       findButton("抽取初始身份")?.click();
+      await Promise.resolve();
+      await Promise.resolve();
     });
     expect(document.body.textContent).toContain("锁定中…");
     expect(

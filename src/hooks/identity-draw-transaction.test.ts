@@ -5,14 +5,12 @@ import { PROFILE_KEY } from "@/lib/identity-profile";
 
 class MemoryStorage {
   private readonly values = new Map<string, string>();
-  failWrites = false;
 
   getItem(key: string) {
     return this.values.get(key) ?? null;
   }
 
   setItem(key: string, value: string) {
-    if (this.failWrites) throw new Error("storage unavailable");
     this.values.set(key, value);
   }
 }
@@ -24,10 +22,9 @@ const commonPlayers = players.filter(
     player.majorWins === 0,
 );
 const currentPlayer = commonPlayers[0];
-const firstWinner = commonPlayers[1];
-const secondWinner = commonPlayers[2];
+const winner = commonPlayers[1];
 
-function profile(drawCredits = 2) {
+function profile() {
   return {
     version: 8,
     anonymousId: "anonymous-identity-draw-test",
@@ -41,7 +38,7 @@ function profile(drawCredits = 2) {
       currentStreak: 2,
       bestStreak: 2,
     },
-    drawCredits,
+    drawCredits: 2,
     lossesTowardCredit: 0,
     recordedRounds: [],
     matchHistory: [],
@@ -49,17 +46,34 @@ function profile(drawCredits = 2) {
   };
 }
 
-function pending(winnerId: string, createdAt: number) {
+function pendingDraw() {
   return {
+    requestId: "52de8707-292b-4a83-82d5-c1776ed54a01",
     poolId: "common" as const,
-    itemIds: Array.from({ length: 29 }, () => winnerId),
-    winnerId,
+    itemIds: Array.from({ length: 29 }, () => winner.id),
+    winnerId: winner.id,
     winnerIndex: 23,
-    createdAt,
+    createdAt: 101,
   };
 }
 
-describe("identity draw transactions", () => {
+function serverProfile(overrides: Record<string, unknown> = {}) {
+  const {
+    version: _version,
+    syncToken: _syncToken,
+    ...server
+  } = profile();
+  return { ...server, ...overrides };
+}
+
+function jsonResponse(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+describe("identity draw server operations", () => {
   let storage: MemoryStorage;
 
   beforeEach(() => {
@@ -69,107 +83,103 @@ describe("identity draw transactions", () => {
     vi.stubGlobal("localStorage", storage);
     vi.stubGlobal("window", new EventTarget());
     vi.stubGlobal("navigator", {});
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    vi.stubGlobal("fetch", vi.fn());
   });
 
-  it("rejects a stale-tab spend after another tab used the final credit", async () => {
-    const { spendDrawCreditAtomically } = await import(
-      "@/hooks/use-anonymous-profile"
-    );
-    storage.setItem(PROFILE_KEY, JSON.stringify(profile(0)));
-
-    expect(
-      spendDrawCreditAtomically(
-        "common",
-        pending(firstWinner.id, 101),
-      ),
-    ).toBe(false);
-    expect(JSON.parse(storage.getItem(PROFILE_KEY) ?? "{}").drawCredits).toBe(
-      0,
-    );
-  });
-
-  it("hydrates a newer remote profile before charging an outdated local credit", async () => {
-    const remote = profile(0);
-    const { version: _version, syncToken: _syncToken, ...serverProfile } = {
-      ...remote,
-      updatedAt: 200,
-    };
-    vi.mocked(fetch).mockResolvedValue(
-      new Response(JSON.stringify(serverProfile), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-    );
+  it("stores the server-generated draw instead of accepting a local winner", async () => {
+    const draw = pendingDraw();
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(jsonResponse(serverProfile()))
+      .mockResolvedValueOnce(
+        jsonResponse(
+          serverProfile({
+            drawCredits: 1,
+            pendingDraw: draw,
+            updatedAt: 101,
+          }),
+        ),
+      );
     const { spendDrawCreditSafely } = await import(
       "@/hooks/use-anonymous-profile"
     );
 
-    await expect(
-      spendDrawCreditSafely(
-        "common",
-        pending(firstWinner.id, 201),
-      ),
-    ).resolves.toBe(false);
+    await expect(spendDrawCreditSafely("common")).resolves.toEqual(draw);
     const stored = JSON.parse(storage.getItem(PROFILE_KEY) ?? "{}");
-    expect(stored.drawCredits).toBe(0);
-    expect(stored.pendingDraw).toBeUndefined();
+    expect(stored.drawCredits).toBe(1);
+    expect(stored.pendingDraw).toEqual(draw);
+    expect(vi.mocked(fetch).mock.calls[1]?.[0]).toContain(
+      "/identity-draws",
+    );
   });
 
-  it("persists the paid result and replaces it only for an authorized reroll", async () => {
-    const { spendDrawCreditAtomically } = await import(
+  it("does not spend a local credit when the server rejects the draw", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(jsonResponse(serverProfile()))
+      .mockResolvedValueOnce(jsonResponse({ code: "profile_conflict" }, 409));
+    const { spendDrawCreditSafely } = await import(
       "@/hooks/use-anonymous-profile"
     );
-    const first = pending(firstWinner.id, 101);
-    const second = pending(secondWinner.id, 102);
 
-    expect(spendDrawCreditAtomically("common", first)).toBe(true);
-    let stored = JSON.parse(storage.getItem(PROFILE_KEY) ?? "{}");
-    expect(stored.drawCredits).toBe(1);
-    expect(stored.pendingDraw).toEqual(first);
-
-    expect(spendDrawCreditAtomically("common", second)).toBe(false);
-    stored = JSON.parse(storage.getItem(PROFILE_KEY) ?? "{}");
-    expect(stored.drawCredits).toBe(1);
-    expect(stored.pendingDraw).toEqual(first);
-
+    await expect(spendDrawCreditSafely("common")).resolves.toBeNull();
     expect(
-      spendDrawCreditAtomically("common", second, first.winnerId),
-    ).toBe(true);
-    stored = JSON.parse(storage.getItem(PROFILE_KEY) ?? "{}");
-    expect(stored.drawCredits).toBe(0);
-    expect(stored.pendingDraw).toEqual(second);
+      JSON.parse(storage.getItem(PROFILE_KEY) ?? "{}").drawCredits,
+    ).toBe(2);
   });
 
-  it("keeps the pending result when adoption fails and clears it on success", async () => {
-    const {
-      adoptPendingIdentityDraw,
-      spendDrawCreditAtomically,
-    } = await import("@/hooks/use-anonymous-profile");
-    const draw = pending(firstWinner.id, 101);
-    expect(spendDrawCreditAtomically("common", draw)).toBe(true);
+  it("adopts only the pending server winner", async () => {
+    const draw = pendingDraw();
+    storage.setItem(
+      PROFILE_KEY,
+      JSON.stringify({ ...profile(), pendingDraw: draw }),
+    );
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(
+        jsonResponse(serverProfile({ pendingDraw: draw })),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse(
+          serverProfile({
+            playerId: winner.id,
+            pendingDraw: undefined,
+            updatedAt: 102,
+          }),
+        ),
+      );
+    const { adoptPendingIdentityDraw } = await import(
+      "@/hooks/use-anonymous-profile"
+    );
 
-    expect(
-      adoptPendingIdentityDraw("common", secondWinner.id),
-    ).toBe(false);
-    expect(
-      JSON.parse(storage.getItem(PROFILE_KEY) ?? "{}").pendingDraw,
-    ).toEqual(draw);
-
-    storage.failWrites = true;
-    expect(
-      adoptPendingIdentityDraw("common", firstWinner.id),
-    ).toBe(false);
-    storage.failWrites = false;
-    expect(
-      JSON.parse(storage.getItem(PROFILE_KEY) ?? "{}").pendingDraw,
-    ).toEqual(draw);
-
-    expect(
-      adoptPendingIdentityDraw("common", firstWinner.id),
-    ).toBe(true);
+    await expect(
+      adoptPendingIdentityDraw("common", winner.id),
+    ).resolves.toBe(true);
     const stored = JSON.parse(storage.getItem(PROFILE_KEY) ?? "{}");
-    expect(stored.playerId).toBe(firstWinner.id);
+    expect(stored.playerId).toBe(winner.id);
     expect(stored.pendingDraw).toBeUndefined();
+  });
+
+  it("discards the pending result through its dedicated endpoint", async () => {
+    const draw = pendingDraw();
+    storage.setItem(
+      PROFILE_KEY,
+      JSON.stringify({ ...profile(), pendingDraw: draw }),
+    );
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(
+        jsonResponse(serverProfile({ pendingDraw: draw })),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse(serverProfile({ pendingDraw: undefined, updatedAt: 102 })),
+      );
+    const { discardPendingIdentityDraw } = await import(
+      "@/hooks/use-anonymous-profile"
+    );
+
+    await expect(
+      discardPendingIdentityDraw("common", winner.id),
+    ).resolves.toBe(true);
+    expect(
+      JSON.parse(storage.getItem(PROFILE_KEY) ?? "{}").pendingDraw,
+    ).toBeUndefined();
+    expect(vi.mocked(fetch).mock.calls[1]?.[1]?.method).toBe("DELETE");
   });
 });
