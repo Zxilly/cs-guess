@@ -14,6 +14,7 @@ RUN --mount=type=cache,id=cs-guess-pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile
 
 COPY components.json index.html tsconfig.app.json tsconfig.json tsconfig.node.json vite.config.ts ./
+COPY public ./public
 COPY src ./src
 RUN pnpm build
 
