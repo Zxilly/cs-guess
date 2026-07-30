@@ -12,7 +12,7 @@ import {
 } from "@/lib/realtime";
 
 const mocks = vi.hoisted(() => ({
-  recordRound: vi.fn(),
+  refreshProfile: vi.fn(),
   celebrationProps: null as Record<string, unknown> | null,
   battleContextProps: null as Record<string, unknown> | null,
   playerSearchProps: null as Record<string, any> | null,
@@ -41,7 +41,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/hooks/use-anonymous-profile", () => ({
-  useAnonymousProfile: () => ({ recordRound: mocks.recordRound }),
+  useAnonymousProfile: () => ({ refreshProfile: mocks.refreshProfile }),
 }));
 
 vi.mock("@/hooks/use-realtime-room", () => ({
@@ -202,7 +202,7 @@ beforeEach(() => {
   mocks.realtime.close.mockClear();
   mocks.realtime.send.mockClear();
   mocks.realtime.send.mockReturnValue("request-default");
-  mocks.recordRound.mockClear();
+  mocks.refreshProfile.mockClear();
   mocks.celebrationProps = null;
   mocks.playerSearchProps = null;
   storeRoomSession();

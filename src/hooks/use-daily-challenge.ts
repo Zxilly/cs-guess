@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
 
 import {
+  ensureAnonymousProfileReady,
+  useAnonymousProfile,
+} from "@/hooks/use-anonymous-profile";
+import {
   loadCurrentDailyChallenge,
   type ServerDailyChallenge,
 } from "@/lib/daily-challenge-api";
 
 export function useDailyChallenge() {
+  const { profile } = useAnonymousProfile();
+  const anonymousId = profile.anonymousId;
+  const syncToken = profile.syncToken;
   const [challenge, setChallenge] = useState<ServerDailyChallenge>();
   const [error, setError] = useState<Error>();
   const [requestVersion, setRequestVersion] = useState(0);
@@ -13,7 +20,13 @@ export function useDailyChallenge() {
   useEffect(() => {
     const controller = new AbortController();
     setError(undefined);
-    loadCurrentDailyChallenge(controller.signal)
+    ensureAnonymousProfileReady()
+      .then(() =>
+        loadCurrentDailyChallenge(controller.signal, {
+          anonymousId,
+          syncToken,
+        }),
+      )
       .then(setChallenge)
       .catch((reason: unknown) => {
         if (!controller.signal.aborted) {
@@ -25,7 +38,7 @@ export function useDailyChallenge() {
         }
       });
     return () => controller.abort();
-  }, [requestVersion]);
+  }, [anonymousId, requestVersion, syncToken]);
 
   function retry() {
     setChallenge(undefined);

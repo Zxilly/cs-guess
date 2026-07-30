@@ -143,6 +143,37 @@ describe("friend room configuration", () => {
     });
   });
 
+  it("binds a realtime reservation to its authenticated Profile", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          room_code: "CS-123456",
+          player_id: "player",
+          session_token: "token",
+          socket_io_url: "/socket.io",
+          snapshot: {},
+        }),
+        { status: 201 },
+      ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await createRoom("donk", "hidden", 2, 3, "easy", undefined, {
+      anonymousId: "anonymous-realtime-test",
+      syncToken: "realtime_test_sync_token_abcdefghijklmnopqrstuvwxyz",
+    });
+
+    const [, request] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(request.headers).toMatchObject({
+      "X-Profile-Token":
+        "realtime_test_sync_token_abcdefghijklmnopqrstuvwxyz",
+    });
+    expect(JSON.parse(String(request.body))).toMatchObject({
+      identity_id: "donk",
+      anonymous_id: "anonymous-realtime-test",
+    });
+  });
+
   it("preserves a structured server error code without exposing its English message", async () => {
     vi.stubGlobal(
       "fetch",

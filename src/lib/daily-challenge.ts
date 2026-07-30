@@ -16,19 +16,19 @@ function storageKey(date: string) {
 }
 
 function createDailyProgress(
-  challenge: { date: string },
+  challenge: { date: string; deadlineUnixMs?: number },
   now: number,
 ): DailyProgress {
   return {
     date: challenge.date,
-    deadline: now + ROUND_MILLISECONDS,
+    deadline: challenge.deadlineUnixMs ?? now + ROUND_MILLISECONDS,
     guessedIds: [],
     status: "playing",
   };
 }
 
 export function loadDailyProgress(
-  challenge: { date: string },
+  challenge: { date: string; deadlineUnixMs?: number },
   catalog: readonly { id: string }[],
   now = Date.now(),
 ): DailyProgress {
@@ -37,7 +37,8 @@ export function loadDailyProgress(
     if (!raw) return createDailyProgress(challenge, now);
     const stored = JSON.parse(raw) as Partial<DailyProgress>;
     const deadline =
-      stored.deadline === null ? now + ROUND_MILLISECONDS : stored.deadline;
+      challenge.deadlineUnixMs ??
+      (stored.deadline === null ? now + ROUND_MILLISECONDS : stored.deadline);
     const guessedIds = Array.isArray(stored.guessedIds)
       ? stored.guessedIds.filter(
           (id): id is string =>

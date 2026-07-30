@@ -257,7 +257,7 @@ function finishReasonLabel(reason?: BattleFinishReason) {
 export function LiveGamePage({ mode }: LiveGamePageProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { recordRound } = useAnonymousProfile();
+  const { refreshProfile } = useAnonymousProfile();
   const [session] = useState(() => loadCredentials(mode));
   const [closingIntent, setClosingIntent] = useState(() =>
     session ? loadClosingIntent(session.credentials) : null,
@@ -273,6 +273,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
   const [leaveError, setLeaveError] = useState("");
   const [startPending, setStartPending] = useState(false);
   const [restartPending, setRestartPending] = useState(false);
+  const refreshedRoundRef = useRef("");
   const [rematchActionPending, setRematchActionPending] = useState<
     "request" | "accept" | "decline" | "cancel" | null
   >(null);
@@ -957,42 +958,16 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
 
   useEffect(() => {
     if (phase !== "finished" || !selfPlayerId || roomCode === "—") return;
-    recordRound(
-      `${roomCode}:R${roundNumber}`,
-      winnerPlayerId === selfPlayerId
-        ? "win"
-        : winnerPlayerId
-          ? "loss"
-          : "draw",
-      {
-        mode,
-        roomCode,
-        roundNumber,
-        bestOf,
-        answerId: mysteryId,
-        guessIds: ownGuesses.map((guess) => guess.id),
-        opponentNames: opponentPlayers.map((player) => player.displayName),
-        selfScore,
-        opponentScore: Math.max(
-          0,
-          ...opponentPlayers.map((player) => player.score),
-        ),
-      },
+    const roundKey = `${roomCode}:R${roundNumber}`;
+    if (refreshedRoundRef.current === roundKey) return;
+    refreshedRoundRef.current = roundKey;
+    const timers = [100, 500].map((delay) =>
+      window.setTimeout(() => {
+        void refreshProfile();
+      }, delay),
     );
-  }, [
-    bestOf,
-    mysteryId,
-    mode,
-    opponentPlayers,
-    ownGuesses,
-    phase,
-    recordRound,
-    roomCode,
-    roundNumber,
-    selfScore,
-    selfPlayerId,
-    winnerPlayerId,
-  ]);
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [phase, refreshProfile, roomCode, roundNumber, selfPlayerId]);
 
   useEffect(() => {
     mountedRef.current = true;

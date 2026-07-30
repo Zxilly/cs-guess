@@ -11,8 +11,11 @@ import { SoloGamePage } from "@/pages/SoloGamePage";
 
 vi.mock("@/hooks/use-anonymous-profile", () => ({
   useAnonymousProfile: () => ({
-    profile: { recordedRounds: [] },
-    recordRound: vi.fn(),
+    profile: {
+      anonymousId: "anonymous-solo-render",
+      syncToken: "solo_render_sync_token_abcdefghijklmnopqrstuvwxyz",
+      recordedRounds: [],
+    },
   }),
 }));
 

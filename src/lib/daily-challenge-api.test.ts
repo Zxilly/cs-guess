@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { loadCurrentDailyChallenge } from "@/lib/daily-challenge-api";
+import {
+  completeDailyChallenge,
+  loadCurrentDailyChallenge,
+} from "@/lib/daily-challenge-api";
 
 describe("loadCurrentDailyChallenge", () => {
   afterEach(() => {
@@ -73,5 +76,75 @@ describe("loadCurrentDailyChallenge", () => {
 
     expect(challenge.mysteryPlayer.team).toBe("无队伍");
     expect(challenge.mysteryPlayer.teamLogoUrl).toBeUndefined();
+  });
+
+  it("starts an authenticated server attempt with the Profile credentials", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          date: "2026-07-30",
+          roundNumber: 211,
+          mysteryPlayerId: "donk",
+          mysteryPlayer: {
+            id: "donk",
+            nickname: "donk",
+            name: "Danil Kryshkovets",
+            team: "Spirit",
+            nationality: "Russian Federation",
+            countryCode: "RU",
+            age: 19,
+            role: "Entry",
+            majorAppearances: 5,
+            majorWins: 1,
+          },
+          catalogVersion: "catalog",
+          deadlineUnixMs: 1_800_000,
+        }),
+        { status: 201 },
+      ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await loadCurrentDailyChallenge(undefined, {
+      anonymousId: "anonymous-daily-test",
+      syncToken: "daily_test_sync_token_abcdefghijklmnopqrstuvwxyz",
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("/v1/daily-challenges/current/attempts"),
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          "X-Profile-Token":
+            "daily_test_sync_token_abcdefghijklmnopqrstuvwxyz",
+        }),
+        body: JSON.stringify({ anonymousId: "anonymous-daily-test" }),
+      }),
+    );
+  });
+
+  it("submits only the daily guess trace and timeout fact", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ anonymousId: "anonymous-daily-test" }), {
+        status: 200,
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await completeDailyChallenge(
+      {
+        anonymousId: "anonymous-daily-test",
+        syncToken: "daily_test_sync_token_abcdefghijklmnopqrstuvwxyz",
+      },
+      ["donk"],
+      false,
+    );
+
+    const [, request] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(String(request.body))).toEqual({
+      anonymousId: "anonymous-daily-test",
+      guessIds: ["donk"],
+      timedOut: false,
+    });
   });
 });

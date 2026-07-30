@@ -467,13 +467,20 @@ async function postSession(
   path: string,
   body: Record<string, unknown>,
   signal?: AbortSignal,
+  profile?: { anonymousId: string; syncToken: string },
 ): Promise<SessionResponse> {
   let response: Response;
   try {
     response = await fetch(`${API_BASE}${path}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+        ...(profile ? { "X-Profile-Token": profile.syncToken } : {}),
+      },
+      body: JSON.stringify({
+        ...body,
+        ...(profile ? { anonymous_id: profile.anonymousId } : {}),
+      }),
       signal,
     });
   } catch (error) {
@@ -522,6 +529,7 @@ export function createRoom(
   bestOf: BestOf,
   difficulty: GameDifficulty,
   signal?: AbortSignal,
+  profile?: { anonymousId: string; syncToken: string },
 ) {
   return postSession("/v1/rooms", {
     identity_id: identityId,
@@ -529,17 +537,18 @@ export function createRoom(
     max_players: maxPlayers,
     best_of: bestOf,
     difficulty,
-  }, signal);
+  }, signal, profile);
 }
 
 export function joinRoom(
   code: string,
   identityId: string,
   signal?: AbortSignal,
+  profile?: { anonymousId: string; syncToken: string },
 ) {
   return postSession(`/v1/rooms/${encodeURIComponent(code)}/join`, {
     identity_id: identityId,
-  }, signal);
+  }, signal, profile);
 }
 
 /**
@@ -602,6 +611,7 @@ export function createQuickMatch(
   difficulty: GameDifficulty,
   signal?: AbortSignal,
   clientRequestId?: string,
+  profile?: { anonymousId: string; syncToken: string },
 ) {
   return postSession("/v1/matches/quick", {
     identity_id: identityId,
@@ -610,7 +620,7 @@ export function createQuickMatch(
     party_size: partySize,
     difficulty,
     ...(clientRequestId ? { client_request_id: clientRequestId } : {}),
-  }, signal);
+  }, signal, profile);
 }
 
 export async function cancelQuickMatch(

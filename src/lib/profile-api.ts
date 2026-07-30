@@ -1,8 +1,6 @@
 import type {
   AnonymousProfile,
   IdentityPoolId,
-  RoundRecordDetails,
-  SeriesResult,
 } from "@/hooks/use-anonymous-profile";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
@@ -103,18 +101,4 @@ export async function discardServerIdentityDraw(
     },
   );
   return readProfileResponse(response, "identity draw discard");
-}
-
-export async function recordServerRound(
-  profile: ProfileCredentials,
-  roundId: string,
-  result: SeriesResult,
-  details?: RoundRecordDetails,
-): Promise<ServerProfile> {
-  const response = await fetch(profileUrl(profile.anonymousId, "/rounds"), {
-    method: "POST",
-    headers: profileHeaders(profile.syncToken, true),
-    body: JSON.stringify({ roundId, result, details }),
-  });
-  return readProfileResponse(response, "round recording");
 }

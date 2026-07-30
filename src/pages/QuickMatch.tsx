@@ -68,6 +68,7 @@ export function QuickMatch() {
     preferencesLoaded.current = true;
   }
   const identity = useAnonymousProfile();
+  const profileRef = useRef(identity.profile);
   const [partySize, setPartySize] = useState<PartySize>(
     searchParams.has("players")
       ? searchParams.get("players") === "4"
@@ -113,6 +114,7 @@ export function QuickMatch() {
     );
   const queue = useMatchmakingQueue();
   navigateRef.current = navigate;
+  profileRef.current = identity.profile;
 
   useEffect(() => {
     const current = new QuickMatchSubmission({
@@ -126,6 +128,7 @@ export function QuickMatch() {
           snapshot.difficulty,
           signal,
           clientRequestId,
+          profileRef.current,
         ),
       persist: (ticket) => {
         saveCredentials(ticket, "quick");

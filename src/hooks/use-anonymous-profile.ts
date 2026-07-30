@@ -11,13 +11,11 @@ import {
   createServerProfile,
   discardServerIdentityDraw,
   loadServerProfile,
-  recordServerRound,
   startServerIdentityDraw,
   type ServerProfile,
 } from "@/lib/profile-api";
 import { deriveRoundSummary } from "@/lib/round-history";
 
-const MAX_RECORDED_ROUNDS = 100;
 const MAX_MATCH_HISTORY = 50;
 const PROFILE_CHANGED_EVENT = "cs-guess:profile-changed";
 
@@ -51,18 +49,6 @@ export interface MatchHistoryEntry {
   opponentNames: string[];
   selfScore: number;
   opponentScore: number;
-}
-
-export interface RoundRecordDetails {
-  mode: MatchHistoryEntry["mode"];
-  roomCode?: string;
-  roundNumber?: number;
-  bestOf?: number;
-  answerId?: string;
-  guessIds?: string[];
-  opponentNames?: string[];
-  selfScore?: number;
-  opponentScore?: number;
 }
 
 export interface AnonymousStats {
@@ -377,89 +363,6 @@ function isValidHistoryPlayerSnapshot(
   );
 }
 
-function historyPlayerSnapshot(
-  player: Player | undefined,
-): HistoryPlayerSnapshot | undefined {
-  if (!player) return undefined;
-  return {
-    id: player.id,
-    nickname: player.nickname,
-    name: player.name,
-    team: player.team,
-    countryCode: player.countryCode,
-    age: player.age,
-    role: player.role,
-    majorAppearances: player.majorAppearances,
-  };
-}
-
-function applyRoundRecord(
-  profile: AnonymousProfile,
-  roundId: string,
-  result: SeriesResult,
-  details?: RoundRecordDetails,
-  completedAt = new Date().toISOString(),
-): AnonymousProfile {
-  if (profile.recordedRounds.includes(roundId)) return profile;
-  const nextStreak =
-    result === "win" ? profile.stats.currentStreak + 1 : 0;
-  const lossesTowardCredit =
-    result === "loss"
-      ? profile.lossesTowardCredit + 1
-      : profile.lossesTowardCredit;
-  const earnedCredits =
-    result === "win" ||
-    (result === "loss" && lossesTowardCredit >= 2)
-      ? 1
-      : 0;
-  return {
-    ...profile,
-    stats: {
-      wins: profile.stats.wins + (result === "win" ? 1 : 0),
-      losses: profile.stats.losses + (result === "loss" ? 1 : 0),
-      draws: profile.stats.draws + (result === "draw" ? 1 : 0),
-      currentStreak: nextStreak,
-      bestStreak: Math.max(profile.stats.bestStreak, nextStreak),
-    },
-    drawCredits: profile.drawCredits + earnedCredits,
-    lossesTowardCredit:
-      result === "loss" ? lossesTowardCredit % 2 : lossesTowardCredit,
-    recordedRounds: [
-      ...profile.recordedRounds.slice(-(MAX_RECORDED_ROUNDS - 1)),
-      roundId,
-    ],
-    matchHistory: details
-      ? [
-          ...profile.matchHistory.slice(-(MAX_MATCH_HISTORY - 1)),
-          {
-            id: roundId,
-            completedAt,
-            result,
-            mode: details.mode,
-            roomCode: details.roomCode,
-            roundNumber: details.roundNumber ?? 1,
-            bestOf: details.bestOf ?? 1,
-            answerId: details.answerId,
-            answerSnapshot: historyPlayerSnapshot(
-              players.find((player) => player.id === details.answerId),
-            ),
-            guessIds: details.guessIds ?? [],
-            guessSnapshots: (details.guessIds ?? []).map(
-              (id) =>
-                historyPlayerSnapshot(
-                  players.find((player) => player.id === id),
-                ) ?? null,
-            ),
-            opponentNames: details.opponentNames ?? [],
-            selfScore: details.selfScore ?? 0,
-            opponentScore: details.opponentScore ?? 0,
-          },
-        ]
-      : profile.matchHistory,
-    updatedAt: Math.max(Date.now(), profile.updatedAt + 1),
-  };
-}
-
 interface SaveProfileOptions {
   notify?: boolean;
   touch?: boolean;
@@ -507,42 +410,23 @@ async function ensureServerProfile(local: AnonymousProfile) {
   );
 }
 
-function roundDetailsFromHistory(
-  entry: MatchHistoryEntry,
-): RoundRecordDetails {
-  return {
-    mode: entry.mode,
-    roomCode: entry.roomCode,
-    roundNumber: entry.roundNumber,
-    bestOf: entry.bestOf,
-    answerId: entry.answerId,
-    guessIds: entry.guessIds,
-    opponentNames: entry.opponentNames,
-    selfScore: entry.selfScore,
-    opponentScore: entry.opponentScore,
-  };
+export function ensureAnonymousProfileReady() {
+  const latest = readProfile();
+  if (!latest) return Promise.reject(new Error("anonymous profile is unavailable"));
+  return queueServerMutation(async () => {
+    const remote = await ensureServerProfile(latest);
+    const current = readProfile();
+    if (current?.anonymousId === latest.anonymousId) {
+      storeServerProfile(remote, current.syncToken);
+    }
+  });
 }
 
 function storeServerProfile(
   remote: ServerProfile,
   syncToken: string,
 ) {
-  const latest = readProfile();
-  let merged: AnonymousProfile = { ...remote, syncToken };
-  if (latest?.anonymousId === remote.anonymousId) {
-    for (const entry of latest.matchHistory) {
-      if (!merged.recordedRounds.includes(entry.id)) {
-        merged = applyRoundRecord(
-          merged,
-          entry.id,
-          entry.result,
-          roundDetailsFromHistory(entry),
-          entry.completedAt,
-        );
-      }
-    }
-  }
-  const saved = saveProfile(merged, { touch: false });
+  const saved = saveProfile({ ...remote, syncToken }, { touch: false });
   useAnonymousProfileStore.getState().replaceProfile(saved);
   return saved;
 }
@@ -552,30 +436,34 @@ function hydrateProfile(local: AnonymousProfile) {
   if (existing) return existing;
   const hydration = queueServerMutation(async () => {
     try {
-      let remote = await ensureServerProfile(local);
+      const remote = await ensureServerProfile(local);
       const latest = readProfile();
       if (!latest || latest.anonymousId !== local.anonymousId) return;
-
-      for (const entry of latest.matchHistory) {
-        if (remote.recordedRounds.includes(entry.id)) continue;
-        remote = await recordServerRound(
-          latest,
-          entry.id,
-          entry.result,
-          roundDetailsFromHistory(entry),
-        );
-      }
       storeServerProfile(remote, latest.syncToken);
     } catch {
-      // Completed rounds remain in local storage and are replayed on the next
-      // hydration. Identity draws require the server and are never guessed
-      // locally.
+      // The local snapshot remains available until the server is reachable.
     }
   }).finally(() => {
     hydrationByProfile.delete(local.anonymousId);
   });
   hydrationByProfile.set(local.anonymousId, hydration);
   return hydration;
+}
+
+export function acceptAuthoritativeProfile(remote: ServerProfile) {
+  const latest = readProfile();
+  if (!latest || latest.anonymousId !== remote.anonymousId) return;
+  storeServerProfile(remote, latest.syncToken);
+}
+
+export async function refreshAnonymousProfile() {
+  const latest = readProfile();
+  if (!latest) return;
+  const remote = await loadServerProfile(
+    latest.anonymousId,
+    latest.syncToken,
+  );
+  if (remote) storeServerProfile(remote, latest.syncToken);
 }
 
 function loadOrCreateProfile() {
@@ -795,31 +683,9 @@ export function useAnonymousProfile() {
     setProfile(saved);
   }, [setProfile]);
 
-  const recordRound = useCallback(
-    (
-      roundId: string,
-      result: SeriesResult,
-      details?: RoundRecordDetails,
-    ) => {
-      const latest = readProfile();
-      if (!latest || latest.recordedRounds.includes(roundId)) return;
-      const next = applyRoundRecord(latest, roundId, result, details);
-      const saved = saveProfile(next);
-      setProfile(saved);
-      void queueServerMutation(async () => {
-        await ensureServerProfile(saved);
-        const remote = await recordServerRound(
-          saved,
-          roundId,
-          result,
-          details,
-        );
-        storeServerProfile(remote, saved.syncToken);
-      }).catch(() => {
-        // The local history entry remains available for hydration replay.
-      });
-    },
-    [setProfile],
+  const refreshProfile = useCallback(
+    () => queueServerMutation(refreshAnonymousProfile),
+    [],
   );
 
   const roundSummary = deriveRoundSummary(
@@ -837,6 +703,6 @@ export function useAnonymousProfile() {
     discardPendingDraw,
     completeIdentitySetup,
     setPreviewDrawCredits,
-    recordRound,
+    refreshProfile,
   };
 }

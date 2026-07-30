@@ -102,7 +102,17 @@ export type SoloGameAction =
   | { type: "guess"; playerId: string }
   | { type: "expire" }
   | { type: "dismiss-result" }
-  | { type: "restart" };
+  | { type: "restart" }
+  | {
+      type: "bind-server-round";
+      round: {
+        roundId: string;
+        roundNumber: number;
+        difficulty: SoloDifficulty;
+        mysteryId: string;
+        deadline: number;
+      };
+    };
 
 function randomIndex(length: number) {
   if (length <= 1) return 0;
@@ -484,6 +494,18 @@ export function soloGameReducer(
         state.roundNumber + 1,
         state.mysteryId,
       );
+    case "bind-server-round":
+      return action.round.roundId === state.roundId
+        ? {
+            ...state,
+            ...action.round,
+          }
+        : {
+            ...action.round,
+            guessedIds: [],
+            status: "playing",
+            resultDismissed: false,
+          };
   }
 }
 

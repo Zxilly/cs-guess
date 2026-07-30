@@ -74,6 +74,7 @@ export function RoomEntry() {
     preferencesLoaded.current = true;
   }
   const identity = useAnonymousProfile();
+  const profileRef = useRef(identity.profile);
   const [roomNumber, setRoomNumber] = useState("");
   const [visibility, setVisibility] =
     useState<OpponentVisibility>(
@@ -113,6 +114,7 @@ export function RoomEntry() {
         : null,
     );
   navigateRef.current = navigate;
+  profileRef.current = identity.profile;
 
   useLayoutEffect(() => {
     const current = new RoomSubmission({
@@ -122,6 +124,7 @@ export function RoomEntry() {
               `CS-${snapshot.roomNumber}`,
               snapshot.identityId,
               signal,
+              profileRef.current,
             )
           : createRoom(
               snapshot.identityId,
@@ -130,6 +133,7 @@ export function RoomEntry() {
               snapshot.bestOf,
               snapshot.difficulty,
               signal,
+              profileRef.current,
             ),
       persist: (response) => {
         saveCredentials(response, "room");

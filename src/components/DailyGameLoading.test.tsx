@@ -20,7 +20,11 @@ vi.mock("@/hooks/use-daily-challenge", () => ({
 
 vi.mock("@/hooks/use-anonymous-profile", () => ({
   useAnonymousProfile: () => ({
-    recordRound: vi.fn(),
+    profile: {
+      anonymousId: "anonymous-loading-test",
+      syncToken: "loading_test_sync_token_abcdefghijklmnopqrstuvwxyz",
+      recordedRounds: [],
+    },
   }),
 }));
 

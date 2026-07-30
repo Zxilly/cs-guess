@@ -9,7 +9,11 @@ import { ModeSidebar } from "@/components/ModeSidebar";
 import { PlayerSearch } from "@/components/PlayerSearch";
 import { Timer } from "@/components/Timer";
 import { players } from "@/data/players";
-import { useAnonymousProfile } from "@/hooks/use-anonymous-profile";
+import {
+  acceptAuthoritativeProfile,
+  ensureAnonymousProfileReady,
+  useAnonymousProfile,
+} from "@/hooks/use-anonymous-profile";
 import {
   loadSoloProgress,
   parseSoloDifficulty,
@@ -22,7 +26,11 @@ import {
   type SoloDifficulty,
 } from "@/lib/solo-game";
 import { focusDailyResultAfterDialog } from "@/lib/daily-result-focus";
-import { recordFinishedSoloRoundOnce } from "@/lib/solo-round-record";
+import {
+  completeServerSoloRound,
+  createServerSoloRound,
+  loadServerSoloRound,
+} from "@/lib/solo-round-api";
 import { maxGuessesForDifficulty } from "@/types/game";
 
 export function SoloGamePage() {
@@ -43,7 +51,9 @@ function SoloGame({
   difficulty: SoloDifficulty;
   audit: string | null;
 }) {
-  const { profile, recordRound } = useAnonymousProfile();
+  const { profile } = useAnonymousProfile();
+  const anonymousId = profile.anonymousId;
+  const syncToken = profile.syncToken;
   const [initialProgress] = useState(() => {
     const loaded = loadSoloProgress(difficulty);
     if (!import.meta.env.DEV || !audit?.startsWith("solo-")) return loaded;
@@ -90,6 +100,9 @@ function SoloGame({
     initialProgress.resetReason,
   );
   const [now, setNow] = useState(Date.now);
+  const [authoritativeReady, setAuthoritativeReady] = useState(
+    Boolean(audit),
+  );
   const recordedRoundRef = useRef<string | undefined>(undefined);
   const resultTitleRef = useRef<HTMLHeadingElement>(null);
 
@@ -126,6 +139,50 @@ function SoloGame({
 
   useEffect(() => {
     if (audit) return;
+    const controller = new AbortController();
+    setAuthoritativeReady(false);
+    void (async () => {
+      await ensureAnonymousProfileReady();
+      const credentials = { anonymousId, syncToken };
+      const existing = await loadServerSoloRound(
+        credentials,
+        game.roundId,
+        controller.signal,
+      );
+      const round =
+        existing ??
+        (await createServerSoloRound(
+          credentials,
+          difficulty,
+          controller.signal,
+        ));
+      if (controller.signal.aborted) return;
+      dispatch({
+        type: "bind-server-round",
+        round: {
+          roundId: round.roundId,
+          roundNumber: round.roundNumber,
+          difficulty: round.difficulty,
+          mysteryId: round.mysteryPlayer.id,
+          deadline: round.deadlineUnixMs,
+        },
+      });
+      setNow(Date.now());
+      setAuthoritativeReady(true);
+    })().catch(() => {
+      if (!controller.signal.aborted) setAuthoritativeReady(false);
+    });
+    return () => controller.abort();
+  }, [
+    audit,
+    difficulty,
+    game.roundId,
+    anonymousId,
+    syncToken,
+  ]);
+
+  useEffect(() => {
+    if (audit || !authoritativeReady) return;
     if (game.status !== "playing") return;
     const update = () => {
       const current = Date.now();
@@ -135,25 +192,40 @@ function SoloGame({
     update();
     const timer = window.setInterval(update, 250);
     return () => window.clearInterval(timer);
-  }, [audit, game.deadline, game.status]);
+  }, [audit, authoritativeReady, game.deadline, game.status]);
 
   useEffect(() => {
-    recordedRoundRef.current = recordFinishedSoloRoundOnce(
-      recordedRoundRef.current,
-      profile.recordedRounds,
-      game,
-      recordRound,
-    );
-  }, [game, profile.recordedRounds, recordRound]);
+    if (
+      audit ||
+      !authoritativeReady ||
+      game.status === "playing" ||
+      recordedRoundRef.current === game.roundId ||
+      profile.recordedRounds.includes(game.roundId)
+    ) {
+      return;
+    }
+    recordedRoundRef.current = game.roundId;
+    void completeServerSoloRound(
+      profile,
+      game.roundId,
+      game.guessedIds,
+      game.resultReason === "timeout",
+    )
+      .then(acceptAuthoritativeProfile)
+      .catch(() => {
+        recordedRoundRef.current = undefined;
+      });
+  }, [audit, authoritativeReady, game, profile]);
 
   function submitGuess(playerId = selectedId) {
-    if (!playerId) return false;
+    if (!playerId || !authoritativeReady) return false;
     dispatch({ type: "guess", playerId });
     setSelectedId(undefined);
     return true;
   }
 
   function restart() {
+    setAuthoritativeReady(false);
     dispatch({ type: "restart" });
     setSelectedId(undefined);
     setSearchOpen(false);
