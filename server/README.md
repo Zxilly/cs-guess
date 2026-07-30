@@ -33,15 +33,31 @@ printable characters. Room codes use the collision-resistant `CS-000000` format.
 
 ### Profile persistence
 
-Anonymous identity, progression, draw credits, and match history are mirrored
-to SQLite through `GET` and `PUT /v1/profiles/{anonymous_id}`. Requests require
-the per-profile `X-Profile-Token`; only its SHA-256 hash is stored.
+Anonymous identity, progression, draw credits, and match history are persisted
+to SQLite through authenticated profile operations. Requests require the
+per-profile `X-Profile-Token`; only its SHA-256 hash is stored.
+
+```http
+POST   /v1/profiles
+GET    /v1/profiles/{anonymous_id}
+POST   /v1/profiles/{anonymous_id}/identity-draws
+POST   /v1/profiles/{anonymous_id}/identity-draws/{winner_id}/adopt
+DELETE /v1/profiles/{anonymous_id}/identity-draws/{winner_id}
+POST   /v1/profiles/{anonymous_id}/rounds
+```
+
+The server creates the initial counters, generates identity draw results,
+deducts draw credits, applies or discards pending identities, and derives
+profile statistics from idempotent round records. Clients cannot replace an
+entire profile representation. Identity draw requests carry a UUID so retrying
+the same request never charges twice; round writes are deduplicated by
+`roundId`.
 
 SQLite uses a bounded async connection pool, WAL journaling, `synchronous =
-NORMAL`, foreign keys, a 5-second busy timeout, and timestamp-guarded upserts so
-stale browser writes cannot replace newer state. Override the database location
-and pool size with `CS_GUESS_DATABASE_PATH` and
-`CS_GUESS_DATABASE_MAX_CONNECTIONS`.
+NORMAL`, foreign keys, and a 5-second busy timeout. Profile domain mutations
+are serialized inside the single server process before their updated aggregate
+is persisted. Override the database location and pool size with
+`CS_GUESS_DATABASE_PATH` and `CS_GUESS_DATABASE_MAX_CONNECTIONS`.
 
 ### Daily challenge persistence
 
