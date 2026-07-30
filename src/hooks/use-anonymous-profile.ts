@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useMemo } from "react";
+import { mutate } from "swr";
+import useSWRImmutable from "swr/immutable";
+import useSWRMutation from "swr/mutation";
 import { create } from "zustand";
 
 import { players, type Player } from "@/data/players";
@@ -368,8 +371,17 @@ interface SaveProfileOptions {
   touch?: boolean;
 }
 
-const hydrationByProfile = new Map<string, Promise<void>>();
+interface ServerProfileReadiness {
+  syncToken: string;
+  promise: Promise<ServerProfile>;
+}
+
+const serverProfileReadiness = new Map<string, ServerProfileReadiness>();
 let serverMutationQueue = Promise.resolve();
+
+export function profileCacheKey(anonymousId: string) {
+  return `cs-guess:server-profile:${anonymousId}`;
+}
 
 function saveProfile(
   profile: AnonymousProfile,
@@ -410,15 +422,34 @@ async function ensureServerProfile(local: AnonymousProfile) {
   );
 }
 
-export function ensureAnonymousProfileReady() {
+function readyServerProfile(local: AnonymousProfile) {
+  const existing = serverProfileReadiness.get(local.anonymousId);
+  if (existing?.syncToken === local.syncToken) return existing.promise;
+
+  const promise = ensureServerProfile(local).catch((error: unknown) => {
+    const current = serverProfileReadiness.get(local.anonymousId);
+    if (current?.promise === promise) {
+      serverProfileReadiness.delete(local.anonymousId);
+    }
+    throw error;
+  });
+  serverProfileReadiness.set(local.anonymousId, {
+    syncToken: local.syncToken,
+    promise,
+  });
+  return promise;
+}
+
+export function ensureAnonymousProfileReady(): Promise<ServerProfile> {
   const latest = readProfile();
   if (!latest) return Promise.reject(new Error("anonymous profile is unavailable"));
   return queueServerMutation(async () => {
-    const remote = await ensureServerProfile(latest);
+    const remote = await readyServerProfile(latest);
     const current = readProfile();
     if (current?.anonymousId === latest.anonymousId) {
       storeServerProfile(remote, current.syncToken);
     }
+    return remote;
   });
 }
 
@@ -426,28 +457,24 @@ function storeServerProfile(
   remote: ServerProfile,
   syncToken: string,
 ) {
+  serverProfileReadiness.set(remote.anonymousId, {
+    syncToken,
+    promise: Promise.resolve(remote),
+  });
+  void mutate(profileCacheKey(remote.anonymousId), remote, {
+    revalidate: false,
+  });
+  const current = useAnonymousProfileStore.getState().profile;
+  if (
+    current.anonymousId === remote.anonymousId &&
+    current.syncToken === syncToken &&
+    current.updatedAt === remote.updatedAt
+  ) {
+    return current;
+  }
   const saved = saveProfile({ ...remote, syncToken }, { touch: false });
   useAnonymousProfileStore.getState().replaceProfile(saved);
   return saved;
-}
-
-function hydrateProfile(local: AnonymousProfile) {
-  const existing = hydrationByProfile.get(local.anonymousId);
-  if (existing) return existing;
-  const hydration = queueServerMutation(async () => {
-    try {
-      const remote = await ensureServerProfile(local);
-      const latest = readProfile();
-      if (!latest || latest.anonymousId !== local.anonymousId) return;
-      storeServerProfile(remote, latest.syncToken);
-    } catch {
-      // The local snapshot remains available until the server is reachable.
-    }
-  }).finally(() => {
-    hydrationByProfile.delete(local.anonymousId);
-  });
-  hydrationByProfile.set(local.anonymousId, hydration);
-  return hydration;
 }
 
 export function acceptAuthoritativeProfile(remote: ServerProfile) {
@@ -458,12 +485,17 @@ export function acceptAuthoritativeProfile(remote: ServerProfile) {
 
 export async function refreshAnonymousProfile() {
   const latest = readProfile();
-  if (!latest) return;
+  if (!latest) return null;
   const remote = await loadServerProfile(
     latest.anonymousId,
     latest.syncToken,
   );
-  if (remote) storeServerProfile(remote, latest.syncToken);
+  if (remote) {
+    storeServerProfile(remote, latest.syncToken);
+  } else {
+    serverProfileReadiness.delete(latest.anonymousId);
+  }
+  return remote;
 }
 
 function loadOrCreateProfile() {
@@ -530,7 +562,7 @@ export function spendDrawCreditSafely(
     const latest = readProfile();
     if (!latest) return null;
     return queueServerMutation(async () => {
-      await ensureServerProfile(latest);
+      await readyServerProfile(latest);
       let remote: ServerProfile;
       try {
         remote = await startServerIdentityDraw(
@@ -566,7 +598,7 @@ export async function discardPendingIdentityDraw(
   }
   try {
     await queueServerMutation(async () => {
-      await ensureServerProfile(latest);
+      await readyServerProfile(latest);
       const remote = await discardServerIdentityDraw(latest, winnerId);
       storeServerProfile(remote, latest.syncToken);
     });
@@ -598,7 +630,7 @@ export async function adoptPendingIdentityDraw(
   }
   try {
     await queueServerMutation(async () => {
-      await ensureServerProfile(latest);
+      await readyServerProfile(latest);
       const remote = await adoptServerIdentityDraw(latest, selectedPlayer.id);
       storeServerProfile(remote, latest.syncToken);
     });
@@ -614,19 +646,16 @@ export function useAnonymousProfile() {
     (state) => state.replaceProfile,
   );
   const anonymousId = profile.anonymousId;
+  useSWRImmutable(
+    profileCacheKey(anonymousId),
+    ensureAnonymousProfileReady,
+  );
   const player = useMemo(
     () =>
       players.find((candidate) => candidate.id === profile.playerId) ??
       players[0],
     [profile.playerId],
   );
-
-  useEffect(() => {
-    const latest = readProfile();
-    if (latest?.anonymousId === anonymousId) {
-      void hydrateProfile(latest);
-    }
-  }, [anonymousId]);
 
   useEffect(() => {
     function applyLatestProfile() {
@@ -646,31 +675,6 @@ export function useAnonymousProfile() {
     };
   }, [setProfile]);
 
-  const spendDrawCredit = useCallback(
-    (poolId: IdentityPoolId, replacedWinnerId?: string) =>
-      spendDrawCreditSafely(poolId, replacedWinnerId),
-    [],
-  );
-
-  const adoptIdentity = useCallback(
-    (poolId: IdentityPoolId, selectedPlayerId: string) => {
-      return adoptPendingIdentityDraw(poolId, selectedPlayerId);
-    },
-    [],
-  );
-
-  const discardPendingDraw = useCallback(
-    (poolId: IdentityPoolId, winnerId: string) =>
-      discardPendingIdentityDraw(poolId, winnerId),
-    [],
-  );
-
-  const completeIdentitySetup = useCallback(
-    (selectedPlayerId: string) =>
-      adoptPendingIdentityDraw("common", selectedPlayerId),
-    [],
-  );
-
   const setPreviewDrawCredits = useCallback((amount: number) => {
     if (!import.meta.env.DEV || !Number.isInteger(amount) || amount < 1) return;
     const latest = readProfile();
@@ -683,11 +687,6 @@ export function useAnonymousProfile() {
     setProfile(saved);
   }, [setProfile]);
 
-  const refreshProfile = useCallback(
-    () => queueServerMutation(refreshAnonymousProfile),
-    [],
-  );
-
   const roundSummary = deriveRoundSummary(
     profile.stats,
     profile.matchHistory,
@@ -698,11 +697,126 @@ export function useAnonymousProfile() {
     player: player as Player,
     currentPool: poolForPlayer(player as Player),
     ...roundSummary,
+    setPreviewDrawCredits,
+  };
+}
+
+export function useIdentityProfileMutations() {
+  const anonymousId = useAnonymousProfileStore(
+    (state) => state.profile.anonymousId,
+  );
+  const {
+    trigger: triggerDraw,
+    isMutating: drawPending,
+  } = useSWRMutation(
+    profileCacheKey(anonymousId),
+    (
+      _key,
+      {
+        arg,
+      }: {
+        arg: {
+          poolId: IdentityPoolId;
+          replacedWinnerId?: string;
+        };
+      },
+    ) => spendDrawCreditSafely(arg.poolId, arg.replacedWinnerId),
+  );
+  const {
+    trigger: triggerAdopt,
+    isMutating: adoptPending,
+  } = useSWRMutation(
+    profileCacheKey(anonymousId),
+    (
+      _key,
+      {
+        arg,
+      }: {
+        arg: {
+          poolId: IdentityPoolId;
+          playerId: string;
+        };
+      },
+    ) => adoptPendingIdentityDraw(arg.poolId, arg.playerId),
+  );
+  const {
+    trigger: triggerDiscard,
+    isMutating: discardPending,
+  } = useSWRMutation(
+    profileCacheKey(anonymousId),
+    (
+      _key,
+      {
+        arg,
+      }: {
+        arg: {
+          poolId: IdentityPoolId;
+          winnerId: string;
+        };
+      },
+    ) => discardPendingIdentityDraw(arg.poolId, arg.winnerId),
+  );
+
+  const spendDrawCredit = useCallback(
+    (poolId: IdentityPoolId, replacedWinnerId?: string) =>
+      triggerDraw({ poolId, replacedWinnerId }),
+    [triggerDraw],
+  );
+  const adoptIdentity = useCallback(
+    (poolId: IdentityPoolId, selectedPlayerId: string) =>
+      triggerAdopt({ poolId, playerId: selectedPlayerId }),
+    [triggerAdopt],
+  );
+  const discardPendingDraw = useCallback(
+    (poolId: IdentityPoolId, winnerId: string) =>
+      triggerDiscard({ poolId, winnerId }),
+    [triggerDiscard],
+  );
+  const completeIdentitySetup = useCallback(
+    (selectedPlayerId: string) =>
+      triggerAdopt({ poolId: "common", playerId: selectedPlayerId }),
+    [triggerAdopt],
+  );
+
+  return {
     spendDrawCredit,
     adoptIdentity,
     discardPendingDraw,
     completeIdentitySetup,
-    setPreviewDrawCredits,
-    refreshProfile,
+    drawPending,
+    adoptPending,
+    discardPending,
+    profileMutationPending:
+      drawPending || adoptPending || discardPending,
   };
+}
+
+export function useIdentityProfile() {
+  return {
+    ...useAnonymousProfile(),
+    ...useIdentityProfileMutations(),
+  };
+}
+
+export function useProfileRefresh() {
+  const anonymousId = useAnonymousProfileStore(
+    (state) => state.profile.anonymousId,
+  );
+  useSWRImmutable(
+    profileCacheKey(anonymousId),
+    ensureAnonymousProfileReady,
+  );
+  const {
+    trigger: triggerRefresh,
+    isMutating: profileRefreshing,
+  } = useSWRMutation(
+    profileCacheKey(anonymousId),
+    () => queueServerMutation(refreshAnonymousProfile),
+  );
+  const refreshProfile = useCallback(
+    () => triggerRefresh(),
+    [triggerRefresh],
+  );
+
+  return { refreshProfile, profileRefreshing };
 }

@@ -25,7 +25,7 @@ vi.mock("@/hooks/use-anonymous-profile", () => {
   return {
     IDENTITY_POOLS: [pool],
     playersInPool: () => [player],
-    useAnonymousProfile: () => ({
+    useIdentityProfile: () => ({
       profile: {
         identityConfirmed: profileState.identityConfirmed,
         drawCredits: 1,

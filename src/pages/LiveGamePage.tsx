@@ -13,6 +13,7 @@ import {
   WarningCircleIcon,
 } from "@phosphor-icons/react";
 import { Navigate, useLocation, useNavigate } from "react-router";
+import useSWRMutation from "swr/mutation";
 
 import { BattleContext } from "@/components/BattleContext";
 import { CelebrationOverlay } from "@/components/CelebrationOverlay";
@@ -26,7 +27,7 @@ import { RematchInviteCard } from "@/components/RematchInviteCard";
 import { Timer } from "@/components/Timer";
 import { Button } from "@/components/ui/button";
 import { players } from "@/data/players";
-import { useAnonymousProfile } from "@/hooks/use-anonymous-profile";
+import { useProfileRefresh } from "@/hooks/use-anonymous-profile";
 import { useBombCountdown } from "@/hooks/use-bomb-countdown";
 import { useRealtimeRoom } from "@/hooks/use-realtime-room";
 import {
@@ -273,7 +274,7 @@ function finishReasonLabel(reason?: BattleFinishReason) {
 export function LiveGamePage({ mode }: LiveGamePageProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { refreshProfile } = useAnonymousProfile();
+  const { refreshProfile } = useProfileRefresh();
   const [session] = useState(() => loadCredentials(mode));
   const [closingIntent, setClosingIntent] = useState(() =>
     session ? loadClosingIntent(session.credentials) : null,
@@ -318,6 +319,14 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
     settled: boolean;
     resolve: (accepted: boolean) => void;
   } | null>(null);
+  const { trigger: triggerLeave } = useSWRMutation(
+    [
+      "leave-session-command",
+      mode,
+      session?.credentials.roomCode ?? "missing",
+    ],
+    (_key, { arg }: { arg: string }) => leaveCurrentRoom(arg),
+  );
   const realtime = useRealtimeRoom(
     closingIntent ? null : (session?.credentials ?? null),
     closingIntent ? undefined : session?.snapshot,
@@ -1061,7 +1070,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
     if (leavePendingRef.current) return;
     resultDialogExitRef.current = true;
     leavePendingRef.current = true;
-    void leaveCurrentRoom(returnTo).then((result) => {
+    void triggerLeave(returnTo).then((result) => {
       if (result.left && result.shouldNavigate) {
         navigate(returnTo, { replace: true });
       }
@@ -1090,7 +1099,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
       difficulty,
       bestOf,
     );
-    const result = await leaveCurrentRoom(destination);
+    const result = await triggerLeave(destination);
     if (result.left && result.shouldNavigate) {
       navigate(destination, { replace: true });
     }

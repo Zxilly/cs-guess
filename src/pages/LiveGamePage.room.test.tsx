@@ -41,7 +41,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/hooks/use-anonymous-profile", () => ({
-  useAnonymousProfile: () => ({ refreshProfile: mocks.refreshProfile }),
+  useProfileRefresh: () => ({ refreshProfile: mocks.refreshProfile }),
 }));
 
 vi.mock("@/hooks/use-realtime-room", () => ({

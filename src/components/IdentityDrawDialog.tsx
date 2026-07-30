@@ -17,8 +17,15 @@ import {
 } from "@/components/ui/dialog";
 import type { Player } from "@/data/players";
 import { PlayerAvatar } from "@/components/PlayerAvatar";
+import { Spinner } from "@/components/ui/spinner";
 import { countryNameZh } from "@/lib/country-geography";
 import { cn } from "@/lib/utils";
+
+export type IdentityDrawPendingAction =
+  | "keep"
+  | "reroll"
+  | "accept"
+  | null;
 
 interface IdentityDrawDialogProps {
   open: boolean;
@@ -34,6 +41,7 @@ interface IdentityDrawDialogProps {
   allowReroll?: boolean;
   rerollReady?: boolean;
   acceptLabel?: string;
+  pendingAction?: IdentityDrawPendingAction;
   onOpenChange: (open: boolean) => void;
   onKeep: () => void;
   onReroll: () => void;
@@ -57,6 +65,7 @@ export function IdentityDrawDialog({
   allowReroll = true,
   rerollReady = true,
   acceptLabel = "使用新身份",
+  pendingAction = null,
   onOpenChange,
   onKeep,
   onReroll,
@@ -101,10 +110,14 @@ export function IdentityDrawDialog({
             </DialogDescription>
           </div>
           <Badge
-            variant={revealed ? "default" : "outline"}
+            variant={revealed && !pendingAction ? "default" : "outline"}
             className="rounded-none font-mono"
           >
-            {revealed ? "抽取完成" : "正在抽取"}
+            {pendingAction
+              ? "正在保存"
+              : revealed
+                ? "抽取完成"
+                : "正在抽取"}
           </Badge>
         </DialogHeader>
 
@@ -217,9 +230,17 @@ export function IdentityDrawDialog({
                     type="button"
                     variant="outline"
                     className="rounded-none"
+                    disabled={Boolean(pendingAction)}
                     onClick={onKeep}
                   >
-                    保留当前
+                    {pendingAction === "keep" ? (
+                      <>
+                        <Spinner aria-hidden="true" />
+                        正在保留…
+                      </>
+                    ) : (
+                      "保留当前"
+                    )}
                   </Button>
                 ) : null}
                 {allowReroll ? (
@@ -227,10 +248,19 @@ export function IdentityDrawDialog({
                     type="button"
                     variant="outline"
                     className="rounded-none"
-                    disabled={remainingCredits < 1 || !rerollReady}
+                    disabled={
+                      Boolean(pendingAction) ||
+                      remainingCredits < 1 ||
+                      !rerollReady
+                    }
                     onClick={onReroll}
                   >
-                    {remainingCredits < 1
+                    {pendingAction === "reroll" ? (
+                      <>
+                        <Spinner aria-hidden="true" />
+                        正在重抽…
+                      </>
+                    ) : remainingCredits < 1
                       ? "无法重抽"
                       : rerollReady
                         ? `重抽 · ${remainingCredits}`
@@ -244,12 +274,29 @@ export function IdentityDrawDialog({
                     "rounded-none",
                     (allowKeepCurrent || allowReroll) && "col-span-2",
                   )}
+                  disabled={Boolean(pendingAction)}
                   onClick={onAccept}
                 >
-                  {acceptLabel}
+                  {pendingAction === "accept" ? (
+                    <>
+                      <Spinner aria-hidden="true" />
+                      正在保存…
+                    </>
+                  ) : (
+                    acceptLabel
+                  )}
                 </Button>
               </div>
             </div>
+            {pendingAction ? (
+              <p className="sr-only" role="status" aria-live="polite">
+                {pendingAction === "keep"
+                  ? "正在保留当前身份"
+                  : pendingAction === "reroll"
+                    ? "正在重新抽取身份"
+                    : "正在保存新身份"}
+              </p>
+            ) : null}
             {errorMessage ? (
               <p className="mt-3 text-sm text-destructive" role="alert">
                 {errorMessage}

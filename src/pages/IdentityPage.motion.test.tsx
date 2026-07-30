@@ -59,7 +59,7 @@ vi.mock("@/hooks/use-anonymous-profile", () => {
   return {
     IDENTITY_POOLS: [pool],
     playersInPool: () => [mocks.currentPlayer, mocks.candidate],
-    useAnonymousProfile: () => ({
+    useIdentityProfile: () => ({
       profile: {
         identityConfirmed: mocks.identityConfirmed,
         drawCredits: mocks.drawCredits,

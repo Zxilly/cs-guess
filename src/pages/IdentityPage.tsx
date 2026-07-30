@@ -12,7 +12,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 
 import { AppHeader } from "@/components/AppHeader";
-import { IdentityDrawDialog } from "@/components/IdentityDrawDialog";
+import {
+  IdentityDrawDialog,
+  type IdentityDrawPendingAction,
+} from "@/components/IdentityDrawDialog";
 import { InfoTip } from "@/components/InfoTip";
 import { PageIntro } from "@/components/PageIntro";
 import { PanelHeader } from "@/components/PanelHeader";
@@ -20,13 +23,14 @@ import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { players, type Player } from "@/data/players";
 import {
   IDENTITY_POOLS,
   playersInPool,
   type PendingIdentityDraw,
   type IdentityPoolId,
-  useAnonymousProfile,
+  useIdentityProfile,
 } from "@/hooks/use-anonymous-profile";
 import { countryNameZh } from "@/lib/country-geography";
 import {
@@ -71,7 +75,7 @@ function pendingDrawRevision(pendingDraw: PendingIdentityDraw | undefined) {
 }
 
 export function IdentityPage() {
-  const identity = useAnonymousProfile();
+  const identity = useIdentityProfile();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const returnTo = normalizeIdentityReturnTo(searchParams.get("return"));
@@ -104,6 +108,8 @@ export function IdentityPage() {
     return onboarding ? null : restorePendingDraw(identity.profile.pendingDraw);
   });
   const [drawError, setDrawError] = useState<string | null>(null);
+  const [pendingDrawPool, setPendingDrawPool] =
+    useState<IdentityPoolId | null>(null);
   const readyPools = useMemo(
     () =>
       new Set(
@@ -123,6 +129,7 @@ export function IdentityPage() {
   );
   const revealTimerRef = useRef<number | null>(null);
   const drawInProgressRef = useRef(false);
+  const resultActionInProgressRef = useRef(false);
   const rollSequenceRef = useRef(0);
   const lastDrawRef = useRef<DrawSequence | null>(draw);
   const drawButtonRefs = useRef(
@@ -138,6 +145,13 @@ export function IdentityPage() {
   const setPreviewDrawCredits = identity.setPreviewDrawCredits;
   if (draw) lastDrawRef.current = draw;
   const displayedDraw = draw ?? lastDrawRef.current;
+  const pendingAction: IdentityDrawPendingAction = identity.discardPending
+    ? "keep"
+    : identity.adoptPending
+      ? "accept"
+      : identity.drawPending && draw
+        ? "reroll"
+        : null;
 
   useEffect(() => {
     if (drawInProgressRef.current) return;
@@ -201,16 +215,30 @@ export function IdentityPage() {
     poolId: IdentityPoolId,
     replacedWinnerId?: string,
   ) {
-    if (drawInProgressRef.current || identity.profile.drawCredits < 1) return;
+    if (
+      drawInProgressRef.current ||
+      identity.profileMutationPending ||
+      identity.profile.drawCredits < 1
+    ) {
+      return;
+    }
     if (onboarding && poolId !== "common") return;
     drawInProgressRef.current = true;
+    setPendingDrawPool(poolId);
     const startingPendingRevision = pendingDrawRevisionRef.current;
     setDrawError(null);
     rollSequenceRef.current += 1;
-    const pendingDraw = await identity.spendDrawCredit(
-      poolId,
-      replacedWinnerId,
-    );
+    let pendingDraw: PendingIdentityDraw | null | undefined;
+    try {
+      pendingDraw = await identity.spendDrawCredit(
+        poolId,
+        replacedWinnerId,
+      );
+    } catch {
+      pendingDraw = null;
+    } finally {
+      setPendingDrawPool(null);
+    }
     const prepared = pendingDraw
       ? restorePreparedIdentityDraw(pendingDraw, players)
       : null;
@@ -260,38 +288,64 @@ export function IdentityPage() {
 
   function changeDrawDialog(open: boolean) {
     if (onboarding) return;
+    if (identity.profileMutationPending) return;
     if (!open && draw?.revealed) void keepCurrentIdentity();
   }
 
   async function keepCurrentIdentity() {
-    if (!draw?.revealed) return;
-    if (!(await identity.discardPendingDraw(draw.poolId, draw.winner.id))) {
-      setDrawError("未能保存选择，请重试。");
+    if (
+      !draw?.revealed ||
+      resultActionInProgressRef.current ||
+      identity.profileMutationPending
+    ) {
       return;
     }
-    setDraw(null);
+    resultActionInProgressRef.current = true;
     setDrawError(null);
+    try {
+      if (!(await identity.discardPendingDraw(draw.poolId, draw.winner.id))) {
+        setDrawError("未能保存选择，请重试。");
+        return;
+      }
+      setDraw(null);
+    } finally {
+      resultActionInProgressRef.current = false;
+    }
   }
 
   async function acceptDrawnIdentity() {
-    if (!draw?.revealed) return;
-    if (onboarding) {
-      const completed = await identity.completeIdentitySetup(draw.winner.id);
-      if (!completed) return;
-      setDraw(null);
-      navigate(returnTo, { replace: true });
+    if (
+      !draw?.revealed ||
+      resultActionInProgressRef.current ||
+      identity.profileMutationPending
+    ) {
       return;
     }
-    const adopted = await identity.adoptIdentity(
-      draw.poolId,
-      draw.winner.id,
-    );
-    if (!adopted) {
-      setDrawError("身份保存失败，请保留此窗口并重试。");
-      return;
-    }
-    setDraw(null);
+    resultActionInProgressRef.current = true;
     setDrawError(null);
+    try {
+      if (onboarding) {
+        const completed = await identity.completeIdentitySetup(draw.winner.id);
+        if (!completed) {
+          setDrawError("身份保存失败，请保留此窗口并重试。");
+          return;
+        }
+        setDraw(null);
+        navigate(returnTo, { replace: true });
+        return;
+      }
+      const adopted = await identity.adoptIdentity(
+        draw.poolId,
+        draw.winner.id,
+      );
+      if (!adopted) {
+        setDrawError("身份保存失败，请保留此窗口并重试。");
+        return;
+      }
+      setDraw(null);
+    } finally {
+      resultActionInProgressRef.current = false;
+    }
   }
 
   function restoreDrawButtonFocus(event: Event) {
@@ -484,7 +538,9 @@ export function IdentityPage() {
                   unlocked &&
                   identity.profile.drawCredits > 0 &&
                   !draw &&
+                  !identity.profileMutationPending &&
                   readyPools.has(pool.id);
+                const requestingDraw = pendingDrawPool === pool.id;
 
                 return (
                   <div
@@ -533,11 +589,18 @@ export function IdentityPage() {
                         variant={canDraw ? "default" : "outline"}
                         className="app-control h-12 min-w-0 rounded-none px-3 sm:min-w-28"
                         aria-disabled={!canDraw}
+                        disabled={identity.profileMutationPending}
+                        aria-busy={requestingDraw}
                         onClick={() => {
                           if (canDraw) startDraw(pool.id);
                         }}
                       >
-                        {canDraw
+                        {requestingDraw ? (
+                          <>
+                            <Spinner aria-hidden="true" />
+                            正在请求…
+                          </>
+                        ) : canDraw
                           ? onboarding
                             ? "抽取初始身份"
                             : "抽取 · 消耗 1 次"
@@ -581,6 +644,7 @@ export function IdentityPage() {
           allowKeepCurrent={!onboarding}
           allowReroll={!onboarding}
           rerollReady={readyPools.has(displayedDraw.poolId)}
+          pendingAction={pendingAction}
           acceptLabel={
             onboarding
               ? returnTo === "/"

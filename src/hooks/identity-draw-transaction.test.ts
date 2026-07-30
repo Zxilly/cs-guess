@@ -86,6 +86,24 @@ describe("identity draw server operations", () => {
     vi.stubGlobal("fetch", vi.fn());
   });
 
+  it("reuses one authoritative profile load across readiness checks", async () => {
+    vi.mocked(fetch).mockResolvedValue(jsonResponse(serverProfile()));
+    const { ensureAnonymousProfileReady } = await import(
+      "@/hooks/use-anonymous-profile"
+    );
+
+    await Promise.all([
+      ensureAnonymousProfileReady(),
+      ensureAnonymousProfileReady(),
+    ]);
+    await ensureAnonymousProfileReady();
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(fetch).mock.calls[0]?.[0]).toContain(
+      `/v1/profiles/${profile().anonymousId}`,
+    );
+  });
+
   it("stores the server-generated draw instead of accepting a local winner", async () => {
     const draw = pendingDraw();
     vi.mocked(fetch)

@@ -142,6 +142,38 @@ afterEach(() => {
 });
 
 describe("IdentityDrawDialog Radix focus integration", () => {
+  it("immediately exposes and locks a pending server action", async () => {
+    await act(async () => {
+      root.render(
+        <IdentityDrawDialog
+          open
+          poolLabel="Major 参赛池"
+          rollKey={1}
+          items={items}
+          winner={winner}
+          winnerIndex={23}
+          revealed
+          remainingCredits={2}
+          pendingAction="accept"
+          onOpenChange={vi.fn()}
+          onKeep={vi.fn()}
+          onReroll={vi.fn()}
+          onAccept={vi.fn()}
+        />,
+      );
+      await Promise.resolve();
+    });
+
+    const dialog = document.querySelector<HTMLElement>('[role="dialog"]');
+    const buttons = Array.from(
+      dialog?.querySelectorAll<HTMLButtonElement>("button") ?? [],
+    );
+    expect(buttons).toHaveLength(3);
+    expect(buttons.every((button) => button.disabled)).toBe(true);
+    expect(buttons.at(-1)?.textContent).toContain("正在保存");
+    expect(dialog?.textContent).toContain("正在保存新身份");
+  });
+
   it("keeps the result shell mounted and inert until the roulette reveals", async () => {
     await renderDrawState(false);
 
