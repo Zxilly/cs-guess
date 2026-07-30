@@ -6,6 +6,7 @@ import {
   UsersThreeIcon,
 } from "@phosphor-icons/react";
 import { useNavigate, useSearchParams } from "react-router";
+import useSWRMutation from "swr/mutation";
 
 import { AppHeader } from "@/components/AppHeader";
 import { DifficultySelector } from "@/components/DifficultySelector";
@@ -99,7 +100,6 @@ export function QuickMatch() {
       ? "加入匹配队列失败，请检查网络后重试。"
       : "",
   );
-  const [pending, setPending] = useState(audit === "quick-submitting");
   const [submittedSettings, setSubmittedSettings] =
     useState<Readonly<QuickMatchSnapshot> | null>(() =>
       audit === "quick-submitting"
@@ -112,6 +112,16 @@ export function QuickMatch() {
           }
         : null,
     );
+  const { trigger: triggerQuickMatch, isMutating } = useSWRMutation(
+    ["quick-match-command", identity.profile.anonymousId],
+    async (
+      _key,
+      { arg }: { arg: QuickMatchSnapshot },
+    ) => {
+      await submission.current?.submit(arg);
+    },
+  );
+  const pending = audit === "quick-submitting" || isMutating;
   const queue = useMatchmakingQueue();
   navigateRef.current = navigate;
   profileRef.current = identity.profile;
@@ -146,9 +156,8 @@ export function QuickMatch() {
         }),
       cancelByRequestId: cancelQuickMatchByRequestId,
       discard: discardQuickMatchCredentials,
-      onPending: (value, snapshot) => {
+      onPending: (_value, snapshot) => {
         if (snapshot) setSubmittedSettings(snapshot);
-        setPending(value);
       },
       onError: (caught) => {
         setError(
@@ -199,7 +208,7 @@ export function QuickMatch() {
     };
     saveQuickMatchPreferences(settings);
     lastPreferences.current = settings;
-    submission.current?.submit({
+    void triggerQuickMatch({
       identityId: identity.player.id,
       ...settings,
     });

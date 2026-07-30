@@ -12,6 +12,7 @@ import {
   UsersThreeIcon,
 } from "@phosphor-icons/react";
 import { useNavigate } from "react-router";
+import useSWRMutation from "swr/mutation";
 
 import { AppHeader } from "@/components/AppHeader";
 import { DifficultySelector } from "@/components/DifficultySelector";
@@ -96,9 +97,6 @@ export function RoomEntry() {
       ? "创建房间失败，请检查网络后重试。"
       : "",
   );
-  const [pending, setPending] = useState<"join" | "create" | null>(
-    audit === "room-submitting" ? "create" : null,
-  );
   const [submittedSettings, setSubmittedSettings] =
     useState<Readonly<RoomSubmissionSnapshot> | null>(() =>
       audit === "room-submitting"
@@ -113,6 +111,21 @@ export function RoomEntry() {
           }
         : null,
     );
+  const { trigger: triggerRoomSubmission, isMutating } = useSWRMutation(
+    ["room-session-command", identity.profile.anonymousId],
+    async (
+      _key,
+      { arg }: { arg: RoomSubmissionSnapshot },
+    ) => {
+      await submission.current?.submit(arg);
+    },
+  );
+  const pending: "join" | "create" | null =
+    audit === "room-submitting"
+      ? "create"
+      : isMutating
+        ? submittedSettings?.kind ?? null
+        : null;
   navigateRef.current = navigate;
   profileRef.current = identity.profile;
 
@@ -143,9 +156,8 @@ export function RoomEntry() {
       },
       compensate: leaveRoom,
       discard: discardRoomCredentials,
-      onPending: (value, snapshot) => {
+      onPending: (_value, snapshot) => {
         if (snapshot) setSubmittedSettings(snapshot);
-        setPending(value ? snapshot?.kind ?? null : null);
       },
       onError: (caught, snapshot) => {
         const message =
@@ -220,7 +232,7 @@ export function RoomEntry() {
 
     setJoinError("");
     setCreateError("");
-    await submission.current?.submit({
+    await triggerRoomSubmission({
       kind: "join",
       identityId: identity.player.id,
       identityNickname: identity.player.nickname,
@@ -237,7 +249,7 @@ export function RoomEntry() {
       bestOf,
       difficulty,
     });
-    await submission.current?.submit({
+    await triggerRoomSubmission({
       kind: "create",
       identityId: identity.player.id,
       identityNickname: identity.player.nickname,

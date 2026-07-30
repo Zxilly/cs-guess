@@ -4,6 +4,7 @@ import {
   ArrowLeftIcon,
 } from "@phosphor-icons/react";
 import { Navigate, useNavigate } from "react-router";
+import useSWRMutation from "swr/mutation";
 
 import { AppHeader } from "@/components/AppHeader";
 import { InfoTip } from "@/components/InfoTip";
@@ -72,9 +73,6 @@ export function MatchmakingPage() {
       ? Math.max(0, Math.floor((Date.now() - session.startedAt) / 1000))
       : 0,
   );
-  const [cancelPending, setCancelPending] = useState(
-    audit === "matching-canceling",
-  );
   const [cancelError, setCancelError] = useState(
     audit === "matching-cancel-error"
       ? "取消匹配失败，请稍后重试。"
@@ -92,6 +90,27 @@ export function MatchmakingPage() {
   );
   const realtimeRef = useRef(realtime);
   const cancellationRef = useRef<QuickMatchCancellation | null>(null);
+  const {
+    trigger: triggerCancellation,
+    isMutating: cancellationPending,
+  } = useSWRMutation(
+    [
+      "quick-match-cancellation-command",
+      session?.credentials.roomCode ?? "missing",
+    ],
+    async (
+      _key,
+      {
+        arg,
+      }: {
+        arg: Parameters<QuickMatchCancellation["cancel"]>[0];
+      },
+    ) => {
+      await cancellationRef.current?.cancel(arg);
+    },
+  );
+  const cancelPending =
+    audit === "matching-canceling" || cancellationPending;
   const closingReturnToRef = useRef(closingIntent?.returnTo ?? "/quick");
   realtimeRef.current = realtime;
 
@@ -110,7 +129,6 @@ export function MatchmakingPage() {
       },
       onPending: (pending) => {
         cancelGuardRef.current = pending;
-        setCancelPending(pending);
         if (pending) {
           setShowMatchFound(false);
           setCancelError("");
@@ -286,8 +304,8 @@ export function MatchmakingPage() {
   useEffect(() => {
     if (!session || !closingIntent) return;
     closingReturnToRef.current = closingIntent.returnTo;
-    cancellationRef.current?.cancel(session.credentials);
-  }, [closingIntent, session]);
+    void triggerCancellation(session.credentials);
+  }, [closingIntent, session, triggerCancellation]);
 
   useEffect(() => {
     const shouldFocus = showConnectionRecovery && !reconnecting;
@@ -308,7 +326,7 @@ export function MatchmakingPage() {
   );
 
   function cancel() {
-    cancellationRef.current?.cancel(credentials);
+    void triggerCancellation(credentials);
   }
 
   function discardInvalidSession() {

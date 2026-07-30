@@ -14,7 +14,6 @@ import {
   type Player,
 } from "@/data/players";
 import {
-  acceptAuthoritativeProfile,
   useAnonymousProfile,
 } from "@/hooks/use-anonymous-profile";
 import { useDailyChallenge } from "@/hooks/use-daily-challenge";
@@ -25,7 +24,6 @@ import {
   type DailyProgress,
 } from "@/lib/daily-challenge";
 import {
-  completeDailyChallenge,
   type ServerDailyChallenge,
 } from "@/lib/daily-challenge-api";
 import { focusDailyResultAfterDialog } from "@/lib/daily-result-focus";
@@ -78,7 +76,12 @@ interface GamePageProps {
 export function GamePage({ mode }: GamePageProps) {
   const [searchParams] = useSearchParams();
   const audit = import.meta.env.DEV ? searchParams.get("audit") : null;
-  const { challenge, error, retry } = useDailyChallenge();
+  const {
+    challenge,
+    error,
+    retry,
+    submitCompletion,
+  } = useDailyChallenge();
 
   if (audit === "daily-loading") {
     return <DailyGameLoading />;
@@ -95,16 +98,28 @@ export function GamePage({ mode }: GamePageProps) {
     return <DailyGameLoading error={error} onRetry={retry} />;
   }
 
-  return <DailyGame mode={mode} challenge={challenge} audit={audit} />;
+  return (
+    <DailyGame
+      mode={mode}
+      challenge={challenge}
+      audit={audit}
+      submitCompletion={submitCompletion}
+    />
+  );
 }
 
 function DailyGame({
   mode,
   challenge,
   audit,
+  submitCompletion,
 }: GamePageProps & {
   challenge: ServerDailyChallenge;
   audit: string | null;
+  submitCompletion: (
+    guessIds: readonly string[],
+    timedOut: boolean,
+  ) => Promise<unknown>;
 }) {
   const { profile } = useAnonymousProfile();
   const [game, dispatch] = useReducer(
@@ -197,16 +212,22 @@ function DailyGame({
       return;
     }
     recordedDailyRoundRef.current = roundId;
-    void completeDailyChallenge(
-      profile,
+    void submitCompletion(
       game.guessedIds,
       game.status === "lost" && game.guessedIds.length < MAX_GUESSES,
     )
-      .then(acceptAuthoritativeProfile)
       .catch(() => {
         recordedDailyRoundRef.current = undefined;
       });
-  }, [audit, challenge.date, game.guessedIds, game.status, mode, profile]);
+  }, [
+    audit,
+    challenge.date,
+    game.guessedIds,
+    game.status,
+    mode,
+    profile.recordedRounds,
+    submitCompletion,
+  ]);
 
   function handleSubmit(playerId = selectedId) {
     if (!playerId) return false;
