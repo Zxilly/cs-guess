@@ -9,10 +9,12 @@ import time
 from collections.abc import Callable, Iterator, Mapping
 from html import unescape
 from typing import Any
+from urllib.error import HTTPError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 API_URL = "https://liquipedia.net/counterstrike/api.php"
+MAX_RETRIES = 3
 
 JsonObject = Mapping[str, Any]
 Transport = Callable[[str, Mapping[str, str]], JsonObject]
@@ -90,14 +92,34 @@ class LiquipediaClient:
         self._last_request_at: float | None = None
 
     def _request(self, params: Mapping[str, str]) -> JsonObject:
-        if self._last_request_at is not None:
-            delay = self._min_interval - (time.monotonic() - self._last_request_at)
-            if delay > 0:
-                time.sleep(delay)
         url = f"{API_URL}?{urlencode(params)}"
-        response = self._transport(url, self._headers)
-        self._last_request_at = time.monotonic()
-        return response
+        retries = 0
+        while True:
+            if self._last_request_at is not None:
+                delay = self._min_interval - (
+                    time.monotonic() - self._last_request_at
+                )
+                if delay > 0:
+                    time.sleep(delay)
+            try:
+                response = self._transport(url, self._headers)
+            except HTTPError as error:
+                self._last_request_at = time.monotonic()
+                retryable = error.code == 429 or 500 <= error.code <= 599
+                if not retryable or retries >= MAX_RETRIES:
+                    raise
+                time.sleep(float(2**retries))
+                retries += 1
+                continue
+            except (OSError, TimeoutError):
+                self._last_request_at = time.monotonic()
+                if retries >= MAX_RETRIES:
+                    raise
+                time.sleep(float(2**retries))
+                retries += 1
+                continue
+            self._last_request_at = time.monotonic()
+            return response
 
     def _iter_category_pages(
         self,

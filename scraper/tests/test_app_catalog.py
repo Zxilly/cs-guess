@@ -66,6 +66,52 @@ def test_app_catalog_preserves_searchable_player_aliases():
     assert player["aliases"] == ["6657", "玩机器", "刘亦博"]
 
 
+def test_app_catalog_exposes_deduplicated_historical_teams_for_near_hints():
+    [player] = build_app_catalog(
+        [
+            {
+                "id": "internal-player",
+                "nickname": "traveler",
+                "fullName": "Team Traveler",
+                "countryCode": "DK",
+                "birthDate": "2000-01-01",
+                "currentTeam": {"name": "Current Team"},
+                "teamHistory": [
+                    {
+                        "team": {"name": "Current Team"},
+                        "current": True,
+                    },
+                    {
+                        "team": {"name": "Previous Team"},
+                        "current": False,
+                    },
+                    {
+                        "team": {"name": "ex-Previous Team"},
+                        "current": False,
+                    },
+                    {
+                        "team": {"name": "previous team"},
+                        "current": False,
+                    },
+                    {
+                        "team": {"name": "Another Team (European team)"},
+                        "current": False,
+                    },
+                ],
+                "role": "Rifler",
+                "majorAppearances": 1,
+                "majorWins": 0,
+            }
+        ],
+        today=date(2026, 7, 30),
+    )
+
+    assert player["historicalTeams"] == [
+        "Previous Team",
+        "Another Team",
+    ]
+
+
 def test_duplicate_nicknames_receive_deterministic_disambiguated_ids():
     records = [
         {

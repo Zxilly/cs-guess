@@ -82,6 +82,25 @@
     },
     "player": {
       "source": "liquipedia",
+      "external_id": "maLeK"
+    },
+    "team": {
+      "source": "liquipedia",
+      "external_id": "envyus"
+    },
+    "overrides": {
+      "participation_kind": "standin"
+    },
+    "basis": "EnVyUs coach Damien \"maLeK\" Marcel replaced the ill RpK in the active roster.",
+    "source_url": "https://www.hltv.org/news/22482/rpk-unable-to-play-malek-to-step-in-at-the-major-qualifier"
+  },
+  {
+    "major": {
+      "source": "liquipedia",
+      "external_id": "ELEAGUE/2018/Major"
+    },
+    "player": {
+      "source": "liquipedia",
       "external_id": "MaleK"
     },
     "team": {
@@ -89,10 +108,90 @@
       "external_id": "envyus"
     },
     "overrides": {
-      "participation_kind": "substitute"
+      "counts_toward_total": false
     },
-    "basis": "Coach maLeK replaced RpK after RpK became ill during the Challengers Stage.",
+    "basis": "The similarly named player Malek \"maleK\" Bennouioua was not EnVyUs coach Damien \"maLeK\" Marcel.",
     "source_url": "https://www.hltv.org/news/22482/rpk-unable-to-play-malek-to-step-in-at-the-major-qualifier"
+  },
+  {
+    "major": {
+      "source": "liquipedia",
+      "external_id": "StarLadder/2025/Major"
+    },
+    "player": {
+      "source": "liquipedia",
+      "external_id": "Nota"
+    },
+    "team": {
+      "source": "liquipedia",
+      "external_id": "PARIVISION"
+    },
+    "overrides": {
+      "participation_kind": "participant",
+      "stage_reached": "Stage 3",
+      "counts_toward_total": true
+    },
+    "basis": "PARIVISION rifler Emil \"nota\" Moskvitin played the StarLadder Budapest Major 2025.",
+    "source_url": "https://www.hltv.org/player/22929/nota"
+  },
+  {
+    "major": {
+      "source": "liquipedia",
+      "external_id": "StarLadder/2025/Major"
+    },
+    "player": {
+      "source": "liquipedia",
+      "external_id": "NOtA"
+    },
+    "team": {
+      "source": "liquipedia",
+      "external_id": "PARIVISION"
+    },
+    "overrides": {
+      "counts_toward_total": false
+    },
+    "basis": "Retired French-Algerian player Kyle \"NOtA\" Saadi is distinct from PARIVISION player Emil \"nota\" Moskvitin.",
+    "source_url": "https://liquipedia.net/counterstrike/Nota"
+  },
+  {
+    "major": {
+      "source": "liquipedia",
+      "external_id": "Intel_Extreme_Masters/2026/Cologne"
+    },
+    "player": {
+      "source": "liquipedia",
+      "external_id": "Nota"
+    },
+    "team": {
+      "source": "liquipedia",
+      "external_id": "PARIVISION"
+    },
+    "overrides": {
+      "participation_kind": "participant",
+      "stage_reached": "Stage 3",
+      "counts_toward_total": true
+    },
+    "basis": "PARIVISION rifler Emil \"nota\" Moskvitin played the IEM Cologne Major 2026.",
+    "source_url": "https://www.hltv.org/player/22929/nota"
+  },
+  {
+    "major": {
+      "source": "liquipedia",
+      "external_id": "Intel_Extreme_Masters/2026/Cologne"
+    },
+    "player": {
+      "source": "liquipedia",
+      "external_id": "NOtA"
+    },
+    "team": {
+      "source": "liquipedia",
+      "external_id": "PARIVISION"
+    },
+    "overrides": {
+      "counts_toward_total": false
+    },
+    "basis": "Retired French-Algerian player Kyle \"NOtA\" Saadi is distinct from PARIVISION player Emil \"nota\" Moskvitin.",
+    "source_url": "https://liquipedia.net/counterstrike/Nota"
   },
   {
     "major": {

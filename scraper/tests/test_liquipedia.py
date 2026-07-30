@@ -1,4 +1,5 @@
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.parse import parse_qs, urlparse
 
 from cs_guess_scraper.liquipedia import (
@@ -19,6 +20,33 @@ class StubTransport:
     def __call__(self, url, headers):
         self.requests.append((url, headers))
         return next(self.responses)
+
+
+def test_iter_player_pages_retries_a_transient_server_error(monkeypatch):
+    delays = []
+    calls = 0
+    response = {
+        "batchcomplete": True,
+        "query": {"pages": []},
+    }
+
+    def flaky_transport(url, headers):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise HTTPError(url, 503, "temporarily unavailable", {}, None)
+        return response
+
+    monkeypatch.setattr("cs_guess_scraper.liquipedia.time.sleep", delays.append)
+    client = LiquipediaClient(
+        "CSGuess/0.1 (contact@example.com)",
+        transport=flaky_transport,
+        min_interval=0,
+    )
+
+    assert list(client.iter_player_pages()) == []
+    assert calls == 2
+    assert delays == [1.0]
 
 
 def test_iter_player_pages_follows_mediawiki_continue_and_returns_revisions():

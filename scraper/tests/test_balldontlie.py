@@ -66,6 +66,25 @@ def test_iter_cs_players_uses_cursor_pagination_and_authorization_header():
     assert first_headers["Authorization"] == "test-token"
 
 
+def test_iter_cs_players_can_resume_after_a_verified_cursor():
+    transport = StubTransport(["players_page_2.json"])
+    client = BallDontLieClient(
+        "test-token",
+        transport=transport,
+        min_interval=0,
+        start_cursor=5326,
+    )
+
+    players = list(client.iter_cs_players(per_page=2))
+
+    assert [player["external_id"] for player in players] == ["1"]
+    url, _ = transport.requests[0]
+    assert parse_qs(urlparse(url).query) == {
+        "cursor": ["5326"],
+        "per_page": ["2"],
+    }
+
+
 def test_iter_cs_players_retries_rate_limit_after_retry_after(monkeypatch):
     delays = []
     monkeypatch.setattr("cs_guess_scraper.balldontlie.time.sleep", delays.append)

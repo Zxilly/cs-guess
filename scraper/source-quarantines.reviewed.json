@@ -16,5 +16,22 @@
         "url": "https://www.hltv.org/player/20729/koala"
       }
     ]
+  },
+  {
+    "target": {
+      "source": "liquipedia",
+      "external_id": "Mizi"
+    },
+    "canonical": {
+      "source": "liquipedia",
+      "external_id": "Folke"
+    },
+    "reason": "Liquipedia's Folke and Mizi records were joined through a shared platform identifier even though their nicknames and legal names identify different Danish players; detach Mizi evidence from Folke before the reviewed PandaScore merge.",
+    "evidence": [
+      {
+        "source": "liquipedia",
+        "url": "https://liquipedia.net/counterstrike/Mizi"
+      }
+    ]
   }
 ]

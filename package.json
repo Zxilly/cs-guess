@@ -7,7 +7,7 @@
     "dev": "vite",
     "dev:server": "cd server && cargo run",
     "build": "tsc -b && vite build",
-    "data:sync": "uv run --project scraper cs-guess-scraper sync --db scraper/data/cs_guess.sqlite --output scraper/data/players.game.json --report scraper/data/sync-report.json --catalog-output src/data/players.generated.json --reviewed-identity-merges scraper/identity-merges.reviewed.json --reviewed-source-quarantines scraper/source-quarantines.reviewed.json --reviewed-identity-separations scraper/identity-separations.reviewed.json --reviewed-major-winners scraper/reviewed-major-winners.json --reviewed-major-appearances scraper/reviewed-major-appearances.json --reviewed-role-overrides scraper/reviewed-role-overrides.json",
+    "data:sync": "uv run --project scraper cs-guess-scraper sync --db scraper/data/cs_guess.sqlite --output scraper/data/players.game.json --report scraper/data/sync-report.json --catalog-output src/data/players.generated.json --reviewed-identity-merges scraper/identity-merges.reviewed.json --reviewed-source-quarantines scraper/source-quarantines.reviewed.json --reviewed-identity-separations scraper/identity-separations.reviewed.json --reviewed-major-winners scraper/reviewed-major-winners.json --reviewed-major-appearances scraper/reviewed-major-appearances.json --reviewed-player-overrides scraper/reviewed-player-overrides.json --reviewed-role-overrides scraper/reviewed-role-overrides.json",
     "data:quality": "uv run --project scraper cs-guess-scraper quality --db scraper/data/cs_guess.sqlite --output scraper/data/data-quality-report.json --fail-on-critical",
     "lint": "oxlint .",
     "test": "vitest run",

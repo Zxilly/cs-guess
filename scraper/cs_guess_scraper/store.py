@@ -78,9 +78,7 @@ class PlayerStore:
             self._connection.executescript(self.schema_path.read_text(encoding="utf-8"))
             source_columns = {
                 str(row["name"])
-                for row in self._connection.execute(
-                    "PRAGMA table_info(source_records)"
-                )
+                for row in self._connection.execute("PRAGMA table_info(source_records)")
             }
             for column in ("source_modified_at", "source_revision_id"):
                 if column not in source_columns:
@@ -89,9 +87,7 @@ class PlayerStore:
                     )
             player_columns = {
                 str(row["name"])
-                for row in self._connection.execute(
-                    "PRAGMA table_info(players)"
-                )
+                for row in self._connection.execute("PRAGMA table_info(players)")
             }
             if "is_coach" not in player_columns:
                 self._connection.execute(
@@ -299,9 +295,7 @@ class PlayerStore:
             raise
         finally:
             self._connection.execute("PRAGMA foreign_keys = ON")
-        violations = list(
-            self._connection.execute("PRAGMA foreign_key_check")
-        )
+        violations = list(self._connection.execute("PRAGMA foreign_key_check"))
         if violations:
             raise sqlite3.IntegrityError(
                 "provider constraint migration created foreign-key violations"
@@ -364,17 +358,12 @@ class PlayerStore:
                 if mapped:
                     platform_player_ids.add(str(mapped["player_id"]))
         matched_platform_player_id = (
-            next(iter(platform_player_ids))
-            if len(platform_player_ids) == 1
-            else None
+            next(iter(platform_player_ids)) if len(platform_player_ids) == 1 else None
         )
         player_id = (
             str(existing["player_id"])
             if existing
-            else (
-                matched_platform_player_id
-                or f"player_{uuid.uuid4().hex}"
-            )
+            else (matched_platform_player_id or f"player_{uuid.uuid4().hex}")
         )
         is_new_player = existing is None and matched_platform_player_id is None
         timestamp = str(raw_metadata.get("fetched_at") or _now())
@@ -501,11 +490,7 @@ class PlayerStore:
                         (
                             player_id,
                             alias,
-                            (
-                                "native_name"
-                                if alias == native_name
-                                else "alternate"
-                            ),
+                            ("native_name" if alias == native_name else "alternate"),
                             source_record_id,
                             timestamp,
                         ),
@@ -638,6 +623,108 @@ class PlayerStore:
                     resolved_value=survivor_id,
                     status="manual",
                 )
+        return result
+
+    def apply_reviewed_player_overrides(
+        self,
+        overrides: list[Mapping[str, Any]],
+    ) -> dict[str, int]:
+        """Apply cited player field corrections without inventing an identity merge."""
+
+        allowed_fields = {
+            "birth_date",
+            "full_name",
+            "country_code",
+            "status",
+            "is_coach",
+        }
+        result = {"applied": 0, "already_applied": 0}
+        with self.connection:
+            for override in overrides:
+                player_ref = override.get("player")
+                if not isinstance(player_ref, Mapping):
+                    raise TypeError(
+                        "reviewed player override requires a player provider reference"
+                    )
+                source = str(player_ref.get("source") or "").strip()
+                external_id = str(player_ref.get("external_id") or "").strip()
+                if not source or not external_id:
+                    raise ValueError(
+                        "reviewed player override requires player.source and "
+                        "player.external_id"
+                    )
+                values = override.get("overrides")
+                if not isinstance(values, Mapping) or not values:
+                    raise TypeError(
+                        "reviewed player override requires non-empty overrides"
+                    )
+                unknown_fields = set(values) - allowed_fields
+                if unknown_fields:
+                    raise ValueError(
+                        "reviewed player override has unsupported fields: "
+                        + ", ".join(sorted(unknown_fields))
+                    )
+                birth_date = values.get("birth_date")
+                if birth_date is not None:
+                    normalized_birth_date = str(birth_date)
+                    try:
+                        parsed_birth_date = date.fromisoformat(normalized_birth_date)
+                    except ValueError as error:
+                        raise ValueError(
+                            "reviewed player birth_date must be YYYY-MM-DD"
+                        ) from error
+                    if parsed_birth_date.isoformat() != normalized_birth_date:
+                        raise ValueError(
+                            "reviewed player birth_date must be YYYY-MM-DD"
+                        )
+                evidence = override.get("evidence")
+                if not isinstance(evidence, list) or not evidence:
+                    raise TypeError(
+                        "reviewed player override requires non-empty evidence"
+                    )
+                evidence_urls = []
+                for item in evidence:
+                    if not isinstance(item, Mapping):
+                        raise TypeError(
+                            "reviewed player override evidence entries must be objects"
+                        )
+                    url = str(item.get("url") or "").strip()
+                    if not url:
+                        raise ValueError(
+                            "reviewed player override evidence requires a source URL"
+                        )
+                    evidence_urls.append(url)
+
+                player_id = self.resolve_player_id(source, external_id)
+                audit_override = {
+                    "player": dict(player_ref),
+                    "overrides": dict(values),
+                    "evidence": [dict(item) for item in evidence],
+                    "basis": override.get("basis"),
+                }
+                observed_at = _now()
+                source_record_id, is_new = self._upsert_source_record(
+                    source="manual",
+                    record_type="player",
+                    external_id=f"reviewed-player:{source}:{external_id}",
+                    raw_metadata={"payload": audit_override},
+                    parsed=dict(values),
+                    source_url=evidence_urls[0],
+                    fetched_at=observed_at,
+                )
+                if not is_new:
+                    result["already_applied"] += 1
+                    continue
+                for field_name, value in values.items():
+                    self._insert_evidence(
+                        entity_type="player",
+                        entity_id=player_id,
+                        field_name=field_name,
+                        source_record_id=source_record_id,
+                        value=value,
+                        observed_at=observed_at,
+                    )
+                result["applied"] += 1
         return result
 
     def apply_reviewed_role_overrides(
@@ -801,9 +888,7 @@ class PlayerStore:
                     ),
                 ).fetchone()
                 if major_row is None or team_row is None:
-                    raise ValueError(
-                        "reviewed Major winner references are unresolved"
-                    )
+                    raise ValueError("reviewed Major winner references are unresolved")
 
                 major_id = str(major_row["entity_id"])
                 team_id = str(team_row["team_id"])
@@ -819,8 +904,7 @@ class PlayerStore:
                 ).fetchone()
                 if conflicting_winner is not None:
                     raise ValueError(
-                        "reviewed Major winner conflicts with an existing "
-                        "winning team"
+                        "reviewed Major winner conflicts with an existing winning team"
                     )
 
                 appearances = list(
@@ -835,9 +919,7 @@ class PlayerStore:
                     )
                 )
                 if not appearances:
-                    raise ValueError(
-                        "reviewed Major winner has no linked roster"
-                    )
+                    raise ValueError("reviewed Major winner has no linked roster")
 
                 observed_at = _now()
                 for appearance in appearances:
@@ -933,9 +1015,7 @@ class PlayerStore:
                     ),
                 ).fetchone()
                 if major_row is None:
-                    raise ValueError(
-                        "reviewed Major appearance event is unresolved"
-                    )
+                    raise ValueError("reviewed Major appearance event is unresolved")
                 major_id = str(major_row["entity_id"])
                 player_id = self.resolve_player_id(
                     str(player_ref["source"]),
@@ -953,9 +1033,7 @@ class PlayerStore:
                     ),
                 ).fetchone()
                 if team_row is None:
-                    raise ValueError(
-                        "reviewed Major appearance team is unresolved"
-                    )
+                    raise ValueError("reviewed Major appearance team is unresolved")
                 team_id = str(team_row["team_id"])
 
                 existing = self.connection.execute(
@@ -1075,9 +1153,8 @@ class PlayerStore:
                         target_external_id,
                     )
                 except KeyError:
-                    result["already_quarantined"] += 1
-                    continue
-                if target_id != canonical_id:
+                    target_id = None
+                if target_id is not None and target_id != canonical_id:
                     raise ValueError(
                         "quarantined provider ID does not belong to the "
                         "reviewed canonical player"
@@ -1102,6 +1179,7 @@ class PlayerStore:
                     )
                 ]
                 tenure_ids: set[str] = set()
+                role_ids: set[str] = set()
                 if source_record_ids:
                     placeholders = ",".join("?" for _ in source_record_ids)
                     tenure_ids = {
@@ -1116,6 +1194,25 @@ class PlayerStore:
                             source_record_ids,
                         )
                     }
+                    role_ids = {
+                        str(row["entity_id"])
+                        for row in self.connection.execute(
+                            f"""
+                            SELECT DISTINCT entity_id
+                            FROM field_evidence
+                            WHERE entity_type = 'player_role'
+                              AND source_record_id IN ({placeholders})
+                            """,
+                            source_record_ids,
+                        )
+                    }
+                    self.connection.execute(
+                        f"""
+                        DELETE FROM player_aliases
+                        WHERE source_record_id IN ({placeholders})
+                        """,
+                        source_record_ids,
+                    )
                     self.connection.execute(
                         f"""
                         DELETE FROM field_evidence
@@ -1137,6 +1234,20 @@ class PlayerStore:
                             "DELETE FROM player_team_tenures WHERE id = ?",
                             (tenure_id,),
                         )
+                for role_id in role_ids:
+                    remaining = self.connection.execute(
+                        """
+                        SELECT 1 FROM field_evidence
+                        WHERE entity_type = 'player_role' AND entity_id = ?
+                        LIMIT 1
+                        """,
+                        (role_id,),
+                    ).fetchone()
+                    if remaining is None:
+                        self.connection.execute(
+                            "DELETE FROM player_roles WHERE id = ?",
+                            (role_id,),
+                        )
                 self.connection.execute(
                     """
                     DELETE FROM player_source_ids
@@ -1144,24 +1255,25 @@ class PlayerStore:
                     """,
                     (target_source, target_external_id),
                 )
-                self._record_conflict(
-                    entity_type="player",
-                    entity_id=canonical_id,
-                    field_name="identity:quarantined_source",
-                    candidates=[
-                        {
-                            "target": dict(target_ref),
-                            "canonical": dict(canonical_ref),
-                            "reason": quarantine.get("reason"),
-                            "evidence": list(
-                                quarantine.get("evidence") or []
-                            ),
-                        }
-                    ],
-                    resolved_value=False,
-                    status="manual",
-                )
-                result["quarantined"] += 1
+                if target_id is None:
+                    result["already_quarantined"] += 1
+                else:
+                    self._record_conflict(
+                        entity_type="player",
+                        entity_id=canonical_id,
+                        field_name="identity:quarantined_source",
+                        candidates=[
+                            {
+                                "target": dict(target_ref),
+                                "canonical": dict(canonical_ref),
+                                "reason": quarantine.get("reason"),
+                                "evidence": list(quarantine.get("evidence") or []),
+                            }
+                        ],
+                        resolved_value=False,
+                        status="manual",
+                    )
+                    result["quarantined"] += 1
         return result
 
     def apply_reviewed_identity_separations(
@@ -1260,9 +1372,7 @@ class PlayerStore:
             player_id = str(row["player_id"])
             balldontlie_id = str(row["balldontlie_id"])
             pandascore_ids = sorted(
-                item
-                for item in str(row["pandascore_ids"] or "").split(",")
-                if item
+                item for item in str(row["pandascore_ids"] or "").split(",") if item
             )
             if not pandascore_ids:
                 continue
@@ -1283,9 +1393,7 @@ class PlayerStore:
             ).fetchone()
             if balldontlie_name_row is None:
                 continue
-            balldontlie_name = json.loads(
-                balldontlie_name_row["normalized_value_json"]
-            )
+            balldontlie_name = json.loads(balldontlie_name_row["normalized_value_json"])
             pandascore_names: list[tuple[str, Any]] = []
             for pandascore_id in pandascore_ids:
                 pandascore_name_row = self.connection.execute(
@@ -1307,11 +1415,7 @@ class PlayerStore:
                     pandascore_names.append(
                         (
                             pandascore_id,
-                            json.loads(
-                                pandascore_name_row[
-                                    "normalized_value_json"
-                                ]
-                            ),
+                            json.loads(pandascore_name_row["normalized_value_json"]),
                         )
                     )
             if not balldontlie_name or not pandascore_names:
@@ -1354,8 +1458,7 @@ class PlayerStore:
                                 "external_id": pandascore_id,
                                 "full_name": pandascore_name,
                             }
-                            for pandascore_id, pandascore_name
-                            in pandascore_names
+                            for pandascore_id, pandascore_name in pandascore_names
                         ],
                     ],
                 }
@@ -1541,24 +1644,36 @@ class PlayerStore:
                 for appearance in appearances:
                     if not isinstance(appearance, Mapping):
                         continue
-                    player_source = str(
-                        appearance.get("player_source") or source
-                    )
+                    player_source = str(appearance.get("player_source") or source)
                     player_external_id = appearance.get("player_external_id")
                     player_id = appearance.get("player_id")
                     if player_id is None and player_external_id is not None:
-                        row = self.connection.execute(
+                        rows = self.connection.execute(
                             """
-                            SELECT player_id FROM player_source_ids
+                            SELECT player_id, external_id
+                            FROM player_source_ids
                             WHERE source = ?
                               AND replace(external_id, '_', ' ')
                                   = replace(?, '_', ' ') COLLATE NOCASE
                             ORDER BY external_id
-                            LIMIT 1
                             """,
                             (player_source, str(player_external_id)),
-                        ).fetchone()
-                        player_id = row["player_id"] if row else None
+                        ).fetchall()
+                        normalized_external_id = str(player_external_id).replace(
+                            "_", " "
+                        )
+                        exact_rows = [
+                            row
+                            for row in rows
+                            if str(row["external_id"]).replace("_", " ")
+                            == normalized_external_id
+                        ]
+                        if exact_rows:
+                            player_id = exact_rows[0]["player_id"]
+                        else:
+                            candidate_ids = {str(row["player_id"]) for row in rows}
+                            if len(candidate_ids) == 1:
+                                player_id = next(iter(candidate_ids))
                     if player_id is None:
                         unresolved = {
                             "source": player_source,
@@ -1641,9 +1756,7 @@ class PlayerStore:
                 (canonical_name, str(starts_on)),
             ).fetchone()
             major_id = (
-                str(same_event["id"])
-                if same_event
-                else f"major_{uuid.uuid4().hex}"
+                str(same_event["id"]) if same_event else f"major_{uuid.uuid4().hex}"
             )
             if not same_event:
                 game_title = str(event.get("game_title") or "cs2").casefold()
@@ -1660,9 +1773,7 @@ class PlayerStore:
                         game_title,
                         str(starts_on),
                         event.get("ends_on") or event.get("end_date"),
-                        normalize_country_code(
-                            event.get("location_country_code")
-                        ),
+                        normalize_country_code(event.get("location_country_code")),
                         fetched_at,
                         fetched_at,
                     ),
@@ -1733,9 +1844,7 @@ class PlayerStore:
             "placement": appearance.get("placement"),
             "stage_reached": appearance.get("stage_reached"),
             "matches_played": appearance.get("matches_played"),
-            "counts_toward_total": bool(
-                appearance.get("counts_toward_total", True)
-            ),
+            "counts_toward_total": bool(appearance.get("counts_toward_total", True)),
         }
         self.connection.execute(
             """
@@ -1759,9 +1868,7 @@ class PlayerStore:
                 fetched_at,
             ),
         )
-        record_external_id = (
-            f"{major_external_id}:{player_source}:{player_external_id}"
-        )
+        record_external_id = f"{major_external_id}:{player_source}:{player_external_id}"
         source_record_id, is_new = self._upsert_source_record(
             source=source,
             record_type="major_appearance",
@@ -1798,49 +1905,55 @@ class PlayerStore:
             "departed_team_claims_retired": 0,
         }
         with self.connection:
-            exact_merges, conflicts_created = (
-                self._merge_exact_name_birth_date_identities()
-            )
-            result["exact_identity_merges"] = exact_merges
-            result["players_merged"] += exact_merges
-            result["conflicts_created"] += conflicts_created
+            while True:
+                pass_merges = 0
 
-            self._coalesce_current_tenures()
-            identity_merges, conflicts_created = (
-                self._merge_high_confidence_cross_source_identities()
-            )
-            alias_merges, alias_conflicts = (
-                self._merge_hltv_alias_confirmed_identities()
-            )
-            identity_merges += alias_merges
-            conflicts_created += alias_conflicts
-            result["high_confidence_identity_merges"] += identity_merges
-            result["players_merged"] += identity_merges
-            result["conflicts_created"] += conflicts_created
+                exact_merges, conflicts_created = (
+                    self._merge_exact_name_birth_date_identities()
+                )
+                result["exact_identity_merges"] += exact_merges
+                result["players_merged"] += exact_merges
+                result["conflicts_created"] += conflicts_created
+                pass_merges += exact_merges
 
-            nickname_merges, conflicts_created = (
-                self._merge_exact_nickname_birth_country_identities()
-            )
-            result["high_confidence_identity_merges"] += nickname_merges
-            result["players_merged"] += nickname_merges
-            result["conflicts_created"] += conflicts_created
+                self._coalesce_current_tenures()
+                identity_merges, conflicts_created = (
+                    self._merge_high_confidence_cross_source_identities()
+                )
+                alias_merges, alias_conflicts = (
+                    self._merge_hltv_alias_confirmed_identities()
+                )
+                identity_merges += alias_merges
+                conflicts_created += alias_conflicts
+                result["high_confidence_identity_merges"] += identity_merges
+                result["players_merged"] += identity_merges
+                result["conflicts_created"] += conflicts_created
+                pass_merges += identity_merges
 
-            biography_merges, conflicts_created = (
-                self._merge_exact_name_nickname_country_identities()
-            )
-            result["high_confidence_identity_merges"] += biography_merges
-            result["players_merged"] += biography_merges
-            result["conflicts_created"] += conflicts_created
+                nickname_merges, conflicts_created = (
+                    self._merge_exact_nickname_birth_country_identities()
+                )
+                result["high_confidence_identity_merges"] += nickname_merges
+                result["players_merged"] += nickname_merges
+                result["conflicts_created"] += conflicts_created
+                pass_merges += nickname_merges
+
+                biography_merges, conflicts_created = (
+                    self._merge_exact_name_nickname_country_identities()
+                )
+                result["high_confidence_identity_merges"] += biography_merges
+                result["players_merged"] += biography_merges
+                result["conflicts_created"] += conflicts_created
+                pass_merges += biography_merges
+
+                if pass_merges == 0:
+                    break
 
             self._coalesce_current_tenures()
             result["conflicts_created"] += self._merge_major_appearances()
             for row in self.connection.execute("SELECT id FROM teams"):
-                result["conflicts_created"] += self._merge_team_fields(
-                    str(row["id"])
-                )
-            result["departed_team_claims_retired"] = (
-                self._retire_departed_team_claims()
-            )
+                result["conflicts_created"] += self._merge_team_fields(str(row["id"]))
+            result["departed_team_claims_retired"] = self._retire_departed_team_claims()
             for row in self.connection.execute("SELECT id FROM players"):
                 player_id = str(row["id"])
                 result["conflicts_created"] += self._merge_player_fields(player_id)
@@ -1916,9 +2029,7 @@ class PlayerStore:
             """
         ):
             candidate = dict(row)
-            candidate["source_set"] = set(
-                str(candidate["sources"] or "").split(",")
-            )
+            candidate["source_set"] = set(str(candidate["sources"] or "").split(","))
             identity_full_name = candidate["full_name"]
             if (
                 "liquipedia" in candidate["source_set"]
@@ -1986,9 +2097,7 @@ class PlayerStore:
                     )
                     if evidence["value"]
                 }
-                candidate["birth_date_evidence"] = sorted(
-                    candidate_birth_dates
-                )
+                candidate["birth_date_evidence"] = sorted(candidate_birth_dates)
                 birth_dates.update(candidate_birth_dates)
             if len(birth_dates) != 1 or not all(
                 candidate["birth_date_evidence"] for candidate in candidates
@@ -1998,9 +2107,7 @@ class PlayerStore:
             survivor = liquipedia[0]
             duplicate = pandascore[0]
             if (
-                frozenset(
-                    (str(survivor["id"]), str(duplicate["id"]))
-                )
+                frozenset((str(survivor["id"]), str(duplicate["id"])))
                 in reviewed_separations
             ):
                 continue
@@ -2012,9 +2119,7 @@ class PlayerStore:
                     "nickname": candidate["canonical_nickname"],
                     "full_name": candidate["identity_full_name"],
                     "country_code": candidate["country_code"],
-                    "birth_date_evidence": candidate[
-                        "birth_date_evidence"
-                    ],
+                    "birth_date_evidence": candidate["birth_date_evidence"],
                     "match_basis": "exact_legal_name_and_birth_date",
                 }
                 for candidate in candidates
@@ -2122,13 +2227,9 @@ class PlayerStore:
             """
         ):
             candidate = dict(row)
-            candidate["source_set"] = set(
-                str(candidate["sources"] or "").split(",")
-            )
+            candidate["source_set"] = set(str(candidate["sources"] or "").split(","))
             key = (
-                nickname_identity_signature(
-                    candidate["canonical_nickname"]
-                ),
+                nickname_identity_signature(candidate["canonical_nickname"]),
                 str(candidate["country_code"]),
                 str(candidate["birth_date"]),
             )
@@ -2155,16 +2256,11 @@ class PlayerStore:
                 if "pandascore" in candidate["source_set"]
                 and "liquipedia" not in candidate["source_set"]
             ]
-            if (
-                len(survivor_candidates) != 1
-                or len(duplicate_candidates) != 1
-            ):
+            if len(survivor_candidates) != 1 or len(duplicate_candidates) != 1:
                 continue
             survivor = survivor_candidates[0]
             duplicate = duplicate_candidates[0]
-            pair = frozenset(
-                (str(survivor["id"]), str(duplicate["id"]))
-            )
+            pair = frozenset((str(survivor["id"]), str(duplicate["id"])))
             if pair in reviewed_separations:
                 continue
 
@@ -2207,9 +2303,7 @@ class PlayerStore:
                     "full_name": candidate["full_name"],
                     "country_code": candidate["country_code"],
                     "birth_date": candidate["birth_date"],
-                    "match_basis": (
-                        "exact_nickname_birth_date_and_country"
-                    ),
+                    "match_basis": ("exact_nickname_birth_date_and_country"),
                 }
                 for candidate in candidates
             ]
@@ -2217,9 +2311,7 @@ class PlayerStore:
             conflicts_created += self._record_conflict(
                 entity_type="player",
                 entity_id=survivor_id,
-                field_name=(
-                    "identity:exact_nickname_birth_date_country"
-                ),
+                field_name=("identity:exact_nickname_birth_date_country"),
                 candidates=audit_candidates,
                 resolved_value=survivor_id,
                 status="automatic",
@@ -2260,16 +2352,10 @@ class PlayerStore:
             """
         ):
             candidate = dict(row)
-            candidate["source_set"] = set(
-                str(candidate["sources"] or "").split(",")
-            )
-            name_signature = person_name_token_signature(
-                candidate["full_name"]
-            )
+            candidate["source_set"] = set(str(candidate["sources"] or "").split(","))
+            name_signature = person_name_token_signature(candidate["full_name"])
             key = (
-                nickname_identity_signature(
-                    candidate["canonical_nickname"]
-                ),
+                nickname_identity_signature(candidate["canonical_nickname"]),
                 str(candidate["country_code"]),
                 name_signature,
             )
@@ -2282,11 +2368,7 @@ class PlayerStore:
             country_code,
             name_signature,
         ), candidates in grouped.items():
-            if (
-                not nickname
-                or not name_signature
-                or len(candidates) != 2
-            ):
+            if not nickname or not name_signature or len(candidates) != 2:
                 continue
             survivor_candidates = [
                 candidate
@@ -2300,16 +2382,11 @@ class PlayerStore:
                 if "pandascore" in candidate["source_set"]
                 and "liquipedia" not in candidate["source_set"]
             ]
-            if (
-                len(survivor_candidates) != 1
-                or len(duplicate_candidates) != 1
-            ):
+            if len(survivor_candidates) != 1 or len(duplicate_candidates) != 1:
                 continue
             survivor = survivor_candidates[0]
             duplicate = duplicate_candidates[0]
-            pair = frozenset(
-                (str(survivor["id"]), str(duplicate["id"]))
-            )
+            pair = frozenset((str(survivor["id"]), str(duplicate["id"])))
             if pair in reviewed_separations:
                 continue
 
@@ -2335,9 +2412,7 @@ class PlayerStore:
                     "full_name": candidate["full_name"],
                     "country_code": candidate["country_code"],
                     "birth_date": candidate["birth_date"],
-                    "match_basis": (
-                        "exact_name_nickname_and_country"
-                    ),
+                    "match_basis": ("exact_name_nickname_and_country"),
                 }
                 for candidate in candidates
             ]
@@ -2345,9 +2420,7 @@ class PlayerStore:
             conflicts_created += self._record_conflict(
                 entity_type="player",
                 entity_id=survivor_id,
-                field_name=(
-                    "identity:exact_name_nickname_country"
-                ),
+                field_name=("identity:exact_name_nickname_country"),
                 candidates=audit_candidates,
                 resolved_value=survivor_id,
                 status="automatic",
@@ -2427,9 +2500,7 @@ class PlayerStore:
             survivor = liquipedia[0]
             duplicate = pandascore[0]
             if (
-                frozenset(
-                    (str(survivor["id"]), str(duplicate["id"]))
-                )
+                frozenset((str(survivor["id"]), str(duplicate["id"])))
                 in reviewed_separations
             ):
                 continue
@@ -2442,12 +2513,10 @@ class PlayerStore:
                 "pandascore",
             )
             survivor_full_name = (
-                survivor_source_values.get("full_name")
-                or survivor["full_name"]
+                survivor_source_values.get("full_name") or survivor["full_name"]
             )
             duplicate_full_name = (
-                duplicate_source_values.get("full_name")
-                or duplicate["full_name"]
+                duplicate_source_values.get("full_name") or duplicate["full_name"]
             )
             survivor_name = person_name_token_signature(survivor_full_name)
             duplicate_name = person_name_token_signature(duplicate_full_name)
@@ -2468,9 +2537,7 @@ class PlayerStore:
                 }
                 if not candidate_birth_dates and candidate["birth_date"]:
                     candidate_birth_dates.add(str(candidate["birth_date"]))
-                candidate["birth_date_evidence"] = sorted(
-                    candidate_birth_dates
-                )
+                candidate["birth_date_evidence"] = sorted(candidate_birth_dates)
                 birth_dates.update(candidate_birth_dates)
             if len(birth_dates) > 1:
                 continue
@@ -2489,22 +2556,14 @@ class PlayerStore:
                     str(survivor["id"]),
                     "hltv",
                 )
-                hltv_name = person_name_token_signature(
-                    hltv_values.get("full_name")
-                )
+                hltv_name = person_name_token_signature(hltv_values.get("full_name"))
                 if not (
                     duplicate_name
                     and hltv_name == duplicate_name
-                    and normalize_identity_text(
-                        hltv_values.get("nickname")
-                    ) == nickname
-                    and hltv_values.get("country_code")
-                    == survivor["country_code"]
+                    and normalize_identity_text(hltv_values.get("nickname")) == nickname
+                    and hltv_values.get("country_code") == survivor["country_code"]
                     and hltv_values.get("current_team_id")
-                    in {
-                        candidate["team_id"]
-                        for candidate in candidates
-                    }
+                    in {candidate["team_id"] for candidate in candidates}
                 ):
                     if compatible_names:
                         match_basis = "compatible_legal_name_tokens"
@@ -2527,9 +2586,7 @@ class PlayerStore:
                     ),
                     "country_code": candidate["country_code"],
                     "birth_date": candidate["birth_date"],
-                    "birth_date_evidence": candidate[
-                        "birth_date_evidence"
-                    ],
+                    "birth_date_evidence": candidate["birth_date_evidence"],
                     "current_team_id": candidate["team_id"],
                     "current_team_name": candidate["team_name"],
                     "current_team_signature": team_signature,
@@ -2592,13 +2649,9 @@ class PlayerStore:
                 survivor_id,
                 "hltv",
             )
-            hltv_nickname = normalize_identity_text(
-                hltv_values.get("nickname")
-            )
+            hltv_nickname = normalize_identity_text(hltv_values.get("nickname"))
             aliases = {
-                normalize_identity_text(
-                    str(alias["external_id"]).replace("_", " ")
-                )
+                normalize_identity_text(str(alias["external_id"]).replace("_", " "))
                 for alias in self.connection.execute(
                     """
                     SELECT external_id FROM player_source_ids
@@ -2645,20 +2698,14 @@ class PlayerStore:
             if len(pandascore_candidates) != 1:
                 continue
             duplicate = pandascore_candidates[0]
-            if (
-                frozenset((survivor_id, str(duplicate["id"])))
-                in reviewed_separations
-            ):
+            if frozenset((survivor_id, str(duplicate["id"]))) in reviewed_separations:
                 continue
             if (
                 not survivor["country_code"]
                 or survivor["country_code"] != duplicate["country_code"]
-                or hltv_values.get("country_code")
-                != survivor["country_code"]
+                or hltv_values.get("country_code") != survivor["country_code"]
                 or hltv_values.get("current_team_id") != team_id
-                or person_name_token_signature(
-                    hltv_values.get("full_name")
-                )
+                or person_name_token_signature(hltv_values.get("full_name"))
                 != person_name_token_signature(duplicate["full_name"])
             ):
                 continue
@@ -2714,9 +2761,7 @@ class PlayerStore:
         ):
             field_name = str(row["field_name"])
             if field_name not in values:
-                values[field_name] = json.loads(
-                    row["normalized_value_json"]
-                )
+                values[field_name] = json.loads(row["normalized_value_json"])
         return values
 
     def _coalesce_current_tenures(self) -> None:
@@ -2841,9 +2886,7 @@ class PlayerStore:
                 updates["counts_toward_total"] = int(
                     bool(updates.get("counts_toward_total", True))
                 )
-                assignments = ", ".join(
-                    f"{column} = ?" for column in updates
-                )
+                assignments = ", ".join(f"{column} = ?" for column in updates)
                 self.connection.execute(
                     f"""
                     UPDATE major_appearances
@@ -2885,9 +2928,7 @@ class PlayerStore:
             ORDER BY p.id
             """
         ):
-            team_signature = " ".join(
-                team_name_identity_signature(row["team_name"])
-            )
+            team_signature = " ".join(team_name_identity_signature(row["team_name"]))
             key = (
                 normalize_identity_text(row["canonical_nickname"]),
                 team_signature,
@@ -2906,9 +2947,7 @@ class PlayerStore:
                 continue
             if (
                 len(player_rows) == 2
-                and frozenset(
-                    player_row["player_id"] for player_row in player_rows
-                )
+                and frozenset(player_row["player_id"] for player_row in player_rows)
                 in reviewed_separations
             ):
                 continue
@@ -3059,9 +3098,7 @@ class PlayerStore:
             """,
             (survivor_id, duplicate_id),
         )
-        self.connection.execute(
-            "DELETE FROM players WHERE id = ?", (duplicate_id,)
-        )
+        self.connection.execute("DELETE FROM players WHERE id = ?", (duplicate_id,))
 
     def _latest_player_evidence(
         self,
@@ -3278,19 +3315,20 @@ class PlayerStore:
         assert player is not None
         roles = self._role_rows(player_id)
         game_role = derive_game_role(player["game_role_override"], roles)
-        has_major_appearance = self.connection.execute(
-            """
+        has_major_appearance = (
+            self.connection.execute(
+                """
             SELECT 1
             FROM major_appearances
             WHERE player_id = ? AND counts_toward_total = 1
             LIMIT 1
             """,
-            (player_id,),
-        ).fetchone() is not None
-        missing = []
-        has_player_career_evidence = bool(
-            player["has_player_career_evidence"]
+                (player_id,),
+            ).fetchone()
+            is not None
         )
+        missing = []
+        has_player_career_evidence = bool(player["has_player_career_evidence"])
         if (
             bool(player["is_coach"])
             and not has_major_appearance
@@ -3311,10 +3349,7 @@ class PlayerStore:
                 parsed_birth_date = date.fromisoformat(birth_date)
             except ValueError:
                 parsed_birth_date = None
-            if (
-                parsed_birth_date is None
-                or parsed_birth_date.isoformat() != birth_date
-            ):
+            if parsed_birth_date is None or parsed_birth_date.isoformat() != birth_date:
                 missing.append("birth_date_full")
         if (
             game_role is None
@@ -3362,10 +3397,7 @@ class PlayerStore:
 
     def _team_presentation_records(self) -> dict[str, dict[str, Any]]:
         """Compose display fields across aliases confirmed by a shared player."""
-        teams = [
-            dict(row)
-            for row in self.connection.execute("SELECT * FROM teams")
-        ]
+        teams = [dict(row) for row in self.connection.execute("SELECT * FROM teams")]
         team_by_id = {str(team["id"]): team for team in teams}
         parent = {team_id: team_id for team_id in team_by_id}
 
@@ -3400,9 +3432,7 @@ class PlayerStore:
             ORDER BY tenure.player_id, team.id
             """
         ):
-            signature = team_name_identity_signature(
-                row["canonical_name"]
-            )
+            signature = team_name_identity_signature(row["canonical_name"])
             if not signature:
                 continue
             key = (str(row["player_id"]), signature)
@@ -3760,15 +3790,11 @@ class PlayerStore:
                 team_data = item.get("team")
                 if not isinstance(team_data, Mapping):
                     continue
-                team_id = self._upsert_team(
-                    source, team_data, fetched_at=fetched_at
-                )
+                team_id = self._upsert_team(source, team_data, fetched_at=fetched_at)
                 is_current = bool(
                     item.get("is_current", item.get("current", False))
                 ) and not _is_departed_team_name(team_data.get("name"))
-                is_primary = bool(
-                    item.get("is_primary", item.get("primary", False))
-                )
+                is_primary = bool(item.get("is_primary", item.get("primary", False)))
                 if current_team_id == team_id and is_current:
                     current_team_has_tenure = True
                     if not is_primary:
@@ -3805,16 +3831,16 @@ class PlayerStore:
                 if isinstance(role_item, str):
                     role_value = role_item.casefold().strip()
                     role_kind = (
-                        "weapon"
-                        if role_value in {"awper", "rifler"}
-                        else "tactical"
+                        "weapon" if role_value in {"awper", "rifler"} else "tactical"
                     )
                     is_primary = role_kind not in seen_kinds
                     role_data: Mapping[str, Any] = {}
                 elif isinstance(role_item, Mapping):
-                    role_value = str(
-                        role_item.get("value") or role_item.get("role") or ""
-                    ).casefold().strip()
+                    role_value = (
+                        str(role_item.get("value") or role_item.get("role") or "")
+                        .casefold()
+                        .strip()
+                    )
                     role_kind = str(
                         role_item.get("kind")
                         or role_item.get("role_kind")
@@ -3939,11 +3965,7 @@ class PlayerStore:
                 """,
                 (name,),
             ).fetchone()
-            team_id = (
-                str(same_name["id"])
-                if same_name
-                else f"team_{uuid.uuid4().hex}"
-            )
+            team_id = str(same_name["id"]) if same_name else f"team_{uuid.uuid4().hex}"
             if not same_name:
                 self.connection.execute(
                     """
@@ -4018,15 +4040,11 @@ class PlayerStore:
         ).casefold()
         start_value = item.get("start_value", item.get("from"))
         start_precision = str(
-            item.get("start_precision")
-            or item.get("from_precision")
-            or "unknown"
+            item.get("start_precision") or item.get("from_precision") or "unknown"
         ).casefold()
         end_value = item.get("end_value", item.get("to"))
         end_precision = str(
-            item.get("end_precision")
-            or item.get("to_precision")
-            or "unknown"
+            item.get("end_precision") or item.get("to_precision") or "unknown"
         ).casefold()
         game_title = str(item.get("game_title") or "counter-strike").casefold()
         identity = _json(
@@ -4040,8 +4058,7 @@ class PlayerStore:
             ]
         )
         tenure_id = (
-            "tenure_"
-            + hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24]
+            "tenure_" + hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24]
         )
         self.connection.execute(
             """
@@ -4125,9 +4142,7 @@ class PlayerStore:
         fetched_at: str,
     ) -> str:
         identity = _json([player_id, role_kind, role, valid_from])
-        role_id = (
-            "role_" + hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24]
-        )
+        role_id = "role_" + hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24]
         self.connection.execute(
             """
             INSERT INTO player_roles (
@@ -4350,6 +4365,7 @@ class PlayerStore:
                 FROM major_events major
                 LEFT JOIN major_appearances appearance
                   ON appearance.major_id = major.id
+                 AND appearance.counts_toward_total = 1
                 GROUP BY major.id
                 ORDER BY major.starts_on
                 """
@@ -4402,6 +4418,7 @@ class PlayerStore:
                 JOIN major_events major ON major.id = appearance.major_id
                 LEFT JOIN teams team ON team.id = appearance.team_id
                 JOIN players player ON player.id = appearance.player_id
+                WHERE appearance.counts_toward_total = 1
                 GROUP BY appearance.major_id, appearance.team_id
                 ORDER BY major.starts_on, team.canonical_name
                 """
@@ -4419,13 +4436,9 @@ class PlayerStore:
                 "specialPlayers": row["special_players"],
             }
             if row["team"] is None:
-                critical_issues.append(
-                    {"code": "major_roster_missing_team", **details}
-                )
+                critical_issues.append({"code": "major_roster_missing_team", **details})
             elif players < 5:
-                critical_issues.append(
-                    {"code": "underfilled_major_roster", **details}
-                )
+                critical_issues.append({"code": "underfilled_major_roster", **details})
             elif players > 6 or (players > 5 and special == 0):
                 critical_issues.append(
                     {
@@ -4503,6 +4516,32 @@ class PlayerStore:
                 """
             )
         ]
+        excluded_major_players_missing_birth_date = [
+            {
+                "id": row["id"],
+                "nickname": row["canonical_nickname"],
+                "majorAppearances": int(row["major_appearances"]),
+            }
+            for row in self.connection.execute(
+                """
+                SELECT
+                    player.id,
+                    player.canonical_nickname,
+                    COUNT(*) AS major_appearances
+                FROM players player
+                JOIN major_appearances appearance
+                  ON appearance.player_id = player.id
+                 AND appearance.counts_toward_total = 1
+                WHERE player.is_guessable = 0
+                  AND player.is_coach = 0
+                  AND player.birth_date IS NULL
+                GROUP BY player.id
+                ORDER BY major_appearances DESC,
+                         lower(player.canonical_nickname),
+                         player.id
+                """
+            )
+        ]
         if missing_avatar_players:
             warnings.append(
                 {
@@ -4522,6 +4561,13 @@ class PlayerStore:
                 {
                     "code": "duplicate_guessable_nickname",
                     "count": len(duplicate_nicknames),
+                }
+            )
+        if excluded_major_players_missing_birth_date:
+            warnings.append(
+                {
+                    "code": "excluded_major_player_missing_birth_date",
+                    "count": len(excluded_major_players_missing_birth_date),
                 }
             )
 
@@ -4546,6 +4592,9 @@ class PlayerStore:
             "warnings": warnings,
             "majorRosterExceptions": roster_exceptions,
             "duplicateNicknames": duplicate_nicknames,
+            "excludedMajorPlayersMissingBirthDate": (
+                excluded_major_players_missing_birth_date
+            ),
             "missingAvatarPlayers": missing_avatar_players,
             "currentTeamsMissingLogo": teams_missing_logo,
         }
@@ -4581,8 +4630,7 @@ class PlayerStore:
                 )
             }
             conflicts = {
-                status: 0
-                for status in ("open", "automatic", "manual", "ignored")
+                status: 0 for status in ("open", "automatic", "manual", "ignored")
             }
             conflicts.update(
                 {

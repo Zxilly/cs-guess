@@ -792,5 +792,126 @@
       "external_id": "52025"
     },
     "basis": "Both records are Danish player Magnus Folke Lind; nickname, legal name, country, and normalized Prestige team identity agree, while Liquipedia supplies the missing birth date."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Jackasmo"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "50003"
+    },
+    "basis": "Mykyta and Nikita are transliterations of the same Ukrainian Jackasmo identity; surname, nickname, country, and current fnatic team agree."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "SaVage"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "29792"
+    },
+    "basis": "Both records are Australian player James SaVage Savage on SemperFi; the reviewed survivor has corroborating Liquipedia, HLTV, Steam, FACEIT, PandaScore, and BALLDONTLIE identities."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Nicx"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "41663"
+    },
+    "basis": "Nick and Nicholas are compatible forms of the same United States nicx identity; surname, current team, and country agree."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Rack"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "46279"
+    },
+    "basis": "Both records identify Swedish player Elias Rack Karttunen with the same current team; the survivor also has corroborating Steam, FACEIT, Liquipedia, and PandaScore identities."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "ArtFr0st"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "36656"
+    },
+    "basis": "Artem and Artyom are transliterations of the same Russian ArtFr0st identity; surname, nickname, country, and current team agree."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Hallzerk"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "18347"
+    },
+    "basis": "The unaccented Hakon Fjaerli record and Håkon Fjærli record identify the same Norwegian hallzerk; nickname and current team agree."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Ahang (Zheng Hang)"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "61563"
+    },
+    "basis": "Liquipedia's disambiguated Ahang page explicitly identifies Zheng Hang, matching the PandaScore legal name, nickname, country, and current team."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Dafra1D"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "51702"
+    },
+    "basis": "Kyrylo Poleiko and Kirill Polieiko are transliterations of the same Ukrainian Dafra1D identity; nickname and current team agree."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Efire"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "47247"
+    },
+    "basis": "Tugs-Erdene and Tugserdene are spelling variants of the same Mongolian efire identity; surname, nickname, country, and current team agree."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "JBa"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "40711"
+    },
+    "basis": "Josh and Joshua are compatible forms of the same United States JBa identity; surname, nickname, country, and current team agree."
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "HuNter-"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "17958"
+    },
+    "basis": "Both records identify Nemanja huNter- Kovač with the exact 1996-01-03 birth date and current team; the country-code difference reflects the player's Bosnia and Herzegovina/Serbia association rather than a second identity."
   }
 ]

@@ -61,6 +61,13 @@ def _team_display_name(value: object) -> str:
     return normalized
 
 
+def _historical_team_display_name(value: object) -> str:
+    name = str(value).strip()
+    if name.casefold().startswith("ex-"):
+        name = name[3:].strip()
+    return _team_display_name(name)
+
+
 def build_app_catalog(
     records: Iterable[Mapping[str, Any]],
     *,
@@ -118,6 +125,25 @@ def build_app_catalog(
             )
         used_ids.add(public_id)
         team_name = _team_display_name(current_team["name"])
+        historical_teams: list[str] = []
+        historical_team_keys = {
+            UNATTACHED_TEAM.casefold(),
+            team_name.casefold(),
+        }
+        for tenure in record.get("teamHistory", []):
+            if not isinstance(tenure, Mapping) or tenure.get("current") is True:
+                continue
+            historical_team = tenure.get("team")
+            if not isinstance(historical_team, Mapping):
+                continue
+            historical_name = _historical_team_display_name(
+                historical_team.get("name", "")
+            )
+            historical_key = historical_name.casefold()
+            if historical_key in historical_team_keys:
+                continue
+            historical_team_keys.add(historical_key)
+            historical_teams.append(historical_name)
         catalog_record = {
             "id": public_id,
             "nickname": str(record["nickname"]),
@@ -130,6 +156,8 @@ def build_app_catalog(
             "majorAppearances": int(record["majorAppearances"]),
             "majorWins": int(record.get("majorWins", 0)),
         }
+        if historical_teams:
+            catalog_record["historicalTeams"] = historical_teams
         aliases = [
             str(alias).strip()
             for alias in record.get("aliases", [])
