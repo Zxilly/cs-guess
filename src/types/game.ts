@@ -27,6 +27,12 @@ export function maxGuessesForDifficulty(difficulty: GameDifficulty) {
 }
 
 export type CountryRelation = "match" | "near" | "miss";
+export type TeamRelation =
+  | "match"
+  | "target_history"
+  | "guess_history"
+  | "shared_history"
+  | "miss";
 
 export interface CountryHint {
   relation: CountryRelation;
@@ -37,6 +43,7 @@ export interface OpponentGuessProgress {
   playerId?: string;
   guessedPlayerId: string | null;
   matchedFields: string[];
+  teamRelation?: TeamRelation;
   countryRelation?: CountryRelation;
   countryDistanceKm?: number | null;
 }

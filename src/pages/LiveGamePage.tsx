@@ -89,6 +89,7 @@ import {
   type GameMode,
   type OpponentGuessProgress,
   type OpponentVisibility,
+  type TeamRelation,
 } from "@/types/game";
 
 interface LiveGamePageProps {
@@ -157,6 +158,21 @@ function countryHint(event: Record<string, unknown>): CountryHint {
     relation,
     distanceKm: readNumber(event, "country_distance_km") ?? null,
   };
+}
+
+function teamRelation(
+  event: Record<string, unknown>,
+): TeamRelation | undefined {
+  const value = readString(event, "team_relation");
+  return value === "match" ||
+    value === "target_history" ||
+    value === "guess_history" ||
+    value === "shared_history" ||
+    value === "miss"
+    ? value
+    : matchedFields(event).includes("team")
+      ? "match"
+      : undefined;
 }
 
 function connectionCopy(connection: string) {
@@ -471,12 +487,14 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
     return players.filter((player) => player.id === guessedId);
   });
   const ownMatchedFields = ownGuessEvents.map(matchedFields);
+  const ownTeamRelations = ownGuessEvents.map(teamRelation);
   const ownCountryHints = ownGuessEvents.map(countryHint);
   const opponentProgress: OpponentGuessProgress[] = opponentEvents.map(
     (event) => ({
       playerId: readString(event, "player_id"),
       guessedPlayerId: readString(event, "guessed_player_id") ?? null,
       matchedFields: matchedFields(event),
+      teamRelation: teamRelation(event),
       countryRelation: countryHint(event).relation,
       countryDistanceKm: readNumber(event, "country_distance_km") ?? null,
     }),
@@ -1855,6 +1873,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
                 opponentPlayer?.forfeitedThisRound ?? false
               }
               ownMatchedFields={ownMatchedFields}
+              ownTeamRelations={ownTeamRelations}
               ownCountryHints={ownCountryHints}
               onOpponentVisibilityChange={
                 mode === "room" && isHost && phase === "waiting"

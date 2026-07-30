@@ -296,6 +296,7 @@ struct CachedGuess {
     player_id: String,
     guess_number: usize,
     matched_fields: Vec<&'static str>,
+    team_relation: &'static str,
     country_relation: &'static str,
     country_distance_km: Option<u32>,
     correct: bool,
@@ -1193,6 +1194,7 @@ impl RoomActor {
         }
 
         let matched_fields = matched_fields(guess_player, target);
+        let team_relation_value = team_relation(guess_player, target);
         let country = country_hint(guess_player, target);
         let correct = guess_player.id == target.id;
         participant.guesses.push(guessed_player_id.clone());
@@ -1203,6 +1205,7 @@ impl RoomActor {
             player_id: guessed_player_id,
             guess_number,
             matched_fields,
+            team_relation: team_relation_value,
             country_relation: country.relation,
             country_distance_km: country.distance_km,
             correct,
@@ -1225,6 +1228,7 @@ impl RoomActor {
                 guessed_player_id: (visibility == Visibility::Open)
                     .then(|| cached.player_id.clone()),
                 matched_fields: cached.matched_fields.clone(),
+                team_relation: cached.team_relation,
                 country_relation: cached.country_relation,
                 country_distance_km: (visibility == Visibility::Open)
                     .then_some(cached.country_distance_km)
@@ -1862,6 +1866,7 @@ impl RoomActor {
                     player_id: guessed_id.clone(),
                     guess_number: index + 1,
                     matched_fields: matched_fields(guessed, target),
+                    team_relation: team_relation(guessed, target),
                     country_relation: country.relation,
                     country_distance_km: country.distance_km,
                     correct: guessed.id == target.id,
@@ -1887,6 +1892,7 @@ impl RoomActor {
                             guessed_player_id: (self.visibility == Visibility::Open)
                                 .then(|| guessed_id.clone()),
                             matched_fields: matched_fields(guessed, target),
+                            team_relation: team_relation(guessed, target),
                             country_relation: country.relation,
                             country_distance_km: (self.visibility == Visibility::Open)
                                 .then_some(country.distance_km)
@@ -1988,6 +1994,7 @@ impl RoomActor {
                 player_id: cached.player_id.clone(),
                 guess_number: cached.guess_number,
                 matched_fields: cached.matched_fields.clone(),
+                team_relation: cached.team_relation,
                 country_relation: cached.country_relation,
                 country_distance_km: cached.country_distance_km,
                 correct: cached.correct,
@@ -2174,6 +2181,8 @@ struct CatalogPlayer {
     id: String,
     nickname: String,
     team: String,
+    #[serde(default)]
+    historical_teams: Vec<String>,
     #[serde(rename = "countryCode")]
     country_code: String,
     age: u8,
@@ -2238,6 +2247,55 @@ fn matched_fields(guess: &CatalogPlayer, target: &CatalogPlayer) -> Vec<&'static
         result.push("major_wins");
     }
     result
+}
+
+fn team_relation(guess: &CatalogPlayer, target: &CatalogPlayer) -> &'static str {
+    if guess.team == target.team {
+        return "match";
+    }
+
+    let guess_current = normalize_team_name(&guess.team);
+    let target_current = normalize_team_name(&target.team);
+    let guess_history = guess
+        .historical_teams
+        .iter()
+        .filter_map(|team| normalize_team_name(team))
+        .collect::<HashSet<_>>();
+    let target_history = target
+        .historical_teams
+        .iter()
+        .filter_map(|team| normalize_team_name(team))
+        .collect::<HashSet<_>>();
+
+    if guess_current
+        .as_ref()
+        .is_some_and(|team| target_history.contains(team))
+    {
+        return "target_history";
+    }
+    if target_current
+        .as_ref()
+        .is_some_and(|team| guess_history.contains(team))
+    {
+        return "guess_history";
+    }
+    if !guess_history.is_disjoint(&target_history) {
+        return "shared_history";
+    }
+    "miss"
+}
+
+fn normalize_team_name(team: &str) -> Option<String> {
+    let normalized = team.split_whitespace().collect::<Vec<_>>().join(" ");
+    let normalized = normalized.to_lowercase();
+    if matches!(
+        normalized.as_str(),
+        "" | "无队伍" | "undefined" | "null" | "none" | "n/a"
+    ) {
+        None
+    } else {
+        Some(normalized)
+    }
 }
 
 fn country_hint(guess: &CatalogPlayer, target: &CatalogPlayer) -> CountryHint {
@@ -2385,6 +2443,7 @@ mod tests {
             id: "guess".to_owned(),
             nickname: "Guess".to_owned(),
             team: "Shared Team".to_owned(),
+            historical_teams: Vec::new(),
             country_code: "FR".to_owned(),
             age: 20,
             role: "AWPer".to_owned(),
@@ -2395,6 +2454,7 @@ mod tests {
             id: "target".to_owned(),
             nickname: "Target".to_owned(),
             team: "Shared Team".to_owned(),
+            historical_teams: Vec::new(),
             country_code: "DK".to_owned(),
             age: 21,
             role: "Rifler".to_owned(),
@@ -2407,11 +2467,73 @@ mod tests {
     }
 
     #[test]
+    fn historical_team_relations_preserve_direction_and_exact_match_semantics() {
+        let guess = CatalogPlayer {
+            id: "guess".to_owned(),
+            nickname: "Guess".to_owned(),
+            team: "Falcons".to_owned(),
+            historical_teams: vec!["Vitality".to_owned()],
+            country_code: "FR".to_owned(),
+            age: 20,
+            role: "AWPer".to_owned(),
+            majors: 1,
+            major_wins: 0,
+        };
+        let target = CatalogPlayer {
+            id: "target".to_owned(),
+            nickname: "Target".to_owned(),
+            team: "MOUZ".to_owned(),
+            historical_teams: vec!["Vitality".to_owned()],
+            country_code: "DK".to_owned(),
+            age: 21,
+            role: "Rifler".to_owned(),
+            majors: 2,
+            major_wins: 1,
+        };
+
+        assert_eq!(team_relation(&guess, &target), "shared_history");
+        assert!(!matched_fields(&guess, &target).contains(&"team"));
+
+        let guess_current_in_target_history = CatalogPlayer {
+            historical_teams: vec!["Astralis".to_owned()],
+            ..guess.clone()
+        };
+        let target_with_guess_current_history = CatalogPlayer {
+            historical_teams: vec!["Falcons".to_owned(), "Vitality".to_owned()],
+            ..target.clone()
+        };
+        assert_eq!(
+            team_relation(
+                &guess_current_in_target_history,
+                &target_with_guess_current_history
+            ),
+            "target_history"
+        );
+
+        let guess_with_target_current_history = CatalogPlayer {
+            historical_teams: vec!["MOUZ".to_owned(), "Vitality".to_owned()],
+            ..guess
+        };
+        let target_without_direct_history = CatalogPlayer {
+            historical_teams: vec!["NAVI".to_owned()],
+            ..target
+        };
+        assert_eq!(
+            team_relation(
+                &guess_with_target_current_history,
+                &target_without_direct_history
+            ),
+            "guess_history"
+        );
+    }
+
+    #[test]
     fn country_hint_uses_normalized_codes_continents_and_capital_distance() {
         let guess = CatalogPlayer {
             id: "guess".to_owned(),
             nickname: "Guess".to_owned(),
             team: "A".to_owned(),
+            historical_teams: Vec::new(),
             country_code: "FR".to_owned(),
             age: 20,
             role: "Rifler".to_owned(),
@@ -2422,6 +2544,7 @@ mod tests {
             id: "target".to_owned(),
             nickname: "Target".to_owned(),
             team: "B".to_owned(),
+            historical_teams: Vec::new(),
             country_code: "DE".to_owned(),
             age: 21,
             role: "AWPer".to_owned(),

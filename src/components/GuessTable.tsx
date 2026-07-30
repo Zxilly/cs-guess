@@ -1,10 +1,14 @@
 import {
+  ArrowLeftIcon,
   ArrowDownIcon,
+  ArrowRightIcon,
   ArrowUpIcon,
   CheckIcon,
   CircleIcon,
   EyeIcon,
   EyeSlashIcon,
+  LinkSimpleIcon,
+  type Icon,
 } from "@phosphor-icons/react";
 import { useId, useState, type KeyboardEvent, type ReactNode } from "react";
 
@@ -30,12 +34,14 @@ import {
   countryNameZh,
   formatCountryDistance,
 } from "@/lib/country-geography";
+import { compareTeams } from "@/lib/team-relation";
 import { cn } from "@/lib/utils";
 import type {
   CountryHint,
   GameMode,
   OpponentGuessProgress,
   OpponentVisibility,
+  TeamRelation,
 } from "@/types/game";
 
 interface GuessTableProps {
@@ -46,6 +52,7 @@ interface GuessTableProps {
   mode: GameMode;
   maxGuesses: number;
   ownMatchedFields?: readonly (readonly string[])[];
+  ownTeamRelations?: readonly (TeamRelation | undefined)[];
   ownCountryHints?: readonly CountryHint[];
   opponentProgress?: readonly OpponentGuessProgress[];
   opponents?: readonly OpponentBoardData[];
@@ -64,6 +71,37 @@ interface OpponentBoardData {
 }
 
 type Comparison = "match" | "higher" | "lower" | "miss";
+
+const TEAM_RELATION_DETAILS: Record<
+  TeamRelation,
+  { label: string; shortLabel: string; icon: Icon }
+> = {
+  match: {
+    label: "当前战队完全一致",
+    shortLabel: "当前同队",
+    icon: CheckIcon,
+  },
+  target_history: {
+    label: "猜测选手的当前战队，是答案曾经效力过的战队",
+    shortLabel: "答案曾效力",
+    icon: ArrowRightIcon,
+  },
+  guess_history: {
+    label: "答案的当前战队，是猜测选手曾经效力过的战队",
+    shortLabel: "猜测曾效力",
+    icon: ArrowLeftIcon,
+  },
+  shared_history: {
+    label: "猜测选手和答案曾经效力过的战队有重叠",
+    shortLabel: "共同历史队",
+    icon: LinkSimpleIcon,
+  },
+  miss: {
+    label: "战队未命中",
+    shortLabel: "未命中",
+    icon: CircleIcon,
+  },
+};
 
 const ATTRIBUTES = [
   ["战队", "team", "team"],
@@ -132,27 +170,39 @@ function ComparisonValue({
 
 function TeamComparisonValue({
   player,
-  comparison,
+  relation,
 }: {
   player: Player;
-  comparison: Comparison;
+  relation: TeamRelation;
 }) {
-  const comparisonLabel =
-    comparison === "match" ? "完全一致" : "战队未命中";
+  const details = TEAM_RELATION_DETAILS[relation];
+  const RelationIcon = details.icon;
+  const isHistoricalRelation =
+    relation === "target_history" ||
+    relation === "guess_history" ||
+    relation === "shared_history";
 
   return (
     <span
       className={cn(
-        "mx-auto flex max-w-full items-center justify-center gap-1.5",
-        comparison === "match"
-          ? "font-semibold text-primary"
-          : "text-muted-foreground",
+        "mx-auto flex max-w-full flex-col items-center justify-center",
+        relation === "match" && "font-semibold text-primary",
+        isHistoricalRelation && "font-semibold text-comparison-near",
+        relation === "miss" && "text-muted-foreground",
       )}
-      title={`${player.team}，${comparisonLabel}`}
-      aria-label={`${player.team}，${comparisonLabel}`}
+      title={`${player.team}，${details.label}`}
+      aria-label={`${player.team}，${details.label}`}
     >
-      <TeamLogo name={player.team} src={player.teamLogoUrl} />
-      <span className="min-w-0 truncate font-mono text-xs">{player.team}</span>
+      <span className="flex min-w-0 max-w-full items-center justify-center gap-1.5">
+        <TeamLogo name={player.team} src={player.teamLogoUrl} />
+        <span className="min-w-0 truncate font-mono text-xs">{player.team}</span>
+      </span>
+      {isHistoricalRelation ? (
+        <span className="mt-1 inline-flex max-w-full items-center gap-1 border border-comparison-near/35 bg-comparison-near/8 px-1.5 py-0.5 font-sans text-[10px] leading-none">
+          <RelationIcon className="size-3 shrink-0" weight="bold" />
+          <span className="truncate">{details.shortLabel}</span>
+        </span>
+      ) : null}
     </span>
   );
 }
@@ -228,12 +278,24 @@ function comparisonFor(
   return player[key] === mysteryPlayer[key] ? "match" : "miss";
 }
 
+function teamRelationFor(
+  player: Player,
+  mysteryPlayer: Player,
+  matchedFields?: readonly string[],
+  relation?: TeamRelation,
+): TeamRelation {
+  if (relation) return relation;
+  if (matchedFields?.includes("team")) return "match";
+  return compareTeams(player, mysteryPlayer);
+}
+
 function GuessBoard({
   title,
   guesses,
   maxGuesses,
   mysteryPlayer,
   matchedFields,
+  teamRelations,
   countryHints,
   showCount = true,
 }: {
@@ -242,6 +304,7 @@ function GuessBoard({
   maxGuesses: number;
   mysteryPlayer: Player;
   matchedFields?: readonly (readonly string[])[];
+  teamRelations?: readonly (TeamRelation | undefined)[];
   countryHints?: readonly CountryHint[];
   showCount?: boolean;
 }) {
@@ -328,11 +391,11 @@ function GuessBoard({
                       attribute[1] === "team" ? (
                         <TeamComparisonValue
                           player={player}
-                          comparison={comparisonFor(
+                          relation={teamRelationFor(
                             player,
                             mysteryPlayer,
-                            attribute,
                             matchedFields?.[index],
+                            teamRelations?.[index],
                           )}
                         />
                       ) : attribute[1] === "countryCode" ? (
@@ -505,7 +568,29 @@ function OpponentBoard({
                       attribute[1] === "countryCode"
                         ? attempt?.countryRelation
                         : undefined;
-                    const near = countryRelation === "near";
+                    const teamRelation =
+                      attribute[1] === "team"
+                        ? attempt?.teamRelation
+                        : undefined;
+                    const isHistoricalTeamRelation =
+                      teamRelation === "target_history" ||
+                      teamRelation === "guess_history" ||
+                      teamRelation === "shared_history";
+                    const cellMatched =
+                      matched || teamRelation === "match";
+                    const near =
+                      countryRelation === "near" ||
+                      isHistoricalTeamRelation;
+                    const teamDetails = teamRelation
+                      ? TEAM_RELATION_DETAILS[teamRelation]
+                      : undefined;
+                    const nearLabel = isHistoricalTeamRelation
+                      ? teamDetails?.label
+                      : "国籍同洲接近";
+                    const NearIcon =
+                      isHistoricalTeamRelation && teamDetails
+                        ? teamDetails.icon
+                        : CircleIcon;
                     return (
                       <TableCell
                         key={attribute[0]}
@@ -516,11 +601,11 @@ function OpponentBoard({
                             attribute[1] === "team" ? (
                               <TeamComparisonValue
                                 player={player}
-                                comparison={comparisonFor(
+                                relation={teamRelationFor(
                                   player,
                                   mysteryPlayer,
-                                  attribute,
                                   attempt.matchedFields,
+                                  attempt.teamRelation,
                                 )}
                               />
                             ) : attribute[1] === "countryCode" ? (
@@ -560,32 +645,43 @@ function OpponentBoard({
                           ) : (
                             <span
                               className={cn(
-                                "inline-flex size-7 items-center justify-center",
-                                matched
+                                "inline-flex min-h-7 items-center justify-center",
+                                cellMatched
                                   ? "text-primary"
                                   : near
                                     ? "text-primary/75"
                                     : "text-muted-foreground/45",
                               )}
                               title={
-                                matched
+                                cellMatched
                                   ? `${attribute[0]}命中`
                                   : near
-                                    ? "国籍同洲接近"
+                                    ? nearLabel
                                     : `${attribute[0]}未命中`
                               }
                               aria-label={
-                                matched
+                                cellMatched
                                   ? `${attribute[0]}命中`
                                   : near
-                                    ? "国籍同洲接近"
+                                    ? nearLabel
                                     : `${attribute[0]}未命中`
                               }
                             >
-                              {matched ? (
+                              {cellMatched ? (
                                 <CheckIcon className="size-3.5" weight="bold" />
+                              ) : isHistoricalTeamRelation && teamDetails ? (
+                                <span className="inline-flex items-center gap-1 border border-comparison-near/35 bg-comparison-near/8 px-1.5 py-1 text-[10px] leading-none text-comparison-near">
+                                  <NearIcon
+                                    className="size-3 shrink-0"
+                                    weight="bold"
+                                  />
+                                  <span>{teamDetails.shortLabel}</span>
+                                </span>
                               ) : near ? (
-                                <CircleIcon className="size-3" weight="duotone" />
+                                <NearIcon
+                                  className="size-3"
+                                  weight="duotone"
+                                />
                               ) : (
                                 <CircleIcon className="size-2.5" weight="fill" />
                               )}
@@ -612,6 +708,7 @@ function MultiplayerGuessBoards({
   maxGuesses,
   mysteryPlayer,
   ownMatchedFields,
+  ownTeamRelations,
   ownCountryHints,
   opponents,
   opponentVisibility,
@@ -620,6 +717,7 @@ function MultiplayerGuessBoards({
   maxGuesses: number;
   mysteryPlayer: Player;
   ownMatchedFields?: readonly (readonly string[])[];
+  ownTeamRelations?: readonly (TeamRelation | undefined)[];
   ownCountryHints?: readonly CountryHint[];
   opponents: readonly OpponentBoardData[];
   opponentVisibility: OpponentVisibility;
@@ -706,6 +804,7 @@ function MultiplayerGuessBoards({
           maxGuesses={maxGuesses}
           mysteryPlayer={mysteryPlayer}
           matchedFields={ownMatchedFields}
+          teamRelations={ownTeamRelations}
           countryHints={ownCountryHints}
           showCount={false}
         />
@@ -743,6 +842,7 @@ export function GuessTable({
   mode,
   maxGuesses,
   ownMatchedFields,
+  ownTeamRelations,
   ownCountryHints,
   opponentProgress,
   opponents,
@@ -759,6 +859,7 @@ export function GuessTable({
         maxGuesses={maxGuesses}
         mysteryPlayer={mysteryPlayer}
         matchedFields={ownMatchedFields}
+        teamRelations={ownTeamRelations}
         countryHints={ownCountryHints}
         showCount={showProgressCount}
       />
@@ -821,6 +922,7 @@ export function GuessTable({
           maxGuesses={maxGuesses}
           mysteryPlayer={mysteryPlayer}
           ownMatchedFields={ownMatchedFields}
+          ownTeamRelations={ownTeamRelations}
           ownCountryHints={ownCountryHints}
           opponents={opponents}
           opponentVisibility={opponentVisibility}
@@ -833,6 +935,7 @@ export function GuessTable({
             maxGuesses={maxGuesses}
             mysteryPlayer={mysteryPlayer}
             matchedFields={ownMatchedFields}
+            teamRelations={ownTeamRelations}
             countryHints={ownCountryHints}
             showCount={false}
           />

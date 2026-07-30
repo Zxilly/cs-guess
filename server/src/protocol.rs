@@ -357,6 +357,7 @@ pub struct GuessView {
     pub player_id: String,
     pub guess_number: usize,
     pub matched_fields: Vec<&'static str>,
+    pub team_relation: &'static str,
     pub country_relation: &'static str,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub country_distance_km: Option<u32>,
@@ -370,6 +371,7 @@ pub struct OpponentProgressView {
     pub guess_number: usize,
     pub guessed_player_id: Option<String>,
     pub matched_fields: Vec<&'static str>,
+    pub team_relation: &'static str,
     pub country_relation: &'static str,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub country_distance_km: Option<u32>,
@@ -467,6 +469,7 @@ pub enum ServerMessage {
         player_id: String,
         guess_number: usize,
         matched_fields: Vec<&'static str>,
+        team_relation: &'static str,
         country_relation: &'static str,
         #[serde(skip_serializing_if = "Option::is_none")]
         country_distance_km: Option<u32>,
@@ -479,6 +482,7 @@ pub enum ServerMessage {
         guess_number: usize,
         guessed_player_id: Option<String>,
         matched_fields: Vec<&'static str>,
+        team_relation: &'static str,
         country_relation: &'static str,
         #[serde(skip_serializing_if = "Option::is_none")]
         country_distance_km: Option<u32>,
