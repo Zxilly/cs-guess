@@ -21,6 +21,8 @@ describe("API traffic routing", () => {
     expect(shouldUseSameOriginApi(["en-US", "zh-CN"])).toBe(true);
     expect(apiBaseForLanguages(["en-US", "zh-CN"], DIRECT_API)).toBe("");
     expect(apiBaseForLanguages(["fr-FR", "zh-CN"], DIRECT_API)).toBe("");
+    expect(apiBaseForLanguages(["zh-TW"], DIRECT_API)).toBe("");
+    expect(apiBaseForLanguages(["zh"], DIRECT_API)).toBe("");
   });
 
   it("rewrites absolute Socket.IO endpoints to the site CDN origin", () => {

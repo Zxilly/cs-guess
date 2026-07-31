@@ -13,11 +13,7 @@ function normalizedPrimaryLanguage(languageTags: readonly string[]) {
 
 export function prefersDirectApi(languageTags: readonly string[]) {
   const primaryLanguage = normalizedPrimaryLanguage(languageTags);
-  return (
-    primaryLanguage === "zh" ||
-    primaryLanguage === DIRECT_API_LANGUAGE.toLowerCase() ||
-    primaryLanguage.startsWith("zh-")
-  );
+  return primaryLanguage === DIRECT_API_LANGUAGE.toLowerCase();
 }
 
 export function shouldUseSameOriginApi(languageTags: readonly string[]) {
