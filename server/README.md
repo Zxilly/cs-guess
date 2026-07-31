@@ -170,7 +170,7 @@ Room creation, room join, and quick matching return the same session shape:
   "room_code": "CS-207207",
   "player_id": "a3827574-2b32-43cc-a19a-2398ab0ad54f",
   "session_token": "keep-this-secret",
-  "socket_io_url": "http://127.0.0.1:8080/socket.io",
+  "socket_io_url": "/socket.io",
   "snapshot": {
     "seq": 0,
     "room_code": "CS-207207",
@@ -294,7 +294,6 @@ See [`.env.example`](.env.example). Important settings:
 | Variable | Purpose |
 | --- | --- |
 | `CS_GUESS_BIND_ADDR` | Listen address |
-| `CS_GUESS_PUBLIC_BASE_URL` | Base used in returned Socket.IO URLs |
 | `CS_GUESS_ALLOWED_ORIGINS` | Comma-separated exact CORS origins |
 | `CS_GUESS_MAX_ROOMS` | Per-process active room ceiling |
 | `CS_GUESS_ROOM_IDLE_SECS` | Empty-connection room lifetime |

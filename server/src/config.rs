@@ -1,13 +1,12 @@
 use std::{env, net::SocketAddr, path::PathBuf, time::Duration};
 
-use http::{HeaderValue, Uri};
+use http::HeaderValue;
 
 use crate::error::AppError;
 
 #[derive(Clone, Debug)]
 pub struct Config {
     pub bind_addr: SocketAddr,
-    pub public_base_url: String,
     pub allowed_origins: Vec<HeaderValue>,
     pub max_rooms: usize,
     pub quick_request_ttl: Duration,
@@ -40,10 +39,6 @@ impl Config {
         let bind_addr = env_value("CS_GUESS_BIND_ADDR", "127.0.0.1:8080")
             .parse()
             .map_err(|error| AppError::Config(format!("invalid bind address: {error}")))?;
-        let public_base_url = env_value("CS_GUESS_PUBLIC_BASE_URL", "http://127.0.0.1:8080");
-        public_base_url
-            .parse::<Uri>()
-            .map_err(|error| AppError::Config(format!("invalid public base URL: {error}")))?;
 
         let allowed_origins = env_value(
             "CS_GUESS_ALLOWED_ORIGINS",
@@ -60,7 +55,6 @@ impl Config {
 
         Ok(Self {
             bind_addr,
-            public_base_url: public_base_url.trim_end_matches('/').to_owned(),
             allowed_origins,
             max_rooms: parse_usize("CS_GUESS_MAX_ROOMS", 10_000)?,
             quick_request_ttl: Duration::from_secs(parse_nonzero_u64(
@@ -115,7 +109,6 @@ impl Config {
     pub fn for_test() -> Self {
         Self {
             bind_addr: "127.0.0.1:0".parse().expect("test address is valid"),
-            public_base_url: "http://localhost".to_owned(),
             allowed_origins: vec![HeaderValue::from_static("http://localhost")],
             max_rooms: 2_000,
             quick_request_ttl: Duration::from_secs(60),

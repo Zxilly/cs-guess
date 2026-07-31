@@ -1022,17 +1022,13 @@ impl AppState {
         player: NewPlayer,
     ) -> Result<SessionResponse, AppError> {
         let snapshot: Snapshot = room.snapshot(player.player_id).await?;
-        let socket_io_url = format!(
-            "{}/socket.io",
-            self.inner.config.public_base_url.trim_end_matches('/')
-        );
         Ok(SessionResponse {
             room_code: room_code.to_owned(),
             player_id: player.player_id,
             session_token: player.session_token,
             // Kept for wire compatibility with older clients; this is now the
-            // Socket.IO endpoint, not a native WebSocket URL.
-            socket_io_url,
+            // same-origin Socket.IO path, not a native WebSocket URL.
+            socket_io_url: "/socket.io".to_owned(),
             snapshot,
         })
     }
