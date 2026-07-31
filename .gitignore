@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+src/locales/*/messages.js
 artifacts
 .pytest_cache
 .ruff_cache

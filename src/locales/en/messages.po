@@ -1,0 +1,3693 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-07-31 00:00+0800\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en\n"
+"Project-Id-Version: cs-guess\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#: src/components/PlayerSearch.tsx:102
+msgid "  ↵ 提交"
+msgstr "↵ Submit"
+
+#. placeholder {0}: group.roomCode
+#: src/pages/StatsPage.tsx:343
+msgid " · 房间 {0}"
+msgstr "· Room {0}"
+
+#: src/components/BattleContext.tsx:267
+msgid "·\n"
+"                      超时判负"
+msgstr "·\n"
+"                      Loss due to timeout"
+
+#: src/pages/StatsPage.tsx:425
+msgid "· 房间"
+msgstr "· Room"
+
+#: src/components/BattleContext.tsx:123
+#: src/components/GuessTable.tsx:476
+msgid "· 超时判负"
+msgstr "· Overtime penalty"
+
+#. placeholder {0}: group.entries.length
+#. placeholder {0}: history.length
+#: src/pages/StatsPage.tsx:323
+#: src/pages/StatsPage.tsx:346
+#: src/pages/StatsPage.tsx:430
+msgid "{0} 回合"
+msgstr "{0} rounds"
+
+#. placeholder {0}: identity.profile.drawCredits
+#: src/pages/IdentityPage.tsx:405
+msgid "{0} 次抽取"
+msgstr "{0, plural, one {# draw} other {# draws}}"
+
+#. placeholder {0}: standing.guessCount
+#: src/pages/LiveGamePage.tsx:1984
+msgid "{0} 次猜出"
+msgstr "{0} guessed"
+
+#. placeholder {0}: pool.unlockWins
+#: src/pages/IdentityPage.tsx:618
+msgid "{0} 胜解锁"
+msgstr "{0} wins to unlock"
+
+#. placeholder {0}: winner.displayName
+#: src/pages/LiveGamePage.tsx:1961
+msgid "{0} 获胜"
+msgstr "{0} Win"
+
+#. placeholder {0}: roundResults.length
+#: src/pages/LiveGamePage.tsx:1919
+msgid "{0} 轮"
+msgstr "{0} rounds"
+
+#. placeholder {0}: countryNameZh(countryCode)
+#. placeholder {1}: continent ? `，${continent}` : ""
+#: src/components/GuessTable.tsx:231
+msgid "{0}，{relationLabel}{1}，两国首都直线距离 {distanceLabel}"
+msgstr "{0}, {relationLabel}{1}, the straight-line distance between the two capitals is {distanceLabel}"
+
+#. placeholder {0}: seriesComplete ? t`系列赛最终排行榜` : t`当前排行榜`
+#: src/components/CelebrationOverlay.tsx:447
+msgid "{0}，可横向滚动"
+msgstr "{0}, horizontal scrolling possible"
+
+#. placeholder {0}: entry.name
+#: src/pages/LiveGamePage.tsx:720
+msgid "{0}（已离开）"
+msgstr "{0}(left)"
+
+#. placeholder {0}: attribute[0]
+#: src/components/GuessTable.tsx:660
+#: src/components/GuessTable.tsx:667
+msgid "{0}命中"
+msgstr "{0}Hit"
+
+#. placeholder {0}: rematchPendingNames(rematch).join("、") || t`原对手`
+#: src/pages/LiveGamePage.tsx:2166
+msgid "{0}尚未回应，邀请将在 {rematchSeconds} 秒后失效。"
+msgstr "{0}has not responded yet and the invitation will expire in {rematchSeconds} seconds."
+
+#. placeholder {0}: attribute[0]
+#: src/components/GuessTable.tsx:663
+#: src/components/GuessTable.tsx:670
+msgid "{0}未命中"
+msgstr "{0}Miss"
+
+#: src/pages/LiveGamePage.tsx:1499
+msgid "{connectedPlayers} / {maxPlayers} 位成员已就位，由你开始本轮"
+msgstr "{connectedPlayers} / {maxPlayers} members are in place, you start this round"
+
+#: src/components/PlayerIdentity.tsx:157
+msgid "{drawCredits} 次抽取"
+msgstr "{drawCredits, plural, one {# draw} other {# draws}}"
+
+#: src/components/PlayerIdentity.tsx:79
+msgid "{drawCredits} 次抽取 · 胜 1 局或累计负 2 局 +1"
+msgstr "{drawCredits, plural, one {# draw} other {# draws}} · Win 1 game or lose 2 games in total +1"
+
+#: src/components/PlayerSearch.tsx:101
+msgid "{highlightedCompletion}  ⇥ 补全"
+msgstr "{highlightedCompletion} ⇥ completion"
+
+#: src/lib/solo-result-copy.ts:18
+#: src/lib/solo-result-copy.ts:19
+msgid "{maxGuesses} 次猜测机会已用完，答案已经揭晓。"
+msgstr "The {maxGuesses} guesses have been used up and the answer has been revealed."
+
+#: src/lib/friend-room.ts:25
+msgid "{maxPlayers} 人"
+msgstr "{maxPlayers} people"
+
+#: src/components/TeamLogo.tsx:32
+msgid "{name} 战队标志"
+msgstr "{name} Team logo"
+
+#: src/components/TeamLogo.tsx:24
+msgid "{name} 暂无战队标志"
+msgstr "{name} No team logo yet"
+
+#: src/pages/MatchmakingPage.tsx:261
+msgid "{roomStatus}，可以立即重试或安全返回。"
+msgstr "{roomStatus}, you can retry immediately or return safely."
+
+#: src/components/GuessTable.tsx:332
+#: src/components/GuessTable.tsx:498
+msgid "{title}，横向滚动查看更多属性"
+msgstr "{title}, scroll horizontally to see more properties"
+
+#: src/debug/install-audit-state.ts:38
+msgid "01 首次进入·身份引导"
+msgstr "01 First time entry·Identity guidance"
+
+#: src/debug/install-audit-state.ts:39
+msgid "02 模式首页"
+msgstr "02 Mode Home Page"
+
+#: src/debug/install-audit-state.ts:40
+msgid "03 身份管理"
+msgstr "03 Identity Management"
+
+#: src/debug/install-audit-state.ts:41
+msgid "04 身份抽取·滚动"
+msgstr "04 Identity Extraction·Scrolling"
+
+#: src/debug/install-audit-state.ts:42
+msgid "05 身份抽取·结果"
+msgstr "05 Identity Extraction·Results"
+
+#: src/debug/install-audit-state.ts:45
+msgid "06 单人难度选择"
+msgstr "06 Single player difficulty selection"
+
+#: src/debug/install-audit-state.ts:46
+msgid "07 单人·进行中"
+msgstr "07 Single·Ongoing"
+
+#: src/debug/install-audit-state.ts:47
+msgid "08 单人·胜利结算"
+msgstr "08 Single player·Victory settlement"
+
+#: src/debug/install-audit-state.ts:48
+msgid "09 单人·失败结算"
+msgstr "09 Single player·Failed settlement"
+
+#: src/debug/install-audit-state.ts:49
+msgid "10 每日·加载中"
+msgstr "10 daily·Loading"
+
+#: src/debug/install-audit-state.ts:50
+msgid "11 每日·加载失败"
+msgstr "11 Daily·Loading failed"
+
+#: src/debug/install-audit-state.ts:51
+msgid "12 每日·进行中"
+msgstr "12 Daily·Ongoing"
+
+#: src/debug/install-audit-state.ts:52
+msgid "13 每日·胜利结算"
+msgstr "13 Daily Victory Settlement"
+
+#: src/debug/install-audit-state.ts:53
+msgid "14 每日·失败结算"
+msgstr "14 Daily·Failed Settlement"
+
+#: src/debug/install-audit-state.ts:54
+msgid "15 快速匹配·1v1设置"
+msgstr "15 Quick Match·1v1 Setup"
+
+#: src/debug/install-audit-state.ts:55
+msgid "16 快速匹配·4人设置"
+msgstr "16 Quick Match·4-player setting"
+
+#: src/debug/install-audit-state.ts:56
+msgid "17 匹配·等待中"
+msgstr "17 matching·waiting"
+
+#: src/debug/install-audit-state.ts:57
+msgid "18 匹配·连接失败"
+msgstr "18 Match·Connection failed"
+
+#: src/debug/install-audit-state.ts:58
+msgid "19 匹配·成功进场"
+msgstr "19 Match·Enter successfully"
+
+#: src/pages/QuickMatch.tsx:328
+msgid "1v1 是双人竞速；4 人乱斗会展示三位对手的独立进度。"
+msgstr "1v1 is a two-player race; a four-player brawl will showcase the independent progress of three opponents."
+
+#: src/debug/install-audit-state.ts:59
+msgid "20 好友房·加入与创建"
+msgstr "20 Friend Room·Join and Create"
+
+#: src/debug/install-audit-state.ts:60
+msgid "21 好友房·等待开局"
+msgstr "21 Friend Room·Waiting for the start"
+
+#: src/debug/install-audit-state.ts:61
+msgid "22 对战·进行中"
+msgstr "22 Battle in progress"
+
+#: src/debug/install-audit-state.ts:62
+msgid "23 对战·重连中"
+msgstr "23 Battle·Reconnecting"
+
+#: src/debug/install-audit-state.ts:63
+msgid "24 对战·离线恢复"
+msgstr "24 Versus·Offline recovery"
+
+#: src/debug/install-audit-state.ts:64
+msgid "25 对战·单局胜利"
+msgstr "25 Battle·Single game victory"
+
+#: src/debug/install-audit-state.ts:65
+msgid "26 对战·单局失败"
+msgstr "26 Battle·Single game failed"
+
+#: src/debug/install-audit-state.ts:66
+msgid "27 对战·系列赛胜利"
+msgstr "27 Versus Series Victory"
+
+#: src/debug/install-audit-state.ts:67
+msgid "28 对战·系列赛失败"
+msgstr "28 Battle·Series Failed"
+
+#: src/debug/install-audit-state.ts:75
+msgid "29 单人·结算明细"
+msgstr "29 Single person·Settlement details"
+
+#: src/pages/ModeLobby.tsx:140
+msgid "3 分钟 · 8 次尝试 · 全服同题"
+msgstr "3 minutes · 8 attempts · Same question on all servers"
+
+#: src/debug/install-audit-state.ts:76
+msgid "30 每日·结算明细"
+msgstr "30 Daily settlement details"
+
+#: src/debug/install-audit-state.ts:77
+msgid "31 战绩·列表"
+msgstr "31 Achievements·List"
+
+#: src/debug/install-audit-state.ts:78
+msgid "32 战绩·回放详情"
+msgstr "32 Record·Replay details"
+
+#: src/debug/install-audit-state.ts:43
+msgid "33 首次身份·滚动"
+msgstr "33 First Identity·Scroll"
+
+#: src/debug/install-audit-state.ts:44
+msgid "34 首次身份·结果"
+msgstr "34 First Identity·Results"
+
+#: src/debug/install-audit-state.ts:79
+msgid "35 快速匹配·提交中"
+msgstr "35 Quick Match·Submitting"
+
+#: src/debug/install-audit-state.ts:80
+msgid "36 快速匹配·提交失败"
+msgstr "36 Quick match·Submission failed"
+
+#: src/debug/install-audit-state.ts:81
+msgid "37 匹配·取消中"
+msgstr "37 Matching·Cancelling"
+
+#: src/debug/install-audit-state.ts:82
+msgid "38 匹配·取消失败"
+msgstr "38 Match·cancel failed"
+
+#: src/debug/install-audit-state.ts:83
+msgid "39 好友房·创建中"
+msgstr "39 Friend Room·Creating"
+
+#: src/pages/LiveGamePage.tsx:1577
+#: src/pages/MatchmakingPage.tsx:472
+#: src/pages/ModeLobby.tsx:214
+#: src/pages/QuickMatch.tsx:265
+#: src/pages/QuickMatch.tsx:347
+msgid "4 人乱斗"
+msgstr "4-Player Free-for-All"
+
+#: src/pages/ModeLobby.tsx:192
+msgid "4 人乱斗："
+msgstr "4-Player Free-for-All:"
+
+#: src/pages/MatchmakingPage.tsx:355
+msgid "4 人乱斗匹配"
+msgstr "4-player brawl match"
+
+#: src/debug/install-audit-state.ts:84
+msgid "40 好友房·创建失败"
+msgstr "40 Friend room·Creation failed"
+
+#: src/debug/install-audit-state.ts:85
+msgid "41 战绩·空状态"
+msgstr "41 record·empty status"
+
+#: src/debug/install-audit-state.ts:68
+msgid "42 重赛·收到邀请"
+msgstr "42 Rematch·Received invitation"
+
+#: src/debug/install-audit-state.ts:69
+msgid "43 重赛·等待回应"
+msgstr "43 Rematch·Waiting for response"
+
+#: src/debug/install-audit-state.ts:70
+msgid "44 重赛·正在匹配"
+msgstr "44 Rematch · Matching"
+
+#: src/debug/install-audit-state.ts:71
+msgid "45 重赛·对手拒绝"
+msgstr "45 Rematch·Opponent refuses"
+
+#: src/debug/install-audit-state.ts:72
+msgid "46 重赛·对手离线"
+msgstr "46 Rematch·Opponent offline"
+
+#: src/debug/install-audit-state.ts:73
+msgid "47 重赛·邀请超时"
+msgstr "47 Rematch·Invitation timeout"
+
+#: src/debug/install-audit-state.ts:74
+msgid "48 重赛·邀请取消"
+msgstr "48 Rematch·Invitation cancelled"
+
+#: src/pages/QuickMatch.tsx:430
+msgid "BO1 一局定胜负，BO3 先赢两局，BO5 先赢三局。"
+msgstr "BO1 determines the outcome in one game, BO3 wins the first two games, and BO5 wins the first three games."
+
+#: src/i18n.ts:72
+msgid "CS Guess — 每日 Counter-Strike 职业选手竞猜挑战"
+msgstr "CS Guess — A daily Counter-Strike pro player guessing challenge"
+
+#: src/i18n.ts:65
+msgid "CS Guess — 每日选手竞猜"
+msgstr "CS Guess — Daily Player Guessing"
+
+#: src/pages/ModeLobby.tsx:238
+msgid "GitHub 源码"
+msgstr "GitHub source code"
+
+#: src/components/BattleContext.tsx:344
+msgid "HOST · 同题竞速"
+msgstr "HOST·Same topic competition"
+
+#: src/components/CelebrationOverlay.tsx:366
+#: src/components/DailyResultPanel.tsx:154
+#: src/components/GuessTable.tsx:114
+msgid "Major 冠军"
+msgstr "Major Titles"
+
+#: src/hooks/use-anonymous-profile.ts:104
+msgid "Major 冠军池"
+msgstr "Major Champion Pool"
+
+#: src/pages/IdentityPage.tsx:520
+msgid "Major 冠军池："
+msgstr "Major Champion Pool:"
+
+#: src/components/GuessTable.tsx:113
+msgid "Major 参赛"
+msgstr "Major Participation"
+
+#: src/hooks/use-anonymous-profile.ts:92
+#: src/pages/IdentityPage.tsx:455
+msgid "Major 参赛池"
+msgstr "Major Participant Pool"
+
+#: src/pages/IdentityPage.tsx:514
+msgid "Major 参赛池："
+msgstr "Major Participant Pool:"
+
+#: src/lib/solo-game.ts:25
+msgid "Major 参赛选手"
+msgstr "Major Players"
+
+#: src/components/CelebrationOverlay.tsx:361
+#: src/components/DailyResultPanel.tsx:151
+msgid "Major 次数"
+msgstr "Major Appearances"
+
+#: src/hooks/use-anonymous-profile.ts:98
+msgid "Major 资深池"
+msgstr "Major senior pool"
+
+#: src/pages/IdentityPage.tsx:517
+msgid "Major 资深池："
+msgstr "Major Veteran Pool:"
+
+#: src/components/SeriesSelector.tsx:13
+msgid "一局定胜负"
+msgstr "One game determines the outcome"
+
+#: src/components/DailyResultPanel.tsx:52
+msgid "三分钟倒计时已结束，今日答案已经揭晓。"
+msgstr "The three-minute countdown has ended and today’s answer has been revealed."
+
+#: src/components/CelebrationOverlay.tsx:169
+msgid "三分钟倒计时已结束，答案已经揭晓。"
+msgstr "The three-minute countdown has ended and the answer has been revealed."
+
+#: src/components/CelebrationOverlay.tsx:426
+msgid "下一局"
+msgstr "next round"
+
+#: src/pages/LiveGamePage.tsx:2030
+msgid "下一局将在 {nextRoundSeconds} 秒后自动开始"
+msgstr "The next round will automatically start in {nextRoundSeconds} seconds"
+
+#: src/components/GuessTable.tsx:229
+msgid "不同洲"
+msgstr "different continents"
+
+#: src/pages/StatsPage.tsx:247
+msgid "个人战绩"
+msgstr "Match History"
+
+#: src/lib/country-geography.ts:91
+msgid "中国"
+msgstr "China"
+
+#: src/components/LanguageSwitcher.tsx:25
+msgid "中文"
+msgstr "Chinese"
+
+#: src/machines/user-journey-machine.ts:700
+msgid "主动离开"
+msgstr "Leave voluntarily"
+
+#: src/pages/ModeLobby.tsx:182
+msgid "了解对战模式"
+msgstr "Learn about Versus Mode"
+
+#: src/pages/SoloDifficultyPage.tsx:114
+msgid "了解难度题池"
+msgstr "About difficulty pools"
+
+#: src/lib/country-geography.ts:110
+msgid "亚洲"
+msgstr "Asia"
+
+#: src/components/DifficultySelector.tsx:105
+#: src/components/SeriesSelector.tsx:115
+#: src/pages/RoomEntry.tsx:448
+#: src/pages/SoloDifficultyPage.tsx:190
+msgid "人"
+msgstr "people"
+
+#: src/pages/MatchmakingPage.tsx:502
+msgid "人，游戏中"
+msgstr "people, in game"
+
+#: src/pages/MatchmakingPage.tsx:502
+msgid "人；等待"
+msgstr "person; waiting"
+
+#: src/pages/MatchmakingPage.tsx:503
+msgid "人。"
+msgstr "people."
+
+#: src/pages/QuickMatch.tsx:394
+msgid "人游戏中"
+msgstr "playing"
+
+#: src/pages/QuickMatch.tsx:392
+msgid "人等待"
+msgstr "waiting"
+
+#: src/lib/friend-room.ts:46
+msgid "仅房主可以开始"
+msgstr "Only homeowners can start"
+
+#: src/components/DailyGameLoading.tsx:72
+#: src/components/DailyGameLoading.tsx:116
+#: src/components/ModeSidebar.tsx:28
+#: src/pages/GamePage.tsx:267
+#: src/pages/ModeLobby.tsx:126
+#: src/pages/StatsPage.tsx:56
+msgid "今日挑战"
+msgstr "Daily Challenge"
+
+#: src/machines/user-journey-machine.ts:534
+msgid "今日挑战失败"
+msgstr "Today’s challenge failed"
+
+#: src/components/CelebrationOverlay.tsx:161
+#: src/components/DailyResultPanel.tsx:81
+msgid "今日挑战完成"
+msgstr "Today's challenge completed"
+
+#: src/machines/user-journey-machine.ts:528
+msgid "今日挑战成功"
+msgstr "Today's challenge was successful"
+
+#: src/components/CelebrationOverlay.tsx:172
+msgid "今日挑战未完成，答案已经揭晓。"
+msgstr "Today's challenge has not been completed, the answer has been revealed."
+
+#: src/components/CelebrationOverlay.tsx:166
+#: src/components/DailyResultPanel.tsx:82
+msgid "今日挑战结束"
+msgstr "Today's challenge ends"
+
+#: src/machines/user-journey-machine.ts:510
+msgid "今日挑战载入"
+msgstr "Today's challenge loading"
+
+#: src/machines/user-journey-machine.ts:516
+msgid "今日挑战载入失败"
+msgstr "Today's challenge failed to load"
+
+#: src/machines/user-journey-machine.ts:522
+msgid "今日挑战进行中"
+msgstr "Today's challenge is in progress"
+
+#: src/pages/ModeLobby.tsx:138
+msgid "今日神秘选手"
+msgstr "Today’s mystery player"
+
+#: src/components/CelebrationOverlay.tsx:494
+#: src/components/DailyResultPanel.tsx:117
+msgid "今日答案"
+msgstr "Today's Answer"
+
+#: src/components/DailyResultPanel.tsx:55
+msgid "今日答案已经揭晓。"
+msgstr "The answer has been revealed today."
+
+#: src/pages/GamePage.tsx:94
+msgid "今日题目加载失败，请检查网络后重试。"
+msgstr "Today's question loading failed, please check the network and try again."
+
+#: src/components/DailyGameLoading.tsx:163
+msgid "今日题目载入失败，可以重新载入。"
+msgstr "Today's question failed to load, you can reload it."
+
+#: src/pages/IdentityPage.tsx:446
+msgid "从 Major 参赛选手中抽取固定匿名身份"
+msgstr "Draw a persistent anonymous identity from Major players"
+
+#: src/machines/user-journey-machine.ts:512
+msgid "从后端读取当天固定题目和已有进度。"
+msgstr "Read the day's fixed questions and existing progress from the backend."
+
+#: src/machines/user-journey-machine.ts:695
+msgid "会话失效"
+msgstr "session expired"
+
+#: src/hooks/use-realtime-room.ts:301
+#: src/hooks/use-realtime-room.ts:419
+#: src/hooks/use-realtime-room.ts:439
+msgid "会话已失效，请退出后重新加入。"
+msgstr "The session has expired, please log out and rejoin."
+
+#: src/pages/LiveGamePage.tsx:2044
+#: src/pages/LiveGamePage.tsx:2076
+#: src/pages/LiveGamePage.tsx:2338
+msgid "会话已失效，请重新加入房间"
+msgstr "The session has expired, please rejoin the room"
+
+#: src/lib/realtime.ts:21
+msgid "会话已失效，请重新加入房间。"
+msgstr "The session has expired, please rejoin the room."
+
+#: src/pages/LiveGamePage.tsx:2052
+#: src/pages/LiveGamePage.tsx:2339
+msgid "会话已失效，请重新匹配"
+msgstr "The session has expired, please try again"
+
+#: src/components/BattleContext.tsx:282
+#: src/components/BattleContext.tsx:341
+msgid "位玩家在线"
+msgstr "players online"
+
+#: src/components/CelebrationOverlay.tsx:355
+#: src/components/DailyResultPanel.tsx:148
+#: src/components/GuessTable.tsx:112
+msgid "位置"
+msgstr "Role"
+
+#: src/components/BattleContext.tsx:159
+#: src/components/BattleContext.tsx:221
+#: src/components/BattleContext.tsx:306
+#: src/components/MatchFoundOverlay.tsx:82
+#: src/pages/LiveGamePage.tsx:667
+#: src/pages/LiveGamePage.tsx:718
+#: src/pages/LiveGamePage.tsx:1803
+#: src/pages/LiveGamePage.tsx:1977
+msgid "你"
+msgstr "You"
+
+#: src/components/CelebrationOverlay.tsx:107
+msgid "你已离开，服务器判定本系列结束。"
+msgstr "You have left and the server has determined that this series is over."
+
+#: src/pages/LiveGamePage.tsx:1587
+msgid "你已连接"
+msgstr "you are connected"
+
+#: src/components/CelebrationOverlay.tsx:162
+msgid "你成功锁定了今日的神秘选手。"
+msgstr "You successfully locked in today’s mystery player."
+
+#: src/components/DailyResultPanel.tsx:90
+msgid "你成功锁定了今日答案。"
+msgstr "You successfully locked today's answer."
+
+#: src/components/CelebrationOverlay.tsx:180
+msgid "你成功锁定了本局的神秘选手。"
+msgstr "You successfully locked in the mystery player of this game."
+
+#: src/components/DailyResultPanel.tsx:93
+msgid "你成功锁定了本局答案。"
+msgstr "You have successfully locked the answer for this game."
+
+#: src/components/CelebrationOverlay.tsx:111
+msgid "你断线超时，服务器判定本系列结束。"
+msgstr "Your disconnection times out and the server determines that this series is over."
+
+#: src/components/CelebrationOverlay.tsx:223
+msgid "你率先拿到本场所需胜局。"
+msgstr "You are the first to get the victory you need in this game."
+
+#: src/components/MatchFoundOverlay.tsx:85
+#: src/pages/LiveGamePage.tsx:651
+msgid "你的身份"
+msgstr "your identity"
+
+#: src/components/CelebrationOverlay.tsx:206
+msgid "你的重连宽限期结束，对手赢得了本场系列赛。"
+msgstr "Your reconnection grace period ends and your opponent wins the series."
+
+#: src/components/CelebrationOverlay.tsx:207
+msgid "你的重连宽限期结束，本局判负。"
+msgstr "Your reconnection grace period has ended, and you will lose this game."
+
+#: src/components/CelebrationOverlay.tsx:234
+msgid "你赢得了本场系列赛。"
+msgstr "You win this series."
+
+#: src/components/CelebrationOverlay.tsx:234
+msgid "你赢得了本局。"
+msgstr "You win this round."
+
+#: src/pages/ModeLobby.tsx:197
+msgid "使用房间号加入，或创建 2–8 人房间。"
+msgstr "Join using your room number, or create a room of 2–8 people."
+
+#: src/components/IdentityDrawDialog.tsx:69
+#: src/pages/IdentityPage.tsx:655
+msgid "使用新身份"
+msgstr "Use new identity"
+
+#: src/components/IdentityDrawDialog.tsx:244
+msgid "保留当前"
+msgstr "keep current"
+
+#: src/machines/user-journey-machine.ts:691
+msgid "保留当前界面并尝试恢复实时连接。"
+msgstr "Keep the current interface and try to resume the live connection."
+
+#: src/machines/user-journey-machine.ts:596
+msgid "保留排队状态、显示错误并允许再次取消。"
+msgstr "Keep queued status, display errors, and allow further cancellations."
+
+#: src/components/CelebrationOverlay.tsx:213
+msgid "倒计时结束，服务器已完成本局裁定。"
+msgstr "The countdown is over and the server has completed the decision of this game."
+
+#: src/components/CelebrationOverlay.tsx:212
+msgid "倒计时结束，本局未分出胜负。"
+msgstr "The countdown is over and there is no winner in this game."
+
+#: src/machines/user-journey-machine.ts:696
+msgid "停止提交指令并提供显式恢复出口。"
+msgstr "Stops commit instructions and provides an explicit recovery exit."
+
+#: src/machines/user-journey-machine.ts:494
+msgid "允许保留当前身份、使用新身份或再次抽取。"
+msgstr "Allows you to keep your current identity, use a new identity, or draw again."
+
+#: src/components/SeriesSelector.tsx:15
+msgid "先赢三局"
+msgstr "Win three games first"
+
+#: src/components/SeriesSelector.tsx:14
+msgid "先赢两局"
+msgstr "Win two games first"
+
+#: src/lib/solo-game.ts:31
+msgid "全部选手"
+msgstr "All Players"
+
+#: src/components/DailyResultPanel.tsx:54
+msgid "八次猜测机会已用完，今日答案已经揭晓。"
+msgstr "The eight guesses have been used up and today the answer has been revealed."
+
+#: src/components/CelebrationOverlay.tsx:171
+msgid "八次猜测机会已用完，答案已经揭晓。"
+msgstr "The eight guesses have been used up and the answer has been revealed."
+
+#: src/pages/MatchmakingPage.tsx:407
+#: src/pages/MatchmakingPage.tsx:494
+msgid "公共队列数据"
+msgstr "public queue data"
+
+#: src/components/GuessTable.tsx:98
+msgid "共同历史队"
+msgstr "shared history team"
+
+#: src/lib/stats-history-display.ts:8
+msgid "关闭对局回放"
+msgstr "Turn off game replay"
+
+#: src/components/CelebrationOverlay.tsx:572
+msgid "关闭并查看明细"
+msgstr "Close and view details"
+
+#: src/components/OperationStatusDialog.tsx:52
+msgid "关闭状态提示"
+msgstr "Close status reminder"
+
+#: src/components/InfoTip.tsx:111
+msgid "关闭说明"
+msgstr "Close description"
+
+#: src/pages/IdentityPage.tsx:573
+msgid "再胜"
+msgstr "more wins"
+
+#: src/pages/StatsPage.tsx:275
+msgid "最佳回合连胜"
+msgstr "Best Round Win Streak"
+
+#: src/components/CelebrationOverlay.tsx:451
+msgid "最终排行榜"
+msgstr "Final Standings"
+
+#: src/pages/StatsPage.tsx:315
+msgid "最近回合"
+msgstr "Recent Rounds"
+
+#: src/components/IdentityDrawDialog.tsx:269
+msgid "准备重抽…"
+msgstr "Ready to draw again..."
+
+#: src/pages/LiveGamePage.tsx:1348
+msgid "凭证已保存"
+msgstr "Voucher saved"
+
+#: src/components/CelebrationOverlay.tsx:468
+msgid "分"
+msgstr "pts"
+
+#: src/components/LanguageSwitcher.tsx:33
+#: src/components/LanguageSwitcher.tsx:34
+msgid "切换为{nextLocaleName}"
+msgstr "Switch to {nextLocaleName}"
+
+#: src/pages/RoomEntry.tsx:492
+msgid "创建中…"
+msgstr "Creating…"
+
+#: src/machines/user-journey-machine.ts:572
+msgid "创建匹配票据并禁用重复提交。"
+msgstr "Create a matching ticket and disable duplicate submissions."
+
+#: src/pages/RoomEntry.tsx:399
+msgid "创建后会生成房间号，人数、题库和赛制在本房间内固定。"
+msgstr "After creation, a room number will be generated, and the number of people, question bank, and competition format are fixed in this room."
+
+#: src/pages/RoomEntry.tsx:478
+msgid "创建并进入等待"
+msgstr "Create & Enter Lobby"
+
+#: src/machines/user-journey-machine.ts:638
+msgid "创建或加入房间请求正在处理。"
+msgstr "The request to create or join a room is being processed."
+
+#: src/pages/RoomEntry.tsx:493
+msgid "创建房间 · {maxPlayers} 人 · {difficultyLabel} · BO{bestOf}"
+msgstr "Create room · {maxPlayers} people · {difficultyLabel} · BO{bestOf}"
+
+#: src/lib/realtime.ts:435
+msgid "创建房间失败，请检查房间设置后重试。"
+msgstr "Room creation failed, please check the room settings and try again."
+
+#: src/pages/RoomEntry.tsx:99
+msgid "创建房间失败，请检查网络后重试。"
+msgstr "Room creation failed, please check the network and try again."
+
+#: src/pages/RoomEntry.tsx:398
+msgid "创建房间说明"
+msgstr "About creating rooms"
+
+#: src/lib/room-submission.ts:38
+msgid "创建房间超时，请重试。"
+msgstr "Room creation timed out, please try again."
+
+#: src/lib/realtime.ts:60
+msgid "创建操作过于频繁，请稍候后重试。"
+msgstr "The creation operation is too frequent, please wait and try again."
+
+#: src/pages/RoomEntry.tsx:397
+msgid "创建新房间"
+msgstr "Create a Room"
+
+#: src/lib/realtime.ts:52
+msgid "创建请求与上次设置冲突，请稍候后重新创建。"
+msgstr "The creation request conflicts with the last setting, please wait and create again."
+
+#: src/pages/IdentityPage.tsx:392
+msgid "初始身份从 Major 参赛池抽取，确认后会固定保留。"
+msgstr "The initial identity is drawn from the Major entry pool and will be retained after confirmation."
+
+#: src/machines/user-journey-machine.ts:468
+msgid "初始身份待确认"
+msgstr "Initial identity to be confirmed"
+
+#: src/machines/user-journey-machine.ts:462
+msgid "初始身份抽取中"
+msgstr "Initial identity extraction in progress"
+
+#: src/pages/IdentityPage.tsx:504
+msgid "初始选手池"
+msgstr "Initial Player Pool"
+
+#: src/components/DailyGameLoading.tsx:98
+#: src/components/DailyGameLoading.tsx:119
+#: src/components/ModeSidebar.tsx:207
+#: src/pages/GamePage.tsx:271
+#: src/pages/LiveGamePage.tsx:1669
+#: src/pages/SoloGamePage.tsx:316
+msgid "剩余时间"
+msgstr "Time Remaining"
+
+#. placeholder {0}: formatTime(seconds)
+#: src/components/Timer.tsx:28
+msgid "剩余时间 {0}"
+msgstr "Remaining time {0}"
+
+#: src/pages/RoomEntry.tsx:374
+msgid "加入"
+msgstr "Join"
+
+#: src/pages/RoomEntry.tsx:374
+msgid "加入中…"
+msgstr "Joining…"
+
+#: src/pages/QuickMatch.tsx:102
+msgid "加入匹配队列失败，请检查网络后重试。"
+msgstr "Failed to join the matching queue, please check the network and try again."
+
+#: src/pages/RoomEntry.tsx:300
+msgid "加入或创建好友房间"
+msgstr "Join or Create a Friend Room"
+
+#: src/pages/RoomEntry.tsx:333
+msgid "加入房间"
+msgstr "Join Room"
+
+#: src/lib/realtime.ts:434
+msgid "加入房间失败，请检查房间号后重试。"
+msgstr "Failed to join the room, please check the room number and try again."
+
+#: src/machines/user-journey-machine.ts:632
+msgid "加入房间或配置人数、题库、赛制和可见性。"
+msgstr "Join a room or configure the number of people, question bank, format and visibility."
+
+#: src/pages/RoomEntry.tsx:334
+msgid "加入房间说明"
+msgstr "Join room instructions"
+
+#: src/lib/room-submission.ts:37
+msgid "加入房间超时，请检查房间号后重试。"
+msgstr "Joining the room timed out, please check the room number and try again."
+
+#: src/lib/realtime.ts:59
+msgid "加入操作过于频繁，请稍候后重试。"
+msgstr "The join operation is too frequent, please wait and try again."
+
+#: src/lib/realtime.ts:51
+msgid "加入请求与上次操作冲突，请确认房间号后重试。"
+msgstr "The request to join conflicts with the last operation. Please confirm the room number and try again."
+
+#: src/components/ui/spinner.tsx:11
+msgid "加载中"
+msgstr "Loading"
+
+#: src/lib/realtime.ts:655
+msgid "匹配会话已经失效。"
+msgstr "The matching session has expired."
+
+#: src/machines/user-journey-machine.ts:618
+msgid "匹配单回合结算"
+msgstr "Match single round settlement"
+
+#: src/machines/user-journey-machine.ts:612
+msgid "匹配回合进行中"
+msgstr "Matching round in progress"
+
+#: src/pages/QuickMatch.tsx:168
+msgid "匹配失败，请稍后重试。"
+msgstr "Match failed, please try again later."
+
+#: src/machines/user-journey-machine.ts:606
+msgid "匹配对局等待开局"
+msgstr "Waiting for the match to start"
+
+#: src/components/MatchFoundOverlay.tsx:72
+msgid "匹配已经完成，立即进入对局。"
+msgstr "Matching has been completed, enter the game immediately."
+
+#: src/components/MatchFoundOverlay.tsx:45
+msgid "匹配成功"
+msgstr "Match successful"
+
+#: src/machines/user-journey-machine.ts:600
+msgid "匹配成功进场"
+msgstr "Successful match entry"
+
+#: src/pages/MatchmakingPage.tsx:368
+msgid "匹配条件"
+msgstr "Match condition"
+
+#: src/lib/realtime.ts:657
+msgid "匹配票据已经失效或取消。"
+msgstr "The matching ticket has expired or been cancelled."
+
+#: src/machines/user-journey-machine.ts:624
+msgid "匹配系列赛结算"
+msgstr "Match Series Settlement"
+
+#: src/pages/QuickMatch.tsx:289
+msgid "匹配规则"
+msgstr "Matchmaking Rules"
+
+#: src/machines/user-journey-machine.ts:564
+msgid "匹配设置"
+msgstr "match settings"
+
+#: src/machines/user-journey-machine.ts:576
+msgid "匹配请求失败"
+msgstr "Match request failed"
+
+#: src/machines/user-journey-machine.ts:570
+msgid "匹配请求提交中"
+msgstr "Matching request is being submitted"
+
+#: src/lib/quick-match-submission.ts:20
+msgid "匹配请求超时，请重试。"
+msgstr "The matching request timed out, please try again."
+
+#: src/components/ModeSidebar.tsx:29
+#: src/pages/ModeLobby.tsx:161
+#: src/pages/SoloDifficultyPage.tsx:93
+#: src/pages/SoloGamePage.tsx:312
+#: src/pages/StatsPage.tsx:57
+msgid "单人练习"
+msgstr "Solo Practice"
+
+#. placeholder {0}: difficultyOption.label
+#: src/pages/SoloGamePage.tsx:288
+msgid "单人练习 · {0}"
+msgstr "Solo practice · {0}"
+
+#: src/machines/user-journey-machine.ts:558
+msgid "单人练习失败"
+msgstr "Solo practice failed"
+
+#: src/components/CelebrationOverlay.tsx:179
+#: src/components/DailyResultPanel.tsx:84
+msgid "单人练习完成"
+msgstr "Single player exercise completed"
+
+#: src/machines/user-journey-machine.ts:552
+msgid "单人练习成功"
+msgstr "Successful solo practice"
+
+#: src/lib/solo-result-copy.ts:23
+msgid "单人练习结束"
+msgstr "End of solo practice"
+
+#: src/machines/user-journey-machine.ts:546
+msgid "单人练习进行中"
+msgstr "Solo practice in progress"
+
+#: src/machines/user-journey-machine.ts:540
+msgid "单人难度选择"
+msgstr "Single player difficulty selection"
+
+#: src/lib/country-geography.ts:108
+msgid "南极洲"
+msgstr "Antarctica"
+
+#: src/pages/StatsPage.tsx:104
+msgid "历史数据不可用"
+msgstr "Historical data is not available"
+
+#: src/pages/LiveGamePage.tsx:2107
+#: src/pages/LiveGamePage.tsx:2166
+msgid "原对手"
+msgstr "Original opponent"
+
+#: src/lib/rematch.ts:141
+msgid "原对手当前离线"
+msgstr "The original opponent is currently offline"
+
+#: src/hooks/use-anonymous-profile.ts:94
+msgid "参加过 1–4 次 Major、尚未夺冠的职业选手"
+msgstr "Professional players who have participated in 1–4 Majors and have yet to win a championship"
+
+#: src/pages/IdentityPage.tsx:514
+msgid "参加过 1–4 次且未夺冠。"
+msgstr "Participated 1–4 times without winning."
+
+#: src/hooks/use-anonymous-profile.ts:100
+msgid "参加过至少 5 次 Major、尚未夺冠的资深选手"
+msgstr "Senior players who have participated in at least 5 Majors and have yet to win a championship"
+
+#: src/pages/IdentityPage.tsx:517
+msgid "参加过至少 5 次且未夺冠。"
+msgstr "Participated at least 5 times without winning."
+
+#: src/pages/ModeLobby.tsx:189
+msgid "双方同题竞速，先猜中者获胜。"
+msgstr "Both sides compete on the same topic, and the first one to guess correctly wins."
+
+#: src/pages/LiveGamePage.tsx:1538
+msgid "双方就位，正在开始。"
+msgstr "Both sides are in position and starting."
+
+#: src/components/CelebrationOverlay.tsx:231
+msgid "双方本局都没能锁定答案。"
+msgstr "Neither side could lock the answer in this game."
+
+#: src/pages/MatchmakingPage.tsx:391
+msgid "取消匹配"
+msgstr "Cancel Matchmaking"
+
+#: src/machines/user-journey-machine.ts:588
+msgid "取消匹配中"
+msgstr "Canceling matching"
+
+#: src/machines/user-journey-machine.ts:594
+msgid "取消匹配失败"
+msgstr "Unmatch failed"
+
+#: src/lib/realtime.ts:643
+msgid "取消匹配失败，请检查网络后重试。"
+msgstr "Unmatching failed, please check the network and try again."
+
+#: src/lib/realtime.ts:658
+#: src/pages/MatchmakingPage.tsx:80
+#: src/pages/MatchmakingPage.tsx:151
+msgid "取消匹配失败，请稍后重试。"
+msgstr "Unmatching failed, please try again later."
+
+#: src/machines/user-journey-machine.ts:590
+msgid "取消当前票据并防止重复操作。"
+msgstr "Cancels the current ticket and prevents duplicate operations."
+
+#: src/lib/quick-match-cancellation.ts:11
+msgid "取消请求超时，请重试。"
+msgstr "Cancel request timed out, please try again."
+
+#: src/pages/LiveGamePage.tsx:2177
+msgid "取消邀请"
+msgstr "Cancel invitation"
+
+#: src/components/SoundToggle.tsx:19
+msgid "取消静音全站音效"
+msgstr "Unmute site-wide sound effects"
+
+#: src/pages/QuickMatch.tsx:290
+msgid "只会匹配人数、赛制、题库难度和猜测可见性完全相同的玩家。"
+msgstr "Only players with the exact same number of players, format, question bank difficulty, and guess visibility will be matched."
+
+#: src/components/ModeSidebar.tsx:179
+msgid "只公开对手命中的属性，不显示具体猜测选手。"
+msgstr "Only the attributes of the opponent's hits are disclosed, and the specific guessing players are not displayed."
+
+#: src/pages/LiveGamePage.tsx:2048
+msgid "可保留当前成员并开始一场全新的系列赛"
+msgstr "Can keep current members and start a new series"
+
+#: src/machines/user-journey-machine.ts:686
+msgid "可接收广播并提交实时指令。"
+msgstr "Can receive broadcasts and submit real-time instructions."
+
+#: src/pages/LiveGamePage.tsx:2054
+msgid "可返回大厅或重新匹配"
+msgstr "You can return to the lobby or rematch"
+
+#: src/pages/LiveGamePage.tsx:1916
+msgid "各轮回顾"
+msgstr "Review of each round"
+
+#: src/machines/user-journey-machine.ts:614
+msgid "同步双方或四人进度并提交猜测。"
+msgstr "Synchronize the progress of two or four people and submit your guesses."
+
+#: src/machines/user-journey-machine.ts:656
+msgid "同步房间成员进度并进行同题竞猜。"
+msgstr "Synchronize the progress of room members and compete on the same topic."
+
+#: src/components/GuessTable.tsx:228
+msgid "同洲接近"
+msgstr "Close to the same continent"
+
+#: src/lib/realtime.ts:686
+msgid "后台清理未完成，服务器将自动回收匹配票据。"
+msgstr "The background cleanup is not completed and the server will automatically recycle matching tickets."
+
+#: src/components/CelebrationOverlay.tsx:430
+msgid "后自动开始。"
+msgstr "starts automatically."
+
+#: src/components/GuessTable.tsx:226
+msgid "命中"
+msgstr "hit"
+
+#: src/components/BattleContext.tsx:191
+msgid "四人同题竞速"
+msgstr "Four people racing on the same topic"
+
+#: src/pages/ModeLobby.tsx:193
+msgid "四人同题竞速，率先猜中者获胜。"
+msgstr "Four people compete on the same question, and the first person to guess correctly wins."
+
+#: src/pages/LiveGamePage.tsx:1543
+msgid "四人同题竞速。"
+msgstr "Four people race on the same topic."
+
+#: src/pages/StatsPage.tsx:409
+msgid "回合"
+msgstr "rounds"
+
+#: src/pages/StatsPage.tsx:141
+msgid "回合 / 赛制"
+msgstr "Round / Format"
+
+#: src/pages/LiveGamePage.tsx:1669
+msgid "回合状态"
+msgstr "turn status"
+
+#: src/pages/LiveGamePage.tsx:272
+msgid "回合结束"
+msgstr "end of round"
+
+#: src/pages/StatsPage.tsx:269
+msgid "回合胜率"
+msgstr "round win rate"
+
+#: src/components/MatchFoundOverlay.tsx:21
+#: src/lib/friend-room.ts:10
+#: src/lib/solo-game.ts:30
+#: src/pages/LiveGamePage.tsx:451
+msgid "困难"
+msgstr "Hard"
+
+#: src/pages/SoloDifficultyPage.tsx:129
+msgid "困难："
+msgstr "Hard:"
+
+#: src/components/CelebrationOverlay.tsx:350
+#: src/components/DailyResultPanel.tsx:142
+msgid "国家或地区"
+msgstr "Country or Region"
+
+#: src/components/GuessTable.tsx:110
+msgid "国籍"
+msgstr "Country of Citizenship"
+
+#: src/components/GuessTable.tsx:592
+msgid "国籍同洲接近"
+msgstr "Nationality close to the same continent"
+
+#: src/components/ModeSidebar.tsx:281
+msgid "在"
+msgstr "exist"
+
+#: src/pages/ModeLobby.tsx:234
+msgid "在 GitHub 查看 CS Guess 源码（新标签页打开）"
+msgstr "View CS Guess source code on GitHub (opens in new tab)"
+
+#: src/machines/user-journey-machine.ts:506
+msgid "在对话框中查看答案和逐次猜测结果。"
+msgstr "View answers and guess-by-guess results in the dialog box."
+
+#: src/components/BattleContext.tsx:118
+#: src/components/BattleContext.tsx:256
+#: src/lib/live-presence.ts:13
+#: src/lib/live-presence.ts:15
+msgid "在线"
+msgstr "Online"
+
+#: src/components/GuessTable.tsx:482
+#: src/pages/LiveGamePage.tsx:677
+#: src/pages/LiveGamePage.tsx:1819
+#: src/pages/LiveGamePage.tsx:1830
+msgid "在线 · 本轮已判负"
+msgstr "Online · This round has been lost"
+
+#: src/pages/ModeLobby.tsx:208
+msgid "在线匹配 · 1 / 3 / 5 局赛制"
+msgstr "Online matching · 1 / 3 / 5 game format"
+
+#: src/pages/ModeLobby.tsx:215
+msgid "在线匹配 · 4 人 · 1 / 3 / 5 局赛制"
+msgstr "Online matchmaking · 4 players · 1 / 3 / 5 rounds"
+
+#: src/pages/IdentityPage.tsx:574
+msgid "场解锁"
+msgstr "matches to unlock"
+
+#: src/lib/country-geography.ts:95
+msgid "塞尔维亚"
+msgstr "Serbia"
+
+#: src/pages/LiveGamePage.tsx:1279
+msgid "复制失败，请手动复制房间号"
+msgstr "Copy failed, please copy the room number manually"
+
+#: src/pages/LiveGamePage.tsx:1636
+msgid "复制房间号 {roomCode}"
+msgstr "Copy room number {roomCode}"
+
+#: src/lib/country-geography.ts:114
+msgid "大洋洲"
+msgstr "Oceania"
+
+#: src/pages/StatsPage.tsx:64
+msgid "失败"
+msgstr "fail"
+
+#: src/machines/user-journey-machine.ts:660
+msgid "好友房单回合结算"
+msgstr "Friend's room order round settlement"
+
+#: src/pages/LiveGamePage.tsx:1552
+msgid "好友房同题竞速。"
+msgstr "Race with friends on the same topic."
+
+#: src/machines/user-journey-machine.ts:654
+msgid "好友房回合进行中"
+msgstr "Friend room round in progress"
+
+#: src/machines/user-journey-machine.ts:636
+msgid "好友房提交中"
+msgstr "Friend room is being submitted"
+
+#: src/machines/user-journey-machine.ts:648
+msgid "好友房等待开局"
+msgstr "Friends room waiting to start"
+
+#: src/machines/user-journey-machine.ts:666
+msgid "好友房系列赛结算"
+msgstr "Friends Room Series Settlement"
+
+#: src/machines/user-journey-machine.ts:630
+msgid "好友房设置"
+msgstr "Friend room settings"
+
+#: src/pages/LiveGamePage.tsx:1696
+msgid "好友房设置与成员"
+msgstr "Friend room settings and members"
+
+#: src/machines/user-journey-machine.ts:642
+msgid "好友房请求失败"
+msgstr "Friend room request failed"
+
+#: src/components/ModeSidebar.tsx:31
+#: src/pages/LiveGamePage.tsx:1332
+#: src/pages/LiveGamePage.tsx:1579
+#: src/pages/LiveGamePage.tsx:1620
+#: src/pages/ModeLobby.tsx:221
+#: src/pages/RoomEntry.tsx:297
+#: src/pages/StatsPage.tsx:59
+msgid "好友房间"
+msgstr "Friend Room"
+
+#: src/pages/LiveGamePage.tsx:1580
+msgid "好友房间 · {difficultyLabel}"
+msgstr "Friend Room · {difficultyLabel}"
+
+#: src/pages/ModeLobby.tsx:196
+msgid "好友房间："
+msgstr "Friend Room:"
+
+#: src/pages/MatchmakingPage.tsx:558
+msgid "安全返回"
+msgstr "Return Safely"
+
+#: src/pages/LiveGamePage.tsx:1458
+msgid "安全退出"
+msgstr "safe exit"
+
+#: src/components/GuessTable.tsx:145
+msgid "完全一致"
+msgstr "completely consistent"
+
+#: src/pages/StatsPage.tsx:263
+msgid "完成回合"
+msgstr "complete round"
+
+#: src/pages/StatsPage.tsx:495
+msgid "完成挑战后可在此查看回合详情。"
+msgstr "Round details can be viewed here after completing the challenge."
+
+#: src/pages/StatsPage.tsx:145
+#: src/pages/StatsPage.tsx:412
+msgid "完成时间"
+msgstr "completion time"
+
+#: src/components/MatchFoundOverlay.tsx:20
+#: src/lib/friend-room.ts:9
+#: src/lib/solo-game.ts:24
+msgid "完整"
+msgstr "Full"
+
+#: src/pages/SoloDifficultyPage.tsx:125
+msgid "完整："
+msgstr "Full:"
+
+#: src/pages/SoloDifficultyPage.tsx:130
+msgid "完整职业选手目录，包含未参加过 Major 的选手。"
+msgstr "Complete professional player directory, including players who have not participated in a Major."
+
+#: src/components/ModeSidebar.tsx:30
+#: src/pages/LiveGamePage.tsx:1577
+#: src/pages/ModeLobby.tsx:207
+#: src/pages/QuickMatch.tsx:265
+msgid "实时 1v1"
+msgstr "Live 1v1"
+
+#: src/pages/MatchmakingPage.tsx:355
+msgid "实时 1v1 匹配"
+msgstr "Live 1v1 matches"
+
+#: src/pages/ModeLobby.tsx:188
+msgid "实时 1v1："
+msgstr "Live 1v1:"
+
+#: src/pages/StatsPage.tsx:58
+msgid "实时匹配"
+msgstr "Real-time matching"
+
+#: src/pages/LiveGamePage.tsx:1332
+#: src/pages/LiveGamePage.tsx:1620
+#: src/pages/LiveGamePage.tsx:1663
+msgid "实时对战"
+msgstr "Real time battle"
+
+#: src/pages/LiveGamePage.tsx:188
+msgid "实时连接不可用"
+msgstr "Live connection not available"
+
+#: src/hooks/use-realtime-room.ts:424
+#: src/hooks/use-realtime-room.ts:445
+msgid "实时连接中断，正在自动重连。"
+msgstr "The real-time connection is interrupted and is automatically reconnecting."
+
+#: src/hooks/use-realtime-room.ts:255
+msgid "实时连接地址无效，请返回大厅后重新加入。"
+msgstr "The real-time connection address is invalid, please return to the lobby and join again."
+
+#: src/hooks/use-realtime-room.ts:512
+msgid "实时连接尚未恢复，请稍后重试。"
+msgstr "The live connection has not been restored, please try again later."
+
+#: src/debug/install-audit-state.ts:358
+msgid "实时连接暂时不可用，请检查网络后重试。"
+msgstr "The live connection is temporarily unavailable, please check the network and try again."
+
+#: src/machines/user-journey-machine.ts:685
+#: src/pages/LiveGamePage.tsx:184
+msgid "实时连接正常"
+msgstr "Real time connection is normal"
+
+#. placeholder {0}: AUDIT_LABELS[audit] ?? audit
+#: src/debug/install-audit-state.ts:316
+msgid "审查｜{0}"
+msgstr "Review｜{0}"
+
+#: src/machines/user-journey-machine.ts:504
+msgid "对局回放"
+msgstr "Game replay"
+
+#: src/components/ModeSidebar.tsx:226
+msgid "对局状态"
+msgstr "Game status"
+
+#: src/pages/StatsPage.tsx:523
+msgid "对局详情"
+msgstr "Game details"
+
+#: src/components/BattleContext.tsx:203
+msgid "对战席位"
+msgstr "Battle seat"
+
+#: src/lib/realtime.ts:23
+msgid "对战服务发生错误，请稍后重试。"
+msgstr "An error occurred in the battle service, please try again later."
+
+#: src/lib/realtime.ts:512
+msgid "对战服务器暂时无法完成请求，请稍后重试。"
+msgstr "The battle server is temporarily unable to complete the request. Please try again later."
+
+#: src/lib/realtime.ts:68
+msgid "对战服务暂时不可用，请稍后重新创建。"
+msgstr "The battle service is temporarily unavailable, please create it again later."
+
+#: src/lib/realtime.ts:67
+msgid "对战服务暂时不可用，请稍后重新加入。"
+msgstr "The battle service is temporarily unavailable, please join again later."
+
+#: src/lib/realtime.ts:22
+msgid "对战服务暂时不可用，请稍后重试。"
+msgstr "The battle service is temporarily unavailable, please try again later."
+
+#: src/lib/realtime.ts:72
+msgid "对战服务暂时无法创建房间，请稍后重试。"
+msgstr "The battle service is temporarily unable to create a room, please try again later."
+
+#: src/lib/realtime.ts:71
+msgid "对战服务暂时无法加入房间，请稍后重试。"
+msgstr "The battle service is temporarily unable to join the room, please try again later."
+
+#: src/pages/ModeLobby.tsx:174
+msgid "对战模式"
+msgstr "Versus Modes"
+
+#: src/pages/QuickMatch.tsx:325
+#: src/pages/QuickMatch.tsx:334
+msgid "对战规模"
+msgstr "Match Size"
+
+#: src/pages/QuickMatch.tsx:327
+msgid "对战规模说明"
+msgstr "About match size"
+
+#: src/pages/QuickMatch.tsx:319
+msgid "对战设置"
+msgstr "Match Settings"
+
+#: src/components/BattleContext.tsx:221
+#: src/components/BattleContext.tsx:271
+#: src/components/GuessTable.tsx:787
+#: src/pages/StatsPage.tsx:143
+msgid "对手"
+msgstr "Opponent"
+
+#. placeholder {0}: entry.seatIndex + 1
+#: src/pages/LiveGamePage.tsx:719
+msgid "对手 {0}"
+msgstr "Opponent {0}"
+
+#. placeholder {0}: index + 1
+#. placeholder {1}: player.displayName
+#: src/pages/LiveGamePage.tsx:560
+msgid "对手 {0} · {1}"
+msgstr "Opponent {0} · {1}"
+
+#: src/components/MatchFoundOverlay.tsx:82
+#: src/pages/LiveGamePage.tsx:667
+msgid "对手 {index}"
+msgstr "Opponent {index}"
+
+#: src/components/BattleContext.tsx:333
+msgid "对手 1"
+msgstr "Opponent 1"
+
+#: src/components/GuessTable.tsx:886
+msgid "对手信息显示方式"
+msgstr "How to display opponent information"
+
+#: src/components/CelebrationOverlay.tsx:229
+msgid "对手已先确定目标选手。"
+msgstr "The opponent has identified the target player first."
+
+#: src/components/MatchFoundOverlay.tsx:69
+msgid "对手已就位"
+msgstr "The opponent is in position"
+
+#: src/components/CelebrationOverlay.tsx:106
+msgid "对手已离开，服务器判定你赢得本系列。"
+msgstr "Your opponent has left, and the server has determined that you have won the series."
+
+#: src/lib/rematch.ts:126
+msgid "对手拒绝了重赛"
+msgstr "Opponent refuses rematch"
+
+#: src/components/CelebrationOverlay.tsx:110
+msgid "对手断线超时，服务器判定你赢得本系列。"
+msgstr "The opponent disconnects and times out, and the server determines that you win this series."
+
+#: src/lib/rematch.ts:137
+msgid "对手没有在规定时间内回应，本次邀请已自动结束。"
+msgstr "If the opponent does not respond within the specified time, this invitation has automatically ended."
+
+#: src/components/GuessTable.tsx:508
+#: src/pages/QuickMatch.tsx:356
+#: src/pages/RoomEntry.tsx:406
+msgid "对手猜测"
+msgstr "Opponent Guesses"
+
+#: src/pages/QuickMatch.tsx:365
+msgid "对手猜测可见性"
+msgstr "Opponent Guess Visibility"
+
+#: src/pages/RoomEntry.tsx:411
+msgid "对手猜测显示方式"
+msgstr "Opponent Guess Display"
+
+#: src/components/CelebrationOverlay.tsx:228
+msgid "对手率先拿到本场所需胜局。"
+msgstr "The opponent is the first to get the victory they need in this game."
+
+#: src/components/CelebrationOverlay.tsx:238
+msgid "对手赢得了本场系列赛。"
+msgstr "The opponent won the series."
+
+#: src/components/CelebrationOverlay.tsx:239
+msgid "对手赢得了本局。"
+msgstr "The opponent won the round."
+
+#: src/components/GuessTable.tsx:824
+#: src/components/GuessTable.tsx:946
+msgid "对手进度"
+msgstr "Opponent Progress"
+
+#: src/components/CelebrationOverlay.tsx:201
+msgid "对手重连宽限期结束，你赢得了本场系列赛。"
+msgstr "The opponent's grace period for reconnection ends and you win the series."
+
+#: src/components/CelebrationOverlay.tsx:202
+msgid "对手重连宽限期结束，本局由你获胜。"
+msgstr "The grace period for your opponent to reconnect ends, and you win this game."
+
+#: src/pages/StatsPage.tsx:493
+msgid "尚无回合记录"
+msgstr "No round recorded yet"
+
+#: src/pages/LiveGamePage.tsx:1312
+msgid "尚未取得可用的房间状态，请重试连接或安全退出。"
+msgstr "The available room status has not been obtained, please try to connect again or exit safely."
+
+#: src/pages/LiveGamePage.tsx:1394
+msgid "尚未取得可用的房间状态。你可以重试连接，或安全退出本房间。"
+msgstr "No available room status has been obtained. You can retry the connection, or exit the room safely."
+
+#: src/components/PlayerIdentity.tsx:171
+msgid "局即可获得下一次机会。"
+msgstr "game to get the next chance."
+
+#: src/machines/user-journey-machine.ts:626
+msgid "展示最终胜负、比分和答案。"
+msgstr "Show the final winner, score and answer."
+
+#: src/machines/user-journey-machine.ts:518
+msgid "展示可恢复错误并允许重新载入。"
+msgstr "Show recoverable errors and allow reloading."
+
+#: src/machines/user-journey-machine.ts:578
+msgid "展示容量、网络或参数错误并允许重试。"
+msgstr "Display capacity, network, or parameter errors and allow retries."
+
+#: src/machines/user-journey-machine.ts:620
+msgid "展示当前回合答案并等待下一回合。"
+msgstr "Show the current round answer and wait for the next round."
+
+#: src/machines/user-journey-machine.ts:662
+msgid "展示当前答案并等待房主开启下一局。"
+msgstr "Display the current answer and wait for the host to start the next round."
+
+#: src/machines/user-journey-machine.ts:470
+msgid "展示抽取结果，确认后进入原本请求的页面。"
+msgstr "Display the extraction results and enter the originally requested page after confirmation."
+
+#: src/machines/user-journey-machine.ts:530
+msgid "展示答案、结果明细和庆祝反馈。"
+msgstr "Show answers, breakdown of results, and celebrate feedback."
+
+#: src/machines/user-journey-machine.ts:560
+msgid "展示答案并允许重试或更换难度。"
+msgstr "Shows answers and allows retrying or changing difficulty."
+
+#: src/machines/user-journey-machine.ts:668
+msgid "展示系列赛最终排名和答案。"
+msgstr "Showing final series standings and answers."
+
+#: src/machines/user-journey-machine.ts:554
+msgid "展示结果并允许继续下一局。"
+msgstr "The result is displayed and allowed to continue to the next round."
+
+#: src/pages/StatsPage.tsx:119
+msgid "岁 ·"
+msgstr "years ·"
+
+#: src/components/CelebrationOverlay.tsx:454
+msgid "左右滑动查看全部席位"
+msgstr "Swipe left or right to view all seats"
+
+#: src/components/BattleContext.tsx:47
+msgid "已使用 {used} 次机会"
+msgstr "{used} opportunities used"
+
+#: src/pages/QuickMatch.tsx:284
+msgid "已使用上次配置"
+msgstr "Previous Settings Restored"
+
+#: src/components/CelebrationOverlay.tsx:224
+msgid "已先于对手确定目标选手。"
+msgstr "The target player has been identified before the opponent."
+
+#. placeholder {0}: opponentPlayer.displayName
+#: src/pages/LiveGamePage.tsx:1534
+msgid "已匹配，等待 {0} 连接。"
+msgstr "Matched, waiting for {0} connections."
+
+#: src/components/ModeSidebar.tsx:83
+#: src/components/ModeSidebar.tsx:93
+#: src/components/ModeSidebar.tsx:98
+msgid "已提交 {guesses} 次猜测"
+msgstr "{guesses} guesses submitted"
+
+#: src/components/GuessTable.tsx:559
+msgid "已提交，内容隐藏"
+msgstr "Submitted, content hidden"
+
+#: src/pages/LiveGamePage.tsx:1983
+msgid "已猜出"
+msgstr "Guessed"
+
+#: src/components/CelebrationOverlay.tsx:476
+#: src/components/DailyResultPanel.tsx:101
+msgid "已用尝试"
+msgstr "Attempts Used"
+
+#: src/pages/MatchmakingPage.tsx:463
+msgid "已等待"
+msgstr "Already waiting"
+
+#: src/pages/IdentityPage.tsx:567
+msgid "已解锁"
+msgstr "Unlocked"
+
+#: src/pages/LiveGamePage.tsx:1711
+#: src/pages/LiveGamePage.tsx:1757
+#: src/pages/MatchmakingPage.tsx:409
+#: src/pages/MatchmakingPage.tsx:494
+msgid "已连接"
+msgstr "Connected"
+
+#: src/pages/LiveGamePage.tsx:1295
+msgid "已连接，正在同步房间"
+msgstr "Connected, syncing rooms"
+
+#: src/pages/SoloDifficultyPage.tsx:200
+msgid "已选择 ·"
+msgstr "Selected ·"
+
+#: src/components/SoundToggle.tsx:44
+msgid "已静音"
+msgstr "muted"
+
+#: src/lib/country-geography.ts:93
+msgid "巴勒斯坦国"
+msgstr "state of palestine"
+
+#. placeholder {0}: seatIndex + 1
+#: src/pages/LiveGamePage.tsx:1759
+msgid "席位 {0}"
+msgstr "Seats {0}"
+
+#: src/pages/IdentityPage.tsx:477
+msgid "平"
+msgstr "D"
+
+#: src/pages/StatsPage.tsx:65
+msgid "平局"
+msgstr "draw"
+
+#: src/components/CelebrationOverlay.tsx:359
+#: src/components/DailyResultPanel.tsx:145
+#: src/components/GuessTable.tsx:111
+msgid "年龄"
+msgstr "Age"
+
+#: src/lib/live-presence.ts:47
+msgid "并列第 {rank}"
+msgstr "Tied #{rank}"
+
+#: src/machines/user-journey-machine.ts:680
+msgid "建立实时连接"
+msgstr "Establish a live connection"
+
+#: src/pages/LiveGamePage.tsx:2068
+msgid "开始下一场"
+msgstr "Start next game"
+
+#: src/components/DailyResultPanel.tsx:162
+msgid "开始下一题"
+msgstr "Start Next Question"
+
+#: src/pages/ModeLobby.tsx:154
+#: src/pages/StatsPage.tsx:498
+msgid "开始今日挑战"
+msgstr "Start today's challenge"
+
+#: src/pages/QuickMatch.tsx:458
+msgid "开始匹配"
+msgstr "Start Matchmaking"
+
+#: src/pages/LiveGamePage.tsx:1789
+msgid "开始本轮"
+msgstr "Start this round"
+
+#: src/pages/SoloDifficultyPage.tsx:208
+msgid "开始练习"
+msgstr "Start Practice"
+
+#: src/pages/MatchmakingPage.tsx:502
+msgid "当前"
+msgstr "current"
+
+#: src/lib/realtime.ts:64
+msgid "当前会话已失效，请刷新页面后重新创建。"
+msgstr "The current session has expired, please refresh the page and create it again."
+
+#: src/lib/realtime.ts:63
+msgid "当前会话已失效，请刷新页面后重新加入。"
+msgstr "The current session has expired, please refresh the page and join again."
+
+#: src/pages/LiveGamePage.tsx:1093
+msgid "当前会话已失效，请重新匹配。"
+msgstr "The current session has expired, please try again."
+
+#: src/components/PlayerIdentity.tsx:171
+msgid "当前再输"
+msgstr "Lose now"
+
+#: src/pages/MatchmakingPage.tsx:527
+msgid "当前匹配会话已失效"
+msgstr "The current matching session has expired"
+
+#: src/components/GuessTable.tsx:83
+msgid "当前同队"
+msgstr "Current team"
+
+#: src/lib/rematch.ts:132
+msgid "当前对局结果不会改变，你可以继续查看或重新匹配。"
+msgstr "The result of the current match will not change, you can continue to check or rematch."
+
+#: src/components/GuessTable.tsx:82
+msgid "当前战队完全一致"
+msgstr "The current team is exactly the same"
+
+#: src/pages/LiveGamePage.tsx:2257
+msgid "当前房间会话已失效"
+msgstr "The current room session has expired"
+
+#: src/lib/realtime.ts:56
+msgid "当前房间数量已达上限，请稍后重新创建。"
+msgstr "The current number of rooms has reached the upper limit, please create again later."
+
+#: src/lib/realtime.ts:19
+msgid "当前房间数量已达上限，请稍后重试。"
+msgstr "The current number of rooms has reached the upper limit, please try again later."
+
+#: src/components/CelebrationOverlay.tsx:447
+#: src/components/CelebrationOverlay.tsx:451
+msgid "当前排行榜"
+msgstr "Current Standings"
+
+#: src/pages/MatchmakingPage.tsx:469
+msgid "当前条件游戏中总数"
+msgstr "Total number in the game under current conditions"
+
+#: src/pages/MatchmakingPage.tsx:468
+msgid "当前条件等待总数"
+msgstr "Total number of current conditions waiting"
+
+#: src/components/DailyGameLoading.tsx:69
+#: src/components/ModeSidebar.tsx:157
+#: src/pages/LiveGamePage.tsx:1329
+msgid "当前模式"
+msgstr "Current mode"
+
+#: src/components/CelebrationOverlay.tsx:476
+msgid "当前比分"
+msgstr "Current Score"
+
+#: src/pages/LiveGamePage.tsx:1495
+msgid "当前离线，重连后由房主开始本轮"
+msgstr "Currently offline, the host will start this round after reconnecting"
+
+#: src/pages/MatchmakingPage.tsx:471
+msgid "当前规则"
+msgstr "Current rules"
+
+#: src/pages/IdentityPage.tsx:424
+#: src/pages/MatchmakingPage.tsx:403
+msgid "当前身份"
+msgstr "Current Identity"
+
+#: src/lib/realtime.ts:47
+#: src/lib/realtime.ts:48
+msgid "当前身份已失效，请先到身份页重新选择身份。"
+msgstr "The current identity has expired. Please go to the identity page to reselect your identity."
+
+#: src/hooks/use-realtime-room.ts:299
+#: src/hooks/use-realtime-room.ts:438
+msgid "当前身份已失效，请重新设置身份。"
+msgstr "The current identity has expired, please reset it."
+
+#: src/lib/realtime.ts:17
+msgid "当前身份已失效，请重新选择身份。"
+msgstr "The current identity has expired, please choose another identity."
+
+#: src/pages/IdentityPage.tsx:563
+msgid "当前身份池"
+msgstr "Current Identity Pool"
+
+#: src/machines/user-journey-machine.ts:676
+msgid "当前页面不依赖 Socket.IO。"
+msgstr "The current page does not rely on Socket.IO."
+
+#: src/pages/IdentityPage.tsx:424
+msgid "待设置身份"
+msgstr "Identity to be set"
+
+#: src/pages/QuickMatch.tsx:284
+msgid "恢复上次配置"
+msgstr "Restore Previous Settings"
+
+#: src/pages/LiveGamePage.tsx:2045
+#: src/pages/LiveGamePage.tsx:2340
+msgid "恢复连接后可再次对战"
+msgstr "You can play again after restoring the connection"
+
+#: src/pages/LiveGamePage.tsx:1094
+msgid "恢复连接后可再次对战。"
+msgstr "You can play again after the connection is restored."
+
+#: src/pages/LiveGamePage.tsx:2077
+msgid "恢复连接后可开始下一场"
+msgstr "The next session can start after the connection is restored"
+
+#: src/pages/LiveGamePage.tsx:2053
+msgid "恢复连接后可重新匹配"
+msgstr "Can be matched again after the connection is restored"
+
+#: src/pages/LiveGamePage.tsx:266
+msgid "成员离开"
+msgstr "members leave"
+
+#: src/components/GuessTable.tsx:805
+#: src/components/GuessTable.tsx:860
+#: src/components/GuessTable.tsx:936
+msgid "我的猜测"
+msgstr "My Guesses"
+
+#: src/components/PlayerIdentity.tsx:51
+#: src/pages/IdentityPage.tsx:383
+msgid "我的身份"
+msgstr "My Identity"
+
+#: src/components/PlayerIdentity.tsx:67
+msgid "我的身份 ·"
+msgstr "my identity ·"
+
+#: src/pages/IdentityPage.tsx:472
+#: src/pages/ModeLobby.tsx:96
+msgid "战绩"
+msgstr "History"
+
+#: src/machines/user-journey-machine.ts:498
+#: src/pages/StatsPage.tsx:252
+msgid "战绩与回放"
+msgstr "History & Replays"
+
+#: src/pages/StatsPage.tsx:254
+msgid "战绩记录说明"
+msgstr "About match history"
+
+#: src/components/CelebrationOverlay.tsx:345
+#: src/components/DailyResultPanel.tsx:129
+#: src/components/GuessTable.tsx:109
+msgid "战队"
+msgstr "Team"
+
+#: src/components/GuessTable.tsx:102
+msgid "战队未命中"
+msgstr "Team misses"
+
+#: src/components/BattleContext.tsx:108
+#: src/components/BattleContext.tsx:231
+#: src/pages/LiveGamePage.tsx:1750
+msgid "房主"
+msgstr "Host"
+
+#: src/pages/LiveGamePage.tsx:1779
+msgid "房主可以开始本轮"
+msgstr "The homeowner can start the round"
+
+#: src/pages/StatsPage.tsx:144
+msgid "房间"
+msgstr "Room"
+
+#: src/lib/realtime.ts:15
+msgid "房间不存在，请检查房间号。"
+msgstr "The room does not exist, please check the room number."
+
+#: src/pages/RoomEntry.tsx:431
+#: src/pages/RoomEntry.tsx:436
+msgid "房间人数"
+msgstr "Room Size"
+
+#: src/pages/LiveGamePage.tsx:1338
+#: src/pages/RoomEntry.tsx:344
+msgid "房间号"
+msgstr "Room Code"
+
+#: src/pages/LiveGamePage.tsx:1276
+msgid "房间号已复制"
+msgstr "Room number copied"
+
+#: src/lib/realtime.ts:35
+msgid "房间号或身份信息无效，请检查后重试。"
+msgstr "The room number or identity information is invalid, please check and try again."
+
+#: src/lib/realtime.ts:40
+msgid "房间已失效，请重新创建。"
+msgstr "The room has expired, please create it again."
+
+#: src/lib/realtime.ts:43
+msgid "房间已满或对局已经开始，请向房主确认后重试。"
+msgstr "The room is full or the game has started. Please confirm with the host and try again."
+
+#: src/lib/realtime.ts:16
+msgid "房间已满或对局已经开始。"
+msgstr "The room is full or the game has started."
+
+#: src/lib/realtime.ts:509
+msgid "房间已满或当前状态无法加入。"
+msgstr "The room is full or cannot be joined due to current status."
+
+#: src/pages/MatchmakingPage.tsx:51
+msgid "房间已连接"
+msgstr "Room is connected"
+
+#: src/pages/LiveGamePage.tsx:1721
+msgid "房间席位"
+msgstr "Room seats"
+
+#: src/pages/LiveGamePage.tsx:1704
+msgid "房间成员"
+msgstr "room members"
+
+#: src/lib/realtime.ts:55
+msgid "房间服务当前繁忙，请稍后重新加入。"
+msgstr "Room service is currently busy, please rejoin later."
+
+#: src/pages/MatchmakingPage.tsx:53
+msgid "房间正在重连"
+msgstr "The room is reconnecting"
+
+#: src/lib/realtime.ts:44
+msgid "房间状态已变化，请重新创建。"
+msgstr "The room status has changed, please create it again."
+
+#: src/pages/LiveGamePage.tsx:1769
+msgid "房间设置"
+msgstr "room settings"
+
+#: src/lib/realtime.ts:36
+msgid "房间设置无效，请调整人数、难度或赛制后重试。"
+msgstr "The room settings are invalid. Please adjust the number of people, difficulty or competition format and try again."
+
+#: src/pages/RoomEntry.tsx:466
+msgid "房间赛制"
+msgstr "Series Format"
+
+#: src/pages/MatchmakingPage.tsx:413
+msgid "房间连接"
+msgstr "room connection"
+
+#: src/pages/MatchmakingPage.tsx:59
+msgid "房间连接中"
+msgstr "Room connecting"
+
+#: src/pages/MatchmakingPage.tsx:57
+msgid "房间连接已关闭"
+msgstr "Room connection is closed"
+
+#: src/pages/MatchmakingPage.tsx:55
+msgid "房间连接离线"
+msgstr "Room connection offline"
+
+#: src/pages/SoloDifficultyPage.tsx:126
+msgid "所有参加过 Major 的选手，包括退役与无队伍选手。"
+msgstr "All players who have participated in the Major, including retired and non-team players."
+
+#: src/pages/LiveGamePage.tsx:2189
+msgid "所有玩家均已同意，服务器正在重置比分并同步新的题目。"
+msgstr "All players have agreed, and the server is resetting scores and synchronizing new questions."
+
+#: src/components/CelebrationOverlay.tsx:217
+msgid "所有玩家均已用完猜测次数，本局未分出胜负。"
+msgstr "All players have exhausted their guesses, and there is no winner in this game."
+
+#: src/components/ModeSidebar.tsx:178
+msgid "所有玩家都能看到彼此猜测的具体选手。"
+msgstr "All players can see the specific players each other guessed."
+
+#: src/pages/IdentityPage.tsx:610
+msgid "抽取 · 暂无机会"
+msgstr "Draw · No Credits"
+
+#: src/pages/IdentityPage.tsx:611
+msgid "抽取 · 正在准备"
+msgstr "Draw · Preparing"
+
+#: src/pages/IdentityPage.tsx:608
+msgid "抽取 · 消耗 1 次"
+msgstr "Draw · Use 1 Credit"
+
+#: src/pages/IdentityPage.tsx:616
+msgid "抽取中"
+msgstr "Drawing"
+
+#: src/pages/IdentityPage.tsx:607
+msgid "抽取初始身份"
+msgstr "Extract initial identity"
+
+#: src/components/IdentityDrawDialog.tsx:121
+msgid "抽取完成"
+msgstr "Extraction completed"
+
+#: src/pages/IdentityPage.tsx:386
+msgid "抽取并确认一个匿名身份，用于对战昵称与战绩记录。"
+msgstr "Draw and confirm an anonymous identity for your in-game name and match history."
+
+#: src/machines/user-journey-machine.ts:458
+msgid "抽取并确认初始职业选手身份。"
+msgstr "Draw and confirm the initial professional player identity."
+
+#: src/pages/IdentityPage.tsx:250
+msgid "抽取次数已变化，请检查网络或其他标签页后重试。"
+msgstr "The number of extractions has changed. Please check the network or other tabs and try again."
+
+#: src/pages/IdentityPage.tsx:511
+msgid "抽取消耗一次机会；结果可使用、保留当前身份或继续重抽。"
+msgstr "Drawing consumes one chance; the result can be used, retain the current identity, or continue to draw again."
+
+#: src/components/IdentityDrawDialog.tsx:201
+msgid "抽取结果："
+msgstr "Extraction results:"
+
+#: src/components/RematchInviteCard.tsx:64
+msgid "拒绝"
+msgstr "reject"
+
+#: src/hooks/use-realtime-room.ts:524
+msgid "指令未确认，请重试。"
+msgstr "The command was not confirmed, please try again."
+
+#: src/data/players.ts:13
+msgid "指挥"
+msgstr "IGL"
+
+#: src/components/ModeSidebar.tsx:79
+msgid "挑战完成"
+msgstr "Challenge completed"
+
+#: src/components/ModeSidebar.tsx:89
+msgid "挑战结束"
+msgstr "Challenge ends"
+
+#: src/components/RematchInviteCard.tsx:48
+msgid "接受后将保留当前规则，并在原房间开启全新的系列赛。"
+msgstr "Once accepted, the current rules will be retained and a new series will start in the original room."
+
+#: src/components/RematchInviteCard.tsx:77
+msgid "接受重赛"
+msgstr "accept rematch"
+
+#: src/pages/SoloDifficultyPage.tsx:185
+msgid "推荐"
+msgstr "Recommended"
+
+#: src/components/PlayerSearch.tsx:566
+msgid "提交猜测"
+msgstr "Submit a guess"
+
+#: src/lib/realtime.ts:14
+msgid "提交的信息无效，请检查房间号和对局设置。"
+msgstr "The submitted information is invalid, please check the room number and game settings."
+
+#: src/components/PlayerSearch.tsx:488
+msgid "搜索并选择猜测选手"
+msgstr "Search and select guess player"
+
+#: src/components/PlayerSearch.tsx:500
+msgid "搜索结果"
+msgstr "Search results"
+
+#: src/components/ModeSidebar.tsx:279
+msgid "搜索职业选手并提交猜测。"
+msgstr "Search for pros and submit your guess."
+
+#: src/components/PlayerSearch.tsx:489
+msgid "搜索选手昵称、姓名、战队或国家"
+msgstr "Search for player nickname, name, team or country"
+
+#: src/machines/user-journey-machine.ts:602
+msgid "播放匹配成功反馈后进入实时对局。"
+msgstr "After playing the feedback of successful matching, enter the real-time match."
+
+#: src/machines/user-journey-machine.ts:464
+msgid "播放选手卡滚动动画并预载候选头像。"
+msgstr "Play player card scrolling animation and preload candidate avatars."
+
+#: src/hooks/use-realtime-room.ts:535
+#: src/lib/realtime.ts:20
+msgid "操作太频繁，请稍后再试。"
+msgstr "The operation was too frequent, please try again later."
+
+#: src/pages/StatsPage.tsx:255
+msgid "数据按回合统计，最多保留最近 50 回合。同一房间的每个回合各占一行，比分为该回合结束时的累计比分。"
+msgstr "Data is calculated by round, with up to the most recent 50 rounds retained. Each round in the same room has its own row, and the score is the cumulative score at the end of the round."
+
+#: src/pages/LiveGamePage.tsx:264
+msgid "断线判负"
+msgstr "Loss due to disconnection"
+
+#: src/machines/user-journey-machine.ts:492
+msgid "新身份待选择"
+msgstr "New identity to be selected"
+
+#: src/lib/rematch.ts:142
+msgid "无法建立重赛。你可以等待对手恢复后再邀请，或重新匹配。"
+msgstr "Unable to create rematch. You can wait for your opponent to recover before inviting, or rematch."
+
+#: src/lib/realtime.ts:76
+msgid "无法连接对战服务器，请检查网络后重新创建。"
+msgstr "Unable to connect to the battle server, please check the network and create again."
+
+#: src/lib/realtime.ts:75
+msgid "无法连接对战服务器，请检查网络后重新加入。"
+msgstr "Unable to connect to the battle server, please check the network and rejoin."
+
+#: src/lib/realtime.ts:24
+msgid "无法连接对战服务器，请检查网络后重试。"
+msgstr "Unable to connect to the battle server, please check the network and try again."
+
+#: src/components/IdentityDrawDialog.tsx:266
+msgid "无法重抽"
+msgstr "Unable to redraw"
+
+#: src/pages/StatsPage.tsx:81
+msgid "无猜测记录"
+msgstr "No Guesses"
+
+#: src/lib/player-display.ts:26
+#: src/lib/player-display.ts:28
+msgid "无队伍"
+msgstr "No Team"
+
+#: src/machines/user-journey-machine.ts:675
+msgid "无需实时连接"
+msgstr "No real-time connection required"
+
+#: src/pages/SoloGamePage.tsx:307
+msgid "旧练习进度无法恢复，已安全开始新的练习回合。"
+msgstr "Old practice progress cannot be restored and it is safe to start a new practice round."
+
+#: src/lib/solo-result-copy.ts:10
+msgid "时间已到"
+msgstr "time has come"
+
+#: src/pages/LiveGamePage.tsx:268
+msgid "时间结束"
+msgstr "time ends"
+
+#: src/components/GuessTable.tsx:916
+#: src/lib/friend-room.ts:26
+#: src/pages/MatchmakingPage.tsx:473
+msgid "明牌"
+msgstr "Open"
+
+#: src/components/ModeSidebar.tsx:170
+#: src/pages/QuickMatch.tsx:377
+#: src/pages/RoomEntry.tsx:291
+#: src/pages/RoomEntry.tsx:423
+msgid "明牌模式"
+msgstr "Open Guesses"
+
+#: src/machines/user-journey-machine.ts:644
+msgid "显示房间号、容量或网络错误并允许重试。"
+msgstr "Shows room number, capacity or network errors and allows retries."
+
+#: src/machines/user-journey-machine.ts:584
+msgid "显示排队与游戏中人数，并允许取消。"
+msgstr "Shows the number of people in queue and in-game, and allows cancellations."
+
+#: src/pages/StatsPage.tsx:285
+#: src/pages/StatsPage.tsx:286
+msgid "暂无"
+msgstr "None yet"
+
+#: src/pages/IdentityPage.tsx:620
+msgid "暂无机会"
+msgstr "No Credits"
+
+#: src/components/CelebrationOverlay.tsx:134
+msgid "有成员断线超时，本系列已结束。最终排名已保留。"
+msgstr "A member's disconnection timed out and this series has ended. Final rankings have been retained."
+
+#: src/components/CelebrationOverlay.tsx:132
+msgid "有成员离开，本系列已结束。最终排名已保留。"
+msgstr "A member has left and this series has ended. Final rankings have been retained."
+
+#. placeholder {0}: identity.winningGuessSampleSize
+#. placeholder {1}: identity.averageWinningGuesses ?? 0
+#: src/pages/StatsPage.tsx:318
+msgid "有猜测记录的胜利回合 {0} 个 · 平均 {1} 次"
+msgstr "{0} wins with guesses · {1} guesses on average"
+
+#: src/components/CelebrationOverlay.tsx:114
+msgid "服务器判定你赢得本系列。"
+msgstr "The server determines that you win this series."
+
+#: src/components/CelebrationOverlay.tsx:115
+msgid "服务器判定本系列结束。"
+msgstr "The server has determined that this series is over."
+
+#: src/hooks/use-realtime-room.ts:133
+msgid "服务器拒绝了本次操作，请稍后重试。"
+msgstr "The server rejected this operation, please try again later."
+
+#: src/hooks/use-realtime-room.ts:536
+msgid "服务器未接受本次操作，请重试。"
+msgstr "The server did not accept this operation, please try again."
+
+#: src/lib/rematch.ts:147
+msgid "服务器正在重置比分和题目，即将开始新的系列赛。"
+msgstr "The server is resetting scores and questions, and a new series is about to begin."
+
+#: src/lib/realtime.ts:80
+msgid "服务器返回了异常数据，请刷新页面后重新创建。"
+msgstr "The server returned abnormal data, please refresh the page and create it again."
+
+#: src/lib/realtime.ts:79
+msgid "服务器返回了异常数据，请刷新页面后重新加入。"
+msgstr "The server returned abnormal data, please refresh the page and rejoin."
+
+#: src/lib/realtime.ts:25
+msgid "服务器返回了无法识别的会话数据，请刷新后重试。"
+msgstr "The server returned unrecognizable session data, please refresh and try again."
+
+#: src/hooks/use-realtime-room.ts:286
+msgid "服务器返回了无法识别的同步响应，请重试。"
+msgstr "The server returned an unrecognized synchronous response. Please try again."
+
+#: src/hooks/use-realtime-room.ts:530
+msgid "服务器返回了无法识别的指令响应，请重试。"
+msgstr "The server returned an unrecognized command response, please try again."
+
+#: src/hooks/use-realtime-room.ts:314
+#: src/hooks/use-realtime-room.ts:391
+msgid "服务器返回的房间状态不完整，请重试。"
+msgstr "The room status returned by the server is incomplete, please try again."
+
+#: src/pages/LiveGamePage.tsx:685
+msgid "未加入"
+msgstr "Not joined"
+
+#: src/components/GuessTable.tsx:103
+#: src/components/GuessTable.tsx:146
+msgid "未命中"
+msgstr "miss"
+
+#: src/pages/LiveGamePage.tsx:1985
+msgid "未猜出"
+msgstr "Not guessed"
+
+#: src/data/players.ts:17
+msgid "未知"
+msgstr "Unknown"
+
+#: src/pages/LiveGamePage.tsx:1943
+#: src/pages/LiveGamePage.tsx:1957
+msgid "未知选手"
+msgstr "Unknown player"
+
+#: src/pages/IdentityPage.tsx:309
+msgid "未能保存选择，请重试。"
+msgstr "Failed to save selection, please try again."
+
+#: src/pages/RoomEntry.tsx:545
+msgid "未能创建房间"
+msgstr "Unable to create room"
+
+#: src/pages/QuickMatch.tsx:480
+msgid "未能加入匹配队列"
+msgstr "Failed to join match queue"
+
+#: src/pages/RoomEntry.tsx:526
+msgid "未能加入房间"
+msgstr "Unable to join room"
+
+#: src/pages/LiveGamePage.tsx:1304
+msgid "未能连接房间"
+msgstr "Unable to connect room"
+
+#: src/pages/MatchmakingPage.tsx:523
+msgid "未能退出匹配"
+msgstr "Unable to exit match"
+
+#: src/pages/LiveGamePage.tsx:1301
+#: src/pages/LiveGamePage.tsx:2124
+msgid "未能退出房间"
+msgstr "Unable to exit room"
+
+#: src/pages/StatsPage.tsx:183
+msgid "本回合无猜测记录"
+msgstr "No guesses recorded in this round"
+
+#: src/pages/StatsPage.tsx:91
+msgid "本回合猜测记录"
+msgstr "Guess record for this round"
+
+#: src/pages/StatsPage.tsx:157
+msgid "本回合答案"
+msgstr "Answer for this round"
+
+#: src/pages/StatsPage.tsx:174
+msgid "本回合答案的历史数据不可用"
+msgstr "Historical data for answers for this round is not available"
+
+#: src/components/CelebrationOverlay.tsx:269
+#: src/components/ModeSidebar.tsx:92
+#: src/pages/LiveGamePage.tsx:1684
+msgid "本局失利"
+msgstr "Round Lost"
+
+#: src/pages/LiveGamePage.tsx:1518
+msgid "本局失利。"
+msgstr "This round was lost."
+
+#: src/components/CelebrationOverlay.tsx:275
+#: src/components/ModeSidebar.tsx:97
+#: src/pages/LiveGamePage.tsx:1685
+msgid "本局平局"
+msgstr "Round Drawn"
+
+#: src/pages/LiveGamePage.tsx:1521
+msgid "本局平局。"
+msgstr "This game is a draw."
+
+#: src/lib/solo-result-copy.ts:11
+#: src/lib/solo-result-copy.ts:12
+msgid "本局时间已到，答案已经揭晓。"
+msgstr "The time of this round is up and the answer has been revealed."
+
+#: src/components/CelebrationOverlay.tsx:241
+msgid "本局未分出胜负。"
+msgstr "There is no winner in this round."
+
+#: src/components/CelebrationOverlay.tsx:494
+#: src/components/DailyResultPanel.tsx:117
+msgid "本局答案"
+msgstr "Round Answer"
+
+#: src/lib/solo-result-copy.ts:24
+#: src/lib/solo-result-copy.ts:25
+msgid "本局答案已经揭晓。"
+msgstr "The answer to this game has been revealed."
+
+#: src/components/CelebrationOverlay.tsx:262
+#: src/components/ModeSidebar.tsx:82
+#: src/pages/LiveGamePage.tsx:1682
+msgid "本局胜利"
+msgstr "Round Won"
+
+#: src/pages/LiveGamePage.tsx:1514
+msgid "本局胜利。"
+msgstr "Victory in this round."
+
+#: src/pages/LiveGamePage.tsx:2207
+msgid "本次邀请已经结束。"
+msgstr "This invitation has ended."
+
+#: src/lib/rematch.ts:127
+msgid "本次邀请已结束，你仍可查看本局结果或重新匹配。"
+msgstr "This invitation has ended. You can still view the results of this game or rematch."
+
+#: src/pages/LiveGamePage.tsx:1510
+msgid "本系列已结束。"
+msgstr "This series has ended."
+
+#: src/components/CelebrationOverlay.tsx:135
+msgid "本系列已结束。最终排名已保留。"
+msgstr "This series has ended. Final rankings have been retained."
+
+#: src/components/GuessTable.tsx:564
+msgid "本轮已判负"
+msgstr "This round has been lost"
+
+#: src/pages/LiveGamePage.tsx:1856
+msgid "本轮已判负，等待下一轮"
+msgstr "This round has been judged as a loss, waiting for the next round"
+
+#: src/hooks/use-realtime-room.ts:129
+msgid "本轮已判负，等待下一轮。"
+msgstr "This round has been judged as a loss, waiting for the next round."
+
+#: src/pages/LiveGamePage.tsx:1962
+msgid "本轮平局"
+msgstr "Draw this round"
+
+#: src/pages/LiveGamePage.tsx:2027
+msgid "本轮平局，继续加赛"
+msgstr "This round is a draw, extra games will continue"
+
+#: src/components/CelebrationOverlay.tsx:421
+msgid "本轮平局，继续加赛。"
+msgstr "This round is a draw and the playoffs will continue."
+
+#: src/lib/solo-result-copy.ts:17
+msgid "机会已用完"
+msgstr "Opportunity has been exhausted"
+
+#: src/machines/user-journey-machine.ts:536
+msgid "机会耗尽或超时后展示答案和结果。"
+msgstr "Answers and results are displayed after opportunities have been exhausted or timed out."
+
+#: src/pages/StatsPage.tsx:192
+msgid "条猜测的历史数据不可用"
+msgstr "Guess historical data is not available"
+
+#: src/components/CelebrationOverlay.tsx:531
+#: src/pages/LiveGamePage.tsx:2088
+#: src/pages/LiveGamePage.tsx:2228
+msgid "查看对局"
+msgstr "View Match"
+
+#: src/components/ModeSidebar.tsx:173
+msgid "查看对手信息规则"
+msgstr "View opponent information rules"
+
+#: src/machines/user-journey-machine.ts:500
+msgid "查看已持久化的对局结果和历史记录。"
+msgstr "View persisted game results and history."
+
+#: src/pages/IdentityPage.tsx:507
+msgid "查看抽取说明"
+msgstr "View extraction instructions"
+
+#: src/components/ModeSidebar.tsx:271
+msgid "查看竞猜规则"
+msgstr "View betting rules"
+
+#: src/pages/GamePage.tsx:327
+#: src/pages/LiveGamePage.tsx:2006
+#: src/pages/SoloGamePage.tsx:370
+msgid "查看结果图例"
+msgstr "View the result legend"
+
+#: src/machines/user-journey-machine.ts:476
+msgid "查看身份、今日挑战和全部游戏模式入口。"
+msgstr "View your identity, today's challenge, and access to all game modes."
+
+#: src/components/PlayerIdentity.tsx:164
+msgid "查看身份与抽取规则"
+msgstr "View identity and extraction rules"
+
+#: src/machines/user-journey-machine.ts:482
+msgid "查看身份池、抽取次数并决定是否更换身份。"
+msgstr "View the identity pool, draw times and decide whether to change identities."
+
+#: src/pages/IdentityPage.tsx:390
+msgid "查看身份规则"
+msgstr "View identity rules"
+
+#: src/pages/RoomEntry.tsx:538
+msgid "检查房间号"
+msgstr "Check room number"
+
+#: src/machines/user-journey-machine.ts:450
+msgid "检查身份"
+msgstr "check identity"
+
+#: src/pages/StatsPage.tsx:140
+msgid "模式"
+msgstr "Mode"
+
+#: src/pages/StatsPage.tsx:407
+msgid "模式 / 房间"
+msgstr "Mode / Room"
+
+#: src/components/AppHeader.tsx:61
+#: src/components/DailyGameLoading.tsx:61
+#: src/components/ModeSidebar.tsx:60
+#: src/machines/user-journey-machine.ts:474
+#: src/pages/SoloDifficultyPage.tsx:98
+msgid "模式大厅"
+msgstr "Game Lobby"
+
+#: src/components/GuessTable.tsx:327
+#: src/components/GuessTable.tsx:493
+msgid "横向滑动查看全部属性 →"
+msgstr "Swipe horizontally to view all properties →"
+
+#: src/components/BattleContext.tsx:131
+#: src/pages/StatsPage.tsx:79
+msgid "次"
+msgstr "attempts"
+
+#: src/pages/StatsPage.tsx:119
+msgid "次 Major"
+msgstr "Major appearances"
+
+#: src/pages/LiveGamePage.tsx:270
+msgid "次数用尽"
+msgstr "Exhausted"
+
+#: src/components/ModeSidebar.tsx:281
+msgid "次机会与三分钟内锁定答案。"
+msgstr "A chance to lock in the answer within three minutes."
+
+#: src/lib/country-geography.ts:112
+msgid "欧洲"
+msgstr "Europe"
+
+#. placeholder {0}: submittedSettings.identityNickname
+#. placeholder {1}: submittedSettings.maxPlayers
+#. placeholder {2}: SOLO_DIFFICULTIES.find( (option) => option.id === submittedSettings.difficulty, )?.label ?? t`简单`
+#. placeholder {3}: submittedSettings.bestOf
+#. placeholder {4}: submittedSettings.visibility === "hidden" ? t`隐藏猜测` : t`明牌模式`
+#: src/pages/RoomEntry.tsx:284
+msgid "正在以 {0} 创建 {1} 人 · {2} · BO{3} · {4}"
+msgstr "Creating {1} people with {0} · {2} · BO{3} · {4}"
+
+#. placeholder {0}: submittedSettings.identityNickname
+#. placeholder {1}: submittedSettings.roomNumber
+#: src/pages/RoomEntry.tsx:283
+msgid "正在以 {0} 加入 CS-{1}"
+msgstr "Joining CS-{1} as {0}"
+
+#: src/components/IdentityDrawDialog.tsx:119
+msgid "正在保存"
+msgstr "Saving"
+
+#: src/components/IdentityDrawDialog.tsx:285
+msgid "正在保存…"
+msgstr "Saving…"
+
+#: src/components/IdentityDrawDialog.tsx:299
+msgid "正在保存新身份"
+msgstr "Saving new identity"
+
+#: src/components/IdentityDrawDialog.tsx:241
+msgid "正在保留…"
+msgstr "Reserved…"
+
+#: src/components/IdentityDrawDialog.tsx:296
+msgid "正在保留当前身份"
+msgstr "Preserving current identity"
+
+#: src/pages/IdentityPage.tsx:621
+msgid "正在准备头像"
+msgstr "Preparing avatar"
+
+#: src/App.tsx:247
+msgid "正在准备对局"
+msgstr "Preparing for a match"
+
+#: src/pages/RoomEntry.tsx:516
+msgid "正在创建房间"
+msgstr "Creating room"
+
+#: src/pages/QuickMatch.tsx:473
+msgid "正在加入匹配队列"
+msgstr "Joining match queue"
+
+#: src/pages/RoomEntry.tsx:516
+msgid "正在加入房间"
+msgstr "Joining room"
+
+#: src/pages/QuickMatch.tsx:446
+msgid "正在加入队列，请稍候。"
+msgstr "Joining the queue, please wait."
+
+#: src/pages/QuickMatch.tsx:457
+msgid "正在加入队列…"
+msgstr "Joining queue…"
+
+#: src/pages/MatchmakingPage.tsx:437
+msgid "正在匹配"
+msgstr "matching"
+
+#: src/lib/rematch.ts:146
+#: src/pages/LiveGamePage.tsx:2188
+msgid "正在匹配原对手"
+msgstr "Matching original opponent"
+
+#: src/pages/LiveGamePage.tsx:2331
+msgid "正在发送"
+msgstr "Sending"
+
+#: src/pages/LiveGamePage.tsx:2177
+msgid "正在取消"
+msgstr "Canceling"
+
+#: src/pages/MatchmakingPage.tsx:513
+msgid "正在取消匹配"
+msgstr "Cancelling Matchmaking"
+
+#: src/pages/MatchmakingPage.tsx:495
+msgid "正在取消匹配。"
+msgstr "Unmatching."
+
+#: src/components/DailyGameLoading.tsx:173
+msgid "正在同步今日统一题目、轮次与计时信息。"
+msgstr "Synchronizing today's unified question, round and timing information."
+
+#: src/pages/RoomEntry.tsx:519
+msgid "正在向服务器确认房间设置，完成后会自动进入等待页面。"
+msgstr "The room settings are being confirmed from the server. After completion, you will automatically enter the waiting page."
+
+#: src/pages/LiveGamePage.tsx:1302
+#: src/pages/LiveGamePage.tsx:2124
+#: src/pages/MatchmakingPage.tsx:362
+msgid "正在完成退出"
+msgstr "Completing exit"
+
+#: src/pages/MatchmakingPage.tsx:365
+msgid "正在寻找对手"
+msgstr "Looking for an opponent"
+
+#: src/pages/LiveGamePage.tsx:1789
+msgid "正在开始"
+msgstr "Starting"
+
+#: src/pages/LiveGamePage.tsx:2144
+msgid "正在开始本轮"
+msgstr "Starting this round"
+
+#: src/pages/LiveGamePage.tsx:2255
+#: src/pages/MatchmakingPage.tsx:525
+msgid "正在恢复连接"
+msgstr "Restore connection"
+
+#: src/components/IdentityDrawDialog.tsx:122
+msgid "正在抽取"
+msgstr "Extracting"
+
+#: src/machines/user-journey-machine.ts:681
+msgid "正在握手并同步服务器快照。"
+msgstr "Handshaking and synchronizing server snapshot."
+
+#: src/pages/LiveGamePage.tsx:2152
+msgid "正在清理上一场结果并同步新的系列赛状态。"
+msgstr "Cleaning up last game results and syncing new series status."
+
+#: src/pages/QuickMatch.tsx:474
+msgid "正在确认身份与对战参数，完成后会自动进入等待页面。"
+msgstr "The identity and battle parameters are being confirmed. After completion, you will automatically enter the waiting page."
+
+#: src/pages/LiveGamePage.tsx:1539
+msgid "正在等待对手加入。"
+msgstr "Waiting for opponents to join."
+
+#: src/components/DailyGameLoading.tsx:126
+msgid "正在获取今日统一题目"
+msgstr "Getting today's unified question"
+
+#: src/pages/LiveGamePage.tsx:1313
+#: src/pages/LiveGamePage.tsx:1397
+msgid "正在获取服务器确认的房间设置、成员与对局状态。"
+msgstr "Obtaining the room settings, members and game status confirmed by the server."
+
+#: src/pages/IdentityPage.tsx:603
+msgid "正在请求…"
+msgstr "Requesting…"
+
+#: src/App.tsx:258
+msgid "正在载入…"
+msgstr "Loading…"
+
+#: src/components/DailyGameLoading.tsx:38
+#: src/components/DailyGameLoading.tsx:172
+msgid "正在载入今日题目"
+msgstr "Loading today's questions"
+
+#: src/components/DailyGameLoading.tsx:164
+msgid "正在载入今日题目，轮次、计时和猜测进度将在题目准备后显示。"
+msgstr "Today's question is loading. Rounds, timing and guessing progress will be displayed after the question is prepared."
+
+#: src/App.tsx:178
+msgid "正在载入玩家身份"
+msgstr "Loading player identities"
+
+#: src/App.tsx:229
+msgid "正在载入身份资料…"
+msgstr "Loading identity information..."
+
+#: src/App.tsx:240
+msgid "正在载入页面"
+msgstr "Loading page"
+
+#: src/lib/live-presence.ts:11
+#: src/pages/LiveGamePage.tsx:192
+#: src/pages/LiveGamePage.tsx:1296
+msgid "正在连接"
+msgstr "Connecting"
+
+#: src/pages/LiveGamePage.tsx:1491
+msgid "正在连接，连接后由房主开始本轮"
+msgstr "Connecting. After connecting, the host will start this round."
+
+#: src/lib/friend-room.ts:45
+msgid "正在连接服务器"
+msgstr "Connecting to server"
+
+#: src/pages/MatchmakingPage.tsx:386
+msgid "正在退出…"
+msgstr "Exiting..."
+
+#: src/pages/LiveGamePage.tsx:2145
+msgid "正在通知房间成员并同步本轮题目。"
+msgstr "Room members are being notified and the questions of this round are being synchronized."
+
+#: src/lib/friend-room.ts:50
+msgid "正在通知所有成员"
+msgstr "Notifying all members"
+
+#: src/pages/MatchmakingPage.tsx:256
+msgid "正在通知服务器退出当前匹配，请勿重复操作。"
+msgstr "The server is being notified to exit the current match, please do not repeat the operation."
+
+#: src/pages/LiveGamePage.tsx:1309
+#: src/pages/LiveGamePage.tsx:2127
+msgid "正在通知服务器释放当前席位，请勿重复操作。"
+msgstr "The server is being notified to release the current seat. Please do not repeat the operation."
+
+#: src/pages/MatchmakingPage.tsx:514
+msgid "正在通知服务器释放当前队列席位，请勿重复操作。"
+msgstr "The server is being notified to release the current queue seat. Please do not repeat the operation."
+
+#: src/components/IdentityDrawDialog.tsx:263
+msgid "正在重抽…"
+msgstr "Redrawing..."
+
+#: src/components/IdentityDrawDialog.tsx:298
+msgid "正在重新抽取身份"
+msgstr "Re-extracting identity"
+
+#: src/pages/LiveGamePage.tsx:2068
+msgid "正在重置"
+msgstr "Resetting"
+
+#: src/pages/LiveGamePage.tsx:2151
+msgid "正在重置系列赛"
+msgstr "Resetting series"
+
+#: src/pages/LiveGamePage.tsx:2047
+msgid "正在重置系列赛…"
+msgstr "Resetting series..."
+
+#: src/lib/live-presence.ts:12
+#: src/pages/LiveGamePage.tsx:1293
+msgid "正在重连"
+msgstr "Reconnecting"
+
+#: src/pages/LiveGamePage.tsx:1996
+msgid "此对局来自旧版本，未包含逐轮记录。"
+msgstr "This match is from an older version and does not include round-by-round records."
+
+#: src/data/players.ts:11
+msgid "步枪手"
+msgstr "Rifler"
+
+#: src/pages/ModeLobby.tsx:130
+msgid "每日刷新"
+msgstr "Refreshed daily"
+
+#: src/components/DailyGameLoading.tsx:38
+#: src/components/DailyGameLoading.tsx:179
+msgid "每日挑战载入失败"
+msgstr "Daily challenge failed to load"
+
+#: src/pages/StatsPage.tsx:331
+msgid "每条记录代表一个回合；同一房间会连续分组，比分为回合结束时的累计比分。"
+msgstr "Each record represents a round; the same room will be grouped continuously, and the score is the cumulative score at the end of the round."
+
+#: src/components/SeriesSelector.tsx:66
+#: src/pages/QuickMatch.tsx:427
+msgid "比赛赛制"
+msgstr "Series Format"
+
+#. placeholder {0}: query.trim()
+#: src/components/PlayerSearch.tsx:112
+msgid "没有找到与“{0}”匹配的选手"
+msgstr "No contestants found matching \"{0}\""
+
+#: src/lib/realtime.ts:39
+msgid "没有找到这个房间，请检查 6 位房间号后重试。"
+msgstr "This room was not found, please check the 6-digit room number and try again."
+
+#: src/components/PlayerSearch.tsx:498
+msgid "没有找到这名选手"
+msgstr "This player was not found"
+
+#: src/machines/user-journey-machine.ts:488
+msgid "消耗抽取次数并播放滚动动画。"
+msgstr "Consumes the draw count and plays the scroll animation."
+
+#: src/pages/MatchmakingPage.tsx:548
+msgid "清除失效会话并返回"
+msgstr "Clear expired session and return"
+
+#: src/pages/MatchmakingPage.tsx:452
+msgid "游戏中"
+msgstr "in game"
+
+#: src/hooks/use-realtime-room.ts:281
+#: src/hooks/use-realtime-room.ts:302
+msgid "状态同步失败，请重试。"
+msgstr "Status synchronization failed, please try again."
+
+#: src/data/players.ts:9
+msgid "狙击手"
+msgstr "AWPer"
+
+#: src/pages/LiveGamePage.tsx:262
+msgid "猜中答案"
+msgstr "Guess the answer"
+
+#: src/pages/QuickMatch.tsx:358
+msgid "猜测可见性说明"
+msgstr "About guess visibility"
+
+#: src/components/GuessTable.tsx:93
+msgid "猜测曾效力"
+msgstr "Guess worked for"
+
+#: src/components/CelebrationOverlay.tsx:218
+msgid "猜测次数已经用尽，服务器已完成本局裁定。"
+msgstr "The number of guesses has been exhausted, and the server has completed the decision of this bureau."
+
+#: src/components/GuessTable.tsx:508
+msgid "猜测状态"
+msgstr "guess state"
+
+#: src/pages/StatsPage.tsx:411
+msgid "猜测记录"
+msgstr "guess record"
+
+#: src/components/DailyGameLoading.tsx:105
+#: src/components/ModeSidebar.tsx:217
+msgid "猜测进度"
+msgstr "Guess Progress"
+
+#: src/components/GuessTable.tsx:342
+msgid "猜测选手"
+msgstr "Guess the player"
+
+#: src/components/GuessTable.tsx:97
+msgid "猜测选手和答案曾经效力过的战队有重叠"
+msgstr "The guessing player overlaps with the teams the answer has played for"
+
+#: src/components/GuessTable.tsx:87
+msgid "猜测选手的当前战队，是答案曾经效力过的战队"
+msgstr "Guess the player's current team, which is the team the answer has played for before"
+
+#: src/pages/LiveGamePage.tsx:134
+#: src/pages/LiveGamePage.tsx:246
+#: src/pages/LiveGamePage.tsx:699
+msgid "玩家"
+msgstr "player"
+
+#: src/components/ModeSidebar.tsx:73
+msgid "玩家就位后开始"
+msgstr "Start after players are in position"
+
+#: src/pages/ModeLobby.tsx:79
+msgid "玩家快捷操作"
+msgstr "Player quick operations"
+
+#: src/App.tsx:191
+#: src/pages/IdentityPage.tsx:367
+#: src/pages/LiveGamePage.tsx:1347
+msgid "玩家身份"
+msgstr "Player Identity"
+
+#: src/machines/user-journey-machine.ts:701
+msgid "用户主动退出后不再自动重连。"
+msgstr "Users will no longer automatically reconnect after voluntarily logging out."
+
+#: src/pages/LiveGamePage.tsx:2049
+msgid "留在房间，等待房主开始下一场"
+msgstr "Stay in the room and wait for the host to start the next session"
+
+#: src/components/CelebrationOverlay.tsx:439
+msgid "留在房间，等待房主开始下一场。"
+msgstr "Stay in the room and wait for the owner to start the next one."
+
+#: src/components/GuessTable.tsx:143
+msgid "目标数值更低"
+msgstr "Target value is lower"
+
+#: src/components/GuessTable.tsx:141
+msgid "目标数值更高"
+msgstr "Target value is higher"
+
+#: src/pages/SoloDifficultyPage.tsx:122
+msgid "目标来自 Major 冠军或参赛至少 5 次的知名选手。"
+msgstr "The pool features Major champions and players with at least 5 Major appearances."
+
+#: src/lib/solo-game.ts:19
+msgid "知名选手"
+msgstr "Notable Players"
+
+#: src/pages/IdentityPage.tsx:654
+msgid "确认身份并继续"
+msgstr "Confirm identity and continue"
+
+#: src/pages/IdentityPage.tsx:653
+msgid "确认身份并进入大厅"
+msgstr "Confirm identity and enter the lobby"
+
+#: src/components/BattleContext.tsx:118
+#: src/components/BattleContext.tsx:256
+#: src/lib/live-presence.ts:13
+#: src/lib/live-presence.ts:16
+msgid "离线"
+msgstr "Offline"
+
+#: src/components/CelebrationOverlay.tsx:428
+msgid "秒"
+msgstr "seconds"
+
+#: src/data/players.ts:15
+msgid "突破手"
+msgstr "Entry Fragger"
+
+#: src/components/MatchFoundOverlay.tsx:113
+msgid "立即进入"
+msgstr "Enter now"
+
+#: src/pages/LiveGamePage.tsx:2282
+msgid "立即重连"
+msgstr "Reconnect now"
+
+#. placeholder {0}: index + 1
+#: src/pages/StatsPage.tsx:101
+msgid "第 {0} 次猜测"
+msgstr "Guess {0}"
+
+#. placeholder {0}: challenge?.roundNumber ?? "—"
+#. placeholder {0}: round.roundNumber
+#: src/pages/LiveGamePage.tsx:1950
+#: src/pages/ModeLobby.tsx:144
+msgid "第 {0} 轮"
+msgstr "Round {0}"
+
+#. placeholder {0}: round.roundNumber
+#: src/pages/LiveGamePage.tsx:1968
+msgid "第 {0} 轮猜测结果"
+msgstr "Guess results for round {0}"
+
+#: src/lib/live-presence.ts:47
+msgid "第 {rank}"
+msgstr "#{rank}"
+
+#. placeholder {0}: winner.nickname
+#: src/components/IdentityDrawDialog.tsx:199
+msgid "第 {rollKey} 次抽取结果：{0}"
+msgstr "The {rollKey} extraction result: {0}"
+
+#. placeholder {0}: opponentPlayer.displayName
+#: src/pages/LiveGamePage.tsx:1505
+msgid "等待 {0} 建立实时连接"
+msgstr "Waiting {0} for live connection to be established"
+
+#: src/components/MatchFoundOverlay.tsx:85
+msgid "等待中的对手 {index}"
+msgstr "Waiting opponent {index}"
+
+#: src/pages/MatchmakingPage.tsx:364
+msgid "等待其余三名玩家"
+msgstr "Wait for the remaining three players"
+
+#: src/pages/LiveGamePage.tsx:1746
+msgid "等待加入"
+msgstr "Waiting to join"
+
+#: src/machines/user-journey-machine.ts:582
+#: src/pages/MatchmakingPage.tsx:446
+msgid "等待匹配"
+msgstr "waiting for match"
+
+#: src/lib/rematch.ts:151
+#: src/pages/LiveGamePage.tsx:2163
+msgid "等待原对手回应"
+msgstr "Wait for the original opponent to respond"
+
+#: src/pages/LiveGamePage.tsx:1536
+msgid "等待四位玩家就位。"
+msgstr "Wait for four players to take their places."
+
+#: src/components/BattleContext.tsx:160
+#: src/components/GuessTable.tsx:564
+#: src/pages/LiveGamePage.tsx:1804
+msgid "等待对手"
+msgstr "Waiting for opponent"
+
+#: src/pages/MatchmakingPage.tsx:260
+msgid "等待已超过 10 分钟，可以重试房间连接或安全返回。"
+msgstr "After waiting more than 10 minutes, you can retry the room connection or return safely."
+
+#: src/pages/LiveGamePage.tsx:1680
+msgid "等待开始"
+msgstr "Waiting to begin"
+
+#: src/components/ModeSidebar.tsx:72
+msgid "等待开局"
+msgstr "Waiting for the start"
+
+#: src/pages/LiveGamePage.tsx:2029
+msgid "等待成员重连后开始下一局"
+msgstr "Wait for members to reconnect before starting the next game"
+
+#: src/components/CelebrationOverlay.tsx:423
+msgid "等待成员重连后开始下一局。"
+msgstr "Wait for the members to reconnect before starting the next game."
+
+#. placeholder {0}: roomMembers.find((player) => player.playerId === hostPlayerId) ?.displayName ?? ""
+#: src/pages/LiveGamePage.tsx:1500
+msgid "等待房主 {0} 开始本轮"
+msgstr "Waiting for the host {0} to start this round"
+
+#: src/machines/user-journey-machine.ts:650
+msgid "等待房主和其他玩家就位。"
+msgstr "Wait for the homeowner and other players to get into position."
+
+#: src/machines/user-journey-machine.ts:608
+msgid "等待所有玩家建立实时连接。"
+msgstr "Wait for all players to establish a live connection."
+
+#: src/pages/IdentityPage.tsx:442
+msgid "等待抽取"
+msgstr "Ready to Draw"
+
+#: src/components/GuessTable.tsx:384
+msgid "等待猜测"
+msgstr "waiting to guess"
+
+#: src/pages/LiveGamePage.tsx:651
+msgid "等待玩家"
+msgstr "waiting for player"
+
+#: src/pages/LiveGamePage.tsx:1506
+msgid "等待玩家实时连接后开始"
+msgstr "Wait for players to connect in real time before starting"
+
+#: src/lib/live-presence.ts:16
+#: src/pages/LiveGamePage.tsx:684
+msgid "等待连接"
+msgstr "Waiting for connection"
+
+#: src/components/GuessTable.tsx:88
+msgid "答案曾效力"
+msgstr "The answer worked"
+
+#: src/components/GuessTable.tsx:92
+msgid "答案的当前战队，是猜测选手曾经效力过的战队"
+msgstr "The current team of the answer is the team that the guessed player has played for before."
+
+#: src/components/MatchFoundOverlay.tsx:19
+#: src/lib/friend-room.ts:8
+#: src/lib/solo-game.ts:18
+#: src/pages/MatchmakingPage.tsx:183
+#: src/pages/RoomEntry.tsx:279
+#: src/pages/RoomEntry.tsx:287
+msgid "简单"
+msgstr "Easy"
+
+#: src/pages/ModeLobby.tsx:162
+msgid "简单 / 完整 / 困难 · 3 分钟"
+msgstr "Easy / Complete / Hard · 3 min"
+
+#: src/pages/SoloDifficultyPage.tsx:121
+msgid "简单："
+msgstr "Easy:"
+
+#: src/pages/QuickMatch.tsx:411
+msgid "简单为高成就选手；完整包含所有参加过 Major\n"
+"                      的选手，包括退役与无队伍选手；困难包含全部选手。"
+msgstr "Simply for high-achieving players; complete for all those who have participated in Majors\n"
+"                      players, including retired and non-team players; the difficulty includes all players."
+
+#. placeholder {0}: identity.player.nickname
+#: src/pages/ModeLobby.tsx:84
+msgid "管理玩家身份：{0}"
+msgstr "Manage player identity: {0}"
+
+#: src/components/PlayerIdentity.tsx:97
+#: src/components/PlayerIdentity.tsx:112
+msgid "管理身份"
+msgstr "Manage identities"
+
+#: src/components/CelebrationOverlay.tsx:447
+msgid "系列赛最终排行榜"
+msgstr "Final standings of the series"
+
+#: src/components/CelebrationOverlay.tsx:121
+#: src/components/CelebrationOverlay.tsx:254
+msgid "系列赛失利"
+msgstr "Series Lost"
+
+#: src/pages/LiveGamePage.tsx:1517
+msgid "系列赛失利。"
+msgstr "Lost the series."
+
+#: src/components/CelebrationOverlay.tsx:139
+msgid "系列赛已结束"
+msgstr "The series is over"
+
+#: src/pages/LiveGamePage.tsx:1520
+msgid "系列赛平局。"
+msgstr "The series is tied."
+
+#: src/components/CelebrationOverlay.tsx:121
+#: src/components/CelebrationOverlay.tsx:247
+msgid "系列赛胜利"
+msgstr "Series Won"
+
+#: src/pages/LiveGamePage.tsx:1513
+msgid "系列赛胜利。"
+msgstr "Series win."
+
+#: src/pages/MatchmakingPage.tsx:369
+msgid "系统只会匹配人数、赛制、题库难度和猜测可见性完全相同的玩家。"
+msgstr "The system will only match players with exactly the same number of players, format, question bank difficulty, and guess visibility."
+
+#: src/components/PlayerIdentity.tsx:176
+msgid "累计"
+msgstr "Grand total"
+
+#: src/pages/StatsPage.tsx:142
+#: src/pages/StatsPage.tsx:361
+#: src/pages/StatsPage.tsx:410
+msgid "累计比分"
+msgstr "cumulative score"
+
+#: src/components/ModeSidebar.tsx:81
+msgid "练习完成"
+msgstr "Exercise completed"
+
+#: src/components/ModeSidebar.tsx:91
+msgid "练习结束"
+msgstr "end of practice"
+
+#: src/pages/SoloDifficultyPage.tsx:139
+msgid "练习难度"
+msgstr "Practice Difficulty"
+
+#: src/pages/StatsPage.tsx:408
+msgid "结果"
+msgstr "result"
+
+#: src/pages/GamePage.tsx:325
+#: src/pages/LiveGamePage.tsx:2005
+#: src/pages/SoloGamePage.tsx:368
+msgid "结果图例"
+msgstr "Results legend"
+
+#: src/components/CelebrationOverlay.tsx:575
+msgid "继续下一局"
+msgstr "Continue to the next game"
+
+#: src/components/CelebrationOverlay.tsx:574
+msgid "继续加赛"
+msgstr "Continue to play extra games"
+
+#: src/lib/country-geography.ts:106
+msgid "美洲"
+msgstr "America"
+
+#: src/pages/ModeLobby.tsx:75
+msgid "职业选手竞猜"
+msgstr "Pro Player Guessing"
+
+#: src/pages/IdentityPage.tsx:475
+msgid "胜"
+msgstr "W"
+
+#: src/components/PlayerIdentity.tsx:160
+msgid "胜 1 局或累计负 2 局 +1"
+msgstr "Win 1 game or lose 2 games in total +1"
+
+#: src/pages/IdentityPage.tsx:409
+msgid "胜 1 局或累计负 2 局，可获得 1 次"
+msgstr "Win 1 game or lose 2 games in total, you can get 1 time"
+
+#: src/pages/StatsPage.tsx:63
+msgid "胜利"
+msgstr "victory"
+
+#: src/pages/IdentityPage.tsx:393
+msgid "胜利一局或累计输掉两局，均可获得一次抽取机会。"
+msgstr "If you win one round or lose two rounds, you will get a chance to draw."
+
+#: src/components/PlayerIdentity.tsx:168
+msgid "胜利一局获得 1 次抽取；每累计输掉两局获得 1 次。"
+msgstr "You will get 1 draw for winning a round; you will get 1 draw for every two rounds you lose."
+
+#: src/pages/StatsPage.tsx:283
+msgid "胜局最佳猜数"
+msgstr "Fewest Guesses in a Win"
+
+#: src/pages/StatsPage.tsx:319
+msgid "胜局猜数暂无 · 仅统计有猜测记录的胜利回合"
+msgstr "No winning guess average yet · only wins with guesses are counted"
+
+#: src/components/PlayerIdentity.tsx:134
+#: src/pages/IdentityPage.tsx:483
+msgid "胜率"
+msgstr "Win Rate"
+
+#: src/components/PlayerIdentity.tsx:176
+msgid "胜解锁"
+msgstr "Win to unlock"
+
+#: src/components/PlayerIdentity.tsx:125
+msgid "胜负"
+msgstr "Victory or defeat"
+
+#: src/machines/user-journey-machine.ts:690
+msgid "自动重连"
+msgstr "Automatically reconnect"
+
+#: src/hooks/use-anonymous-profile.ts:106
+msgid "至少赢得过 1 次 Major 冠军的选手"
+msgstr "Players who have won at least 1 Major"
+
+#: src/pages/IdentityPage.tsx:520
+msgid "至少赢得过一次冠军。"
+msgstr "Win at least one championship."
+
+#: src/components/LanguageSwitcher.tsx:25
+msgid "英文"
+msgstr "English"
+
+#: src/pages/GamePage.tsx:331
+#: src/pages/SoloGamePage.tsx:374
+msgid "蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。向上箭头表示目标数值更高，向下箭头表示更低。"
+msgstr "Blue represents complete identity, and light blue represents the same continent; the nationality card shows the straight-line distance between the capitals of the two countries. An upward arrow indicates a higher target value, a downward arrow indicates a lower value."
+
+#: src/pages/LiveGamePage.tsx:2007
+msgid "蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。隐藏模式不公开对手猜测的具体选手。"
+msgstr "Blue represents complete identity, and light blue represents the same continent; the nationality card shows the straight-line distance between the capitals of the two countries. Hidden mode does not reveal the specific player guessed by the opponent."
+
+#: src/components/ModeSidebar.tsx:280
+msgid "蓝色代表完全一致，箭头表示数值方向。"
+msgstr "Blue represents complete agreement, and the arrow indicates the numerical direction."
+
+#: src/machines/user-journey-machine.ts:524
+msgid "计时、搜索选手并在当前题库规定的机会内提交猜测。"
+msgstr "Time, search for players and submit guesses within the opportunities specified by the current question bank."
+
+#: src/pages/IdentityPage.tsx:383
+msgid "设置初始身份"
+msgstr "Set initial identity"
+
+#: src/pages/QuickMatch.tsx:272
+msgid "设置对战参数"
+msgstr "Configure Match"
+
+#: src/pages/StatsPage.tsx:390
+#: src/pages/StatsPage.tsx:413
+#: src/pages/StatsPage.tsx:478
+msgid "详情"
+msgstr "Details"
+
+#: src/components/DailyGameLoading.tsx:180
+msgid "请检查网络连接后重新载入。"
+msgstr "Please check the network connection and reload."
+
+#: src/components/RematchInviteCard.tsx:45
+msgid "请求再次对战"
+msgstr "Request to fight again"
+
+#: src/lib/realtime.ts:18
+msgid "请求状态发生冲突，请重新提交。"
+msgstr "There is a conflict in the request status, please resubmit."
+
+#: src/pages/RoomEntry.tsx:230
+msgid "请输入 6 位房间号"
+msgstr "Please enter the 6-digit room number"
+
+#: src/machines/user-journey-machine.ts:452
+msgid "读取本地匿名档案并决定是否需要首次身份引导。"
+msgstr "Read the local anonymity archive and determine whether a first identity boot is required."
+
+#: src/pages/IdentityPage.tsx:476
+msgid "负"
+msgstr "L"
+
+#: src/pages/QuickMatch.tsx:429
+msgid "赛制说明"
+msgstr "About series formats"
+
+#: src/lib/country-geography.ts:84
+msgid "距离未知"
+msgstr "unknown distance"
+
+#: src/components/PlayerIdentity.tsx:98
+#: src/components/PlayerIdentity.tsx:113
+#: src/pages/ModeLobby.tsx:87
+msgid "身份"
+msgstr "Identity"
+
+#: src/pages/IdentityPage.tsx:332
+#: src/pages/IdentityPage.tsx:344
+msgid "身份保存失败，请保留此窗口并重试。"
+msgstr "Identity saving failed, please keep this window and try again."
+
+#: src/pages/IdentityPage.tsx:465
+msgid "身份确认后将持续用于后续对局。"
+msgstr "After the identity is confirmed, it will continue to be used in subsequent games."
+
+#: src/machines/user-journey-machine.ts:480
+msgid "身份管理"
+msgstr "Identity management"
+
+#: src/machines/user-journey-machine.ts:486
+msgid "身份重抽中"
+msgstr "Identity re-drawn"
+
+#: src/pages/RoomEntry.tsx:356
+msgid "输入 6 位房间号"
+msgstr "Enter 6-digit room number"
+
+#: src/pages/RoomEntry.tsx:335
+msgid "输入好友分享的 6 位房间号。凭证只保存在当前标签页。"
+msgstr "Enter the 6-digit room number shared by your friend. Credentials are only saved in the current tab."
+
+#: src/pages/ModeLobby.tsx:222
+msgid "输入房间号 · 或创建房间"
+msgstr "Enter room code · or create a room"
+
+#: src/pages/IdentityPage.tsx:373
+msgid "返回"
+msgstr "Back"
+
+#: src/pages/MatchmakingPage.tsx:390
+msgid "返回匹配设置"
+msgstr "Back to Match Settings"
+
+#: src/components/CelebrationOverlay.tsx:293
+#: src/pages/LiveGamePage.tsx:2096
+msgid "返回模式大厅"
+msgstr "Back to Game Lobby"
+
+#: src/pages/QuickMatch.tsx:492
+#: src/pages/RoomEntry.tsx:557
+msgid "返回设置"
+msgstr "Back to Settings"
+
+#. placeholder {0}: maxPlayers - connectedPlayers
+#: src/pages/LiveGamePage.tsx:1498
+msgid "还需 {0} 位成员加入，由你开始本轮"
+msgstr "{0} members need to join, you start this round"
+
+#. placeholder {0}: requiredPlayers - connectedPlayers
+#: src/lib/friend-room.ts:48
+msgid "还需 {0} 位成员连接"
+msgstr "{0} members remaining to connect"
+
+#: src/pages/MatchmakingPage.tsx:409
+#: src/pages/MatchmakingPage.tsx:494
+msgid "连接中"
+msgstr "Connecting"
+
+#: src/pages/LiveGamePage.tsx:1758
+msgid "连接中断"
+msgstr "Connection interrupted"
+
+#: src/debug/install-audit-state.ts:360
+msgid "连接中断，正在尝试恢复对局。"
+msgstr "The connection was interrupted, trying to resume the game."
+
+#: src/pages/LiveGamePage.tsx:186
+msgid "连接中断，正在重连"
+msgstr "Connection interrupted, reconnecting"
+
+#: src/components/BattleContext.tsx:126
+#: src/components/BattleContext.tsx:272
+msgid "连接中断，重连宽限期已开始。"
+msgstr "The connection was interrupted and the grace period for reconnection has begun."
+
+#: src/pages/LiveGamePage.tsx:190
+msgid "连接已关闭"
+msgstr "connection closed"
+
+#: src/pages/LiveGamePage.tsx:1493
+msgid "连接恢复后，房主可以开始本轮"
+msgstr "Once connectivity is restored, the homeowner can begin the round"
+
+#: src/pages/LiveGamePage.tsx:1396
+msgid "连接恢复后会重新同步房间，不会使用过期数据填充比分或席位。"
+msgstr "Rooms are resynced when the connection is restored and scores or seats are not populated with expired data."
+
+#: src/components/ModeSidebar.tsx:246
+#: src/pages/LiveGamePage.tsx:1343
+msgid "连接状态"
+msgstr "connection status"
+
+#: src/hooks/use-realtime-room.ts:350
+msgid "连接超时，无法恢复实时连接。你可以立即重试或安全退出。"
+msgstr "The connection timed out and the live connection cannot be restored. You can try again now or exit safely."
+
+#: src/pages/QuickMatch.tsx:399
+msgid "连接队列中"
+msgstr "Connecting to Queue"
+
+#: src/pages/LiveGamePage.tsx:2258
+#: src/pages/MatchmakingPage.tsx:528
+msgid "连接需要处理"
+msgstr "Connection needs handling"
+
+#: src/components/PlayerIdentity.tsx:143
+#: src/pages/IdentityPage.tsx:492
+#: src/pages/IdentityPage.tsx:495
+msgid "连胜"
+msgstr "Win Streak"
+
+#: src/pages/LiveGamePage.tsx:1031
+msgid "退出匹配失败，凭证已保留，请检查网络后重试。"
+msgstr "Exit matching failed, credentials have been retained, please check the network and try again."
+
+#: src/pages/MatchmakingPage.tsx:257
+msgid "退出尚未完成，原匹配已暂停恢复。请重试退出。"
+msgstr "The exit has not been completed and the original matching has been suspended and resumed. Please try exiting again."
+
+#: src/pages/LiveGamePage.tsx:1357
+#: src/pages/LiveGamePage.tsx:1437
+msgid "退出房间"
+msgstr "Exit the room"
+
+#: src/pages/LiveGamePage.tsx:1040
+msgid "退出房间失败，凭证已保留，请检查网络后重试。"
+msgstr "Failed to exit the room, the credentials have been retained, please check the network and try again."
+
+#: src/lib/realtime.ts:598
+msgid "退出房间失败，请检查网络后重试。"
+msgstr "Failed to exit the room, please check the network and try again."
+
+#: src/components/IdentityDrawDialog.tsx:111
+msgid "选手卡横向滚动，并由中心指针选出新的身份。"
+msgstr "The player card scrolls horizontally, and a new identity is selected by the center pointer."
+
+#: src/pages/MatchmakingPage.tsx:197
+msgid "选手已连接"
+msgstr "Player is connected"
+
+#: src/hooks/use-anonymous-profile.ts:141
+msgid "选手池为空"
+msgstr "Player pool is empty"
+
+#: src/pages/SoloGamePage.tsx:300
+msgid "选手目录已更新，已安全开始新的练习回合。"
+msgstr "The player directory has been updated and it is safe to start a new practice round."
+
+#: src/machines/user-journey-machine.ts:566
+msgid "选择人数、题库、赛制和对手猜测可见性。"
+msgstr "Select the number of players, question bank, format and opponent guess visibility."
+
+#: src/pages/ModeLobby.tsx:104
+msgid "选择游戏模式"
+msgstr "Choose a Game Mode"
+
+#: src/pages/ModeLobby.tsx:179
+msgid "选择玩法"
+msgstr "Choose how to play"
+
+#: src/machines/user-journey-machine.ts:542
+msgid "选择简单、完整或困难题库。"
+msgstr "Choose from easy, complete or difficult question banks."
+
+#: src/pages/SoloDifficultyPage.tsx:106
+msgid "选择练习难度"
+msgstr "Choose a Difficulty"
+
+#: src/components/GuessTable.tsx:757
+msgid "选择要查看的对手"
+msgstr "Select an opponent to view"
+
+#: src/pages/IdentityPage.tsx:504
+msgid "选择选手池"
+msgstr "Choose a Player Pool"
+
+#: src/pages/LiveGamePage.tsx:2167
+msgid "邀请已发送。"
+msgstr "The invitation has been sent."
+
+#: src/lib/rematch.ts:152
+msgid "邀请已送达；所有对手同意后将直接开始新的系列赛。"
+msgstr "The invitation has been sent; a new series will begin directly after all opponents agree."
+
+#: src/components/CelebrationOverlay.tsx:295
+#: src/pages/LiveGamePage.tsx:2332
+msgid "邀请重赛"
+msgstr "Invite Rematch"
+
+#: src/components/IdentityDrawDialog.tsx:268
+msgid "重抽 · {remainingCredits}"
+msgstr "Redraw · {remainingCredits}"
+
+#: src/pages/LiveGamePage.tsx:1419
+#: src/pages/LiveGamePage.tsx:1477
+#: src/pages/LiveGamePage.tsx:2273
+#: src/pages/LiveGamePage.tsx:2316
+msgid "重新加入房间"
+msgstr "rejoin room"
+
+#: src/pages/LiveGamePage.tsx:1420
+#: src/pages/LiveGamePage.tsx:1478
+#: src/pages/LiveGamePage.tsx:2240
+#: src/pages/LiveGamePage.tsx:2274
+#: src/pages/LiveGamePage.tsx:2317
+#: src/pages/LiveGamePage.tsx:2319
+msgid "重新匹配"
+msgstr "rematch"
+
+#: src/pages/LiveGamePage.tsx:1417
+#: src/pages/LiveGamePage.tsx:1475
+#: src/pages/LiveGamePage.tsx:2271
+#: src/pages/LiveGamePage.tsx:2314
+#: src/pages/MatchmakingPage.tsx:547
+msgid "重新设置身份"
+msgstr "Choose Identity Again"
+
+#: src/components/DailyGameLoading.tsx:188
+msgid "重新载入"
+msgstr "Reload"
+
+#: src/pages/LiveGamePage.tsx:1428
+#: src/pages/LiveGamePage.tsx:1479
+#: src/pages/MatchmakingPage.tsx:566
+msgid "重试连接"
+msgstr "Retry connection"
+
+#: src/pages/LiveGamePage.tsx:1472
+#: src/pages/LiveGamePage.tsx:2136
+#: src/pages/MatchmakingPage.tsx:388
+#: src/pages/MatchmakingPage.tsx:538
+msgid "重试退出"
+msgstr "Retry to exit"
+
+#: src/lib/rematch.ts:131
+msgid "重赛邀请已取消"
+msgstr "Rematch invitation canceled"
+
+#: src/pages/LiveGamePage.tsx:2202
+msgid "重赛邀请已结束"
+msgstr "Rematch invitations have ended"
+
+#: src/lib/rematch.ts:136
+msgid "重赛邀请已超时"
+msgstr "Rematch invitation has expired"
+
+#: src/components/BattleContext.tsx:123
+#: src/components/BattleContext.tsx:266
+#: src/components/GuessTable.tsx:476
+msgid "重连 00:"
+msgstr "Reconnect 00:"
+
+#: src/components/IdentityDrawDialog.tsx:180
+msgid "锁定中…"
+msgstr "Locked…"
+
+#: src/pages/MatchmakingPage.tsx:473
+msgid "隐藏"
+msgstr "Hidden"
+
+#: src/pages/QuickMatch.tsx:359
+msgid "隐藏模式只展示命中的属性；明牌模式会显示具体猜测选手。"
+msgstr "The hidden mode only displays the attributes of the hit; the exposed mode displays the specific guessed players."
+
+#: src/components/GuessTable.tsx:901
+#: src/components/ModeSidebar.tsx:170
+#: src/lib/friend-room.ts:26
+#: src/pages/QuickMatch.tsx:377
+#: src/pages/RoomEntry.tsx:290
+#: src/pages/RoomEntry.tsx:423
+msgid "隐藏猜测"
+msgstr "Hidden Guesses"
+
+#: src/machines/user-journey-machine.ts:548
+msgid "随机题目计时竞猜。"
+msgstr "Timed guessing on random questions."
+
+#: src/pages/SoloGamePage.tsx:290
+msgid "难度选择"
+msgstr "Difficulty selection"
+
+#: src/components/SoundToggle.tsx:19
+msgid "静音全站音效"
+msgstr "Mute site-wide sound effects"
+
+#: src/lib/country-geography.ts:104
+msgid "非洲"
+msgstr "Africa"
+
+#: src/components/SoundToggle.tsx:44
+msgid "音效"
+msgstr "Sound effects"
+
+#: src/pages/QuickMatch.tsx:387
+msgid "题库与赛制"
+msgstr "Player Pool & Series"
+
+#: src/components/DifficultySelector.tsx:66
+#: src/pages/QuickMatch.tsx:408
+#: src/pages/RoomEntry.tsx:455
+msgid "题库难度"
+msgstr "Player Pool Difficulty"
+
+#: src/pages/QuickMatch.tsx:410
+msgid "题库难度说明"
+msgstr "About player pool difficulty"
+
+#: src/pages/SoloDifficultyPage.tsx:110
+msgid "题目范围"
+msgstr "Player Pool"
+
+#: src/pages/IdentityPage.tsx:510
+msgid "首次只能从 Major 参赛池抽取，确认后身份会固定保留。"
+msgstr "You can only draw from the Major entry pool for the first time, and your identity will be retained after confirmation."
+
+#: src/pages/IdentityPage.tsx:367
+msgid "首次设置"
+msgstr "First time setup"
+
+#: src/machines/user-journey-machine.ts:456
+msgid "首次身份引导"
+msgstr "First identity boot"
