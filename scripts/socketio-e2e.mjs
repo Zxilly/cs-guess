@@ -89,6 +89,34 @@ function createSocket(baseUrl, namespace, auth = undefined, reconnect = false) {
   });
 }
 
+function waitForCompressedWebSocket(socket) {
+  const engine = socket.io.engine;
+  return new Promise((resolve, reject) => {
+    const cleanup = () => {
+      engine.off("upgrade", inspect);
+      engine.off("upgradeError", fail);
+    };
+    const fail = (error) => {
+      cleanup();
+      reject(error);
+    };
+    const inspect = (transport) => {
+      if (transport.name !== "websocket") return;
+      cleanup();
+      const extensions = transport.ws?.extensions ?? "";
+      if (!extensions.includes("permessage-deflate")) {
+        reject(new Error(`WebSocket compression was not negotiated: ${extensions || "none"}`));
+        return;
+      }
+      resolve(extensions);
+    };
+
+    engine.on("upgrade", inspect);
+    engine.on("upgradeError", fail);
+    inspect(engine.transport);
+  });
+}
+
 async function createRoom(baseUrl) {
   const response = await fetch(`${baseUrl}/v1/rooms`, {
     method: "POST",
@@ -170,8 +198,14 @@ try {
   await waitForReady(baseUrl);
 
   const queue = createSocket(baseUrl, "/queue");
+  const compression = timeout(
+    waitForCompressedWebSocket(queue),
+    3_000,
+    "compressed WebSocket upgrade",
+  );
   const counts = await timeout(waitForEvent(queue, "queue_counts"), 3_000, "queue counts");
   if (typeof counts?.total !== "number") throw new Error("queue count payload is invalid");
+  await compression;
   queue.disconnect();
 
   const session = await createRoom(baseUrl);
@@ -303,7 +337,7 @@ try {
   }
   guest.disconnect();
   room.disconnect();
-  console.log("Socket.IO E2E passed: queue, room auth/snapshot, command and guess idempotency, reconnect snapshot");
+  console.log("Socket.IO E2E passed: compressed WebSocket upgrade, queue, room auth/snapshot, command and guess idempotency, reconnect snapshot");
 } finally {
   if (!serverExited) {
     server.kill("SIGTERM");

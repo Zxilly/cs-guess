@@ -28,6 +28,7 @@ COPY rust-toolchain.toml ./
 COPY server/Cargo.toml server/Cargo.lock ./server/
 COPY server/src ./server/src
 COPY server/migrations ./server/migrations
+COPY server/vendor ./server/vendor
 COPY src/data/players.generated.json src/data/countries.generated.json ./src/data/
 
 RUN --mount=type=cache,id=cs-guess-cargo-registry,target=/usr/local/cargo/registry \
