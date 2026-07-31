@@ -29,6 +29,7 @@ import {
   type SoloDifficulty,
 } from "@/lib/solo-game";
 import { focusDailyResultAfterDialog } from "@/lib/daily-result-focus";
+import { trackEvent } from "@/lib/analytics";
 import {
   completeServerSoloRound,
   createServerSoloRound,
@@ -255,6 +256,10 @@ function SoloGame({
 
   function submitGuess(playerId = selectedId) {
     if (!playerId || !authoritativeReady) return false;
+    trackEvent("guess-submitted", {
+      mode: "solo",
+      attempt: game.guessedIds.length + 1,
+    });
     dispatch({ type: "guess", playerId });
     setSelectedId(undefined);
     return true;

@@ -22,12 +22,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAnonymousProfile } from "@/hooks/use-anonymous-profile";
 import { useDailyChallenge } from "@/hooks/use-daily-challenge";
+import { trackEvent } from "@/lib/analytics";
 
 interface ModeOptionProps {
   to: string;
   icon: Icon;
   title: string;
   meta: string;
+  analyticsMode: "solo" | "quick-duel" | "quick-group" | "room";
 }
 
 function ModeOption({
@@ -35,10 +37,14 @@ function ModeOption({
   icon: ModeIcon,
   title,
   meta,
+  analyticsMode,
 }: ModeOptionProps) {
   return (
     <Link
       to={to}
+      onClick={() =>
+        trackEvent("mode-selected", { mode: analyticsMode })
+      }
       className="group grid min-h-16 min-w-0 grid-cols-[28px_minmax(0,1fr)_20px] items-center gap-3 border-t border-foreground/20 px-4 py-2.5 transition-colors first:border-t-0 hover:bg-primary/[0.035] focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary sm:min-h-20 sm:grid-cols-[36px_minmax(0,1fr)_20px] sm:gap-4 sm:px-5 sm:py-3"
     >
       <ModeIcon className="size-6 text-primary sm:size-7" weight="light" />
@@ -139,6 +145,9 @@ export function ModeLobby() {
                 </div>
                 <Link
                   to="/play/daily"
+                  onClick={() =>
+                    trackEvent("mode-selected", { mode: "daily" })
+                  }
                   className="mt-4 inline-flex h-11 items-center justify-between bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85 sm:mt-5"
                 >
                   开始今日挑战
@@ -150,6 +159,7 @@ export function ModeLobby() {
                 icon={CrosshairSimpleIcon}
                 title="单人练习"
                 meta="简单 / 完整 / 困难 · 3 分钟"
+                analyticsMode="solo"
               />
             </section>
           </Card>
@@ -195,18 +205,21 @@ export function ModeLobby() {
                 icon={LightningIcon}
                 title="实时 1v1"
                 meta="在线匹配 · 1 / 3 / 5 局赛制"
+                analyticsMode="quick-duel"
               />
               <ModeOption
                 to="/quick?players=4"
                 icon={UsersThreeIcon}
                 title="4 人乱斗"
                 meta="在线匹配 · 4 人 · 1 / 3 / 5 局赛制"
+                analyticsMode="quick-group"
               />
               <ModeOption
                 to="/room"
                 icon={DoorOpenIcon}
                 title="好友房间"
                 meta="输入房间号 · 或创建房间"
+                analyticsMode="room"
               />
             </section>
           </Card>

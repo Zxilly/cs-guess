@@ -35,6 +35,7 @@ import {
   QuickMatchCancellation,
   QuickMatchCancellationTimeoutError,
 } from "@/lib/quick-match-cancellation";
+import { trackEvent } from "@/lib/analytics";
 import {
   parseSoloDifficulty,
   SOLO_DIFFICULTIES,
@@ -344,6 +345,7 @@ export function MatchmakingPage() {
       discardInvalidSession();
       return;
     }
+    trackEvent("matchmaking-cancelled", { partySize });
     cancel();
   }
 

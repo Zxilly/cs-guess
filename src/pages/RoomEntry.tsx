@@ -48,6 +48,7 @@ import {
   saveSoloDifficulty,
   SOLO_DIFFICULTIES,
 } from "@/lib/solo-game";
+import { trackEvent } from "@/lib/analytics";
 import type {
   BestOf,
   GameDifficulty,
@@ -232,6 +233,7 @@ export function RoomEntry() {
 
     setJoinError("");
     setCreateError("");
+    trackEvent("room-join-requested", { source: "room-entry" });
     await triggerRoomSubmission({
       kind: "join",
       identityId: identity.player.id,
@@ -246,6 +248,12 @@ export function RoomEntry() {
     saveRoomPreferences({
       visibility,
       maxPlayers,
+      bestOf,
+      difficulty,
+    });
+    trackEvent("room-create-requested", {
+      visibility,
+      partySize: maxPlayers,
       bestOf,
       difficulty,
     });

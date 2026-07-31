@@ -46,6 +46,7 @@ import {
   realtimeCredentialsMatch,
   saveClosingIntent,
 } from "@/lib/realtime";
+import { trackEvent } from "@/lib/analytics";
 import {
   copyRoomCode,
   friendRoomSettings,
@@ -1078,6 +1079,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
   }
 
   function exitSeries(event?: ReactMouseEvent<HTMLElement>) {
+    trackEvent("series-exited", { mode });
     startLeave(closingIntent?.returnTo ?? "/", event);
   }
   startLeaveRef.current = startLeave;
@@ -1109,6 +1111,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
     if (!connected || rematchActionPending) return;
     dismissCelebration();
     setRematchActionPending("request");
+    trackEvent("rematch-requested", { mode: "quick" });
     realtime.send("request_rematch", {}, () => {
       if (mountedRef.current) setRematchActionPending(null);
     });
@@ -1117,6 +1120,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
   function respondRematch(accept: boolean) {
     if (!rematch || rematchActionPending) return;
     setRematchActionPending(accept ? "accept" : "decline");
+    trackEvent("rematch-responded", { mode: "quick", accepted: accept });
     realtime.send(
       "respond_rematch",
       {
@@ -1132,6 +1136,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
   function cancelRematch() {
     if (!rematch || rematchActionPending) return;
     setRematchActionPending("cancel");
+    trackEvent("rematch-cancelled", { mode: "quick" });
     realtime.send(
       "cancel_rematch",
       { invitation_id: rematch.invitationId },
@@ -1186,6 +1191,10 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
         if (!mountedRef.current) return;
         setGuessPending(false);
         if (!accepted) return;
+        trackEvent("guess-submitted", {
+          mode,
+          attempt: selfGuessCount + 1,
+        });
         clearLiveGuessDraft(pending.roomCode, pending.roundNumber);
         setSelectedId(undefined);
         setSearchQuery("");
@@ -1224,6 +1233,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
       },
     );
     if (sent && acknowledged !== false) {
+      trackEvent("round-start-requested", { mode: "room" });
       startPendingRef.current = true;
       setStartPending(true);
     }
@@ -1252,6 +1262,7 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
       },
     );
     if (sent && acknowledged !== false) {
+      trackEvent("series-restarted", { mode: "room" });
       restartPendingRef.current = true;
       setRestartPending(true);
     }
@@ -1260,8 +1271,10 @@ export function LiveGamePage({ mode }: LiveGamePageProps) {
   async function copyCurrentRoomCode() {
     try {
       await copyRoomCode(roomCode);
+      trackEvent("room-code-copied", { success: true });
       setCopyFeedback("房间号已复制");
     } catch {
+      trackEvent("room-code-copied", { success: false });
       setCopyFeedback("复制失败，请手动复制房间号");
     }
   }

@@ -27,6 +27,7 @@ import {
   type ServerDailyChallenge,
 } from "@/lib/daily-challenge-api";
 import { focusDailyResultAfterDialog } from "@/lib/daily-result-focus";
+import { trackEvent } from "@/lib/analytics";
 import type { SoloLossReason } from "@/lib/solo-result-copy";
 import { MAX_GUESSES, type GameMode } from "@/types/game";
 
@@ -232,6 +233,10 @@ function DailyGame({
   function handleSubmit(playerId = selectedId) {
     if (!playerId) return false;
 
+    trackEvent("guess-submitted", {
+      mode: "daily",
+      attempt: game.guessedIds.length + 1,
+    });
     dispatch({
       type: "guess",
       playerId,

@@ -17,6 +17,7 @@ import { PanelHeader } from "@/components/PanelHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { trackEvent } from "@/lib/analytics";
 import {
   loadSoloDifficulty,
   prepareSoloRoundForPlay,
@@ -81,6 +82,7 @@ export function SoloDifficultyPage() {
   function start() {
     saveSoloDifficulty(selected);
     prepareSoloRoundForPlay(selected);
+    trackEvent("practice-started", { difficulty: selected });
     navigate(`/play/solo?difficulty=${selected}`);
   }
 

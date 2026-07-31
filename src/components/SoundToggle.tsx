@@ -4,6 +4,7 @@ import {
 } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
+import { trackEvent } from "@/lib/analytics";
 import { useSoundStore } from "@/stores/sound-store";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +16,12 @@ export function SoundToggle({ className }: SoundToggleProps) {
   const enabled = useSoundStore((state) => state.enabled);
   const toggle = useSoundStore((state) => state.toggle);
   const label = enabled ? "静音" : "取消静音";
+
+  function handleToggle() {
+    const nextEnabled = !enabled;
+    toggle();
+    trackEvent("sound-toggled", { enabled: nextEnabled });
+  }
 
   return (
     <Button
@@ -29,7 +36,7 @@ export function SoundToggle({ className }: SoundToggleProps) {
       aria-label={`${label}全站音效`}
       aria-pressed={!enabled}
       title={`${label}全站音效`}
-      onClick={toggle}
+      onClick={handleToggle}
     >
       {enabled ? <SpeakerHighIcon /> : <SpeakerSlashIcon />}
       <span className="hidden sm:inline">

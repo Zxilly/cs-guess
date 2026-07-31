@@ -47,6 +47,7 @@ import {
   parseSoloDifficulty,
   saveSoloDifficulty,
 } from "@/lib/solo-game";
+import { trackEvent } from "@/lib/analytics";
 import type {
   BestOf,
   GameDifficulty,
@@ -208,6 +209,7 @@ export function QuickMatch() {
     };
     saveQuickMatchPreferences(settings);
     lastPreferences.current = settings;
+    trackEvent("matchmaking-started", settings);
     void triggerQuickMatch({
       identityId: identity.player.id,
       ...settings,

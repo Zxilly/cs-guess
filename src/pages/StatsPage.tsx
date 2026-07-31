@@ -40,6 +40,7 @@ import {
   type MatchHistoryEntry,
   useAnonymousProfile,
 } from "@/hooks/use-anonymous-profile";
+import { trackEvent } from "@/lib/analytics";
 import { countryNameZh } from "@/lib/country-geography";
 import {
   focusReplayTitle,
@@ -230,6 +231,14 @@ export function StatsPage() {
   const historyGroups = groupRoundHistory(history);
   const hasCompletedRounds = !auditEmpty && identity.completedRounds > 0;
 
+  function openReplay(entry: MatchHistoryEntry) {
+    trackEvent("stats-replay-opened", {
+      mode: entry.mode,
+      result: entry.result,
+    });
+    setReplay(entry);
+  }
+
   return (
     <div className="min-h-svh bg-background text-foreground">
       <AppHeader subtitle="个人战绩" backToLobby />
@@ -372,7 +381,7 @@ export function StatsPage() {
                               variant="ghost"
                               size="sm"
                               className="min-h-9 rounded-none text-primary"
-                              onClick={() => setReplay(entry)}
+                              onClick={() => openReplay(entry)}
                             >
                               <PlayIcon />
                               详情
@@ -460,7 +469,7 @@ export function StatsPage() {
                               variant="ghost"
                               size="sm"
                               className="rounded-none text-primary"
-                              onClick={() => setReplay(entry)}
+                              onClick={() => openReplay(entry)}
                             >
                               <PlayIcon />
                               详情
