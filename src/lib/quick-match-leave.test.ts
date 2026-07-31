@@ -29,9 +29,10 @@ describe("quick room leave", () => {
 
     await leaveQuickMatch(ticket);
 
-    const [url, init] = fetchMock.mock.calls[0] as [URL, RequestInit];
+    const [input, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const url = new URL(input, window.location.origin);
     expect(url.pathname).toBe("/v1/matches/quick/CS-123456");
-    expect(url.searchParams.get("session_token")).toBe("token");
+    expect(new Headers(init.headers).get("X-Session-Token")).toBe("token");
     expect(init).toMatchObject({ method: "DELETE", keepalive: true });
   });
 

@@ -582,12 +582,15 @@ describe("LiveGamePage friend-room waiting state", () => {
       await flush();
 
       expect(fetchMock).toHaveBeenCalledTimes(1);
-      const [url, init] = fetchMock.mock.calls[0] as unknown as [
-        URL,
+      const [input, init] = fetchMock.mock.calls[0] as unknown as [
+        string,
         RequestInit,
       ];
+      const url = new URL(input, window.location.origin);
       expect(url.pathname).toBe("/v1/rooms/CS-123456");
-      expect(url.searchParams.get("session_token")).toBe("secret-token");
+      expect(new Headers(init.headers).get("X-Session-Token")).toBe(
+        "secret-token",
+      );
       expect(init).toMatchObject({ method: "DELETE", keepalive: true });
       expect(mocks.realtime.close).toHaveBeenCalledTimes(1);
       expect(sessionStorage.getItem("cs-guess:realtime-session")).toBeNull();

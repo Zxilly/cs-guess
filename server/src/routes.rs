@@ -11,6 +11,7 @@ use axum::{
         HeaderMap, HeaderName, HeaderValue, Method, Request, StatusCode,
         header::{CACHE_CONTROL, ORIGIN},
     },
+    middleware::{self, Next},
     response::{IntoResponse, Response},
     routing::{delete, get, post},
 };
@@ -60,6 +61,7 @@ pub fn app(state: AppState) -> Router {
     io.ns("/queue", queue_socket_connected);
     let request_id_header = HeaderName::from_static("x-request-id");
     let profile_token_header = HeaderName::from_static("x-profile-token");
+    let session_token_header = HeaderName::from_static("x-session-token");
     let config = state.config().clone();
     let cors = CorsLayer::new()
         .allow_origin(config.allowed_origins)
@@ -68,6 +70,7 @@ pub fn app(state: AppState) -> Router {
             axum::http::header::CONTENT_TYPE,
             request_id_header.clone(),
             profile_token_header,
+            session_token_header,
         ]);
 
     Router::new()
@@ -114,6 +117,7 @@ pub fn app(state: AppState) -> Router {
         )
         .fallback(frontend_or_not_found)
         .with_state(state)
+        .layer(middleware::from_fn(apply_api_cache_policy))
         .layer(PropagateRequestIdLayer::new(request_id_header.clone()))
         .layer(SetRequestIdLayer::new(request_id_header, MakeRequestUuid))
         .layer(
@@ -154,6 +158,28 @@ async fn ready(State(state): State<AppState>) -> Response {
         )
             .into_response()
     }
+}
+
+async fn apply_api_cache_policy(request: Request<Body>, next: Next) -> Response {
+    let path = request.uri().path();
+    let is_api = path == "/v1" || path.starts_with("/v1/");
+    let is_health = path.starts_with("/health/");
+    let is_private = request.method() != Method::GET
+        || path.starts_with("/v1/profiles/")
+        || path.starts_with("/v1/solo-rounds/");
+    let cache_policy = if is_api && is_private {
+        Some(HeaderValue::from_static("private, no-store"))
+    } else if is_api || is_health {
+        Some(HeaderValue::from_static("no-store"))
+    } else {
+        None
+    };
+
+    let mut response = next.run(request).await;
+    if let Some(cache_policy) = cache_policy {
+        response.headers_mut().insert(CACHE_CONTROL, cache_policy);
+    }
+    response
 }
 
 async fn create_room(
@@ -205,10 +231,12 @@ async fn join_room(
 async fn leave_friend_room(
     State(state): State<AppState>,
     Path(code): Path<String>,
-    Query(query): Query<SessionTokenQuery>,
+    headers: HeaderMap,
 ) -> Result<StatusCode, AppError> {
     state.admit_session_request().await?;
-    state.leave_friend_room(&code, query.session_token).await?;
+    state
+        .leave_friend_room(&code, session_token(&headers)?.to_owned())
+        .await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -420,19 +448,23 @@ async fn realtime_profile_binding(
     Ok(Some(anonymous_id.to_owned()))
 }
 
-#[derive(Deserialize)]
-struct SessionTokenQuery {
-    session_token: String,
-}
-
 async fn cancel_quick_match(
     State(state): State<AppState>,
     Path(code): Path<String>,
-    Query(query): Query<SessionTokenQuery>,
+    headers: HeaderMap,
 ) -> Result<StatusCode, AppError> {
     state.admit_session_request().await?;
-    state.cancel_quick_match(&code, query.session_token).await?;
+    state
+        .cancel_quick_match(&code, session_token(&headers)?.to_owned())
+        .await?;
     Ok(StatusCode::NO_CONTENT)
+}
+
+fn session_token(headers: &HeaderMap) -> Result<&str, AppError> {
+    headers
+        .get("x-session-token")
+        .and_then(|value| value.to_str().ok())
+        .ok_or(AppError::Unauthorized)
 }
 
 async fn cancel_quick_match_by_request_id(
@@ -806,6 +838,7 @@ mod tests {
             .unwrap();
         assert_eq!(api_miss.status(), StatusCode::NOT_FOUND);
         assert_eq!(api_miss.headers()[header::CONTENT_TYPE], "application/json");
+        assert_eq!(api_miss.headers()[header::CACHE_CONTROL], "no-store");
 
         fs::remove_dir_all(static_dir).unwrap();
     }
@@ -822,6 +855,7 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(live.status(), StatusCode::OK);
+        assert_eq!(live.headers()[header::CACHE_CONTROL], "no-store");
 
         let create = service
             .clone()
@@ -836,6 +870,7 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(create.status(), StatusCode::CREATED);
+        assert_eq!(create.headers()[header::CACHE_CONTROL], "private, no-store");
         let create_body: Value =
             serde_json::from_slice(&create.into_body().collect().await.unwrap().to_bytes())
                 .unwrap();
@@ -901,33 +936,38 @@ mod tests {
 
         let wrong_token = service
             .clone()
+            .oneshot(delete_with_session_token(
+                &format!("/v1/rooms/{room_code}"),
+                "wrong-token",
+            ))
+            .await
+            .unwrap();
+        assert_eq!(wrong_token.status(), StatusCode::UNAUTHORIZED);
+
+        let missing_token = service
+            .clone()
             .oneshot(
-                Request::delete(format!("/v1/rooms/{room_code}?session_token=wrong-token"))
+                Request::delete(format!("/v1/rooms/{room_code}"))
                     .body(Body::empty())
                     .unwrap(),
             )
             .await
             .unwrap();
-        assert_eq!(wrong_token.status(), StatusCode::UNAUTHORIZED);
+        assert_eq!(missing_token.status(), StatusCode::UNAUTHORIZED);
 
         let missing = service
             .clone()
-            .oneshot(
-                Request::delete("/v1/rooms/CS-999999?session_token=missing")
-                    .body(Body::empty())
-                    .unwrap(),
-            )
+            .oneshot(delete_with_session_token("/v1/rooms/CS-999999", "missing"))
             .await
             .unwrap();
         assert_eq!(missing.status(), StatusCode::NOT_FOUND);
 
         let host_leave = service
             .clone()
-            .oneshot(
-                Request::delete(format!("/v1/rooms/{room_code}?session_token={host_token}"))
-                    .body(Body::empty())
-                    .unwrap(),
-            )
+            .oneshot(delete_with_session_token(
+                &format!("/v1/rooms/{room_code}"),
+                host_token,
+            ))
             .await
             .unwrap();
         assert_eq!(host_leave.status(), StatusCode::NO_CONTENT);
@@ -955,11 +995,10 @@ mod tests {
         for token in [guest_token, third_token] {
             let leave = service
                 .clone()
-                .oneshot(
-                    Request::delete(format!("/v1/rooms/{room_code}?session_token={token}"))
-                        .body(Body::empty())
-                        .unwrap(),
-                )
+                .oneshot(delete_with_session_token(
+                    &format!("/v1/rooms/{room_code}"),
+                    token,
+                ))
                 .await
                 .unwrap();
             assert_eq!(leave.status(), StatusCode::NO_CONTENT);
@@ -999,23 +1038,19 @@ mod tests {
 
         let wrong_endpoint = service
             .clone()
-            .oneshot(
-                Request::delete(format!("/v1/rooms/{room_code}?session_token={token}"))
-                    .body(Body::empty())
-                    .unwrap(),
-            )
+            .oneshot(delete_with_session_token(
+                &format!("/v1/rooms/{room_code}"),
+                token,
+            ))
             .await
             .unwrap();
         assert_eq!(wrong_endpoint.status(), StatusCode::BAD_REQUEST);
 
         let quick_cancel = service
-            .oneshot(
-                Request::delete(format!(
-                    "/v1/matches/quick/{room_code}?session_token={token}"
-                ))
-                .body(Body::empty())
-                .unwrap(),
-            )
+            .oneshot(delete_with_session_token(
+                &format!("/v1/matches/quick/{room_code}"),
+                token,
+            ))
             .await
             .unwrap();
         assert_eq!(quick_cancel.status(), StatusCode::NO_CONTENT);
@@ -1319,14 +1354,13 @@ mod tests {
                 .unwrap();
         assert_ne!(first["room_code"], second["room_code"]);
 
-        let cancel_uri = format!(
-            "/v1/matches/quick/{}?session_token={}",
-            first["room_code"].as_str().unwrap(),
-            first["session_token"].as_str().unwrap()
-        );
+        let cancel_uri = format!("/v1/matches/quick/{}", first["room_code"].as_str().unwrap(),);
         let cancelled = service
             .clone()
-            .oneshot(Request::delete(cancel_uri).body(Body::empty()).unwrap())
+            .oneshot(delete_with_session_token(
+                &cancel_uri,
+                first["session_token"].as_str().unwrap(),
+            ))
             .await
             .unwrap();
         assert_eq!(cancelled.status(), StatusCode::NO_CONTENT);
@@ -1471,14 +1505,13 @@ mod tests {
             serde_json::from_slice(&second.into_body().collect().await.unwrap().to_bytes())
                 .unwrap();
 
-        let cancel_uri = format!(
-            "/v1/matches/quick/{}?session_token={}",
-            first["room_code"].as_str().unwrap(),
-            first["session_token"].as_str().unwrap()
-        );
+        let cancel_uri = format!("/v1/matches/quick/{}", first["room_code"].as_str().unwrap(),);
         let cancelled = service
             .clone()
-            .oneshot(Request::delete(cancel_uri).body(Body::empty()).unwrap())
+            .oneshot(delete_with_session_token(
+                &cancel_uri,
+                first["session_token"].as_str().unwrap(),
+            ))
             .await
             .unwrap();
         assert_eq!(cancelled.status(), StatusCode::NO_CONTENT);
@@ -1608,6 +1641,13 @@ mod tests {
         Request::post(uri)
             .header(header::CONTENT_TYPE, "application/json")
             .body(Body::from(body.to_string()))
+            .unwrap()
+    }
+
+    fn delete_with_session_token(uri: &str, token: &str) -> Request<Body> {
+        Request::delete(uri)
+            .header("x-session-token", token)
+            .body(Body::empty())
             .unwrap()
     }
 }

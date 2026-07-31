@@ -142,7 +142,8 @@ all reserved players connect by WebSocket.
 Cancel a waiting quick-match ticket with:
 
 ```http
-DELETE /v1/matches/quick/CS-207207?session_token={session_token}
+DELETE /v1/matches/quick/CS-207207
+X-Session-Token: {session_token}
 ```
 
 Read the current public queue totals with:
@@ -208,16 +209,18 @@ refresh cannot reveal hidden guesses.
 
 ## Socket.IO protocol
 
-Connect to:
+Connect to the room namespace with the session credentials in the Socket.IO
+auth payload:
 
 ```text
-GET /v1/rooms/{room_code}/ws?session_token={session_token}
+Socket.IO namespace `/room` on `/socket.io`
+auth: { "room_code": "CS-207207", "session_token": "keep-this-secret" }
 ```
 
-Use `wss://` in production. Session tokens are 256-bit random values and are
-stored in memory only as SHA-256 hashes. A new connection with the same token
-atomically supersedes the previous socket, which makes reconnect safe even
-when a stale TCP connection has not noticed the network loss.
+Session tokens are 256-bit random values and are stored in memory only as
+SHA-256 hashes. A new connection with the same token atomically supersedes the
+previous socket, which makes reconnect safe even when a stale TCP connection
+has not noticed the network loss.
 
 Client messages are JSON text. Every mutation carries a stable UUID
 `request_id`:

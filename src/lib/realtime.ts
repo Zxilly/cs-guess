@@ -578,16 +578,15 @@ export async function leaveRoom(
       "session_token" in credentials
         ? credentials.session_token
         : credentials.sessionToken;
-    const url = new URL(
+    const result = await fetch(
       `${API_BASE}/v1/rooms/${encodeURIComponent(roomCode)}`,
-      window.location.origin,
+      {
+        method: "DELETE",
+        headers: { "X-Session-Token": sessionToken },
+        keepalive: true,
+        signal: controller.signal,
+      },
     );
-    url.searchParams.set("session_token", sessionToken);
-    const result = await fetch(url, {
-      method: "DELETE",
-      keepalive: true,
-      signal: controller.signal,
-    });
     if (
       result.status !== 204 &&
       result.status !== 401 &&
@@ -628,14 +627,17 @@ export async function cancelQuickMatch(
   credentials: RealtimeCredentials,
   signal?: AbortSignal,
 ) {
-  const url = new URL(
-    `${API_BASE}/v1/matches/quick/${encodeURIComponent(credentials.roomCode)}`,
-    window.location.origin,
-  );
-  url.searchParams.set("session_token", credentials.sessionToken);
   let response: Response;
   try {
-    response = await fetch(url, { method: "DELETE", signal, keepalive: true });
+    response = await fetch(
+      `${API_BASE}/v1/matches/quick/${encodeURIComponent(credentials.roomCode)}`,
+      {
+        method: "DELETE",
+        headers: { "X-Session-Token": credentials.sessionToken },
+        signal,
+        keepalive: true,
+      },
+    );
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
       throw error;
