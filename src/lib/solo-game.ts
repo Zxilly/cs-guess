@@ -91,6 +91,7 @@ export interface SoloGameState {
   roundId: string;
   roundNumber: number;
   difficulty: SoloDifficulty;
+  maxGuesses: number;
   mysteryId: string;
   guessedIds: string[];
   status: GameStatus;
@@ -110,6 +111,7 @@ export type SoloGameAction =
         roundId: string;
         roundNumber: number;
         difficulty: SoloDifficulty;
+        maxGuesses: number;
         mysteryId: string;
         deadline: number;
       };
@@ -141,6 +143,7 @@ export function createSoloRound(
     roundId: `solo:${difficulty}:${roundToken}`,
     roundNumber,
     difficulty,
+    maxGuesses: maxGuessesForDifficulty(difficulty),
     mysteryId: mysteryPlayer.id,
     guessedIds: [],
     status: "playing",
@@ -258,6 +261,7 @@ function migrateLegacySoloProgress(
         roundId: state.roundId,
         roundNumber,
         difficulty,
+        maxGuesses,
         mysteryId: state.mysteryId,
         guessedIds: state.guessedIds,
         status,
@@ -397,7 +401,15 @@ export function loadSoloProgress(
     ) {
       return { state: createSoloRound(difficulty, 1, undefined, now) };
     }
-    const restored = state as SoloGameState;
+    const restored: SoloGameState = {
+      ...(state as SoloGameState),
+      maxGuesses:
+        typeof state.maxGuesses === "number" &&
+        Number.isInteger(state.maxGuesses) &&
+        state.maxGuesses > 0
+          ? state.maxGuesses
+          : maxGuessesForDifficulty(difficulty),
+    };
     const validMystery = soloMysteryPool(difficulty).some(
       ({ id }) => id === restored.mysteryId,
     );
@@ -415,7 +427,7 @@ export function loadSoloProgress(
         resetReason: "catalog-changed",
       };
     }
-    const maxGuesses = maxGuessesForDifficulty(difficulty);
+    const maxGuesses = restored.maxGuesses;
     const guessedMystery = restored.guessedIds.includes(restored.mysteryId);
     const uniqueGuesses =
       new Set(restored.guessedIds).size === restored.guessedIds.length;
@@ -466,11 +478,10 @@ export function soloGameReducer(
         return state;
       }
       const guessedIds = [...state.guessedIds, action.playerId];
-      const maxGuesses = maxGuessesForDifficulty(state.difficulty);
       const status =
         action.playerId === state.mysteryId
           ? "won"
-          : guessedIds.length >= maxGuesses
+          : guessedIds.length >= state.maxGuesses
             ? "lost"
             : "playing";
       const resultReason =

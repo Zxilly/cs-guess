@@ -52,6 +52,7 @@ describe("SoloGamePage persistence", () => {
         status: "playing",
         deadline: now + 60_000,
         resultDismissed: false,
+        maxGuesses: 8,
       },
       storage,
     );

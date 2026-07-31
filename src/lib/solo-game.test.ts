@@ -154,8 +154,8 @@ describe("solo progress persistence", () => {
     const loaded = loadSoloProgress("easy", storage, 10_000);
     const loadedAgain = loadSoloProgress("easy", storage, 10_000);
 
-    expect(loaded.state).toEqual(legacyState);
-    expect(loadedAgain.state).toEqual(legacyState);
+    expect(loaded.state).toEqual({ ...legacyState, maxGuesses: 8 });
+    expect(loadedAgain.state).toEqual({ ...legacyState, maxGuesses: 8 });
     expect(storage.has("cs-guess:solo-progress:v2:easy")).toBe(true);
     expect(storage.has("cs-guess:solo-progress:v1:easy")).toBe(false);
     expect(storage.has("cs-guess:solo-progress:v2:full")).toBe(true);
@@ -299,6 +299,7 @@ describe("solo progress persistence", () => {
       status: "playing" as const,
       deadline: 50_000,
       resultDismissed: false,
+      maxGuesses: 8,
     };
     saveSoloProgress(v2State, storage);
     storage.setItem(
@@ -327,6 +328,7 @@ describe("solo progress persistence", () => {
       status: "playing" as const,
       deadline: 50_000,
       resultDismissed: false,
+      maxGuesses: 8,
     };
 
     saveSoloProgress(progress, storage);
@@ -347,6 +349,7 @@ describe("solo progress persistence", () => {
       status: "playing" as const,
       deadline: 5_000,
       resultDismissed: false,
+      maxGuesses: 8,
     };
 
     saveSoloProgress(progress, storage);
@@ -370,6 +373,7 @@ describe("solo progress persistence", () => {
       resultReason: "timeout" as const,
       deadline: 5_000,
       resultDismissed: true,
+      maxGuesses: 8,
     };
 
     saveSoloProgress(progress, storage);
@@ -392,6 +396,7 @@ describe("solo progress persistence", () => {
       resultReason: "attempts-exhausted" as const,
       deadline: 50_000,
       resultDismissed: true,
+      maxGuesses: 10,
     };
 
     saveSoloProgress(progress, storage);
@@ -414,6 +419,7 @@ describe("solo progress persistence", () => {
       status: "playing" as const,
       deadline: 20_000,
       resultDismissed: false,
+      maxGuesses: 10,
     };
     saveSoloProgress(previousHard, storage);
     saveSoloProgress(
@@ -422,6 +428,7 @@ describe("solo progress persistence", () => {
         roundId: "solo:easy:active",
         difficulty: "easy",
         mysteryId: soloMysteryPool("easy")[0].id,
+        maxGuesses: 8,
       },
       storage,
     );
@@ -446,6 +453,7 @@ describe("solo progress persistence", () => {
       status: "playing" as const,
       deadline: 50_000,
       resultDismissed: false,
+      maxGuesses: 8,
     };
     saveSoloProgress(progress, storage);
     storage.setItem(

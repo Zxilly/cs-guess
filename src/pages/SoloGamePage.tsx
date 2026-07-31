@@ -36,7 +36,6 @@ import {
   createServerSoloRound,
   loadServerSoloRound,
 } from "@/lib/solo-round-api";
-import { maxGuessesForDifficulty } from "@/types/game";
 
 export function SoloGamePage() {
   const [searchParams] = useSearchParams();
@@ -83,7 +82,7 @@ function SoloGame({
       };
     }
     if (audit === "solo-lost") {
-      const maxGuesses = maxGuessesForDifficulty(difficulty);
+      const maxGuesses = base.maxGuesses;
       return {
         state: {
           ...base,
@@ -125,7 +124,7 @@ function SoloGame({
   );
   const selectedPlayer = players.find((player) => player.id === selectedId);
   const isFinished = game.status !== "playing";
-  const maxGuesses = maxGuessesForDifficulty(difficulty);
+  const maxGuesses = game.maxGuesses;
   const secondsLeft = soloSecondsUntil(game.deadline, now);
   const resultOpen = isFinished && !game.resultDismissed;
   const lossReason =
@@ -207,6 +206,7 @@ function SoloGame({
         roundId: serverRound.roundId,
         roundNumber: serverRound.roundNumber,
         difficulty: serverRound.difficulty,
+        maxGuesses: serverRound.maxGuesses,
         mysteryId: serverRound.mysteryPlayer.id,
         deadline: serverRound.deadlineUnixMs,
       },
