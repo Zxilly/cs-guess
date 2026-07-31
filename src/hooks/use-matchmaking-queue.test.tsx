@@ -75,7 +75,7 @@ function QueueProbe() {
   const queue = useMatchmakingQueue();
   return (
     <output data-testid="live">
-      {queue.live ? "live" : "offline"}:{queue.counts.bo1}
+      {queue.live ? "live" : "offline"}:{queue.counts.easy.bo1_hidden}
     </output>
   );
 }
@@ -273,36 +273,34 @@ describe("useMatchmakingQueue socket ownership", () => {
   });
 });
 
-function queueCounts(bo1: number) {
-  const difficulty = { playing_bo1_hidden: 0, playing_bo1_open: 0 };
-  return {
-    bo1,
-    bo3: 0,
-    bo5: 0,
-    bo1_hidden: 0,
+function queueCounts(bo1Hidden: number) {
+  const difficulty = {
+    bo1_hidden: bo1Hidden,
     bo1_open: 0,
     bo3_hidden: 0,
     bo3_open: 0,
     bo5_hidden: 0,
     bo5_open: 0,
-    total: 0,
-    group_bo1: 0,
-    group_bo3: 0,
-    group_bo5: 0,
     group_bo1_hidden: 0,
     group_bo1_open: 0,
     group_bo3_hidden: 0,
     group_bo3_open: 0,
     group_bo5_hidden: 0,
     group_bo5_open: 0,
-    group_total: 0,
-    playing_bo1: 0,
-    playing_bo3: 0,
-    playing_bo5: 0,
-    playing_group_bo1: 0,
-    playing_group_bo3: 0,
-    playing_group_bo5: 0,
-    playing_total: 0,
+    playing_bo1_hidden: 0,
+    playing_bo1_open: 0,
+    playing_bo3_hidden: 0,
+    playing_bo3_open: 0,
+    playing_bo5_hidden: 0,
+    playing_bo5_open: 0,
+    playing_group_bo1_hidden: 0,
+    playing_group_bo1_open: 0,
+    playing_group_bo3_hidden: 0,
+    playing_group_bo3_open: 0,
+    playing_group_bo5_hidden: 0,
+    playing_group_bo5_open: 0,
+  };
+  return {
     easy: difficulty,
     full: difficulty,
     hard: difficulty,

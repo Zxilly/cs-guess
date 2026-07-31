@@ -22,8 +22,8 @@ use crate::{
         CreateProfileRequest, ProfileCompletionResponse, ProfileState, StartIdentityDrawRequest,
     },
     protocol::{
-        Difficulty, DifficultyQueueCounts, QueueCounts, RoomKind, SessionResponse, Snapshot,
-        Visibility,
+        Difficulty, DifficultyQueueCounts, QueueCounts, QueueCountsView, RoomKind, SessionResponse,
+        Snapshot, Visibility,
     },
     room::{NewPlayer, RoomHandle, RoomSpec, spawn_room},
     solo::{CompleteSoloRoundRequest, CreateSoloRoundRequest, SoloRound},
@@ -262,7 +262,7 @@ fn encode_queue_counts(counts: QueueCounts) -> Bytes {
     Bytes::from(
         serde_json::to_vec(&serde_json::json!({
             "type": "queue_counts",
-            "counts": counts,
+            "counts": QueueCountsView::from(counts),
         }))
         .expect("queue telemetry is always serializable"),
     )

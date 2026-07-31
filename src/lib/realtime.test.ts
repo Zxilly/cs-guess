@@ -92,16 +92,14 @@ describe("realtime closing intent", () => {
 describe("matchmaking queue counts", () => {
   it("reports counts for the selected difficulty instead of the aggregate queue", () => {
     const counts = {
-      bo3_hidden: 9,
-      playing_bo3: 12,
-      easy: { bo3_hidden: 2, playing_bo3: 4 },
-      full: { bo3_hidden: 3, playing_bo3: 6 },
-      hard: { bo3_hidden: 4, playing_bo3: 2 },
+      easy: { bo3_hidden: 2, playing_bo3_hidden: 4 },
+      full: { bo3_hidden: 3, playing_bo3_hidden: 6 },
+      hard: { bo3_hidden: 4, playing_bo3_hidden: 2 },
     } as unknown as MatchmakingQueueCounts;
 
     expect(queueCountFor(counts, 2, 3, "hidden", "easy")).toBe(2);
     expect(queueCountFor(counts, 2, 3, "hidden", "hard")).toBe(4);
-    expect(playingCountFor(counts, 2, 3, "full")).toBe(6);
+    expect(playingCountFor(counts, 2, 3, "full", "hidden")).toBe(6);
   });
 });
 

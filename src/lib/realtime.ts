@@ -271,45 +271,6 @@ export function isAuthoritativeRoomSnapshot(
 }
 
 export interface MatchmakingQueueCounts {
-  bo1: number;
-  bo3: number;
-  bo5: number;
-  bo1_hidden: number;
-  bo1_open: number;
-  bo3_hidden: number;
-  bo3_open: number;
-  bo5_hidden: number;
-  bo5_open: number;
-  total: number;
-  group_bo1: number;
-  group_bo3: number;
-  group_bo5: number;
-  group_bo1_hidden: number;
-  group_bo1_open: number;
-  group_bo3_hidden: number;
-  group_bo3_open: number;
-  group_bo5_hidden: number;
-  group_bo5_open: number;
-  group_total: number;
-  playing_bo1: number;
-  playing_bo1_hidden?: number;
-  playing_bo1_open?: number;
-  playing_bo3: number;
-  playing_bo3_hidden?: number;
-  playing_bo3_open?: number;
-  playing_bo5: number;
-  playing_bo5_hidden?: number;
-  playing_bo5_open?: number;
-  playing_group_bo1: number;
-  playing_group_bo1_hidden?: number;
-  playing_group_bo1_open?: number;
-  playing_group_bo3: number;
-  playing_group_bo3_hidden?: number;
-  playing_group_bo3_open?: number;
-  playing_group_bo5: number;
-  playing_group_bo5_hidden?: number;
-  playing_group_bo5_open?: number;
-  playing_total: number;
   easy: MatchmakingDifficultyCounts;
   full: MatchmakingDifficultyCounts;
   hard: MatchmakingDifficultyCounts;
@@ -328,26 +289,18 @@ export interface MatchmakingDifficultyCounts {
   group_bo3_open: number;
   group_bo5_hidden: number;
   group_bo5_open: number;
-  total: number;
-  playing_bo1: number;
   playing_bo1_hidden: number;
   playing_bo1_open: number;
-  playing_bo3: number;
   playing_bo3_hidden: number;
   playing_bo3_open: number;
-  playing_bo5: number;
   playing_bo5_hidden: number;
   playing_bo5_open: number;
-  playing_group_bo1: number;
   playing_group_bo1_hidden: number;
   playing_group_bo1_open: number;
-  playing_group_bo3: number;
   playing_group_bo3_hidden: number;
   playing_group_bo3_open: number;
-  playing_group_bo5: number;
   playing_group_bo5_hidden: number;
   playing_group_bo5_open: number;
-  playing_total: number;
 }
 
 export function queueCountFor(
@@ -355,26 +308,25 @@ export function queueCountFor(
   partySize: 2 | 4,
   bestOf: BestOf,
   visibility: OpponentVisibility,
-  difficulty?: GameDifficulty,
+  difficulty: GameDifficulty,
 ) {
   const prefix = partySize === 4 ? "group_" : "";
   const key =
     `${prefix}bo${bestOf}_${visibility}` as keyof MatchmakingDifficultyCounts;
-  return (difficulty ? counts[difficulty][key] : counts[key]) ?? 0;
+  return counts[difficulty][key] ?? 0;
 }
 
 export function playingCountFor(
   counts: MatchmakingQueueCounts,
   partySize: 2 | 4,
   bestOf: BestOf,
-  difficulty?: GameDifficulty,
-  visibility?: OpponentVisibility,
+  difficulty: GameDifficulty,
+  visibility: OpponentVisibility,
 ) {
   const prefix = partySize === 4 ? "playing_group_" : "playing_";
-  const key = `${prefix}bo${bestOf}${
-    visibility ? `_${visibility}` : ""
-  }` as keyof MatchmakingDifficultyCounts;
-  return (difficulty ? counts[difficulty][key] : counts[key]) ?? 0;
+  const key =
+    `${prefix}bo${bestOf}_${visibility}` as keyof MatchmakingDifficultyCounts;
+  return counts[difficulty][key] ?? 0;
 }
 
 export interface ServerEvent extends Record<string, unknown> {

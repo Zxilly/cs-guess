@@ -157,23 +157,25 @@ DELETE /v1/matches/quick/CS-207207
 X-Session-Token: {session_token}
 ```
 
-Read the current public queue totals with:
+Read the current public queue buckets with:
 
 ```http
 GET /v1/matches/queue
 ```
 
-Subscribe to the same BO1/BO3/BO5 totals in real time with:
+Subscribe to the same buckets in real time with:
 
 ```text
 Socket.IO namespace `/queue` on `/socket.io`
 ```
 
-The queue namespace sends `queue_counts` events with the counts payload.
-Counts include `bo1`, `bo3`, and `bo5` for 1v1 plus `group_bo1`,
-`group_bo3`, `group_bo5`, and `group_total` for four-player matches. It updates
-immediately and whenever a player joins, pairs, or cancels. It carries only
-aggregate public counts and does not expose session credentials.
+The queue namespace sends `queue_counts` events with the same payload as the
+REST endpoint. The top level contains only `easy`, `full`, and `hard`. Each
+difficulty reports exact waiting and playing buckets by party size, BO1/BO3/BO5,
+and opponent visibility, such as `bo3_hidden` or
+`playing_group_bo5_open`. Clients can aggregate these buckets when needed. It
+updates whenever a player joins, pairs, or cancels and does not expose session
+credentials.
 
 Room creation, room join, and quick matching return the same session shape:
 

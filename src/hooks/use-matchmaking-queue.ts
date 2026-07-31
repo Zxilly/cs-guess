@@ -29,60 +29,29 @@ const EMPTY_DIFFICULTY_COUNTS: MatchmakingDifficultyCounts = {
   group_bo3_open: 0,
   group_bo5_hidden: 0,
   group_bo5_open: 0,
-  total: 0,
-  playing_bo1: 0,
   playing_bo1_hidden: 0,
   playing_bo1_open: 0,
-  playing_bo3: 0,
   playing_bo3_hidden: 0,
   playing_bo3_open: 0,
-  playing_bo5: 0,
   playing_bo5_hidden: 0,
   playing_bo5_open: 0,
-  playing_group_bo1: 0,
   playing_group_bo1_hidden: 0,
   playing_group_bo1_open: 0,
-  playing_group_bo3: 0,
   playing_group_bo3_hidden: 0,
   playing_group_bo3_open: 0,
-  playing_group_bo5: 0,
   playing_group_bo5_hidden: 0,
   playing_group_bo5_open: 0,
-  playing_total: 0,
 };
 
 const EMPTY_COUNTS: MatchmakingQueueCounts = {
-  bo1: 0,
-  bo3: 0,
-  bo5: 0,
-  bo1_hidden: 0,
-  bo1_open: 0,
-  bo3_hidden: 0,
-  bo3_open: 0,
-  bo5_hidden: 0,
-  bo5_open: 0,
-  total: 0,
-  group_bo1: 0,
-  group_bo3: 0,
-  group_bo5: 0,
-  group_bo1_hidden: 0,
-  group_bo1_open: 0,
-  group_bo3_hidden: 0,
-  group_bo3_open: 0,
-  group_bo5_hidden: 0,
-  group_bo5_open: 0,
-  group_total: 0,
-  playing_bo1: 0,
-  playing_bo3: 0,
-  playing_bo5: 0,
-  playing_group_bo1: 0,
-  playing_group_bo3: 0,
-  playing_group_bo5: 0,
-  playing_total: 0,
   easy: { ...EMPTY_DIFFICULTY_COUNTS },
   full: { ...EMPTY_DIFFICULTY_COUNTS },
   hard: { ...EMPTY_DIFFICULTY_COUNTS },
 };
+
+const DIFFICULTY_COUNT_KEYS = Object.keys(
+  EMPTY_DIFFICULTY_COUNTS,
+) as (keyof MatchmakingDifficultyCounts)[];
 
 interface MatchmakingQueueState {
   counts: MatchmakingQueueCounts;
@@ -94,49 +63,23 @@ const MatchmakingQueueContext =
 
 function isDifficultyCounts(value: unknown): value is MatchmakingDifficultyCounts {
   if (!value || typeof value !== "object") return false;
-  return Object.values(value).every(
-    (count) => typeof count === "number" && Number.isFinite(count) && count >= 0,
+  const counts = value as Partial<MatchmakingDifficultyCounts>;
+  return DIFFICULTY_COUNT_KEYS.every(
+    (key) =>
+      typeof counts[key] === "number" &&
+      Number.isFinite(counts[key]) &&
+      counts[key] >= 0,
   );
 }
 
 function isQueueCounts(value: unknown): value is MatchmakingQueueCounts {
   if (!value || typeof value !== "object") return false;
   const counts = value as Partial<MatchmakingQueueCounts>;
-  return [
-    counts.bo1,
-    counts.bo3,
-    counts.bo5,
-    counts.bo1_hidden,
-    counts.bo1_open,
-    counts.bo3_hidden,
-    counts.bo3_open,
-    counts.bo5_hidden,
-    counts.bo5_open,
-    counts.total,
-    counts.group_bo1,
-    counts.group_bo3,
-    counts.group_bo5,
-    counts.group_bo1_hidden,
-    counts.group_bo1_open,
-    counts.group_bo3_hidden,
-    counts.group_bo3_open,
-    counts.group_bo5_hidden,
-    counts.group_bo5_open,
-    counts.group_total,
-    counts.playing_bo1,
-    counts.easy?.playing_bo1_hidden,
-    counts.easy?.playing_bo1_open,
-    counts.playing_bo3,
-    counts.playing_bo5,
-    counts.playing_group_bo1,
-    counts.playing_group_bo3,
-    counts.playing_group_bo5,
-    counts.playing_total,
-  ].every(
-    (count) => typeof count === "number" && Number.isFinite(count) && count >= 0,
-  ) && isDifficultyCounts(counts.easy)
-    && isDifficultyCounts(counts.full)
-    && isDifficultyCounts(counts.hard);
+  return (
+    isDifficultyCounts(counts.easy) &&
+    isDifficultyCounts(counts.full) &&
+    isDifficultyCounts(counts.hard)
+  );
 }
 
 function useMatchmakingQueueConnection(

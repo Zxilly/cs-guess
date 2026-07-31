@@ -215,7 +215,7 @@ pub struct QuickMatchRequest {
     pub difficulty: Difficulty,
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Eq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct DifficultyQueueCounts {
     pub bo1_hidden: u32,
     pub bo1_open: u32,
@@ -251,7 +251,7 @@ pub struct DifficultyQueueCounts {
     pub playing_total: u32,
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Eq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct QueueCounts {
     pub bo1: u32,
     pub bo3: u32,
@@ -283,6 +283,82 @@ pub struct QueueCounts {
     pub easy: DifficultyQueueCounts,
     pub full: DifficultyQueueCounts,
     pub hard: DifficultyQueueCounts,
+}
+
+#[derive(Clone, Copy, Debug, Serialize)]
+pub struct DifficultyQueueCountsView {
+    pub bo1_hidden: u32,
+    pub bo1_open: u32,
+    pub bo3_hidden: u32,
+    pub bo3_open: u32,
+    pub bo5_hidden: u32,
+    pub bo5_open: u32,
+    pub group_bo1_hidden: u32,
+    pub group_bo1_open: u32,
+    pub group_bo3_hidden: u32,
+    pub group_bo3_open: u32,
+    pub group_bo5_hidden: u32,
+    pub group_bo5_open: u32,
+    pub playing_bo1_hidden: u32,
+    pub playing_bo1_open: u32,
+    pub playing_bo3_hidden: u32,
+    pub playing_bo3_open: u32,
+    pub playing_bo5_hidden: u32,
+    pub playing_bo5_open: u32,
+    pub playing_group_bo1_hidden: u32,
+    pub playing_group_bo1_open: u32,
+    pub playing_group_bo3_hidden: u32,
+    pub playing_group_bo3_open: u32,
+    pub playing_group_bo5_hidden: u32,
+    pub playing_group_bo5_open: u32,
+}
+
+impl From<DifficultyQueueCounts> for DifficultyQueueCountsView {
+    fn from(counts: DifficultyQueueCounts) -> Self {
+        Self {
+            bo1_hidden: counts.bo1_hidden,
+            bo1_open: counts.bo1_open,
+            bo3_hidden: counts.bo3_hidden,
+            bo3_open: counts.bo3_open,
+            bo5_hidden: counts.bo5_hidden,
+            bo5_open: counts.bo5_open,
+            group_bo1_hidden: counts.group_bo1_hidden,
+            group_bo1_open: counts.group_bo1_open,
+            group_bo3_hidden: counts.group_bo3_hidden,
+            group_bo3_open: counts.group_bo3_open,
+            group_bo5_hidden: counts.group_bo5_hidden,
+            group_bo5_open: counts.group_bo5_open,
+            playing_bo1_hidden: counts.playing_bo1_hidden,
+            playing_bo1_open: counts.playing_bo1_open,
+            playing_bo3_hidden: counts.playing_bo3_hidden,
+            playing_bo3_open: counts.playing_bo3_open,
+            playing_bo5_hidden: counts.playing_bo5_hidden,
+            playing_bo5_open: counts.playing_bo5_open,
+            playing_group_bo1_hidden: counts.playing_group_bo1_hidden,
+            playing_group_bo1_open: counts.playing_group_bo1_open,
+            playing_group_bo3_hidden: counts.playing_group_bo3_hidden,
+            playing_group_bo3_open: counts.playing_group_bo3_open,
+            playing_group_bo5_hidden: counts.playing_group_bo5_hidden,
+            playing_group_bo5_open: counts.playing_group_bo5_open,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Serialize)]
+pub struct QueueCountsView {
+    pub easy: DifficultyQueueCountsView,
+    pub full: DifficultyQueueCountsView,
+    pub hard: DifficultyQueueCountsView,
+}
+
+impl From<QueueCounts> for QueueCountsView {
+    fn from(counts: QueueCounts) -> Self {
+        Self {
+            easy: counts.easy.into(),
+            full: counts.full.into(),
+            hard: counts.hard.into(),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]

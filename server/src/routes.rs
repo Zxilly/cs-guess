@@ -41,7 +41,7 @@ use crate::{
         StartIdentityDrawRequest, validate_anonymous_id,
     },
     protocol::{
-        ClientMessage, CreateRoomRequest, JoinRoomRequest, QueueCounts, QuickMatchRequest,
+        ClientMessage, CreateRoomRequest, JoinRoomRequest, QueueCountsView, QuickMatchRequest,
         SessionResponse, Snapshot,
     },
     solo::{CompleteSoloRoundRequest, CreateSoloRoundRequest, SoloRound},
@@ -280,8 +280,8 @@ async fn quick_match(
     Ok(Json(response))
 }
 
-async fn queue_counts(State(state): State<AppState>) -> Json<QueueCounts> {
-    Json(state.queue_counts())
+async fn queue_counts(State(state): State<AppState>) -> Json<QueueCountsView> {
+    Json(state.queue_counts().into())
 }
 
 async fn current_daily_challenge(
@@ -1621,10 +1621,10 @@ mod tests {
         let initial: Value =
             serde_json::from_slice(&initial.into_body().collect().await.unwrap().to_bytes())
                 .unwrap();
-        assert_eq!(initial["total"], 0);
-        assert_eq!(initial["easy"]["total"], 0);
-        assert_eq!(initial["full"]["total"], 0);
-        assert_eq!(initial["hard"]["total"], 0);
+        assert_eq!(initial.as_object().unwrap().len(), 3);
+        assert_eq!(initial["easy"]["bo1_hidden"], 0);
+        assert_eq!(initial["full"]["bo1_hidden"], 0);
+        assert_eq!(initial["hard"]["bo1_hidden"], 0);
 
         let first = service
             .clone()
@@ -1653,8 +1653,8 @@ mod tests {
         let waiting: Value =
             serde_json::from_slice(&waiting.into_body().collect().await.unwrap().to_bytes())
                 .unwrap();
-        assert_eq!(waiting["total"], 1);
-        assert_eq!(waiting["bo5_hidden"], 1);
+        assert!(waiting.get("total").is_none());
+        assert!(waiting.get("bo5_hidden").is_none());
         assert_eq!(waiting["easy"]["bo5_hidden"], 1);
         assert_eq!(waiting["full"]["bo5_hidden"], 0);
         assert_eq!(waiting["hard"]["bo5_hidden"], 0);
@@ -1683,8 +1683,9 @@ mod tests {
             .unwrap();
         let empty: Value =
             serde_json::from_slice(&empty.into_body().collect().await.unwrap().to_bytes()).unwrap();
-        assert_eq!(empty["total"], 0);
-        assert_eq!(empty["easy"]["total"], 0);
+        assert!(empty.get("total").is_none());
+        assert!(empty["easy"].get("total").is_none());
+        assert_eq!(empty["easy"]["bo5_hidden"], 0);
         assert!(first["session_token"].is_string());
     }
 
