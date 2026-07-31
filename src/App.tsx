@@ -1,4 +1,4 @@
-import { lazy, Suspense, useLayoutEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef } from "react";
 import { CrosshairIcon } from "@phosphor-icons/react";
 import {
   Navigate,
@@ -17,57 +17,66 @@ import {
   realtimeCredentialsMatch,
 } from "@/lib/realtime";
 import { hasConfirmedIdentity } from "@/lib/identity-profile";
+import {
+  installRoutePreloading,
+  routeModules,
+} from "@/lib/route-preload";
 
 const ModeLobby = lazy(() =>
-  import("@/pages/ModeLobby").then((module) => ({
+  routeModules.modeLobby().then((module) => ({
     default: module.ModeLobby,
   })),
 );
 const GamePage = lazy(() =>
-  import("@/pages/GamePage").then((module) => ({
+  routeModules.dailyGame().then((module) => ({
     default: module.GamePage,
   })),
 );
 const SoloGamePage = lazy(() =>
-  import("@/pages/SoloGamePage").then((module) => ({
+  routeModules.soloGame().then((module) => ({
     default: module.SoloGamePage,
   })),
 );
 const SoloDifficultyPage = lazy(() =>
-  import("@/pages/SoloDifficultyPage").then((module) => ({
+  routeModules.soloDifficulty().then((module) => ({
     default: module.SoloDifficultyPage,
   })),
 );
 const LiveGamePage = lazy(() =>
-  import("@/pages/LiveGamePage").then((module) => ({
+  routeModules.liveGame().then((module) => ({
     default: module.LiveGamePage,
   })),
 );
 const MatchmakingPage = lazy(() =>
-  import("@/pages/MatchmakingPage").then((module) => ({
+  routeModules.matchmaking().then((module) => ({
     default: module.MatchmakingPage,
   })),
 );
 const QuickMatch = lazy(() =>
-  import("@/pages/QuickMatch").then((module) => ({
+  routeModules.quickMatch().then((module) => ({
     default: module.QuickMatch,
   })),
 );
 const RoomEntry = lazy(() =>
-  import("@/pages/RoomEntry").then((module) => ({
+  routeModules.roomEntry().then((module) => ({
     default: module.RoomEntry,
   })),
 );
 const StatsPage = lazy(() =>
-  import("@/pages/StatsPage").then((module) => ({
+  routeModules.stats().then((module) => ({
     default: module.StatsPage,
   })),
 );
 const IdentityPage = lazy(() =>
-  import("@/pages/IdentityPage").then((module) => ({
+  routeModules.identity().then((module) => ({
     default: module.IdentityPage,
   })),
 );
+
+function RoutePreloadManager() {
+  useEffect(() => installRoutePreloading(), []);
+  return null;
+}
 
 function ScrollToTop() {
   const { pathname, search } = useLocation();
@@ -247,6 +256,7 @@ export function App() {
   return (
     <>
       <ScrollToTop />
+      <RoutePreloadManager />
       <GlobalSoundManager />
       <Suspense fallback={<RouteLoading />}>
         <Routes>
