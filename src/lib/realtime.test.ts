@@ -75,7 +75,6 @@ describe("realtime closing intent", () => {
         room_code: "CS-654321",
         player_id: "quick-player",
         session_token: "quick-token",
-        socket_io_url: "/socket.io",
         snapshot: {},
       },
       "quick",
@@ -114,7 +113,6 @@ describe("friend room configuration", () => {
           room_code: "CS-123456",
           player_id: "player",
           session_token: "token",
-          socket_io_url: "/socket.io",
           snapshot: {
             difficulty: "full",
             max_players: 6,
@@ -150,7 +148,6 @@ describe("friend room configuration", () => {
           room_code: "CS-123456",
           player_id: "player",
           session_token: "token",
-          socket_io_url: "/socket.io",
           snapshot: {},
         }),
         { status: 201 },
@@ -368,7 +365,6 @@ describe("realtime session persistence", () => {
       room_code: "CS-123456",
       player_id: "player",
       session_token: "token",
-      socket_io_url: "/socket.io",
       snapshot: { phase: "waiting" },
     };
 
@@ -385,7 +381,6 @@ describe("realtime session persistence", () => {
       room_code: "CS-123456",
       player_id: "old-player",
       session_token: "old-token",
-      socket_io_url: "/socket.io",
       snapshot: {},
     };
     const newTicket = {
@@ -400,7 +395,7 @@ describe("realtime session persistence", () => {
       roomCode: oldTicket.room_code,
       playerId: oldTicket.player_id,
       sessionToken: oldTicket.session_token,
-      socketIoUrl: oldTicket.socket_io_url,
+      socketIoUrl: "/socket.io",
       mode: "quick",
     });
 

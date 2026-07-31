@@ -153,7 +153,7 @@ export function QuickMatch() {
           roomCode: ticket.room_code,
           playerId: ticket.player_id,
           sessionToken: ticket.session_token,
-          socketIoUrl: ticket.socket_io_url,
+          socketIoUrl: "/socket.io",
           mode: "quick",
         }),
       cancelByRequestId: cancelQuickMatchByRequestId,

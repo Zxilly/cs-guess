@@ -925,7 +925,7 @@ mod tests {
             serde_json::from_slice(&create.into_body().collect().await.unwrap().to_bytes())
                 .unwrap();
         let room_code = create_body["room_code"].as_str().unwrap();
-        assert_eq!(create_body["socket_io_url"], "/socket.io");
+        assert!(create_body.get("socket_io_url").is_none());
         assert_eq!(create_body["snapshot"]["phase"], "waiting");
         assert_eq!(create_body["snapshot"]["max_guesses"], 8);
         assert!(create_body["snapshot"].get("mystery_id").is_none());
@@ -940,7 +940,7 @@ mod tests {
         assert_eq!(join.status(), StatusCode::OK);
         let join_body: Value =
             serde_json::from_slice(&join.into_body().collect().await.unwrap().to_bytes()).unwrap();
-        assert_eq!(join_body["socket_io_url"], "/socket.io");
+        assert!(join_body.get("socket_io_url").is_none());
     }
 
     #[tokio::test]

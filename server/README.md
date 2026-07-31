@@ -182,7 +182,6 @@ Room creation, room join, and quick matching return the same session shape:
   "room_code": "CS-207207",
   "player_id": "a3827574-2b32-43cc-a19a-2398ab0ad54f",
   "session_token": "keep-this-secret",
-  "socket_io_url": "/socket.io",
   "snapshot": {
     "seq": 0,
     "room_code": "CS-207207",

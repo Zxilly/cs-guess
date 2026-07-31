@@ -291,7 +291,6 @@ pub struct SessionResponse {
     #[serde(with = "wire_uuid")]
     pub player_id: Uuid,
     pub session_token: String,
-    pub socket_io_url: String,
     pub snapshot: Snapshot,
 }
 

@@ -1033,9 +1033,6 @@ impl AppState {
             room_code: room_code.to_owned(),
             player_id: player.player_id,
             session_token: player.session_token,
-            // Kept for wire compatibility with older clients; this is now the
-            // same-origin Socket.IO path, not a native WebSocket URL.
-            socket_io_url: "/socket.io".to_owned(),
             snapshot,
         })
     }

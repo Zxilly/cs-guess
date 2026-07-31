@@ -421,7 +421,6 @@ describe("useRealtimeRoom socket ownership and synchronization", () => {
         room_code: credentialsA.roomCode,
         player_id: credentialsA.playerId,
         session_token: credentialsA.sessionToken,
-        socket_io_url: credentialsA.socketIoUrl,
         snapshot: {},
       },
       "room",
@@ -454,7 +453,6 @@ describe("useRealtimeRoom socket ownership and synchronization", () => {
           room_code: credentialsA.roomCode,
           player_id: credentialsA.playerId,
           session_token: credentialsA.sessionToken,
-          socket_io_url: credentialsA.socketIoUrl,
           snapshot: {},
         },
         "room",
@@ -497,7 +495,6 @@ describe("useRealtimeRoom socket ownership and synchronization", () => {
         room_code: credentialsB.roomCode,
         player_id: credentialsB.playerId,
         session_token: credentialsB.sessionToken,
-        socket_io_url: credentialsB.socketIoUrl,
         snapshot: {},
       },
       "room",
@@ -524,11 +521,15 @@ describe("useRealtimeRoom socket ownership and synchronization", () => {
         room_code: invalidCredentials.roomCode,
         player_id: invalidCredentials.playerId,
         session_token: invalidCredentials.sessionToken,
-        socket_io_url: invalidCredentials.socketIoUrl,
         snapshot: {},
       },
       "room",
     );
+    const stored = JSON.parse(
+      sessionStorage.getItem("cs-guess:realtime-session")!,
+    );
+    stored.credentials.socketIoUrl = invalidCredentials.socketIoUrl;
+    sessionStorage.setItem("cs-guess:realtime-session", JSON.stringify(stored));
 
     renderProbe({ credentials: invalidCredentials });
 
@@ -547,7 +548,6 @@ describe("useRealtimeRoom socket ownership and synchronization", () => {
         room_code: credentialsB.roomCode,
         player_id: credentialsB.playerId,
         session_token: credentialsB.sessionToken,
-        socket_io_url: credentialsB.socketIoUrl,
         snapshot: {},
       },
       "room",

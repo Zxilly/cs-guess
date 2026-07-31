@@ -22,7 +22,6 @@ const TICKET: SessionResponse = {
   room_code: "CS-123456",
   player_id: "player-1",
   session_token: "token-1",
-  socket_io_url: "/socket.io",
   snapshot: { phase: "waiting" },
 };
 

@@ -228,7 +228,6 @@ export interface SessionResponse {
   room_code: string;
   player_id: string;
   session_token: string;
-  socket_io_url: string;
   snapshot: Record<string, unknown>;
 }
 
@@ -458,7 +457,6 @@ function isSessionResponse(value: unknown): value is SessionResponse {
     typeof response.room_code === "string" &&
     typeof response.player_id === "string" &&
     typeof response.session_token === "string" &&
-    typeof response.socket_io_url === "string" &&
     Boolean(response.snapshot) &&
     typeof response.snapshot === "object"
   );
@@ -701,7 +699,7 @@ export function saveCredentials(
     roomCode: response.room_code,
     playerId: response.player_id,
     sessionToken: response.session_token,
-    socketIoUrl: response.socket_io_url,
+    socketIoUrl: "/socket.io",
     mode,
   };
   const session = {
