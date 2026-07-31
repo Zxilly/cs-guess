@@ -63,6 +63,7 @@ pub fn app(state: AppState) -> Router {
     let request_id_header = HeaderName::from_static("x-request-id");
     let profile_token_header = HeaderName::from_static("x-profile-token");
     let session_token_header = HeaderName::from_static("x-session-token");
+    let idempotency_key_header = HeaderName::from_static("idempotency-key");
     let config = state.config().clone();
     let cors = CorsLayer::new()
         .allow_origin(config.allowed_origins)
@@ -72,6 +73,7 @@ pub fn app(state: AppState) -> Router {
             request_id_header.clone(),
             profile_token_header,
             session_token_header,
+            idempotency_key_header,
         ]);
 
     Router::new()
@@ -82,7 +84,7 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/rooms/{code}", delete(leave_friend_room))
         .route("/v1/matches/quick", post(quick_match))
         .route(
-            "/v1/matches/quick/request/{client_request_id}",
+            "/v1/matches/quick/request",
             delete(cancel_quick_match_by_request_id),
         )
         .route("/v1/matches/quick/{code}", delete(cancel_quick_match))
@@ -510,13 +512,20 @@ fn session_token(headers: &HeaderMap) -> Result<&str, AppError> {
 
 async fn cancel_quick_match_by_request_id(
     State(state): State<AppState>,
-    Path(client_request_id): Path<String>,
+    headers: HeaderMap,
 ) -> Result<StatusCode, AppError> {
     state.admit_session_request().await?;
     state
-        .cancel_quick_match_by_request_id(&client_request_id)
+        .cancel_quick_match_by_request_id(idempotency_key(&headers)?)
         .await?;
     Ok(StatusCode::NO_CONTENT)
+}
+
+fn idempotency_key(headers: &HeaderMap) -> Result<&str, AppError> {
+    headers
+        .get("idempotency-key")
+        .and_then(|value| value.to_str().ok())
+        .ok_or_else(|| AppError::BadRequest("Idempotency-Key header is required".to_owned()))
 }
 
 #[derive(Deserialize)]
@@ -1270,7 +1279,8 @@ mod tests {
 
         let cancelled = service
             .oneshot(
-                Request::delete("/v1/matches/quick/request/cancel-request-1")
+                Request::delete("/v1/matches/quick/request")
+                    .header("idempotency-key", "cancel-request-1")
                     .body(Body::empty())
                     .unwrap(),
             )

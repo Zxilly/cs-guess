@@ -317,7 +317,9 @@ describe("QuickMatch submission lifecycle", () => {
       fetchMock.mock.calls.some(
         ([url, init]) =>
           init?.method === "DELETE" &&
-          String(url).includes("/v1/matches/quick/request/"),
+          String(url).endsWith("/v1/matches/quick/request") &&
+          typeof (init.headers as Record<string, string>)["Idempotency-Key"] ===
+            "string",
       ),
     ).toBe(true);
   });

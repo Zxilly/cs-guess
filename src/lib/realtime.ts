@@ -677,9 +677,10 @@ export async function cancelQuickMatchByRequestId(clientRequestId: string) {
   const timeout = window.setTimeout(() => controller.abort(), 5_000);
   try {
     const response = await fetch(
-      `${API_BASE}/v1/matches/quick/request/${encodeURIComponent(clientRequestId)}`,
+      `${API_BASE}/v1/matches/quick/request`,
       {
         method: "DELETE",
+        headers: { "Idempotency-Key": clientRequestId },
         keepalive: true,
         signal: controller.signal,
       },
