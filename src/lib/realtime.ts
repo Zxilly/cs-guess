@@ -4,9 +4,9 @@ import type {
   OpponentVisibility,
 } from "@/types/game";
 import { t } from "@lingui/core/macro";
+import { API_BASE, resolveApiSocketUrl } from "@/lib/api-routing";
 import { clearLiveGuessDraftsForRoom } from "@/lib/live-guess-draft";
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 const SESSION_KEY = "cs-guess:realtime-session";
 const CLOSING_INTENT_KEY = "cs-guess:realtime-closing-intent";
 export const CLOSING_INTENT_TTL_MS = 15 * 60 * 1_000;
@@ -817,14 +817,12 @@ export function discardRoomCredentials(response: SessionResponse) {
 }
 
 export function resolveSocketIoEndpoint(socketIoUrl: string) {
-  const fallbackBase = API_BASE || window.location.origin;
-  const url = new URL(socketIoUrl || "/socket.io", fallbackBase);
+  const url = resolveApiSocketUrl(socketIoUrl);
   return { url: url.origin, path: url.pathname || "/socket.io" };
 }
 
 export function resolveQueueSocketIoEndpoint() {
-  const fallbackBase = API_BASE || window.location.origin;
-  const url = new URL("/socket.io", fallbackBase);
+  const url = resolveApiSocketUrl("/socket.io");
   return { url: url.origin, path: url.pathname };
 }
 

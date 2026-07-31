@@ -1,9 +1,8 @@
 import type { Player } from "@/data/players";
 import type { AnonymousProfile } from "@/hooks/use-anonymous-profile";
+import { API_BASE } from "@/lib/api-routing";
 import { displayTeamName, isUnattachedTeam } from "@/lib/player-display";
 import type { ServerProfile } from "@/lib/profile-api";
-
-const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 
 export interface ServerDailyChallenge {
   date: string;

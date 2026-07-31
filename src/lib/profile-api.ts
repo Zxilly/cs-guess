@@ -2,8 +2,7 @@ import type {
   AnonymousProfile,
   IdentityPoolId,
 } from "@/hooks/use-anonymous-profile";
-
-const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+import { API_BASE } from "@/lib/api-routing";
 
 export type ServerProfile = Omit<AnonymousProfile, "syncToken">;
 
