@@ -290,7 +290,10 @@ describe("PlayerSearch combobox ARIA", () => {
     const container = await mountSearch();
     const input = inputIn(container);
 
-    expect(input.getAttribute("aria-label")).toBe("搜索并选择猜测选手");
+    expect(input.getAttribute("aria-label")).toBe(
+      "按昵称、姓名、战队或国家搜索并选择选手",
+    );
+    expect(input.getAttribute("placeholder")).toBe("搜索选手、战队或国家");
     expect(input.getAttribute("aria-expanded")).toBe("false");
     expect(input.hasAttribute("aria-controls")).toBe(false);
     expect(input.hasAttribute("aria-activedescendant")).toBe(false);

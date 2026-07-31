@@ -72,7 +72,7 @@ describe("ModeLobby", () => {
     expect(markup).toContain("text-xs");
   });
 
-  it("keeps both mobile header destinations named without shortening the brand", () => {
+  it("keeps compact mobile header actions accessible without visible labels", () => {
     const markup = renderToStaticMarkup(
       <MemoryRouter>
         <ModeLobby />
@@ -82,9 +82,10 @@ describe("ModeLobby", () => {
     expect(markup).toContain('aria-label="CS GUESS · 职业选手竞猜"');
     expect(markup).toContain('href="/identity"');
     expect(markup).toContain("管理玩家身份：steel");
-    expect(markup).toContain('<span class="sm:hidden">身份</span>');
+    expect(markup).not.toContain('<span class="sm:hidden">身份</span>');
     expect(markup).toContain('href="/stats"');
-    expect(markup).toContain(">战绩</");
+    expect(markup).toContain('aria-label="查看战绩"');
+    expect(markup).toContain('<span class="hidden sm:inline">战绩</span>');
   });
 
   it("links the lobby to the GitHub repository in a new tab", () => {

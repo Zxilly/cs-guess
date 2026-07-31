@@ -53,5 +53,14 @@ describe("PlayerIdentity", () => {
 
     expect(markup).toContain("2 次抽取");
     expect(markup).toContain("胜 1 局或累计负 2 局 +1");
+    expect(markup).toContain('data-layout="compact-player-identity"');
+    expect(markup).toMatch(
+      /data-layout="compact-identity-pool" class="[^"]*whitespace-normal[^"]*"/,
+    );
+    expect(markup).toMatch(
+      /data-layout="compact-identity-credit-rule" class="[^"]*whitespace-normal[^"]*"/,
+    );
+    expect(markup).toContain('data-layout="identity-manage-action"');
+    expect(markup).toContain("sm:grid-cols-[minmax(0,1fr)_auto]");
   });
 });

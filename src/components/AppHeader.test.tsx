@@ -6,7 +6,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
 
 describe("AppHeader mobile contract", () => {
-  it("keeps the complete brand visible and exposes a descriptive home link", () => {
+  it("reserves mobile width for the complete brand and hides only its subtitle", () => {
     const markup = renderToStaticMarkup(
       <MemoryRouter>
         <AppHeader subtitle="职业选手竞猜" />
@@ -16,9 +16,12 @@ describe("AppHeader mobile contract", () => {
     expect(markup).toContain('data-layout="app-header"');
     expect(markup).toContain('aria-label="CS GUESS · 职业选手竞猜"');
     expect(markup).toContain(">CS GUESS</p>");
-    expect(markup).toContain("whitespace-nowrap");
+    expect(markup).toContain("grid-cols-[auto_minmax(0,1fr)]");
+    expect(markup).toContain("min-h-10 shrink-0");
+    expect(markup).toContain(
+      "hidden whitespace-nowrap text-xs text-muted-foreground sm:block",
+    );
     expect(markup).toContain('aria-label="静音全站音效"');
-    expect(markup).not.toContain("truncate text-lg font-bold");
   });
 
   it("keeps injected header actions inside the dedicated mobile action area", () => {
