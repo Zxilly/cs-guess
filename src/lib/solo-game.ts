@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { players } from "@/data/players";
 import {
   maxGuessesForDifficulty,
@@ -14,20 +15,20 @@ export type SoloDifficulty = GameDifficulty;
 export const SOLO_DIFFICULTIES = [
   {
     id: "easy",
-    label: "简单",
-    poolLabel: "知名选手",
+    label: t`简单`,
+    poolLabel: t`知名选手`,
     recommended: true,
   },
   {
     id: "full",
-    label: "完整",
-    poolLabel: "Major 参赛选手",
+    label: t`完整`,
+    poolLabel: t`Major 参赛选手`,
     recommended: false,
   },
   {
     id: "hard",
-    label: "困难",
-    poolLabel: "全部选手",
+    label: t`困难`,
+    poolLabel: t`全部选手`,
     recommended: false,
   },
 ] as const satisfies readonly {

@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { CheckCircleIcon, DiceFiveIcon } from "@phosphor-icons/react";
 import {
   useEffect,
@@ -19,6 +20,7 @@ import type { Player } from "@/data/players";
 import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { Spinner } from "@/components/ui/spinner";
 import { countryNameZh } from "@/lib/country-geography";
+import { displayTeamName } from "@/lib/player-display";
 import { cn } from "@/lib/utils";
 
 export type IdentityDrawPendingAction =
@@ -64,7 +66,7 @@ export function IdentityDrawDialog({
   allowKeepCurrent = true,
   allowReroll = true,
   rerollReady = true,
-  acceptLabel = "使用新身份",
+  acceptLabel = t`使用新身份`,
   pendingAction = null,
   onOpenChange,
   onKeep,
@@ -106,7 +108,7 @@ export function IdentityDrawDialog({
               {poolLabel}
             </DialogTitle>
             <DialogDescription className="sr-only">
-              选手卡横向滚动，并由中心指针选出新的身份。
+              {t`选手卡横向滚动，并由中心指针选出新的身份。`}
             </DialogDescription>
           </div>
           <Badge
@@ -114,10 +116,10 @@ export function IdentityDrawDialog({
             className="rounded-none font-mono"
           >
             {pendingAction
-              ? "正在保存"
+              ? t`正在保存`
               : revealed
-                ? "抽取完成"
-                : "正在抽取"}
+                ? t`抽取完成`
+                : t`正在抽取`}
           </Badge>
         </DialogHeader>
 
@@ -156,7 +158,7 @@ export function IdentityDrawDialog({
                     {countryNameZh(player.countryCode)}
                   </p>
                   <p className="mt-1 truncate text-xs text-muted-foreground">
-                    {player.team}
+                    {displayTeamName(player.team)}
                   </p>
                 </div>
               ))}
@@ -175,7 +177,7 @@ export function IdentityDrawDialog({
             )}
             aria-hidden={revealed}
           >
-            锁定中…
+            {t`锁定中…`}
           </p>
           <div
             data-slot="identity-draw-result-content"
@@ -194,9 +196,9 @@ export function IdentityDrawDialog({
                 role="status"
                 aria-live="polite"
                 aria-atomic="true"
-                aria-label={`第 ${rollKey} 次抽取结果：${winner.nickname}`}
+                aria-label={t`第 ${rollKey} 次抽取结果：${winner.nickname}`}
               >
-                抽取结果：{winner.nickname}
+                {t`抽取结果：`}{winner.nickname}
               </p>
             ) : null}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -213,7 +215,7 @@ export function IdentityDrawDialog({
                     {winner.nickname}
                   </p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {countryNameZh(winner.countryCode)} · {winner.team}
+                    {countryNameZh(winner.countryCode)} · {displayTeamName(winner.team)}
                   </p>
                 </div>
               </div>
@@ -236,10 +238,10 @@ export function IdentityDrawDialog({
                     {pendingAction === "keep" ? (
                       <>
                         <Spinner aria-hidden="true" />
-                        正在保留…
+                        {t`正在保留…`}
                       </>
                     ) : (
-                      "保留当前"
+                      t`保留当前`
                     )}
                   </Button>
                 ) : null}
@@ -258,13 +260,13 @@ export function IdentityDrawDialog({
                     {pendingAction === "reroll" ? (
                       <>
                         <Spinner aria-hidden="true" />
-                        正在重抽…
+                        {t`正在重抽…`}
                       </>
                     ) : remainingCredits < 1
-                      ? "无法重抽"
+                      ? t`无法重抽`
                       : rerollReady
-                        ? `重抽 · ${remainingCredits}`
-                        : "准备重抽…"}
+                        ? t`重抽 · ${remainingCredits}`
+                        : t`准备重抽…`}
                   </Button>
                 ) : null}
                 <Button
@@ -280,7 +282,7 @@ export function IdentityDrawDialog({
                   {pendingAction === "accept" ? (
                     <>
                       <Spinner aria-hidden="true" />
-                      正在保存…
+                      {t`正在保存…`}
                     </>
                   ) : (
                     acceptLabel
@@ -291,10 +293,10 @@ export function IdentityDrawDialog({
             {pendingAction ? (
               <p className="sr-only" role="status" aria-live="polite">
                 {pendingAction === "keep"
-                  ? "正在保留当前身份"
+                  ? t`正在保留当前身份`
                   : pendingAction === "reroll"
-                    ? "正在重新抽取身份"
-                    : "正在保存新身份"}
+                    ? t`正在重新抽取身份`
+                    : t`正在保存新身份`}
               </p>
             ) : null}
             {errorMessage ? (

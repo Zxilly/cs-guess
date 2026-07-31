@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { Navigate, useSearchParams } from "react-router";
 import { mutate } from "swr";
@@ -284,9 +285,9 @@ function SoloGame({
         status={game.status}
         roundNumber={game.roundNumber}
         bestOf={1}
-        modeLabel={`单人练习 · ${difficultyOption.label}`}
+        modeLabel={t`单人练习 · ${difficultyOption.label}`}
         backHref="/solo"
-        backLabel="难度选择"
+        backLabel={t`难度选择`}
       />
 
       <main className="app-game-main">
@@ -296,23 +297,23 @@ function SoloGame({
               className="mb-5 border border-foreground/20 px-4 py-3 text-sm text-muted-foreground"
               role="status"
             >
-              选手目录已更新，已安全开始新的练习回合。
+              {t`选手目录已更新，已安全开始新的练习回合。`}
             </p>
           ) : resetReason === "progress-reset" ? (
             <p
               className="mb-5 border border-foreground/20 px-4 py-3 text-sm text-muted-foreground"
               role="status"
             >
-              旧练习进度无法恢复，已安全开始新的练习回合。
+              {t`旧练习进度无法恢复，已安全开始新的练习回合。`}
             </p>
           ) : null}
           {!isFinished ? (
             <>
-              <h1 className="sr-only">单人练习</h1>
+              <h1 className="sr-only">{t`单人练习`}</h1>
 
               <div className="mb-5 flex items-center justify-between border-y border-foreground/15 py-3 lg:hidden">
                 <span className="text-xs text-muted-foreground">
-                  剩余时间
+                  {t`剩余时间`}
                 </span>
                 <Timer seconds={secondsLeft} className="text-lg text-primary" />
                 <span className="font-mono text-xs">
@@ -364,13 +365,13 @@ function SoloGame({
 
               <div className="mt-5 flex items-center text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
-                  <span>结果图例</span>
+                  <span>{t`结果图例`}</span>
                   <InfoTip
-                    label="查看结果图例"
+                    label={t`查看结果图例`}
                     side="right"
                     className="size-10"
                   >
-                    蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。向上箭头表示目标数值更高，向下箭头表示更低。
+                    {t`蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。向上箭头表示目标数值更高，向下箭头表示更低。`}
                   </InfoTip>
                 </div>
               </div>

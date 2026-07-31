@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowClockwiseIcon,
@@ -47,15 +48,15 @@ const WAITING_TIMEOUT_SECONDS = 10 * 60;
 function roomConnectionLabel(connection: ConnectionState) {
   switch (connection) {
     case "connected":
-      return "房间已连接";
+      return t`房间已连接`;
     case "reconnecting":
-      return "房间正在重连";
+      return t`房间正在重连`;
     case "offline":
-      return "房间连接离线";
+      return t`房间连接离线`;
     case "closed":
-      return "房间连接已关闭";
+      return t`房间连接已关闭`;
     default:
-      return "房间连接中";
+      return t`房间连接中`;
   }
 }
 
@@ -76,7 +77,7 @@ export function MatchmakingPage() {
   );
   const [cancelError, setCancelError] = useState(
     audit === "matching-cancel-error"
-      ? "取消匹配失败，请稍后重试。"
+      ? t`取消匹配失败，请稍后重试。`
       : "",
   );
   const [showMatchFound, setShowMatchFound] = useState(false);
@@ -147,7 +148,7 @@ export function MatchmakingPage() {
           caught instanceof ApiError ||
             caught instanceof QuickMatchCancellationTimeoutError
             ? caught.message
-            : "取消匹配失败，请稍后重试。",
+            : t`取消匹配失败，请稍后重试。`,
         );
       },
       returnTo: () => {
@@ -179,7 +180,7 @@ export function MatchmakingPage() {
     parseSoloDifficulty(readString(realtime.snapshot, "difficulty")) ?? "easy";
   const difficultyLabel =
     SOLO_DIFFICULTIES.find((option) => option.id === difficulty)?.label ??
-    "简单";
+    t`简单`;
   const snapshotPlayers = readRecords(realtime.snapshot, "players");
   const joinedEvents = realtime.events.filter(
     (event) => event.type === "player_joined",
@@ -193,7 +194,7 @@ export function MatchmakingPage() {
         : {},
     ),
   ]) {
-    const name = readString(player, "display_name") ?? "选手已连接";
+    const name = readString(player, "display_name") ?? t`选手已连接`;
     const key = readString(player, "player_id") ?? `name:${name}`;
     connectedPlayers.set(key, name);
   }
@@ -252,12 +253,12 @@ export function MatchmakingPage() {
     cancelError ||
     (closingIntent
       ? cancelPending
-        ? "正在通知服务器退出当前匹配，请勿重复操作。"
-        : "退出尚未完成，原匹配已暂停恢复。请重试退出。"
+        ? t`正在通知服务器退出当前匹配，请勿重复操作。`
+        : t`退出尚未完成，原匹配已暂停恢复。请重试退出。`
       : realtime.error) ||
     (waitingTimedOut
-      ? "等待已超过 10 分钟，可以重试房间连接或安全返回。"
-      : `${roomStatus}，可以立即重试或安全返回。`);
+      ? t`等待已超过 10 分钟，可以重试房间连接或安全返回。`
+      : t`${roomStatus}，可以立即重试或安全返回。`);
 
   useEffect(() => {
     if (
@@ -351,21 +352,21 @@ export function MatchmakingPage() {
 
   return (
     <div className="min-h-svh bg-background text-foreground">
-      <AppHeader subtitle={partySize === 4 ? "4 人乱斗匹配" : "实时 1v1 匹配"} />
+      <AppHeader subtitle={partySize === 4 ? t`4 人乱斗匹配` : t`实时 1v1 匹配`} />
 
       <main className="app-main">
         <PageIntro
           eyebrow={partySize === 4 ? "Group Queue · Live" : "Duel Queue · Live"}
           title={
             closingIntent
-              ? "正在完成退出"
+              ? t`正在完成退出`
               : partySize === 4
-                ? "等待其余三名玩家"
-                : "正在寻找对手"
+                ? t`等待其余三名玩家`
+                : t`正在寻找对手`
           }
           help={
-            <InfoTip label="匹配条件" side="right" className="size-6">
-              系统只会匹配人数、赛制、题库难度和猜测可见性完全相同的玩家。
+            <InfoTip label={t`匹配条件`} side="right" className="size-6">
+              {t`系统只会匹配人数、赛制、题库难度和猜测可见性完全相同的玩家。`}
             </InfoTip>
           }
           aside={
@@ -382,12 +383,12 @@ export function MatchmakingPage() {
                 <ArrowLeftIcon />
               )}
               {cancelPending
-                ? "正在退出…"
+                ? t`正在退出…`
                 : closingIntent
-                  ? "重试退出"
+                  ? t`重试退出`
                   : fatalOffline
-                    ? "返回匹配设置"
-                    : "取消匹配"}
+                    ? t`返回匹配设置`
+                    : t`取消匹配`}
             </Button>
           }
         />
@@ -399,17 +400,17 @@ export function MatchmakingPage() {
           <section aria-busy={cancelPending}>
             <div className="grid border-b border-foreground/20 sm:grid-cols-3">
               <div className="p-5">
-                <p className="text-xs text-muted-foreground">当前身份</p>
+                <p className="text-xs text-muted-foreground">{t`当前身份`}</p>
                 <p className="mt-2 font-semibold">{identity.player.nickname}</p>
               </div>
               <div className="border-t border-foreground/20 p-5 sm:border-t-0 sm:border-l">
-                <p className="text-xs text-muted-foreground">公共队列数据</p>
+                <p className="text-xs text-muted-foreground">{t`公共队列数据`}</p>
                 <p className="mt-2 font-mono text-sm font-semibold">
-                  {queue.live ? "已连接" : "连接中"}
+                  {queue.live ? t`已连接` : t`连接中`}
                 </p>
               </div>
               <div className="border-t border-foreground/20 p-5 sm:border-t-0 sm:border-l">
-                <p className="text-xs text-muted-foreground">房间连接</p>
+                <p className="text-xs text-muted-foreground">{t`房间连接`}</p>
                 <p className="mt-2 font-mono text-sm font-semibold">
                   {roomStatus}
                 </p>
@@ -433,7 +434,7 @@ export function MatchmakingPage() {
                       {selected ? (
                         <span className="inline-flex items-center gap-2 text-xs">
                           <Spinner role="presentation" aria-hidden="true" />
-                          正在匹配
+                          {t`正在匹配`}
                         </span>
                       ) : null}
                     </div>
@@ -442,13 +443,13 @@ export function MatchmakingPage() {
                         <p className="font-mono text-3xl font-semibold">
                           {waitingByBestOf[index]}
                         </p>
-                        <p className="mt-1 text-xs">等待匹配</p>
+                        <p className="mt-1 text-xs">{t`等待匹配`}</p>
                       </div>
                       <div>
                         <p className="font-mono text-3xl font-semibold">
                           {playingByBestOf[index]}
                         </p>
-                        <p className="mt-1 text-xs">游戏中</p>
+                        <p className="mt-1 text-xs">{t`游戏中`}</p>
                       </div>
                     </div>
                   </div>
@@ -459,17 +460,17 @@ export function MatchmakingPage() {
             <div className="grid grid-cols-2 border-t border-foreground/20 md:grid-cols-4">
               {[
                 [
-                  "已等待",
+                  t`已等待`,
                   `${String(Math.floor(elapsed / 60)).padStart(2, "0")}:${String(
                     elapsed % 60,
                   ).padStart(2, "0")}`,
                 ],
-                ["当前条件等待总数", String(waitingTotal)],
-                ["当前条件游戏中总数", String(playingTotal)],
+                [t`当前条件等待总数`, String(waitingTotal)],
+                [t`当前条件游戏中总数`, String(playingTotal)],
                 [
-                  "当前规则",
-                  `${partySize === 4 ? "4 人乱斗" : "1v1"} · ${difficultyLabel} · BO${bestOf} · ${
-                    visibility === "hidden" ? "隐藏" : "明牌"
+                  t`当前规则`,
+                  `${partySize === 4 ? t`4 人乱斗` : "1v1"} · ${difficultyLabel} · BO${bestOf} · ${
+                    visibility === "hidden" ? t`隐藏` : t`明牌`
                   }`,
                 ],
               ].map(([label, value]) => (
@@ -490,16 +491,16 @@ export function MatchmakingPage() {
               aria-atomic="true"
               data-testid="matching-connection-status"
             >
-              公共队列数据{queue.live ? "已连接" : "连接中"}；{roomStatus}。
-              {cancelPending ? "正在取消匹配。" : ""}
+              {t`公共队列数据`}{queue.live ? t`已连接` : t`连接中`}；{roomStatus}。
+              {cancelPending ? t`正在取消匹配。` : ""}
             </p>
             <p
               className="sr-only"
               aria-live="off"
               data-testid="matching-queue-summary"
             >
-              当前 {joinedPlayerCount} 人；等待 {waitingTotal} 人，游戏中{" "}
-              {playingTotal} 人。
+              {t`当前`} {joinedPlayerCount} {t`人；等待`} {waitingTotal} {t`人，游戏中`}{" "}
+              {playingTotal} {t`人。`}
             </p>
 
           </section>
@@ -509,8 +510,8 @@ export function MatchmakingPage() {
         open={cancelPending}
         kind="progress"
         eyebrow="MATCHMAKING"
-        title="正在取消匹配"
-        description="正在通知服务器释放当前队列席位，请勿重复操作。"
+        title={t`正在取消匹配`}
+        description={t`正在通知服务器释放当前队列席位，请勿重复操作。`}
       />
       <OperationStatusDialog
         open={showConnectionRecovery && !cancelPending}
@@ -519,12 +520,12 @@ export function MatchmakingPage() {
         titleRef={recoveryTitleRef}
         title={
           closingIntent
-            ? "未能退出匹配"
+            ? t`未能退出匹配`
             : reconnecting && !cancelError
-              ? "正在恢复连接"
+              ? t`正在恢复连接`
             : fatalOffline
-              ? "当前匹配会话已失效"
-              : "连接需要处理"
+              ? t`当前匹配会话已失效`
+              : t`连接需要处理`
         }
         description={recoveryMessage}
       >
@@ -534,7 +535,7 @@ export function MatchmakingPage() {
             className="w-full rounded-none sm:w-auto"
             onClick={cancel}
           >
-            重试退出
+            {t`重试退出`}
           </Button>
         ) : fatalOffline ? (
           <Button
@@ -543,8 +544,8 @@ export function MatchmakingPage() {
             onClick={discardInvalidSession}
           >
             {realtime.offlineReason === "profile_invalid"
-              ? "重新设置身份"
-              : "清除失效会话并返回"}
+              ? t`重新设置身份`
+              : t`清除失效会话并返回`}
           </Button>
         ) : (
           <>
@@ -554,7 +555,7 @@ export function MatchmakingPage() {
               className="w-full rounded-none sm:w-auto"
               onClick={cancel}
             >
-              安全返回
+              {t`安全返回`}
             </Button>
             <Button
               type="button"
@@ -562,7 +563,7 @@ export function MatchmakingPage() {
               onClick={realtime.retry}
             >
               <ArrowClockwiseIcon />
-              重试连接
+              {t`重试连接`}
             </Button>
           </>
         )}

@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { cn } from "@/lib/utils";
 
 interface TimerProps {
@@ -24,7 +25,7 @@ export function Timer({ seconds, className }: TimerProps) {
         isUrgent ? "text-destructive" : "text-foreground",
         className,
       )}
-      aria-label={`剩余时间 ${formatTime(seconds)}`}
+      aria-label={t`剩余时间 ${formatTime(seconds)}`}
     >
       {formatTime(seconds)}
     </div>

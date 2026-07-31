@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   CalendarDotsIcon,
   CheckCircleIcon,
@@ -14,10 +15,7 @@ import { TeamLogo } from "@/components/TeamLogo";
 import { Button } from "@/components/ui/button";
 import type { Player } from "@/data/players";
 import { countryNameZh } from "@/lib/country-geography";
-import {
-  displayTeamName,
-  UNATTACHED_TEAM_LABEL,
-} from "@/lib/player-display";
+import { displayTeamName, isUnattachedTeam } from "@/lib/player-display";
 import {
   soloLossCopy,
   type SoloLossReason,
@@ -51,10 +49,10 @@ export function DailyResultPanel({
   const soloLoss = soloLossCopy(lossReason, maxGuesses);
   const dailyLossSummary =
     lossReason === "timeout"
-      ? "三分钟倒计时已结束，今日答案已经揭晓。"
+      ? t`三分钟倒计时已结束，今日答案已经揭晓。`
       : lossReason === "attempts-exhausted"
-        ? "八次猜测机会已用完，今日答案已经揭晓。"
-        : "今日答案已经揭晓。";
+        ? t`八次猜测机会已用完，今日答案已经揭晓。`
+        : t`今日答案已经揭晓。`;
 
   return (
     <section
@@ -80,19 +78,19 @@ export function DailyResultPanel({
             >
               {isDaily
                 ? won
-                  ? "今日挑战完成"
-                  : "今日挑战结束"
+                  ? t`今日挑战完成`
+                  : t`今日挑战结束`
                 : won
-                  ? "单人练习完成"
+                  ? t`单人练习完成`
                   : soloLoss.title}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
               {isDaily
                 ? won
-                  ? "你成功锁定了今日答案。"
+                  ? t`你成功锁定了今日答案。`
                   : dailyLossSummary
                 : won
-                  ? "你成功锁定了本局答案。"
+                  ? t`你成功锁定了本局答案。`
                   : soloLoss.panelSummary}
             </p>
           </div>
@@ -100,7 +98,7 @@ export function DailyResultPanel({
 
         <div className="flex items-baseline justify-between gap-4 border-t border-foreground/15 pt-4 sm:block sm:border-t-0 sm:pt-0 sm:text-right">
           <p className="font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground">
-            已用尝试
+            {t`已用尝试`}
           </p>
           <p className="font-mono text-2xl font-semibold tracking-[-0.04em]">
             {attempts} / {maxGuesses}
@@ -116,7 +114,7 @@ export function DailyResultPanel({
         />
         <div className="min-w-0">
           <p className="font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground">
-            {isDaily ? "今日答案" : "本局答案"}
+            {isDaily ? t`今日答案` : t`本局答案`}
           </p>
           <h3 className="mt-2 truncate text-3xl font-bold tracking-[-0.04em]">
             {mysteryPlayer.nickname}
@@ -128,12 +126,12 @@ export function DailyResultPanel({
       </div>
 
       <dl className="border-t border-foreground/20 lg:grid lg:grid-cols-6">
-        <ResultItem label="战队">
+        <ResultItem label={t`战队`}>
           <span className="flex min-w-0 items-center gap-2">
             <TeamLogo
               name={teamName}
               src={
-                teamName === UNATTACHED_TEAM_LABEL
+                isUnattachedTeam(mysteryPlayer.team)
                   ? undefined
                   : mysteryPlayer.teamLogoUrl
               }
@@ -141,19 +139,19 @@ export function DailyResultPanel({
             <span className="truncate">{teamName}</span>
           </span>
         </ResultItem>
-        <ResultItem label="国家或地区" icon={<GlobeHemisphereWestIcon />}>
+        <ResultItem label={t`国家或地区`} icon={<GlobeHemisphereWestIcon />}>
           {countryNameZh(mysteryPlayer.countryCode)}
         </ResultItem>
-        <ResultItem label="年龄" icon={<CalendarDotsIcon />}>
+        <ResultItem label={t`年龄`} icon={<CalendarDotsIcon />}>
           {mysteryPlayer.age}
         </ResultItem>
-        <ResultItem label="位置">
+        <ResultItem label={t`位置`}>
           <PlayerRoleLabel role={mysteryPlayer.role} />
         </ResultItem>
-        <ResultItem label="Major 次数" icon={<MedalIcon />}>
+        <ResultItem label={t`Major 次数`} icon={<MedalIcon />}>
           {mysteryPlayer.majorAppearances}
         </ResultItem>
-        <ResultItem label="Major 冠军" icon={<MedalIcon />}>
+        <ResultItem label={t`Major 冠军`} icon={<MedalIcon />}>
           {mysteryPlayer.majorWins}
         </ResultItem>
       </dl>
@@ -161,7 +159,7 @@ export function DailyResultPanel({
         <footer className="flex justify-end border-t border-foreground/20 px-5 py-4 sm:px-7">
           <Button className="w-full rounded-none sm:w-auto" onClick={onPlayAgain}>
             <ArrowClockwiseIcon />
-            开始下一题
+            {t`开始下一题`}
           </Button>
         </footer>
       ) : null}

@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { readNumber, readRecord, readRecords, readString } from "@/lib/realtime";
 
 export type RematchStatus =
@@ -122,33 +123,33 @@ export function rematchStatusCopy(status: RematchStatus) {
   switch (status) {
     case "declined":
       return {
-        title: "对手拒绝了重赛",
-        description: "本次邀请已结束，你仍可查看本局结果或重新匹配。",
+        title: t`对手拒绝了重赛`,
+        description: t`本次邀请已结束，你仍可查看本局结果或重新匹配。`,
       };
     case "cancelled":
       return {
-        title: "重赛邀请已取消",
-        description: "当前对局结果不会改变，你可以继续查看或重新匹配。",
+        title: t`重赛邀请已取消`,
+        description: t`当前对局结果不会改变，你可以继续查看或重新匹配。`,
       };
     case "expired":
       return {
-        title: "重赛邀请已超时",
-        description: "对手没有在规定时间内回应，本次邀请已自动结束。",
+        title: t`重赛邀请已超时`,
+        description: t`对手没有在规定时间内回应，本次邀请已自动结束。`,
       };
     case "opponent_offline":
       return {
-        title: "原对手当前离线",
-        description: "无法建立重赛。你可以等待对手恢复后再邀请，或重新匹配。",
+        title: t`原对手当前离线`,
+        description: t`无法建立重赛。你可以等待对手恢复后再邀请，或重新匹配。`,
       };
     case "starting":
       return {
-        title: "正在匹配原对手",
-        description: "服务器正在重置比分和题目，即将开始新的系列赛。",
+        title: t`正在匹配原对手`,
+        description: t`服务器正在重置比分和题目，即将开始新的系列赛。`,
       };
     default:
       return {
-        title: "等待原对手回应",
-        description: "邀请已送达；所有对手同意后将直接开始新的系列赛。",
+        title: t`等待原对手回应`,
+        description: t`邀请已送达；所有对手同意后将直接开始新的系列赛。`,
       };
   }
 }

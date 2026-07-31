@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   CheckIcon,
   FireIcon,
@@ -62,7 +63,7 @@ export function DifficultySelector({
     <div
       className="grid grid-cols-3 border border-foreground/25"
       role="radiogroup"
-      aria-label="题库难度"
+      aria-label={t`题库难度`}
     >
       {SOLO_DIFFICULTIES.map((option, index) => {
         const selected = value === option.id;
@@ -101,7 +102,7 @@ export function DifficultySelector({
                 <span className="truncate">{option.poolLabel}</span>
                 <span aria-hidden="true">·</span>
                 <span className="shrink-0 font-mono">
-                  {soloMysteryPool(option.id).length} 人
+                  {soloMysteryPool(option.id).length} {t`人`}
                 </span>
               </span>
             </span>

@@ -1,9 +1,6 @@
 import type { Player } from "@/data/players";
 import type { AnonymousProfile } from "@/hooks/use-anonymous-profile";
-import {
-  displayTeamName,
-  UNATTACHED_TEAM_LABEL,
-} from "@/lib/player-display";
+import { displayTeamName, isUnattachedTeam } from "@/lib/player-display";
 import type { ServerProfile } from "@/lib/profile-api";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
@@ -41,12 +38,13 @@ export async function loadCurrentDailyChallenge(
     throw new Error(`daily challenge load failed: ${response.status}`);
   }
   const challenge = (await response.json()) as ServerDailyChallenge;
-  const team = displayTeamName(challenge.mysteryPlayer.team);
+  const rawTeam = challenge.mysteryPlayer.team;
+  const team = displayTeamName(rawTeam);
   const mysteryPlayer = {
     ...challenge.mysteryPlayer,
     team,
   };
-  if (team === UNATTACHED_TEAM_LABEL) {
+  if (isUnattachedTeam(rawTeam)) {
     delete mysteryPlayer.teamLogoUrl;
   }
   return {

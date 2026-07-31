@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   SpeakerHighIcon,
   SpeakerSlashIcon,
@@ -15,7 +16,7 @@ interface SoundToggleProps {
 export function SoundToggle({ className }: SoundToggleProps) {
   const enabled = useSoundStore((state) => state.enabled);
   const toggle = useSoundStore((state) => state.toggle);
-  const label = enabled ? "静音" : "取消静音";
+  const label = enabled ? t`静音全站音效` : t`取消静音全站音效`;
 
   function handleToggle() {
     const nextEnabled = !enabled;
@@ -33,14 +34,14 @@ export function SoundToggle({ className }: SoundToggleProps) {
         !enabled && "text-foreground",
         className,
       )}
-      aria-label={`${label}全站音效`}
+      aria-label={label}
       aria-pressed={!enabled}
-      title={`${label}全站音效`}
+      title={label}
       onClick={handleToggle}
     >
       {enabled ? <SpeakerHighIcon /> : <SpeakerSlashIcon />}
       <span className="hidden sm:inline">
-        {enabled ? "音效" : "已静音"}
+        {enabled ? t`音效` : t`已静音`}
       </span>
     </Button>
   );

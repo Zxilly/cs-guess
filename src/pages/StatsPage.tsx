@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { Fragment, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import {
@@ -41,7 +42,9 @@ import {
   useAnonymousProfile,
 } from "@/hooks/use-anonymous-profile";
 import { trackEvent } from "@/lib/analytics";
+import { getActiveLocale } from "@/i18n";
 import { countryNameZh } from "@/lib/country-geography";
+import { displayTeamName } from "@/lib/player-display";
 import {
   focusReplayTitle,
   groupRoundHistory,
@@ -50,20 +53,20 @@ import {
 } from "@/lib/stats-history-display";
 
 const MODE_LABELS: Record<MatchHistoryEntry["mode"], string> = {
-  daily: "今日挑战",
-  solo: "单人练习",
-  quick: "实时匹配",
-  room: "好友房间",
+  daily: t`今日挑战`,
+  solo: t`单人练习`,
+  quick: t`实时匹配`,
+  room: t`好友房间`,
 };
 
 const RESULT_LABELS = {
-  win: "胜利",
-  loss: "失败",
-  draw: "平局",
+  win: t`胜利`,
+  loss: t`失败`,
+  draw: t`平局`,
 } as const;
 
 function formatTime(value: string) {
-  return new Intl.DateTimeFormat("zh-CN", {
+  return new Intl.DateTimeFormat(getActiveLocale(), {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
@@ -73,9 +76,9 @@ function formatTime(value: string) {
 
 function GuessCount({ entry }: { entry: MatchHistoryEntry }) {
   return entry.guessIds.length > 0 ? (
-    <span>{entry.guessIds.length} 次</span>
+    <span>{entry.guessIds.length} {t`次`}</span>
   ) : (
-    <span className="text-muted-foreground">无猜测记录</span>
+    <span className="text-muted-foreground">{t`无猜测记录`}</span>
   );
 }
 
@@ -85,7 +88,7 @@ function ReplayGuessCards({
   guesses: readonly (Player | undefined)[];
 }) {
   return (
-    <section aria-label="本回合猜测记录" className="grid gap-2">
+    <section aria-label={t`本回合猜测记录`} className="grid gap-2">
       {guesses.map((guess, index) => (
         <article
           // Index is the durable attempt position, including unavailable history.
@@ -95,15 +98,15 @@ function ReplayGuessCards({
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="font-mono text-xs text-muted-foreground">
-                第 {index + 1} 次猜测
+                {t`第 ${index + 1} 次猜测`}
               </p>
               <p className="mt-1 font-semibold">
-                {guess?.nickname ?? "历史数据不可用"}
+                {guess?.nickname ?? t`历史数据不可用`}
               </p>
             </div>
             {guess ? (
               <Badge variant="outline" className="rounded-none">
-                {guess.team}
+                {displayTeamName(guess.team)}
               </Badge>
             ) : (
               <WarningCircleIcon className="size-4 text-destructive" />
@@ -113,7 +116,7 @@ function ReplayGuessCards({
             <p className="mt-2 text-xs text-muted-foreground">
               {countryNameZh(guess.countryCode)} · {playerRoleNameZh(guess.role)}
               {" · "}
-              {guess.age} 岁 · {guess.majorAppearances} 次 Major
+              {guess.age} {t`岁 ·`} {guess.majorAppearances} {t`次 Major`}
             </p>
           ) : null}
         </article>
@@ -134,12 +137,12 @@ export function ReplayDetails({ entry }: { entry: MatchHistoryEntry }) {
     <div className="p-5">
       <dl className="mb-5 grid grid-cols-2 gap-px border border-foreground/20 bg-foreground/15 sm:grid-cols-3">
         {[
-          ["模式", MODE_LABELS[entry.mode]],
-          ["回合 / 赛制", `R${entry.roundNumber} · BO${entry.bestOf}`],
-          ["累计比分", `${entry.selfScore} : ${entry.opponentScore}`],
-          ["对手", entry.opponentNames.join("、") || "—"],
-          ["房间", entry.roomCode ?? "—"],
-          ["完成时间", formatTime(entry.completedAt)],
+          [t`模式`, MODE_LABELS[entry.mode]],
+          [t`回合 / 赛制`, `R${entry.roundNumber} · BO${entry.bestOf}`],
+          [t`累计比分`, `${entry.selfScore} : ${entry.opponentScore}`],
+          [t`对手`, entry.opponentNames.join("、") || "—"],
+          [t`房间`, entry.roomCode ?? "—"],
+          [t`完成时间`, formatTime(entry.completedAt)],
         ].map(([label, value]) => (
           <div key={label} className="bg-background p-3">
             <dt className="text-xs text-muted-foreground">{label}</dt>
@@ -151,11 +154,11 @@ export function ReplayDetails({ entry }: { entry: MatchHistoryEntry }) {
       {answer ? (
         <div className="mb-5 flex flex-col justify-between gap-3 border border-foreground/20 px-4 py-3 sm:flex-row sm:items-center">
           <div>
-            <p className="text-xs text-muted-foreground">本回合答案</p>
+            <p className="text-xs text-muted-foreground">{t`本回合答案`}</p>
             <p className="mt-1 text-lg font-semibold">{answer.nickname}</p>
           </div>
           <div className="font-mono text-xs sm:text-right">
-            <p>{answer.team}</p>
+            <p>{displayTeamName(answer.team)}</p>
             <p className="mt-1 text-muted-foreground">
               {countryNameZh(answer.countryCode)} ·{" "}
               <PlayerRoleLabel role={answer.role} /> · {answer.age}
@@ -168,7 +171,7 @@ export function ReplayDetails({ entry }: { entry: MatchHistoryEntry }) {
           className="mb-5 flex items-center gap-2 border border-destructive/35 p-4 text-sm"
         >
           <WarningCircleIcon className="size-5 text-destructive" />
-          本回合答案的历史数据不可用
+          {t`本回合答案的历史数据不可用`}
         </div>
       )}
 
@@ -177,7 +180,7 @@ export function ReplayDetails({ entry }: { entry: MatchHistoryEntry }) {
           role="status"
           className="grid min-h-28 place-items-center border border-foreground/20 px-4 text-center text-sm text-muted-foreground"
         >
-          本回合无猜测记录
+          {t`本回合无猜测记录`}
         </div>
       ) : (
         <>
@@ -186,7 +189,7 @@ export function ReplayDetails({ entry }: { entry: MatchHistoryEntry }) {
               role="status"
               className="mb-3 text-xs text-muted-foreground"
             >
-              {unavailableGuessCount} 条猜测的历史数据不可用
+              {unavailableGuessCount} {t`条猜测的历史数据不可用`}
             </p>
           ) : null}
           <div
@@ -241,15 +244,15 @@ export function StatsPage() {
 
   return (
     <div className="min-h-svh bg-background text-foreground">
-      <AppHeader subtitle="个人战绩" backToLobby />
+      <AppHeader subtitle={t`个人战绩`} backToLobby />
 
       <main className="app-main">
         <PageIntro
           eyebrow="Stats & Replay"
-          title="战绩与回放"
+          title={t`战绩与回放`}
           help={
-            <InfoTip label="战绩记录说明" side="right" className="size-6">
-              数据按回合统计，最多保留最近 50 回合。同一房间的每个回合各占一行，比分为该回合结束时的累计比分。
+            <InfoTip label={t`战绩记录说明`} side="right" className="size-6">
+              {t`数据按回合统计，最多保留最近 50 回合。同一房间的每个回合各占一行，比分为该回合结束时的累计比分。`}
             </InfoTip>
           }
         />
@@ -257,19 +260,19 @@ export function StatsPage() {
         <div className="mt-7 grid grid-cols-2 gap-3 xl:grid-cols-4">
           {[
             {
-              label: "完成回合",
+              label: t`完成回合`,
               value: hasCompletedRounds ? identity.completedRounds : "—",
               empty: !hasCompletedRounds,
               icon: ClockCounterClockwiseIcon,
             },
             {
-              label: "回合胜率",
+              label: t`回合胜率`,
               value: hasCompletedRounds ? `${identity.winRate}%` : "—",
               empty: !hasCompletedRounds,
               icon: ChartBarIcon,
             },
             {
-              label: "最佳回合连胜",
+              label: t`最佳回合连胜`,
               value: hasCompletedRounds
                 ? identity.profile.stats.bestStreak
                 : "—",
@@ -277,10 +280,10 @@ export function StatsPage() {
               icon: TrophyIcon,
             },
             {
-              label: "胜局最佳猜数",
+              label: t`胜局最佳猜数`,
               value: auditEmpty
-                ? "暂无"
-                : identity.bestGuessCount ?? "暂无",
+                ? t`暂无`
+                : identity.bestGuessCount ?? t`暂无`,
               empty: auditEmpty || identity.bestGuessCount === null,
               icon: CrosshairSimpleIcon,
             },
@@ -309,15 +312,15 @@ export function StatsPage() {
 
         <Card className="mt-5 gap-0 overflow-hidden rounded-none border-foreground/25 bg-transparent py-0 shadow-none">
           <PanelHeader
-            title="最近回合"
+            title={t`最近回合`}
             description={
               !auditEmpty && identity.winningGuessSampleSize > 0
-                ? `有猜测记录的胜利回合 ${identity.winningGuessSampleSize} 个 · 平均 ${identity.averageWinningGuesses} 次`
-                : "胜局猜数暂无 · 仅统计有猜测记录的胜利回合"
+                ? t`有猜测记录的胜利回合 ${identity.winningGuessSampleSize} 个 · 平均 ${identity.averageWinningGuesses ?? 0} 次`
+                : t`胜局猜数暂无 · 仅统计有猜测记录的胜利回合`
             }
             action={
               <Badge variant="outline" className="rounded-none">
-                {history.length} 回合
+                {t`${history.length} 回合`}
               </Badge>
             }
           />
@@ -325,7 +328,7 @@ export function StatsPage() {
           {history.length ? (
             <div>
               <p className="border-b border-foreground/15 px-5 py-2 text-xs text-muted-foreground">
-                每条记录代表一个回合；同一房间会连续分组，比分为回合结束时的累计比分。
+                {t`每条记录代表一个回合；同一房间会连续分组，比分为回合结束时的累计比分。`}
               </p>
 
               <div
@@ -337,10 +340,10 @@ export function StatsPage() {
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <p className="text-xs font-semibold">
                         {MODE_LABELS[group.entries[0].mode]}
-                        {group.roomCode ? ` · 房间 ${group.roomCode}` : ""}
+                        {group.roomCode ? t` · 房间 ${group.roomCode}` : ""}
                       </p>
                       <p className="font-mono text-xs text-muted-foreground">
-                        {group.entries.length} 回合
+                        {t`${group.entries.length} 回合`}
                       </p>
                     </div>
                     <div className="grid gap-2">
@@ -355,7 +358,7 @@ export function StatsPage() {
                                 R{entry.roundNumber} · BO{entry.bestOf}
                               </p>
                               <p className="mt-1 text-xs text-muted-foreground">
-                                累计比分{" "}
+                                {t`累计比分`}{" "}
                                 <span className="font-mono text-foreground">
                                   {entry.selfScore} : {entry.opponentScore}
                                 </span>
@@ -384,7 +387,7 @@ export function StatsPage() {
                               onClick={() => openReplay(entry)}
                             >
                               <PlayIcon />
-                              详情
+                              {t`详情`}
                             </Button>
                           </div>
                         </article>
@@ -401,13 +404,13 @@ export function StatsPage() {
               <Table className="table-fixed">
                 <TableHeader>
                   <TableRow className="border-foreground/20 hover:bg-transparent">
-                    <TableHead className="w-[18%]">模式 / 房间</TableHead>
-                    <TableHead className="w-[11%]">结果</TableHead>
-                    <TableHead className="w-[14%]">回合</TableHead>
-                    <TableHead className="w-[14%]">累计比分</TableHead>
-                    <TableHead className="w-[15%]">猜测记录</TableHead>
-                    <TableHead className="w-[18%]">完成时间</TableHead>
-                    <TableHead className="w-24 text-right">详情</TableHead>
+                    <TableHead className="w-[18%]">{t`模式 / 房间`}</TableHead>
+                    <TableHead className="w-[11%]">{t`结果`}</TableHead>
+                    <TableHead className="w-[14%]">{t`回合`}</TableHead>
+                    <TableHead className="w-[14%]">{t`累计比分`}</TableHead>
+                    <TableHead className="w-[15%]">{t`猜测记录`}</TableHead>
+                    <TableHead className="w-[18%]">{t`完成时间`}</TableHead>
+                    <TableHead className="w-24 text-right">{t`详情`}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -419,12 +422,12 @@ export function StatsPage() {
                             colSpan={7}
                             className="px-3 py-2 text-xs font-medium text-muted-foreground"
                           >
-                            {MODE_LABELS[group.entries[0].mode]} · 房间{" "}
+                            {MODE_LABELS[group.entries[0].mode]} {t`· 房间`}{" "}
                             <span className="font-mono text-foreground">
                               {group.roomCode}
                             </span>
                             {" · "}
-                            {group.entries.length} 回合
+                            {t`${group.entries.length} 回合`}
                           </TableCell>
                         </TableRow>
                       ) : null}
@@ -472,7 +475,7 @@ export function StatsPage() {
                               onClick={() => openReplay(entry)}
                             >
                               <PlayIcon />
-                              详情
+                              {t`详情`}
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -487,12 +490,12 @@ export function StatsPage() {
             <div className="grid min-h-52 place-items-center px-6 text-center">
               <div>
                 <ClockCounterClockwiseIcon className="mx-auto size-8 text-primary" />
-                <p className="mt-4 font-medium">尚无回合记录</p>
+                <p className="mt-4 font-medium">{t`尚无回合记录`}</p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  完成挑战后可在此查看回合详情。
+                  {t`完成挑战后可在此查看回合详情。`}
                 </p>
                 <Button asChild className="mt-5 rounded-none">
-                  <Link to="/play/daily">开始今日挑战</Link>
+                  <Link to="/play/daily">{t`开始今日挑战`}</Link>
                 </Button>
               </div>
             </div>
@@ -517,7 +520,7 @@ export function StatsPage() {
               tabIndex={-1}
               className="text-xl outline-none"
             >
-              对局详情
+              {t`对局详情`}
             </DialogTitle>
             <DialogDescription>
               {replay

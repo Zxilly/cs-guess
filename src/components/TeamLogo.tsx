@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { ShieldIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
@@ -20,7 +21,7 @@ export function TeamLogo({ name, src, className }: TeamLogoProps) {
     return (
       <ShieldIcon
         className={cn("size-4 shrink-0 text-muted-foreground/60", className)}
-        aria-label={`${name} 暂无战队标志`}
+        aria-label={t`${name} 暂无战队标志`}
       />
     );
   }
@@ -28,7 +29,7 @@ export function TeamLogo({ name, src, className }: TeamLogoProps) {
   return (
     <img
       src={src}
-      alt={`${name} 战队标志`}
+      alt={t`${name} 战队标志`}
       className={cn(
         "size-5 shrink-0 object-contain drop-shadow-[0_0_1px_rgba(15,23,42,0.75)]",
         className,

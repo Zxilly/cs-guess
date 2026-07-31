@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 
@@ -90,7 +91,7 @@ export function GamePage({ mode }: GamePageProps) {
   if (audit === "daily-error") {
     return (
       <DailyGameLoading
-        error={new Error("今日题目加载失败，请检查网络后重试。")}
+        error={new Error(t`今日题目加载失败，请检查网络后重试。`)}
         onRetry={() => undefined}
       />
     );
@@ -263,11 +264,11 @@ function DailyGame({
         <div className="app-game-container min-w-0">
           {!isFinished ? (
             <>
-              <h1 className="sr-only">今日挑战</h1>
+              <h1 className="sr-only">{t`今日挑战`}</h1>
 
               <div className="mb-5 flex items-center justify-between border-y border-foreground/15 py-3 lg:hidden">
                 <span className="text-xs text-muted-foreground">
-                  剩余时间
+                  {t`剩余时间`}
                 </span>
                 <Timer
                   seconds={secondsLeft}
@@ -321,13 +322,13 @@ function DailyGame({
 
               <div className="mt-5 flex items-center text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
-                  <span>结果图例</span>
+                  <span>{t`结果图例`}</span>
                   <InfoTip
-                    label="查看结果图例"
+                    label={t`查看结果图例`}
                     side="right"
                     className="size-10"
                   >
-                    蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。向上箭头表示目标数值更高，向下箭头表示更低。
+                    {t`蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。向上箭头表示目标数值更高，向下箭头表示更低。`}
                   </InfoTip>
                 </div>
               </div>

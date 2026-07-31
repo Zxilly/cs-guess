@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { useCallback, useEffect, useMemo } from "react";
 import { mutate } from "swr";
 import useSWRImmutable from "swr/immutable";
@@ -88,21 +89,21 @@ export interface AnonymousProfile {
 export const IDENTITY_POOLS = [
   {
     id: "common",
-    label: "Major 参赛池",
+    label: t`Major 参赛池`,
     unlockWins: 0,
-    description: "参加过 1–4 次 Major、尚未夺冠的职业选手",
+    description: t`参加过 1–4 次 Major、尚未夺冠的职业选手`,
   },
   {
     id: "advanced",
-    label: "Major 资深池",
+    label: t`Major 资深池`,
     unlockWins: 3,
-    description: "参加过至少 5 次 Major、尚未夺冠的资深选手",
+    description: t`参加过至少 5 次 Major、尚未夺冠的资深选手`,
   },
   {
     id: "star",
-    label: "Major 冠军池",
+    label: t`Major 冠军池`,
     unlockWins: 10,
-    description: "至少赢得过 1 次 Major 冠军的选手",
+    description: t`至少赢得过 1 次 Major 冠军的选手`,
   },
 ] as const;
 
@@ -137,7 +138,7 @@ function pickPlayer(poolId: IdentityPoolId, excludedId?: string) {
   const available = pool.filter((player) => player.id !== excludedId);
   const candidates = available.length > 0 ? available : pool;
   const player = candidates[randomIndex(candidates.length)];
-  if (!player) throw new Error("选手池为空");
+  if (!player) throw new Error(t`选手池为空`);
   return player;
 }
 

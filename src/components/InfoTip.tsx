@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   forwardRef,
   useEffect,
@@ -107,7 +108,7 @@ export function InfoTip({
             type="button"
             data-slot="info-tip-close"
             className="absolute top-1.5 right-1.5 grid size-11 place-items-center text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary"
-            aria-label="关闭说明"
+            aria-label={t`关闭说明`}
             onClick={() => setOpen(false)}
           >
             <XIcon className="size-4" />

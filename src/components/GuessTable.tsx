@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   ArrowLeftIcon,
   ArrowDownIcon,
@@ -34,6 +35,7 @@ import {
   countryNameZh,
   formatCountryDistance,
 } from "@/lib/country-geography";
+import { displayTeamName } from "@/lib/player-display";
 import { compareTeams } from "@/lib/team-relation";
 import { cn } from "@/lib/utils";
 import type {
@@ -77,39 +79,39 @@ const TEAM_RELATION_DETAILS: Record<
   { label: string; shortLabel: string; icon: Icon }
 > = {
   match: {
-    label: "当前战队完全一致",
-    shortLabel: "当前同队",
+    label: t`当前战队完全一致`,
+    shortLabel: t`当前同队`,
     icon: CheckIcon,
   },
   target_history: {
-    label: "猜测选手的当前战队，是答案曾经效力过的战队",
-    shortLabel: "答案曾效力",
+    label: t`猜测选手的当前战队，是答案曾经效力过的战队`,
+    shortLabel: t`答案曾效力`,
     icon: ArrowRightIcon,
   },
   guess_history: {
-    label: "答案的当前战队，是猜测选手曾经效力过的战队",
-    shortLabel: "猜测曾效力",
+    label: t`答案的当前战队，是猜测选手曾经效力过的战队`,
+    shortLabel: t`猜测曾效力`,
     icon: ArrowLeftIcon,
   },
   shared_history: {
-    label: "猜测选手和答案曾经效力过的战队有重叠",
-    shortLabel: "共同历史队",
+    label: t`猜测选手和答案曾经效力过的战队有重叠`,
+    shortLabel: t`共同历史队`,
     icon: LinkSimpleIcon,
   },
   miss: {
-    label: "战队未命中",
-    shortLabel: "未命中",
+    label: t`战队未命中`,
+    shortLabel: t`未命中`,
     icon: CircleIcon,
   },
 };
 
 const ATTRIBUTES = [
-  ["战队", "team", "team"],
-  ["国籍", "countryCode", "nationality"],
-  ["年龄", "age", "age"],
-  ["位置", "role", "role"],
-  ["Major 参赛", "majorAppearances", "major_appearances"],
-  ["Major 冠军", "majorWins", "major_wins"],
+  [t`战队`, "team", "team"],
+  [t`国籍`, "countryCode", "nationality"],
+  [t`年龄`, "age", "age"],
+  [t`位置`, "role", "role"],
+  [t`Major 参赛`, "majorAppearances", "major_appearances"],
+  [t`Major 冠军`, "majorWins", "major_wins"],
 ] as const;
 
 function compareNumber(guess: number, target: number): Comparison {
@@ -136,12 +138,12 @@ function ComparisonValue({
           : CircleIcon;
   const comparisonLabel =
     comparison === "higher"
-      ? "目标数值更高"
+      ? t`目标数值更高`
       : comparison === "lower"
-        ? "目标数值更低"
+        ? t`目标数值更低`
         : comparison === "match"
-          ? "完全一致"
-          : "未命中";
+          ? t`完全一致`
+          : t`未命中`;
 
   return (
     <span
@@ -177,6 +179,7 @@ function TeamComparisonValue({
 }) {
   const details = TEAM_RELATION_DETAILS[relation];
   const RelationIcon = details.icon;
+  const teamName = displayTeamName(player.team);
   const isHistoricalRelation =
     relation === "target_history" ||
     relation === "guess_history" ||
@@ -190,12 +193,12 @@ function TeamComparisonValue({
         isHistoricalRelation && "font-semibold text-comparison-near",
         relation === "miss" && "text-muted-foreground",
       )}
-      title={`${player.team}，${details.label}`}
-      aria-label={`${player.team}，${details.label}`}
+      title={`${teamName}，${details.label}`}
+      aria-label={`${teamName}，${details.label}`}
     >
       <span className="flex min-w-0 max-w-full items-center justify-center gap-1.5">
-        <TeamLogo name={player.team} src={player.teamLogoUrl} />
-        <span className="min-w-0 truncate font-mono text-xs">{player.team}</span>
+        <TeamLogo name={teamName} src={player.teamLogoUrl} />
+        <span className="min-w-0 truncate font-mono text-xs">{teamName}</span>
       </span>
       {isHistoricalRelation ? (
         <span className="mt-1 inline-flex max-w-full items-center gap-1 border border-comparison-near/35 bg-comparison-near/8 px-1.5 py-0.5 font-sans text-[10px] leading-none">
@@ -220,12 +223,12 @@ function CountryComparisonValue({
   const continent = countryContinentZh(countryCode);
   const relationLabel =
     comparison.relation === "match"
-      ? "命中"
+      ? t`命中`
       : comparison.relation === "near"
-        ? "同洲接近"
-        : "不同洲";
+        ? t`同洲接近`
+        : t`不同洲`;
   const distanceLabel = formatCountryDistance(comparison.distanceKm);
-  const comparisonLabel = `${countryNameZh(countryCode)}，${relationLabel}${
+  const comparisonLabel = t`${countryNameZh(countryCode)}，${relationLabel}${
     continent ? `，${continent}` : ""
   }，两国首都直线距离 ${distanceLabel}`;
 
@@ -321,12 +324,12 @@ function GuessBoard({
         ) : null}
       </div>
       <p className="border-b border-foreground/15 px-4 py-2 text-xs text-muted-foreground sm:hidden">
-        横向滑动查看全部属性 →
+        {t`横向滑动查看全部属性 →`}
       </p>
       <div
         className="overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         role="region"
-        aria-label={`${title}，横向滚动查看更多属性`}
+        aria-label={t`${title}，横向滚动查看更多属性`}
         tabIndex={0}
       >
         <Table className="min-w-[44rem] table-fixed">
@@ -336,7 +339,7 @@ function GuessBoard({
                 #
               </TableHead>
               <TableHead className="w-34 border-r border-foreground/15">
-                猜测选手
+                {t`猜测选手`}
               </TableHead>
               {ATTRIBUTES.map(([label]) => (
                 <TableHead
@@ -378,7 +381,7 @@ function GuessBoard({
                     </div>
                   ) : (
                     <span className="text-xs text-muted-foreground/50">
-                      等待猜测
+                      {t`等待猜测`}
                     </span>
                   )}
                 </TableCell>
@@ -470,13 +473,13 @@ function OpponentBoard({
                 className="mt-1 font-mono text-xs text-destructive"
                 aria-hidden="true"
               >
-                重连 00:{String(disconnectSeconds).padStart(2, "0")} · 超时判负
+                {t`重连 00:`}{String(disconnectSeconds).padStart(2, "0")} {t`· 超时判负`}
               </p>
             </>
           ) : null}
           {forfeitedThisRound ? (
             <p className="mt-1 text-xs font-medium text-destructive">
-              在线 · 本轮已判负
+              {t`在线 · 本轮已判负`}
             </p>
           ) : null}
         </div>
@@ -487,12 +490,12 @@ function OpponentBoard({
         ) : null}
       </div>
       <p className="border-b border-foreground/15 px-4 py-2 text-xs text-muted-foreground sm:hidden">
-        横向滑动查看全部属性 →
+        {t`横向滑动查看全部属性 →`}
       </p>
       <div
         className="overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         role="region"
-        aria-label={`${title}，横向滚动查看更多属性`}
+        aria-label={t`${title}，横向滚动查看更多属性`}
         tabIndex={0}
       >
         <Table className="min-w-[44rem] table-fixed">
@@ -502,7 +505,7 @@ function OpponentBoard({
                 #
               </TableHead>
               <TableHead className="w-34 border-r border-foreground/15">
-                {visibility === "open" ? "对手猜测" : "猜测状态"}
+                {visibility === "open" ? t`对手猜测` : t`猜测状态`}
               </TableHead>
               {ATTRIBUTES.map(([label]) => (
                 <TableHead
@@ -553,12 +556,12 @@ function OpponentBoard({
                       ) : (
                         <div className="flex items-center gap-2 text-xs">
                           <EyeSlashIcon className="size-3.5 text-primary" />
-                          <span>已提交，内容隐藏</span>
+                          <span>{t`已提交，内容隐藏`}</span>
                         </div>
                       )
                     ) : (
                       <span className="text-xs text-muted-foreground/50">
-                        {forfeitedThisRound ? "本轮已判负" : "等待对手"}
+                        {forfeitedThisRound ? t`本轮已判负` : t`等待对手`}
                       </span>
                     )}
                   </TableCell>
@@ -586,7 +589,7 @@ function OpponentBoard({
                       : undefined;
                     const nearLabel = isHistoricalTeamRelation
                       ? teamDetails?.label
-                      : "国籍同洲接近";
+                      : t`国籍同洲接近`;
                     const NearIcon =
                       isHistoricalTeamRelation && teamDetails
                         ? teamDetails.icon
@@ -654,17 +657,17 @@ function OpponentBoard({
                               )}
                               title={
                                 cellMatched
-                                  ? `${attribute[0]}命中`
+                                  ? t`${attribute[0]}命中`
                                   : near
                                     ? nearLabel
-                                    : `${attribute[0]}未命中`
+                                    : t`${attribute[0]}未命中`
                               }
                               aria-label={
                                 cellMatched
-                                  ? `${attribute[0]}命中`
+                                  ? t`${attribute[0]}命中`
                                   : near
                                     ? nearLabel
-                                    : `${attribute[0]}未命中`
+                                    : t`${attribute[0]}未命中`
                               }
                             >
                               {cellMatched ? (
@@ -751,7 +754,7 @@ function MultiplayerGuessBoards({
       <div
         className="mb-3 grid grid-cols-3 border border-foreground/25"
         role="tablist"
-        aria-label="选择要查看的对手"
+        aria-label={t`选择要查看的对手`}
       >
         {opponents.map((opponent, index) => {
           const selected = index === activeIndex;
@@ -781,7 +784,7 @@ function MultiplayerGuessBoards({
               }}
             >
               <span className="block truncate text-xs font-semibold">
-                对手 {index + 1}
+                {t`对手`} {index + 1}
               </span>
               <span
                 className={cn(
@@ -799,7 +802,7 @@ function MultiplayerGuessBoards({
       </div>
       <div className="grid min-w-0 gap-4 min-[1400px]:grid-cols-2">
         <GuessBoard
-          title="我的猜测"
+          title={t`我的猜测`}
           guesses={guesses}
           maxGuesses={maxGuesses}
           mysteryPlayer={mysteryPlayer}
@@ -818,7 +821,7 @@ function MultiplayerGuessBoards({
             className="min-w-0"
           >
             <OpponentBoard
-              title="对手进度"
+              title={t`对手进度`}
               progress={opponent.progress}
               visibility={opponentVisibility}
               maxGuesses={maxGuesses}
@@ -854,7 +857,7 @@ export function GuessTable({
   if (mode === "daily" || mode === "solo") {
     return (
       <GuessBoard
-        title="我的猜测"
+        title={t`我的猜测`}
         guesses={guesses}
         maxGuesses={maxGuesses}
         mysteryPlayer={mysteryPlayer}
@@ -880,7 +883,7 @@ export function GuessTable({
           <div
             className="inline-flex w-fit border border-foreground/25"
             role="group"
-            aria-label="对手信息显示方式"
+            aria-label={t`对手信息显示方式`}
           >
             <Button
               type="button"
@@ -895,7 +898,7 @@ export function GuessTable({
               onClick={() => onOpponentVisibilityChange("hidden")}
             >
               <EyeSlashIcon />
-              隐藏猜测
+              {t`隐藏猜测`}
             </Button>
             <Button
               type="button"
@@ -910,7 +913,7 @@ export function GuessTable({
               onClick={() => onOpponentVisibilityChange("open")}
             >
               <EyeIcon />
-              明牌
+              {t`明牌`}
             </Button>
           </div>
         </div>
@@ -930,7 +933,7 @@ export function GuessTable({
       ) : (
         <div className="grid min-w-0 gap-4 min-[1400px]:grid-cols-2">
           <GuessBoard
-            title="我的猜测"
+            title={t`我的猜测`}
             guesses={guesses}
             maxGuesses={maxGuesses}
             mysteryPlayer={mysteryPlayer}
@@ -940,7 +943,7 @@ export function GuessTable({
             showCount={false}
           />
           <OpponentBoard
-            title="对手进度"
+            title={t`对手进度`}
             progress={normalizedProgress}
             visibility={opponentVisibility}
             maxGuesses={maxGuesses}

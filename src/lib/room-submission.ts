@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import type { SessionResponse } from "@/lib/realtime";
 import type {
   BestOf,
@@ -33,8 +34,8 @@ export class RoomSubmissionTimeoutError extends Error {
   constructor(kind: RoomSubmissionSnapshot["kind"]) {
     super(
       kind === "join"
-        ? "加入房间超时，请检查房间号后重试。"
-        : "创建房间超时，请重试。",
+        ? t`加入房间超时，请检查房间号后重试。`
+        : t`创建房间超时，请重试。`,
     );
     this.name = "RoomSubmissionTimeoutError";
     this.kind = kind;

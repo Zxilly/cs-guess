@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   ArrowLeftIcon,
   ClockIcon,
@@ -24,10 +25,10 @@ import {
 import type { GameMode, OpponentVisibility } from "@/types/game";
 
 const modeNames: Record<GameMode, string> = {
-  daily: "今日挑战",
-  solo: "单人练习",
-  quick: "实时 1v1",
-  room: "好友房间",
+  daily: t`今日挑战`,
+  solo: t`单人练习`,
+  quick: t`实时 1v1`,
+  room: t`好友房间`,
 };
 
 interface ModeSidebarProps {
@@ -56,7 +57,7 @@ export function ModeSidebar({
   roundNumber,
   modeLabel,
   backHref = "/",
-  backLabel = "模式大厅",
+  backLabel = t`模式大厅`,
   onExit,
   connectionLabel,
   connectionTone = "connected",
@@ -68,33 +69,33 @@ export function ModeSidebar({
   const isNumberedRound = mode === "daily" || mode === "solo";
   const finishedStatus = {
     waiting: {
-      label: "等待开局",
-      detail: "玩家就位后开始",
+      label: t`等待开局`,
+      detail: t`玩家就位后开始`,
       icon: HourglassMediumIcon,
     },
     won: {
       label:
         mode === "daily"
-          ? "挑战完成"
+          ? t`挑战完成`
           : mode === "solo"
-            ? "练习完成"
-            : "本局胜利",
-      detail: `已提交 ${guesses} 次猜测`,
+            ? t`练习完成`
+            : t`本局胜利`,
+      detail: t`已提交 ${guesses} 次猜测`,
       icon: TrophyIcon,
     },
     lost: {
       label:
         mode === "daily"
-          ? "挑战结束"
+          ? t`挑战结束`
           : mode === "solo"
-            ? "练习结束"
-            : "本局失利",
-      detail: `已提交 ${guesses} 次猜测`,
+            ? t`练习结束`
+            : t`本局失利`,
+      detail: t`已提交 ${guesses} 次猜测`,
       icon: XCircleIcon,
     },
     draw: {
-      label: "本局平局",
-      detail: `已提交 ${guesses} 次猜测`,
+      label: t`本局平局`,
+      detail: t`已提交 ${guesses} 次猜测`,
       icon: ScalesIcon,
     },
   }[status === "playing" ? "waiting" : status];
@@ -153,7 +154,7 @@ export function ModeSidebar({
         <div className="mt-4 flex flex-wrap items-end justify-between gap-x-4 gap-y-3 border-t-2 border-primary pt-4 lg:mt-8 lg:block lg:pt-5">
           <div className="min-w-0 flex-1 basis-32">
             <p className="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-              当前模式
+              {t`当前模式`}
             </p>
             <p className="mt-1 text-sm font-semibold lg:mt-2 lg:text-lg">
               {modeLabel ?? modeNames[mode]}
@@ -166,16 +167,16 @@ export function ModeSidebar({
                   <EyeSlashIcon className="size-3.5 shrink-0" />
                 )}
                 <span>
-                  {opponentVisibility === "open" ? "明牌模式" : "隐藏猜测"}
+                  {opponentVisibility === "open" ? t`明牌模式` : t`隐藏猜测`}
                 </span>
                 <InfoTip
-                  label="查看对手信息规则"
+                  label={t`查看对手信息规则`}
                   side="right"
                   className="size-6 hover:bg-transparent hover:text-primary"
                 >
                   {opponentVisibility === "open"
-                    ? "所有玩家都能看到彼此猜测的具体选手。"
-                    : "只公开对手命中的属性，不显示具体猜测选手。"}
+                    ? t`所有玩家都能看到彼此猜测的具体选手。`
+                    : t`只公开对手命中的属性，不显示具体猜测选手。`}
                 </InfoTip>
               </div>
             ) : null}
@@ -203,7 +204,7 @@ export function ModeSidebar({
             <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
               <div className="flex items-center gap-2 text-sm">
                 <ClockIcon className="size-4" />
-                <span>剩余时间</span>
+                <span>{t`剩余时间`}</span>
               </div>
               <Timer
                 seconds={secondsLeft}
@@ -213,7 +214,7 @@ export function ModeSidebar({
 
             {isNumberedRound ? (
               <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
-                <p className="text-sm">猜测进度</p>
+                <p className="text-sm">{t`猜测进度`}</p>
                 <p className="mt-2 font-mono text-3xl font-medium">
                   {guesses} / {maxGuesses}
                 </p>
@@ -222,7 +223,7 @@ export function ModeSidebar({
           </>
         ) : (
           <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
-            <p className="text-xs text-muted-foreground">对局状态</p>
+            <p className="text-xs text-muted-foreground">{t`对局状态`}</p>
             <div className="mt-3 flex items-start gap-3">
               <FinishedStatusIcon
                 className={`mt-0.5 size-5 shrink-0 ${finishedStatusTone}`}
@@ -242,7 +243,7 @@ export function ModeSidebar({
 
         {connectionLabel ? (
           <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
-            <p className="text-xs text-muted-foreground">连接状态</p>
+            <p className="text-xs text-muted-foreground">{t`连接状态`}</p>
             <p
               className={`mt-3 flex items-center gap-2 text-sm font-medium ${connectionToneClass}`}
               role={connectionTone === "offline" ? undefined : "status"}
@@ -267,7 +268,7 @@ export function ModeSidebar({
                 className="h-auto justify-start rounded-none px-0 text-xs text-muted-foreground hover:bg-transparent hover:text-primary"
               >
                 <InfoIcon />
-                查看竞猜规则
+                {t`查看竞猜规则`}
               </Button>
             </PopoverTrigger>
             <PopoverContent
@@ -275,9 +276,9 @@ export function ModeSidebar({
               className="w-64 rounded-none bg-foreground px-3 py-2 text-xs text-background shadow-none ring-0"
             >
               <ul className="space-y-1 leading-5">
-                <li>搜索职业选手并提交猜测。</li>
-                <li>蓝色代表完全一致，箭头表示数值方向。</li>
-                <li>在 {maxGuesses} 次机会与三分钟内锁定答案。</li>
+                <li>{t`搜索职业选手并提交猜测。`}</li>
+                <li>{t`蓝色代表完全一致，箭头表示数值方向。`}</li>
+                <li>{t`在`} {maxGuesses} {t`次机会与三分钟内锁定答案。`}</li>
               </ul>
             </PopoverContent>
           </Popover>

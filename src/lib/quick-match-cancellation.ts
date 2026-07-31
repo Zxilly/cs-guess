@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   clearClosingIntentIfMatches,
   isTerminalSessionError,
@@ -7,7 +8,7 @@ import {
 
 export class QuickMatchCancellationTimeoutError extends Error {
   constructor() {
-    super("取消请求超时，请重试。");
+    super(t`取消请求超时，请重试。`);
     this.name = "QuickMatchCancellationTimeoutError";
   }
 }

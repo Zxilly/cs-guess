@@ -53,8 +53,8 @@ describe("team relation", () => {
   it("does not treat two unattached histories as near", () => {
     expect(
       compareTeams(
-        player("Falcons", ["无队伍"]),
-        player("MOUZ", ["无队伍"]),
+        player("Falcons", ["无队伍", "No Team"]),
+        player("MOUZ", ["No Team", "无队伍"]),
       ),
     ).toBe("miss");
   });

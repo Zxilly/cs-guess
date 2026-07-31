@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { UserCircleIcon, WifiHighIcon } from "@phosphor-icons/react";
 
 import type { GameMode } from "@/types/game";
@@ -43,7 +44,7 @@ interface BattleParticipant {
 
 function AttemptDots({ used, total }: { used: number; total: number }) {
   return (
-    <div className="flex gap-1" aria-label={`已使用 ${used} 次机会`}>
+    <div className="flex gap-1" aria-label={t`已使用 ${used} 次机会`}>
       {Array.from({ length: total }, (_, index) => (
         <span
           key={index}
@@ -104,7 +105,7 @@ function PlayerSide({
           <p className="truncate text-sm font-semibold">{name}</p>
           {isHost ? (
             <span className="shrink-0 font-mono text-[9px] font-semibold text-primary">
-              房主
+              {t`房主`}
             </span>
           ) : null}
         </div>
@@ -114,20 +115,20 @@ function PlayerSide({
           } ${connected ? "text-primary" : "text-destructive"}`}
         >
           <WifiHighIcon className="size-3" />
-          {presenceLabel ?? (connected ? "在线" : "离线")}
+          {presenceLabel ?? (connected ? t`在线` : t`离线`)}
         </p>
         {disconnectSeconds !== null && disconnectSeconds !== undefined ? (
           <>
             <p className="mt-1 font-mono text-xs text-destructive" aria-live="off">
-              重连 00:{String(disconnectSeconds).padStart(2, "0")} · 超时判负
+              {t`重连 00:`}{String(disconnectSeconds).padStart(2, "0")} {t`· 超时判负`}
             </p>
             <span className="sr-only" role="status" aria-live="polite">
-              {slotLabel ?? side}连接中断，重连宽限期已开始。
+              {slotLabel ?? side}{t`连接中断，重连宽限期已开始。`}
             </span>
           </>
         ) : null}
         <p className="mt-1 font-mono text-xs text-muted-foreground sm:hidden">
-          {guesses} / {maxGuesses} 次
+          {guesses} / {maxGuesses} {t`次`}
         </p>
       </div>
       <div className={`ml-auto hidden sm:block ${side === "对手" ? "order-first ml-0 mr-auto" : ""}`}>
@@ -155,8 +156,8 @@ export function BattleContext({
   isRoomHost = false,
   onlinePlayers = 1,
   maxPlayers = 4,
-  selfName = "你",
-  opponentName = "等待对手",
+  selfName = t`你`,
+  opponentName = t`等待对手`,
   selfPlayerId,
   opponentPlayerId,
   hostPlayerId,
@@ -187,7 +188,7 @@ export function BattleContext({
               id="group-battle-heading"
               className="mt-1 text-sm font-semibold"
             >
-              四人同题竞速
+              {t`四人同题竞速`}
             </h2>
           </div>
           {roomCode ? (
@@ -199,7 +200,7 @@ export function BattleContext({
         <div
           className="grid sm:grid-cols-2 xl:grid-cols-4"
           role="list"
-          aria-label="对战席位"
+          aria-label={t`对战席位`}
         >
           {participants.map((participant, index) => {
             const headingId = `battle-participant-${index}`;
@@ -217,7 +218,7 @@ export function BattleContext({
                   <div className="min-w-0">
                     <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
                       {participant.slotLabel ??
-                        (participant.self ? "你" : "对手")}
+                        (participant.self ? t`你` : t`对手`)}
                     </p>
                     <h3
                       id={headingId}
@@ -227,7 +228,7 @@ export function BattleContext({
                     </h3>
                     {participant.playerId === hostPlayerId ? (
                       <p className="mt-1 font-mono text-[9px] font-semibold text-primary">
-                        房主
+                        {t`房主`}
                       </p>
                     ) : null}
                     <p className="mt-1 text-xs text-muted-foreground">
@@ -252,7 +253,7 @@ export function BattleContext({
                   >
                     <WifiHighIcon className="size-3" />
                     {participant.presenceLabel ??
-                      (participant.connected ? "在线" : "离线")}
+                      (participant.connected ? t`在线` : t`离线`)}
                   </span>
                 </div>
                 {participant.disconnectSeconds !== null &&
@@ -262,13 +263,13 @@ export function BattleContext({
                       className="mt-2 font-mono text-xs text-destructive"
                       aria-live="off"
                     >
-                      重连 00:
-                      {String(participant.disconnectSeconds).padStart(2, "0")} ·
-                      超时判负
+                      {t`重连 00:`}
+                      {String(participant.disconnectSeconds).padStart(2, "0")} {t`·
+                      超时判负`}
                     </p>
                     <span className="sr-only" role="status" aria-live="polite">
-                      {participant.slotLabel ?? "对手"}
-                      连接中断，重连宽限期已开始。
+                      {participant.slotLabel ?? t`对手`}
+                      {t`连接中断，重连宽限期已开始。`}
                     </span>
                   </>
                 ) : null}
@@ -278,7 +279,7 @@ export function BattleContext({
         </div>
         <div className="flex items-center justify-between border-t border-foreground/15 px-4 py-2 text-xs text-muted-foreground">
           <span>
-            {onlinePlayers} / {maxPlayers} 位玩家在线
+            {onlinePlayers} / {maxPlayers} {t`位玩家在线`}
           </span>
           <span className="font-mono text-primary">
             {mode === "room"
@@ -302,7 +303,7 @@ export function BattleContext({
           guesses={guesses}
           maxGuesses={maxGuesses}
           presenceLabel={selfPresenceLabel}
-          slotLabel="你"
+          slotLabel={t`你`}
           playerId={selfPlayerId}
           isHost={selfPlayerId === hostPlayerId}
         />
@@ -329,7 +330,7 @@ export function BattleContext({
           maxGuesses={maxGuesses}
           presenceLabel={opponentPresenceLabel}
           disconnectSeconds={opponentDisconnectSeconds}
-          slotLabel="对手 1"
+          slotLabel={t`对手 1`}
           playerId={opponentPlayerId}
           isHost={opponentPlayerId === hostPlayerId}
         />
@@ -337,10 +338,10 @@ export function BattleContext({
       {mode === "room" ? (
         <div className="flex items-center justify-between border-t border-foreground/15 px-4 py-2 text-xs text-muted-foreground">
           <span>
-            {onlinePlayers} / {maxPlayers} 位玩家在线
+            {onlinePlayers} / {maxPlayers} {t`位玩家在线`}
           </span>
           <span className="font-mono text-primary">
-            {isRoomHost ? "HOST · 同题竞速" : "FRIEND ROOM"}
+            {isRoomHost ? t`HOST · 同题竞速` : "FRIEND ROOM"}
           </span>
         </div>
       ) : null}

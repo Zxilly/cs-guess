@@ -1,9 +1,6 @@
 import type { Player } from "@/data/players";
 import type { AnonymousProfile } from "@/hooks/use-anonymous-profile";
-import {
-  displayTeamName,
-  UNATTACHED_TEAM_LABEL,
-} from "@/lib/player-display";
+import { displayTeamName, isUnattachedTeam } from "@/lib/player-display";
 import type { ServerProfile } from "@/lib/profile-api";
 import type { SoloDifficulty } from "@/lib/solo-game";
 
@@ -31,9 +28,10 @@ function profileHeaders(profile: ProfileCredentials, json = false) {
 }
 
 function normalizeRound(round: ServerSoloRound): ServerSoloRound {
-  const team = displayTeamName(round.mysteryPlayer.team);
+  const rawTeam = round.mysteryPlayer.team;
+  const team = displayTeamName(rawTeam);
   const mysteryPlayer = { ...round.mysteryPlayer, team };
-  if (team === UNATTACHED_TEAM_LABEL) delete mysteryPlayer.teamLogoUrl;
+  if (isUnattachedTeam(rawTeam)) delete mysteryPlayer.teamLogoUrl;
   return { ...round, mysteryPlayer };
 }
 

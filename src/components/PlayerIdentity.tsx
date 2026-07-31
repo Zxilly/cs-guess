@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   ChartLineUpIcon,
   DiceFiveIcon,
@@ -17,6 +18,7 @@ import {
   type IdentityPoolId,
 } from "@/hooks/use-anonymous-profile";
 import { countryNameZh } from "@/lib/country-geography";
+import { displayTeamName } from "@/lib/player-display";
 
 interface PlayerIdentityProps {
   player: Player;
@@ -46,7 +48,7 @@ export function PlayerIdentity({
   );
 
   return (
-    <section className="border border-foreground/25" aria-label="我的身份">
+    <section className="border border-foreground/25" aria-label={t`我的身份`}>
       <div
         className={
           compact
@@ -62,7 +64,7 @@ export function PlayerIdentity({
           />
           <div className="min-w-0">
             <p className="truncate font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-              我的身份 · {
+              {t`我的身份 ·`} {
                 IDENTITY_POOLS.find((pool) => pool.id === currentPool)?.label
               }
             </p>
@@ -70,11 +72,11 @@ export function PlayerIdentity({
               {player.nickname}
             </p>
             <p className="mt-0.5 truncate text-xs text-muted-foreground">
-              {countryNameZh(player.countryCode)} · {player.team}
+              {countryNameZh(player.countryCode)} · {displayTeamName(player.team)}
             </p>
             {compact ? (
               <p className="mt-1 truncate font-mono text-xs text-muted-foreground">
-                {drawCredits} 次抽取 · 胜 1 局或累计负 2 局 +1
+                {t`${drawCredits} 次抽取 · 胜 1 局或累计负 2 局 +1`}
               </p>
             ) : null}
           </div>
@@ -92,8 +94,8 @@ export function PlayerIdentity({
             disabled
           >
             <DiceFiveIcon />
-            <span className={compact ? "hidden sm:inline" : ""}>管理身份</span>
-            {compact ? <span className="sm:hidden">身份</span> : null}
+            <span className={compact ? "hidden sm:inline" : ""}>{t`管理身份`}</span>
+            {compact ? <span className="sm:hidden">{t`身份`}</span> : null}
           </Button>
         ) : (
           <Button
@@ -107,8 +109,8 @@ export function PlayerIdentity({
           >
             <Link to={manageHref}>
               <DiceFiveIcon />
-              <span className={compact ? "hidden sm:inline" : ""}>管理身份</span>
-              {compact ? <span className="sm:hidden">身份</span> : null}
+              <span className={compact ? "hidden sm:inline" : ""}>{t`管理身份`}</span>
+              {compact ? <span className="sm:hidden">{t`身份`}</span> : null}
             </Link>
           </Button>
         )}
@@ -120,7 +122,7 @@ export function PlayerIdentity({
             <div className="px-4 py-3">
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <TrophyIcon />
-                胜负
+                {t`胜负`}
               </p>
               <p className="mt-1 font-mono text-sm font-semibold">
                 {stats.wins}W · {stats.losses}L
@@ -129,7 +131,7 @@ export function PlayerIdentity({
             <div className="border-x border-foreground/20 px-4 py-3">
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <ChartLineUpIcon />
-                胜率
+                {t`胜率`}
               </p>
               <p className="mt-1 font-mono text-sm font-semibold">
                 {winRate}%
@@ -138,7 +140,7 @@ export function PlayerIdentity({
             <div className="px-4 py-3">
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <FireIcon />
-                连胜
+                {t`连胜`}
               </p>
               <p className="mt-1 font-mono text-sm font-semibold">
                 {stats.currentStreak}
@@ -152,26 +154,26 @@ export function PlayerIdentity({
                 variant={drawCredits > 0 ? "default" : "outline"}
                 className="rounded-none font-mono"
               >
-                {drawCredits} 次抽取
+                {t`${drawCredits} 次抽取`}
               </Badge>
               <span className="font-mono text-xs text-muted-foreground">
-                胜 1 局或累计负 2 局 +1
+                {t`胜 1 局或累计负 2 局 +1`}
               </span>
             </div>
             <InfoTip
-              label="查看身份与抽取规则"
+              label={t`查看身份与抽取规则`}
               side="left"
               className="size-10"
             >
-              <p>胜利一局获得 1 次抽取；每累计输掉两局获得 1 次。</p>
+              <p>{t`胜利一局获得 1 次抽取；每累计输掉两局获得 1 次。`}</p>
               {drawCredits < 1 ? (
                 <p className="mt-1">
-                  当前再输 {2 - lossesTowardCredit} 局即可获得下一次机会。
+                  {t`当前再输`} {2 - lossesTowardCredit} {t`局即可获得下一次机会。`}
                 </p>
               ) : null}
               {nextLockedPool ? (
                 <p className="mt-1">
-                  累计 {nextLockedPool.unlockWins} 胜解锁
+                  {t`累计`} {nextLockedPool.unlockWins} {t`胜解锁`}
                   {nextLockedPool.label}。
                 </p>
               ) : null}

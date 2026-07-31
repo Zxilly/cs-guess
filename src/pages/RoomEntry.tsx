@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   useEffect,
   useLayoutEffect,
@@ -95,7 +96,7 @@ export function RoomEntry() {
   const [joinError, setJoinError] = useState("");
   const [createError, setCreateError] = useState(
     audit === "room-error"
-      ? "创建房间失败，请检查网络后重试。"
+      ? t`创建房间失败，请检查网络后重试。`
       : "",
   );
   const [submittedSettings, setSubmittedSettings] =
@@ -226,7 +227,7 @@ export function RoomEntry() {
     event.preventDefault();
 
     if (!ROOM_NUMBER_PATTERN.test(roomNumber)) {
-      setJoinError("请输入 6 位房间号");
+      setJoinError(t`请输入 6 位房间号`);
       roomInputRef.current?.focus({ preventScroll: true });
       return;
     }
@@ -275,28 +276,28 @@ export function RoomEntry() {
 
   const difficultyLabel =
     SOLO_DIFFICULTIES.find((option) => option.id === difficulty)?.label ??
-    "简单";
+    t`简单`;
   const pendingSummary =
     pending && submittedSettings
       ? submittedSettings.kind === "join"
-        ? `正在以 ${submittedSettings.identityNickname} 加入 CS-${submittedSettings.roomNumber}`
-        : `正在以 ${submittedSettings.identityNickname} 创建 ${submittedSettings.maxPlayers} 人 · ${
+        ? t`正在以 ${submittedSettings.identityNickname} 加入 CS-${submittedSettings.roomNumber}`
+        : t`正在以 ${submittedSettings.identityNickname} 创建 ${submittedSettings.maxPlayers} 人 · ${
             SOLO_DIFFICULTIES.find(
               (option) => option.id === submittedSettings.difficulty,
-            )?.label ?? "简单"
+            )?.label ?? t`简单`
           } · BO${submittedSettings.bestOf} · ${
             submittedSettings.visibility === "hidden"
-              ? "隐藏猜测"
-              : "明牌模式"
+              ? t`隐藏猜测`
+              : t`明牌模式`
           }`
       : "";
 
   return (
     <div className="min-h-svh bg-background text-foreground">
-      <AppHeader subtitle="好友房间" backToLobby />
+      <AppHeader subtitle={t`好友房间`} backToLobby />
 
       <main className="app-main">
-        <PageIntro eyebrow="Friend Room" title="加入或创建好友房间" />
+        <PageIntro eyebrow="Friend Room" title={t`加入或创建好友房间`} />
 
         <div
           className="app-section-stack app-section-offset"
@@ -329,9 +330,9 @@ export function RoomEntry() {
                   className="size-7 shrink-0 text-primary"
                   weight="light"
                 />
-                <h2 className="text-xl font-semibold">加入房间</h2>
-                <InfoTip label="加入房间说明" side="right" className="size-10">
-                  输入好友分享的 6 位房间号。凭证只保存在当前标签页。
+                <h2 className="text-xl font-semibold">{t`加入房间`}</h2>
+                <InfoTip label={t`加入房间说明`} side="right" className="size-10">
+                  {t`输入好友分享的 6 位房间号。凭证只保存在当前标签页。`}
                 </InfoTip>
               </div>
 
@@ -340,7 +341,7 @@ export function RoomEntry() {
                   htmlFor="room-code"
                   className="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground"
                 >
-                  房间号
+                  {t`房间号`}
                 </label>
                 <div className="mt-2 flex">
                   <span className="flex h-12 items-center border border-r-0 border-foreground/30 bg-muted/50 px-3 font-mono text-sm text-muted-foreground">
@@ -352,7 +353,7 @@ export function RoomEntry() {
                     name="roomCode"
                     value={roomNumber}
                     onChange={(event) => handleRoomCodeChange(event.target.value)}
-                    placeholder="输入 6 位房间号"
+                    placeholder={t`输入 6 位房间号`}
                     inputMode="numeric"
                     maxLength={6}
                     autoComplete="off"
@@ -370,7 +371,7 @@ export function RoomEntry() {
                     ) : (
                       <DoorOpenIcon />
                     )}
-                    <span>{pending === "join" ? "加入中…" : "加入"}</span>
+                    <span>{pending === "join" ? t`加入中…` : t`加入`}</span>
                     {pending === "join" ? null : (
                       <ArrowRightIcon className="hidden sm:block" />
                     )}
@@ -393,21 +394,21 @@ export function RoomEntry() {
                   className="size-7 shrink-0 text-primary"
                   weight="light"
                 />
-                <h2 className="text-xl font-semibold">创建新房间</h2>
-                <InfoTip label="创建房间说明" side="right" className="size-10">
-                  创建后会生成房间号，人数、题库和赛制在本房间内固定。
+                <h2 className="text-xl font-semibold">{t`创建新房间`}</h2>
+                <InfoTip label={t`创建房间说明`} side="right" className="size-10">
+                  {t`创建后会生成房间号，人数、题库和赛制在本房间内固定。`}
                 </InfoTip>
               </div>
 
               <div className="grid gap-5 sm:gap-6 lg:grid-cols-12 lg:items-start">
                 <div className="lg:col-span-3">
                   <p className="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                    对手猜测
+                    {t`对手猜测`}
                   </p>
                   <div
                     className="mt-2 flex border border-foreground/25"
                     role="group"
-                    aria-label="对手猜测显示方式"
+                    aria-label={t`对手猜测显示方式`}
                   >
                     {(["hidden", "open"] as const).map((option) => (
                       <Button
@@ -419,7 +420,7 @@ export function RoomEntry() {
                         className="h-11 min-w-0 flex-1 rounded-none border-r border-foreground/20 px-2 last:border-r-0"
                         onClick={() => setVisibility(option)}
                       >
-                        {option === "hidden" ? "隐藏猜测" : "明牌模式"}
+                        {option === "hidden" ? t`隐藏猜测` : t`明牌模式`}
                       </Button>
                     ))}
                   </div>
@@ -427,12 +428,12 @@ export function RoomEntry() {
 
                 <div className="lg:col-span-3">
                   <p className="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                    房间人数
+                    {t`房间人数`}
                   </p>
                   <div
                     className="mt-2 grid min-h-11 grid-cols-2 border border-foreground/25"
                     role="group"
-                    aria-label="房间人数"
+                    aria-label={t`房间人数`}
                   >
                     {([2, 4] as const).map((size) => (
                       <Button
@@ -444,14 +445,14 @@ export function RoomEntry() {
                         className="h-11 min-w-0 rounded-none border-r border-foreground/20 font-mono text-xs last:border-r-0"
                         onClick={() => setMaxPlayers(size)}
                       >
-                        {size} 人
+                        {size} {t`人`}
                       </Button>
                     ))}
                   </div>
                 </div>
                 <div className="lg:col-span-6">
                   <p className="mb-3 font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                    题库难度
+                    {t`题库难度`}
                   </p>
                   <DifficultySelector
                     value={difficulty}
@@ -462,7 +463,7 @@ export function RoomEntry() {
 
                 <div className="lg:col-span-6">
                   <p className="mb-3 font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                    房间赛制
+                    {t`房间赛制`}
                   </p>
                   <SeriesSelector
                     value={bestOf}
@@ -474,7 +475,7 @@ export function RoomEntry() {
 
                 <div className="lg:col-span-6">
                   <p className="mb-3 font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                    创建并进入等待
+                    {t`创建并进入等待`}
                   </p>
                   <Button
                     ref={createButtonRef}
@@ -488,8 +489,8 @@ export function RoomEntry() {
                       <PlusIcon className="shrink-0" />
                       <span className="truncate">
                         {pending === "create"
-                          ? "创建中…"
-                          : `创建房间 · ${maxPlayers} 人 · ${difficultyLabel} · BO${bestOf}`}
+                          ? t`创建中…`
+                          : t`创建房间 · ${maxPlayers} 人 · ${difficultyLabel} · BO${bestOf}`}
                       </span>
                     </span>
                     {pending === "create" ? (
@@ -512,17 +513,17 @@ export function RoomEntry() {
         open={pending !== null}
         kind="progress"
         eyebrow="FRIEND ROOM"
-        title={pending === "join" ? "正在加入房间" : "正在创建房间"}
+        title={pending === "join" ? t`正在加入房间` : t`正在创建房间`}
         description={
           pendingSummary ??
-          "正在向服务器确认房间设置，完成后会自动进入等待页面。"
+          t`正在向服务器确认房间设置，完成后会自动进入等待页面。`
         }
       />
       <OperationStatusDialog
         open={Boolean(joinError)}
         kind="error"
         eyebrow="FRIEND ROOM"
-        title="未能加入房间"
+        title={t`未能加入房间`}
         description={joinError}
         returnFocusRef={roomInputRef}
         onOpenChange={(open) => {
@@ -534,14 +535,14 @@ export function RoomEntry() {
           className="w-full rounded-none sm:w-auto"
           onClick={dismissJoinError}
         >
-          检查房间号
+          {t`检查房间号`}
         </Button>
       </OperationStatusDialog>
       <OperationStatusDialog
         open={Boolean(createError)}
         kind="error"
         eyebrow="FRIEND ROOM"
-        title="未能创建房间"
+        title={t`未能创建房间`}
         description={createError}
         returnFocusRef={createButtonRef}
         onOpenChange={(open) => {
@@ -553,7 +554,7 @@ export function RoomEntry() {
           className="w-full rounded-none sm:w-auto"
           onClick={dismissCreateError}
         >
-          返回设置
+          {t`返回设置`}
         </Button>
       </OperationStatusDialog>
     </div>

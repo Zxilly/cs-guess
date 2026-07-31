@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   ArrowRightIcon,
   SwordIcon,
@@ -41,10 +42,10 @@ export function RematchInviteCard({
       </div>
       <div className="px-4 py-4">
         <h2 id="rematch-invite-title" className="text-lg font-bold">
-          {requesterName} 请求再次对战
+          {requesterName} {t`请求再次对战`}
         </h2>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          接受后将保留当前规则，并在原房间开启全新的系列赛。
+          {t`接受后将保留当前规则，并在原房间开启全新的系列赛。`}
         </p>
       </div>
       <div className="grid grid-cols-2 border-t border-foreground/20">
@@ -60,7 +61,7 @@ export function RematchInviteCard({
           ) : (
             <XIcon />
           )}
-          拒绝
+          {t`拒绝`}
         </Button>
         <Button
           type="button"
@@ -73,7 +74,7 @@ export function RematchInviteCard({
           ) : (
             <ArrowRightIcon />
           )}
-          接受重赛
+          {t`接受重赛`}
         </Button>
       </div>
     </aside>

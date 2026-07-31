@@ -3,6 +3,7 @@ import type {
   GameDifficulty,
   OpponentVisibility,
 } from "@/types/game";
+import { t } from "@lingui/core/macro";
 import { clearLiveGuessDraftsForRoom } from "@/lib/live-guess-draft";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
@@ -10,18 +11,18 @@ const SESSION_KEY = "cs-guess:realtime-session";
 const CLOSING_INTENT_KEY = "cs-guess:realtime-closing-intent";
 export const CLOSING_INTENT_TTL_MS = 15 * 60 * 1_000;
 const API_ERROR_MESSAGES: Record<string, string> = {
-  bad_request: "提交的信息无效，请检查房间号和对局设置。",
-  room_not_found: "房间不存在，请检查房间号。",
-  room_full: "房间已满或对局已经开始。",
-  profile_not_found: "当前身份已失效，请重新选择身份。",
-  idempotency_conflict: "请求状态发生冲突，请重新提交。",
-  capacity_reached: "当前房间数量已达上限，请稍后重试。",
-  rate_limited: "操作太频繁，请稍后再试。",
-  unauthorized: "会话已失效，请重新加入房间。",
-  unavailable: "对战服务暂时不可用，请稍后重试。",
-  internal_error: "对战服务发生错误，请稍后重试。",
-  network_error: "无法连接对战服务器，请检查网络后重试。",
-  invalid_response: "服务器返回了无法识别的会话数据，请刷新后重试。",
+  bad_request: t`提交的信息无效，请检查房间号和对局设置。`,
+  room_not_found: t`房间不存在，请检查房间号。`,
+  room_full: t`房间已满或对局已经开始。`,
+  profile_not_found: t`当前身份已失效，请重新选择身份。`,
+  idempotency_conflict: t`请求状态发生冲突，请重新提交。`,
+  capacity_reached: t`当前房间数量已达上限，请稍后重试。`,
+  rate_limited: t`操作太频繁，请稍后再试。`,
+  unauthorized: t`会话已失效，请重新加入房间。`,
+  unavailable: t`对战服务暂时不可用，请稍后重试。`,
+  internal_error: t`对战服务发生错误，请稍后重试。`,
+  network_error: t`无法连接对战服务器，请检查网络后重试。`,
+  invalid_response: t`服务器返回了无法识别的会话数据，请刷新后重试。`,
 };
 
 type RoomSessionAction = "join" | "create";
@@ -31,52 +32,52 @@ const ROOM_SESSION_ERROR_MESSAGES: Record<
   Record<RoomSessionAction, string>
 > = {
   bad_request: {
-    join: "房间号或身份信息无效，请检查后重试。",
-    create: "房间设置无效，请调整人数、难度或赛制后重试。",
+    join: t`房间号或身份信息无效，请检查后重试。`,
+    create: t`房间设置无效，请调整人数、难度或赛制后重试。`,
   },
   room_not_found: {
-    join: "没有找到这个房间，请检查 6 位房间号后重试。",
-    create: "房间已失效，请重新创建。",
+    join: t`没有找到这个房间，请检查 6 位房间号后重试。`,
+    create: t`房间已失效，请重新创建。`,
   },
   room_full: {
-    join: "房间已满或对局已经开始，请向房主确认后重试。",
-    create: "房间状态已变化，请重新创建。",
+    join: t`房间已满或对局已经开始，请向房主确认后重试。`,
+    create: t`房间状态已变化，请重新创建。`,
   },
   profile_not_found: {
-    join: "当前身份已失效，请先到身份页重新选择身份。",
-    create: "当前身份已失效，请先到身份页重新选择身份。",
+    join: t`当前身份已失效，请先到身份页重新选择身份。`,
+    create: t`当前身份已失效，请先到身份页重新选择身份。`,
   },
   idempotency_conflict: {
-    join: "加入请求与上次操作冲突，请确认房间号后重试。",
-    create: "创建请求与上次设置冲突，请稍候后重新创建。",
+    join: t`加入请求与上次操作冲突，请确认房间号后重试。`,
+    create: t`创建请求与上次设置冲突，请稍候后重新创建。`,
   },
   capacity_reached: {
-    join: "房间服务当前繁忙，请稍后重新加入。",
-    create: "当前房间数量已达上限，请稍后重新创建。",
+    join: t`房间服务当前繁忙，请稍后重新加入。`,
+    create: t`当前房间数量已达上限，请稍后重新创建。`,
   },
   rate_limited: {
-    join: "加入操作过于频繁，请稍候后重试。",
-    create: "创建操作过于频繁，请稍候后重试。",
+    join: t`加入操作过于频繁，请稍候后重试。`,
+    create: t`创建操作过于频繁，请稍候后重试。`,
   },
   unauthorized: {
-    join: "当前会话已失效，请刷新页面后重新加入。",
-    create: "当前会话已失效，请刷新页面后重新创建。",
+    join: t`当前会话已失效，请刷新页面后重新加入。`,
+    create: t`当前会话已失效，请刷新页面后重新创建。`,
   },
   unavailable: {
-    join: "对战服务暂时不可用，请稍后重新加入。",
-    create: "对战服务暂时不可用，请稍后重新创建。",
+    join: t`对战服务暂时不可用，请稍后重新加入。`,
+    create: t`对战服务暂时不可用，请稍后重新创建。`,
   },
   internal_error: {
-    join: "对战服务暂时无法加入房间，请稍后重试。",
-    create: "对战服务暂时无法创建房间，请稍后重试。",
+    join: t`对战服务暂时无法加入房间，请稍后重试。`,
+    create: t`对战服务暂时无法创建房间，请稍后重试。`,
   },
   network_error: {
-    join: "无法连接对战服务器，请检查网络后重新加入。",
-    create: "无法连接对战服务器，请检查网络后重新创建。",
+    join: t`无法连接对战服务器，请检查网络后重新加入。`,
+    create: t`无法连接对战服务器，请检查网络后重新创建。`,
   },
   invalid_response: {
-    join: "服务器返回了异常数据，请刷新页面后重新加入。",
-    create: "服务器返回了异常数据，请刷新页面后重新创建。",
+    join: t`服务器返回了异常数据，请刷新页面后重新加入。`,
+    create: t`服务器返回了异常数据，请刷新页面后重新创建。`,
   },
 };
 
@@ -430,8 +431,8 @@ export function roomSessionErrorMessage(
 ) {
   const fallback =
     action === "join"
-      ? "加入房间失败，请检查房间号后重试。"
-      : "创建房间失败，请检查房间设置后重试。";
+      ? t`加入房间失败，请检查房间号后重试。`
+      : t`创建房间失败，请检查房间设置后重试。`;
   if (!(error instanceof ApiError)) return fallback;
 
   const mapped = error.code
@@ -505,10 +506,10 @@ async function postSession(
       (response.status === 404
         ? API_ERROR_MESSAGES.room_not_found
         : response.status === 409
-          ? "房间已满或当前状态无法加入。"
+          ? t`房间已满或当前状态无法加入。`
           : response.status === 503
             ? API_ERROR_MESSAGES.unavailable
-            : "对战服务器暂时无法完成请求，请稍后重试。");
+            : t`对战服务器暂时无法完成请求，请稍后重试。`);
     throw new ApiError(message, response.status, errorCode);
   }
 
@@ -594,7 +595,7 @@ export async function leaveRoom(
       result.status !== 404
     ) {
       throw new ApiError(
-        "退出房间失败，请检查网络后重试。",
+        t`退出房间失败，请检查网络后重试。`,
         result.status,
       );
     }
@@ -639,7 +640,7 @@ export async function cancelQuickMatch(
     if (error instanceof DOMException && error.name === "AbortError") {
       throw error;
     }
-    throw new ApiError("取消匹配失败，请检查网络后重试。");
+    throw new ApiError(t`取消匹配失败，请检查网络后重试。`);
   }
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as
@@ -651,10 +652,10 @@ export async function cancelQuickMatch(
       (typeof payload?.message === "string"
         ? payload.message
         : response.status === 401 || response.status === 403
-          ? "匹配会话已经失效。"
+          ? t`匹配会话已经失效。`
           : response.status === 404
-            ? "匹配票据已经失效或取消。"
-            : "取消匹配失败，请稍后重试。");
+            ? t`匹配票据已经失效或取消。`
+            : t`取消匹配失败，请稍后重试。`);
     throw new ApiError(message, response.status, code);
   }
 }
@@ -682,7 +683,7 @@ export async function cancelQuickMatchByRequestId(clientRequestId: string) {
       },
     );
     if (!response.ok && response.status !== 404) {
-      throw new ApiError("后台清理未完成，服务器将自动回收匹配票据。", response.status);
+      throw new ApiError(t`后台清理未完成，服务器将自动回收匹配票据。`, response.status);
     }
   } finally {
     window.clearTimeout(timeout);

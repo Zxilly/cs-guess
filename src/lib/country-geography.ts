@@ -1,4 +1,6 @@
+import { t } from "@lingui/core/macro";
 import countries from "@/data/countries.generated.json";
+import { getActiveLocale } from "@/i18n";
 import type { CountryHint } from "@/types/game";
 
 interface CountryMetadata {
@@ -13,21 +15,6 @@ const POLITICAL_CODE_OVERRIDES: Readonly<Record<string, string>> = {
   MO: "CN",
   TW: "CN",
   XK: "RS",
-};
-
-const POLITICAL_NAME_OVERRIDES: Readonly<Record<string, string>> = {
-  CN: "中国",
-  PS: "巴勒斯坦国",
-  RS: "塞尔维亚",
-};
-
-const CONTINENT_NAMES: Readonly<Record<string, string>> = {
-  Africa: "非洲",
-  Americas: "美洲",
-  Antarctic: "南极洲",
-  Asia: "亚洲",
-  Europe: "欧洲",
-  Oceania: "大洋洲",
 };
 
 const CHINESE_REGION_NAMES = new Intl.DisplayNames(["zh-CN"], {
@@ -49,9 +36,12 @@ export function normalizeCountryCode(countryCode: string): string {
 
 export function countryNameZh(countryCode: string): string {
   const normalized = normalizeCountryCode(countryCode);
+  const politicalName = politicalCountryName(normalized);
+  const displayNames =
+    getActiveLocale() === "en" ? ENGLISH_REGION_NAMES : CHINESE_REGION_NAMES;
   return (
-    POLITICAL_NAME_OVERRIDES[normalized] ??
-    CHINESE_REGION_NAMES.of(normalized) ??
+    politicalName ??
+    displayNames.of(normalized) ??
     COUNTRY_BY_CODE.get(normalized)?.nameZh ??
     normalized
   );
@@ -65,7 +55,7 @@ export function countryNameEn(countryCode: string): string {
 export function countryContinentZh(countryCode: string): string | null {
   const normalized = normalizeCountryCode(countryCode);
   const continent = COUNTRY_BY_CODE.get(normalized)?.continent;
-  return continent ? (CONTINENT_NAMES[continent] ?? continent) : null;
+  return continent ? continentName(continent) : null;
 }
 
 export function compareCountries(
@@ -91,8 +81,40 @@ export function compareCountries(
 
 export function formatCountryDistance(distanceKm: number | null): string {
   return distanceKm === null
-    ? "距离未知"
-    : `${distanceKm.toLocaleString("zh-CN")} km`;
+    ? t`距离未知`
+    : `${distanceKm.toLocaleString(getActiveLocale())} km`;
+}
+
+function politicalCountryName(countryCode: string): string | null {
+  switch (countryCode) {
+    case "CN":
+      return t`中国`;
+    case "PS":
+      return t`巴勒斯坦国`;
+    case "RS":
+      return t`塞尔维亚`;
+    default:
+      return null;
+  }
+}
+
+function continentName(continent: string): string {
+  switch (continent) {
+    case "Africa":
+      return t`非洲`;
+    case "Americas":
+      return t`美洲`;
+    case "Antarctic":
+      return t`南极洲`;
+    case "Asia":
+      return t`亚洲`;
+    case "Europe":
+      return t`欧洲`;
+    case "Oceania":
+      return t`大洋洲`;
+    default:
+      return continent;
+  }
 }
 
 function capitalDistanceKm(

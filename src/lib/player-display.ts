@@ -1,14 +1,29 @@
-export const UNATTACHED_TEAM_LABEL = "无队伍";
+import { t } from "@lingui/core/macro";
 
-const INVALID_TEAM_NAMES = new Set(["", "undefined", "null", "none", "n/a"]);
+const UNATTACHED_TEAM_VALUES = new Set([
+  "",
+  "无队伍",
+  "no team",
+  "undefined",
+  "null",
+  "none",
+  "n/a",
+]);
 
-export function displayTeamName(value: unknown): string {
-  if (typeof value !== "string") return UNATTACHED_TEAM_LABEL;
-  const withoutDisambiguation = value
+function normalizeTeamValue(value: string) {
+  return value
     .trim()
     .replace(/\s+\([^()]*\bteam\)$/i, "")
     .trim();
-  return INVALID_TEAM_NAMES.has(withoutDisambiguation.toLowerCase())
-    ? UNATTACHED_TEAM_LABEL
-    : withoutDisambiguation;
+}
+
+export function isUnattachedTeam(value: unknown): boolean {
+  if (typeof value !== "string") return true;
+  return UNATTACHED_TEAM_VALUES.has(normalizeTeamValue(value).toLowerCase());
+}
+
+export function displayTeamName(value: unknown): string {
+  if (typeof value !== "string") return t`无队伍`;
+  const normalized = normalizeTeamValue(value);
+  return isUnattachedTeam(normalized) ? t`无队伍` : normalized;
 }

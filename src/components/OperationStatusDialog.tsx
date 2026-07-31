@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { useRef, type ReactNode, type RefObject } from "react";
 
 import {
@@ -48,7 +49,7 @@ export function OperationStatusDialog({
       <DialogContent
         role={isProgress ? "dialog" : "alertdialog"}
         showCloseButton={showCloseButton}
-        closeLabel="关闭状态提示"
+        closeLabel={t`关闭状态提示`}
         aria-busy={isProgress}
         onEscapeKeyDown={(event) => {
           if (isProgress) event.preventDefault();

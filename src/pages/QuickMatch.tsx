@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   ArrowCounterClockwiseIcon,
@@ -98,7 +99,7 @@ export function QuickMatch() {
   );
   const [error, setError] = useState(
     audit === "quick-error"
-      ? "加入匹配队列失败，请检查网络后重试。"
+      ? t`加入匹配队列失败，请检查网络后重试。`
       : "",
   );
   const [submittedSettings, setSubmittedSettings] =
@@ -164,7 +165,7 @@ export function QuickMatch() {
         setError(
           caught instanceof ApiError || caught instanceof QuickMatchTimeoutError
             ? caught.message
-            : "匹配失败，请稍后重试。",
+            : t`匹配失败，请稍后重试。`,
         );
       },
     });
@@ -261,14 +262,14 @@ export function QuickMatch() {
   return (
     <div className="min-h-svh bg-background text-foreground">
       <AppHeader
-        subtitle={displayedSettings.partySize === 4 ? "4 人乱斗" : "实时 1v1"}
+        subtitle={displayedSettings.partySize === 4 ? t`4 人乱斗` : t`实时 1v1`}
         backToLobby
       />
 
       <main className="app-main">
         <PageIntro
           eyebrow="Quick Match"
-          title="设置对战参数"
+          title={t`设置对战参数`}
           aside={
             lastPreferences.current ? (
               <Button
@@ -280,13 +281,13 @@ export function QuickMatch() {
                 onClick={restoreLastPreferences}
               >
                 <ArrowCounterClockwiseIcon />
-                {canRestoreLastPreferences ? "恢复上次配置" : "已使用上次配置"}
+                {canRestoreLastPreferences ? t`恢复上次配置` : t`已使用上次配置`}
               </Button>
             ) : undefined
           }
           help={
-            <InfoTip label="匹配规则" side="right" className="size-6">
-              只会匹配人数、赛制、题库难度和猜测可见性完全相同的玩家。
+            <InfoTip label={t`匹配规则`} side="right" className="size-6">
+              {t`只会匹配人数、赛制、题库难度和猜测可见性完全相同的玩家。`}
             </InfoTip>
           }
         />
@@ -315,22 +316,22 @@ export function QuickMatch() {
             <div className="grid lg:grid-cols-2 lg:grid-rows-[auto_auto_auto] lg:gap-y-5">
               <section className="grid gap-y-5 border-b border-foreground/20 p-5 sm:p-6 lg:row-span-3 lg:grid-rows-[subgrid] lg:border-r lg:border-b-0">
                 <h2 className="flex min-h-10 items-center text-lg font-semibold">
-                  对战设置
+                  {t`对战设置`}
                 </h2>
 
                 <div>
                   <div className="flex items-center gap-1">
                     <p className="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                      对战规模
+                      {t`对战规模`}
                     </p>
-                    <InfoTip label="对战规模说明" side="right" className="size-9">
-                      1v1 是双人竞速；4 人乱斗会展示三位对手的独立进度。
+                    <InfoTip label={t`对战规模说明`} side="right" className="size-9">
+                      {t`1v1 是双人竞速；4 人乱斗会展示三位对手的独立进度。`}
                     </InfoTip>
                   </div>
                   <div
                     className="mt-2 grid grid-cols-2 border border-foreground/25"
                     role="group"
-                    aria-label="对战规模"
+                    aria-label={t`对战规模`}
                   >
                     {([2, 4] as const).map((size) => (
                       <Button
@@ -343,7 +344,7 @@ export function QuickMatch() {
                         className="min-h-24 rounded-none border-r border-foreground/20 text-sm last:border-r-0"
                       >
                         {size === 4 ? <UsersThreeIcon /> : <UsersIcon />}
-                        {size === 4 ? "4 人乱斗" : "1v1"}
+                        {size === 4 ? t`4 人乱斗` : "1v1"}
                       </Button>
                     ))}
                   </div>
@@ -352,16 +353,16 @@ export function QuickMatch() {
                 <div>
                   <div className="flex items-center gap-1">
                     <p className="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                      对手猜测
+                      {t`对手猜测`}
                     </p>
-                    <InfoTip label="猜测可见性说明" side="right" className="size-9">
-                      隐藏模式只展示命中的属性；明牌模式会显示具体猜测选手。
+                    <InfoTip label={t`猜测可见性说明`} side="right" className="size-9">
+                      {t`隐藏模式只展示命中的属性；明牌模式会显示具体猜测选手。`}
                     </InfoTip>
                   </div>
                   <div
                     className="mt-2 grid grid-cols-2 border border-foreground/25"
                     role="group"
-                    aria-label="对手猜测可见性"
+                    aria-label={t`对手猜测可见性`}
                   >
                     {(["hidden", "open"] as const).map((option) => (
                       <Button
@@ -373,7 +374,7 @@ export function QuickMatch() {
                         onClick={() => setVisibility(option)}
                         className="min-h-24 rounded-none border-r border-foreground/20 text-sm last:border-r-0"
                       >
-                        {option === "hidden" ? "隐藏猜测" : "明牌模式"}
+                        {option === "hidden" ? t`隐藏猜测` : t`明牌模式`}
                       </Button>
                     ))}
                   </div>
@@ -383,19 +384,19 @@ export function QuickMatch() {
               <section className="grid gap-y-5 p-5 sm:p-6 lg:row-span-3 lg:grid-rows-[subgrid]">
                 <div className="flex items-center justify-between gap-4">
                   <h2 className="flex min-h-10 items-center text-lg font-semibold">
-                    题库与赛制
+                    {t`题库与赛制`}
                   </h2>
                   <p className="text-right font-mono text-xs text-primary">
                     {queue.live ? (
                       <>
-                        {waitingCounts[bestOf]} 人等待
+                        {waitingCounts[bestOf]} {t`人等待`}
                         <span className="mx-1.5 text-muted-foreground">·</span>
-                        {playingCounts[bestOf]} 人游戏中
+                        {playingCounts[bestOf]} {t`人游戏中`}
                       </>
                     ) : (
                       <span className="inline-flex items-center gap-2 text-muted-foreground">
                         <span className="size-1.5 bg-muted-foreground/40" />
-                        连接队列中
+                        {t`连接队列中`}
                       </span>
                     )}
                   </p>
@@ -404,11 +405,11 @@ export function QuickMatch() {
                 <div>
                   <div className="flex items-center gap-1">
                     <p className="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                      题库难度
+                      {t`题库难度`}
                     </p>
-                    <InfoTip label="题库难度说明" side="right" className="size-9">
-                      简单为高成就选手；完整包含所有参加过 Major
-                      的选手，包括退役与无队伍选手；困难包含全部选手。
+                    <InfoTip label={t`题库难度说明`} side="right" className="size-9">
+                      {t`简单为高成就选手；完整包含所有参加过 Major
+                      的选手，包括退役与无队伍选手；困难包含全部选手。`}
                     </InfoTip>
                   </div>
                   <div className="mt-2">
@@ -423,10 +424,10 @@ export function QuickMatch() {
                 <div>
                   <div className="flex items-center gap-1">
                     <p className="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                      比赛赛制
+                      {t`比赛赛制`}
                     </p>
-                    <InfoTip label="赛制说明" side="right" className="size-9">
-                      BO1 一局定胜负，BO3 先赢两局，BO5 先赢三局。
+                    <InfoTip label={t`赛制说明`} side="right" className="size-9">
+                      {t`BO1 一局定胜负，BO3 先赢两局，BO5 先赢三局。`}
                     </InfoTip>
                   </div>
                   <div className="mt-2">
@@ -442,7 +443,7 @@ export function QuickMatch() {
             </div>
 
             <p className="sr-only" role="status" aria-live="polite">
-              {pending ? "正在加入队列，请稍候。" : ""}
+              {pending ? t`正在加入队列，请稍候。` : ""}
             </p>
 
             <footer className="fixed inset-x-0 bottom-0 z-30 flex border-t border-foreground/20 bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-12px_30px_rgba(0,0,0,0.08)] backdrop-blur sm:justify-end lg:static lg:grid lg:grid-cols-2 lg:gap-6 lg:bg-transparent lg:p-6 lg:shadow-none lg:backdrop-blur-none">
@@ -453,8 +454,8 @@ export function QuickMatch() {
                 disabled={pending}
               >
                 {pending
-                  ? "正在加入队列…"
-                  : "开始匹配"}
+                  ? t`正在加入队列…`
+                  : t`开始匹配`}
                 {pending ? (
                   <Spinner role="presentation" aria-hidden="true" />
                 ) : (
@@ -469,14 +470,14 @@ export function QuickMatch() {
         open={pending}
         kind="progress"
         eyebrow="MATCHMAKING"
-        title="正在加入匹配队列"
-        description="正在确认身份与对战参数，完成后会自动进入等待页面。"
+        title={t`正在加入匹配队列`}
+        description={t`正在确认身份与对战参数，完成后会自动进入等待页面。`}
       />
       <OperationStatusDialog
         open={Boolean(error)}
         kind="error"
         eyebrow="MATCHMAKING"
-        title="未能加入匹配队列"
+        title={t`未能加入匹配队列`}
         description={error}
         returnFocusRef={submitButtonRef}
         onOpenChange={(open) => {
@@ -488,7 +489,7 @@ export function QuickMatch() {
           className="w-full rounded-none sm:w-auto"
           onClick={() => setError("")}
         >
-          返回设置
+          {t`返回设置`}
         </Button>
       </OperationStatusDialog>
     </div>

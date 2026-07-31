@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   ArrowRightIcon,
   CalendarDotsIcon,
@@ -102,22 +103,22 @@ function terminalSeriesCopy(
       Record<Exclude<ResultOutcome, "draw">, string>
     > = {
       explicit_leave: {
-        win: "对手已离开，服务器判定你赢得本系列。",
-        loss: "你已离开，服务器判定本系列结束。",
+        win: t`对手已离开，服务器判定你赢得本系列。`,
+        loss: t`你已离开，服务器判定本系列结束。`,
       },
       disconnect_timeout: {
-        win: "对手断线超时，服务器判定你赢得本系列。",
-        loss: "你断线超时，服务器判定本系列结束。",
+        win: t`对手断线超时，服务器判定你赢得本系列。`,
+        loss: t`你断线超时，服务器判定本系列结束。`,
       },
       legacy: {
-        win: "服务器判定你赢得本系列。",
-        loss: "服务器判定本系列结束。",
+        win: t`服务器判定你赢得本系列。`,
+        loss: t`服务器判定本系列结束。`,
       },
     };
     const resolvedOutcome = outcome === "draw" ? "loss" : outcome;
     return {
       eyebrow: "Series complete",
-      title: outcome === "win" ? "系列赛胜利" : "系列赛失利",
+      title: outcome === "win" ? t`系列赛胜利` : t`系列赛失利`,
       summary: summaries[kind][resolvedOutcome],
     };
   }
@@ -128,14 +129,14 @@ function terminalSeriesCopy(
         ? departureKind(finishReason)
         : "legacy";
     const summaries: Record<DepartureKind, string> = {
-      explicit_leave: "有成员离开，本系列已结束。最终排名已保留。",
+      explicit_leave: t`有成员离开，本系列已结束。最终排名已保留。`,
       disconnect_timeout:
-        "有成员断线超时，本系列已结束。最终排名已保留。",
-      legacy: "本系列已结束。最终排名已保留。",
+        t`有成员断线超时，本系列已结束。最终排名已保留。`,
+      legacy: t`本系列已结束。最终排名已保留。`,
     };
     return {
       eyebrow: "Series complete",
-      title: "系列赛已结束",
+      title: t`系列赛已结束`,
       summary: summaries[kind],
     };
   }
@@ -157,26 +158,26 @@ function resultCopy(
     return outcome === "win"
       ? {
           eyebrow: "Daily complete",
-          title: "今日挑战完成",
-          summary: "你成功锁定了今日的神秘选手。",
+          title: t`今日挑战完成`,
+          summary: t`你成功锁定了今日的神秘选手。`,
         }
       : {
           eyebrow: "Daily complete",
-          title: "今日挑战结束",
+          title: t`今日挑战结束`,
           summary:
             lossReason === "timeout"
-              ? "三分钟倒计时已结束，答案已经揭晓。"
+              ? t`三分钟倒计时已结束，答案已经揭晓。`
               : lossReason === "attempts-exhausted"
-                ? "八次猜测机会已用完，答案已经揭晓。"
-                : "今日挑战未完成，答案已经揭晓。",
+                ? t`八次猜测机会已用完，答案已经揭晓。`
+                : t`今日挑战未完成，答案已经揭晓。`,
         };
   }
   if (context === "solo") {
     if (outcome === "win") {
       return {
           eyebrow: "Solo complete",
-          title: "单人练习完成",
-          summary: "你成功锁定了本局的神秘选手。",
+          title: t`单人练习完成`,
+          summary: t`你成功锁定了本局的神秘选手。`,
       };
     }
     const lossCopy = soloLossCopy(lossReason, maxGuesses);
@@ -197,60 +198,60 @@ function resultCopy(
     if (finishReason === "disconnect_forfeit") {
       if (outcome === "win") {
         return seriesComplete
-          ? "对手重连宽限期结束，你赢得了本场系列赛。"
-          : "对手重连宽限期结束，本局由你获胜。";
+          ? t`对手重连宽限期结束，你赢得了本场系列赛。`
+          : t`对手重连宽限期结束，本局由你获胜。`;
       }
       if (outcome === "loss") {
         return seriesComplete
-          ? "你的重连宽限期结束，对手赢得了本场系列赛。"
-          : "你的重连宽限期结束，本局判负。";
+          ? t`你的重连宽限期结束，对手赢得了本场系列赛。`
+          : t`你的重连宽限期结束，本局判负。`;
       }
     }
     if (finishReason === "timeout") {
       return outcome === "draw"
-        ? "倒计时结束，本局未分出胜负。"
-        : "倒计时结束，服务器已完成本局裁定。";
+        ? t`倒计时结束，本局未分出胜负。`
+        : t`倒计时结束，服务器已完成本局裁定。`;
     }
     if (finishReason === "max_guesses") {
       return outcome === "draw"
-        ? "所有玩家均已用完猜测次数，本局未分出胜负。"
-        : "猜测次数已经用尽，服务器已完成本局裁定。";
+        ? t`所有玩家均已用完猜测次数，本局未分出胜负。`
+        : t`猜测次数已经用尽，服务器已完成本局裁定。`;
     }
     if (finishReason === "solved") {
       if (outcome === "win") {
         return seriesComplete
-          ? "你率先拿到本场所需胜局。"
-          : "已先于对手确定目标选手。";
+          ? t`你率先拿到本场所需胜局。`
+          : t`已先于对手确定目标选手。`;
       }
       if (outcome === "loss") {
         return seriesComplete
-          ? "对手率先拿到本场所需胜局。"
-          : "对手已先确定目标选手。";
+          ? t`对手率先拿到本场所需胜局。`
+          : t`对手已先确定目标选手。`;
       }
-      return "双方本局都没能锁定答案。";
+      return t`双方本局都没能锁定答案。`;
     }
     if (outcome === "win") {
-      return seriesComplete ? "你赢得了本场系列赛。" : "你赢得了本局。";
+      return seriesComplete ? t`你赢得了本场系列赛。` : t`你赢得了本局。`;
     }
     if (outcome === "loss") {
       return seriesComplete
-        ? "对手赢得了本场系列赛。"
-        : "对手赢得了本局。";
+        ? t`对手赢得了本场系列赛。`
+        : t`对手赢得了本局。`;
     }
-    return "本局未分出胜负。";
+    return t`本局未分出胜负。`;
   })();
   if (seriesComplete) {
     if (outcome === "win") {
       return {
         eyebrow: "Series complete",
-        title: "系列赛胜利",
+        title: t`系列赛胜利`,
         summary: battleSummary,
       };
     }
     if (outcome === "loss") {
       return {
         eyebrow: "Series complete",
-        title: "系列赛失利",
+        title: t`系列赛失利`,
         summary: battleSummary,
       };
     }
@@ -258,20 +259,20 @@ function resultCopy(
   if (outcome === "win") {
     return {
       eyebrow: "Round complete",
-      title: "本局胜利",
+      title: t`本局胜利`,
       summary: battleSummary,
     };
   }
   if (outcome === "loss") {
     return {
       eyebrow: "Round complete",
-      title: "本局失利",
+      title: t`本局失利`,
       summary: battleSummary,
     };
   }
   return {
     eyebrow: "Round complete",
-    title: "本局平局",
+    title: t`本局平局`,
     summary: battleSummary,
   };
 }
@@ -289,9 +290,9 @@ export function CelebrationOverlay({
   waitingForHostRestart = false,
   onClose,
   onExit,
-  exitLabel = "返回模式大厅",
+  exitLabel = t`返回模式大厅`,
   onRematch,
-  rematchLabel = "邀请重赛",
+  rematchLabel = t`邀请重赛`,
   rematchDisabled = false,
   rematchDisabledReason,
   onCloseAutoFocus,
@@ -341,28 +342,28 @@ export function CelebrationOverlay({
   const outcomeClassName = `result-dialog--${outcome}`;
   const details = [
     {
-      label: "战队",
+      label: t`战队`,
       value: displayTeamName(mysteryPlayer.team),
       icon: ShieldIcon,
     },
     {
-      label: "国家或地区",
+      label: t`国家或地区`,
       value: countryNameZh(mysteryPlayer.countryCode),
       icon: GlobeHemisphereWestIcon,
     },
     {
-      label: "位置",
+      label: t`位置`,
       value: playerRoleNameZh(mysteryPlayer.role),
       icon: playerRoleIcon(mysteryPlayer.role),
     },
-    { label: "年龄", value: mysteryPlayer.age, icon: CalendarDotsIcon },
+    { label: t`年龄`, value: mysteryPlayer.age, icon: CalendarDotsIcon },
     {
-      label: "Major 次数",
+      label: t`Major 次数`,
       value: mysteryPlayer.majorAppearances,
       icon: MedalIcon,
     },
     {
-      label: "Major 冠军",
+      label: t`Major 冠军`,
       value: mysteryPlayer.majorWins,
       icon: MedalIcon,
     },
@@ -417,16 +418,16 @@ export function CelebrationOverlay({
                 aria-atomic="true"
               >
                 {tiebreak ? (
-                  "本轮平局，继续加赛。"
+                  t`本轮平局，继续加赛。`
                 ) : nextRoundPaused ? (
-                  "等待成员重连后开始下一局。"
+                  t`等待成员重连后开始下一局。`
                 ) : (
                   <>
-                    下一局{" "}
+                    {t`下一局`}{" "}
                     <span className="font-mono font-semibold text-primary">
-                      {String(nextRoundSeconds).padStart(2, "0")} 秒
+                      {String(nextRoundSeconds).padStart(2, "0")} {t`秒`}
                     </span>{" "}
-                    后自动开始。
+                    {t`后自动开始。`}
                   </>
                 )}
               </span>
@@ -435,7 +436,7 @@ export function CelebrationOverlay({
             seriesComplete &&
             waitingForHostRestart ? (
               <span className="mt-1 block">
-                留在房间，等待房主开始下一场。
+                {t`留在房间，等待房主开始下一场。`}
               </span>
             ) : null}
           </DialogDescription>
@@ -443,14 +444,14 @@ export function CelebrationOverlay({
             <div
               className="mt-4 w-full min-w-0 max-w-full overflow-x-auto"
               role="region"
-              aria-label={`${seriesComplete ? "系列赛最终排行榜" : "当前排行榜"}，可横向滚动`}
+              aria-label={t`${seriesComplete ? t`系列赛最终排行榜` : t`当前排行榜`}，可横向滚动`}
               tabIndex={0}
             >
               <p className="text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                {seriesComplete ? "最终排行榜" : "当前排行榜"}
+                {seriesComplete ? t`最终排行榜` : t`当前排行榜`}
               </p>
               <p className="mt-1 text-xs text-muted-foreground sm:hidden">
-                左右滑动查看全部席位
+                {t`左右滑动查看全部席位`}
               </p>
               <ol className="mt-2 grid min-w-[32rem] grid-cols-4 border border-foreground/20 text-left">
                 {standings.map((entry) => (
@@ -464,7 +465,7 @@ export function CelebrationOverlay({
                       {entry.label} · {entry.rankLabel}
                     </p>
                     <p className="mt-1 truncate font-semibold">{entry.name}</p>
-                    <p className="mt-1 font-mono text-lg">{entry.score} 分</p>
+                    <p className="mt-1 font-mono text-lg">{entry.score} {t`分`}</p>
                   </li>
                 ))}
               </ol>
@@ -472,7 +473,7 @@ export function CelebrationOverlay({
           ) : (
             <div className="mt-4 flex items-center gap-3 font-mono">
               <span className="text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                {context === "battle" ? "当前比分" : "已用尝试"}
+                {context === "battle" ? t`当前比分` : t`已用尝试`}
               </span>
               <strong className="result-dialog__score text-xl tracking-[-0.04em]">
                 {score}
@@ -490,7 +491,7 @@ export function CelebrationOverlay({
             />
             <div className="min-w-0">
               <p className="font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground">
-                {context === "daily" ? "今日答案" : "本局答案"}
+                {context === "daily" ? t`今日答案` : t`本局答案`}
               </p>
               <h3 className="mt-1.5 truncate text-2xl font-bold tracking-[-0.03em]">
                 {mysteryPlayer.nickname}
@@ -527,7 +528,7 @@ export function CelebrationOverlay({
                 className="w-full rounded-none sm:w-auto"
                 onClick={onClose}
               >
-                查看对局
+                {t`查看对局`}
               </Button>
               {onRematch ? (
                 <div className="w-full sm:w-auto">
@@ -568,10 +569,10 @@ export function CelebrationOverlay({
               onClick={onClose}
             >
               {context !== "battle"
-                ? "关闭并查看明细"
+                ? t`关闭并查看明细`
                 : tiebreak
-                  ? "继续加赛"
-                  : "继续下一局"}
+                  ? t`继续加赛`
+                  : t`继续下一局`}
               <ArrowRightIcon />
             </Button>
           )}

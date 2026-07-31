@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { CheckIcon } from "@phosphor-icons/react";
 import type { KeyboardEvent } from "react";
 
@@ -9,9 +10,9 @@ const OPTIONS: Array<{
   title: string;
   description: string;
 }> = [
-  { value: 1, title: "BO1", description: "一局定胜负" },
-  { value: 3, title: "BO3", description: "先赢两局" },
-  { value: 5, title: "BO5", description: "先赢三局" },
+  { value: 1, title: "BO1", description: t`一局定胜负` },
+  { value: 3, title: "BO3", description: t`先赢两局` },
+  { value: 5, title: "BO5", description: t`先赢三局` },
 ];
 
 interface SeriesSelectorProps {
@@ -62,7 +63,7 @@ export function SeriesSelector({
         compact ? null : "gap-px bg-foreground/20",
       )}
       role="radiogroup"
-      aria-label="比赛赛制"
+      aria-label={t`比赛赛制`}
     >
       {OPTIONS.map((option, index) => {
         const selected = value === option.value;
@@ -111,7 +112,7 @@ export function SeriesSelector({
                         : "text-foreground",
                     )}
                   >
-                    {waitingCounts[option.value] ?? 0} 人
+                    {waitingCounts[option.value] ?? 0} {t`人`}
                   </span>
                 ) : null}
               </span>

@@ -1,10 +1,11 @@
+import { t } from "@lingui/core/macro";
 import { players, type Player } from "@/data/players";
 import type {
   HistoryPlayerSnapshot,
   MatchHistoryEntry,
 } from "@/hooks/use-anonymous-profile";
 
-export const STATS_REPLAY_CLOSE_LABEL = "关闭对局回放";
+export const STATS_REPLAY_CLOSE_LABEL = t`关闭对局回放`;
 
 export function focusReplayTitle(
   event: { preventDefault: () => void },

@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { ArrowLeftIcon, CrosshairIcon } from "@phosphor-icons/react";
 import { Link } from "react-router";
 
@@ -34,7 +35,7 @@ export function DailyGameLoading({
     <div
       className="min-h-svh bg-background text-foreground lg:grid lg:grid-cols-[280px_minmax(0,1fr)]"
       role="status"
-      aria-label={error ? "每日挑战载入失败" : "正在载入今日题目"}
+      aria-label={error ? t`每日挑战载入失败` : t`正在载入今日题目`}
       data-daily-game-surface={error ? "error" : "loading"}
     >
       <aside className="border-b border-foreground/20 bg-sidebar lg:sticky lg:top-0 lg:h-screen lg:border-r lg:border-b-0">
@@ -57,7 +58,7 @@ export function DailyGameLoading({
             >
               <Link to="/">
                 <ArrowLeftIcon />
-                模式大厅
+                {t`模式大厅`}
               </Link>
             </Button>
           </div>
@@ -65,10 +66,10 @@ export function DailyGameLoading({
           <div className="mt-4 flex items-end justify-between gap-4 border-t-2 border-primary pt-4 lg:mt-8 lg:block lg:pt-5">
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                当前模式
+                {t`当前模式`}
               </p>
               <p className="mt-1 whitespace-nowrap text-sm font-semibold lg:mt-2 lg:text-lg">
-                今日挑战
+                {t`今日挑战`}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4 border-l border-foreground/15 pl-4 lg:mt-5 lg:gap-5 lg:border-t lg:border-l-0 lg:pt-5 lg:pl-0">
@@ -94,14 +95,14 @@ export function DailyGameLoading({
           </div>
 
           <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
-            <p className="text-sm">剩余时间</p>
+            <p className="text-sm">{t`剩余时间`}</p>
             <LoadingBlock
               className="mt-3 h-10 w-28 bg-primary/20"
               animate={pending}
             />
           </div>
           <div className="mt-6 hidden border-t border-foreground/15 pt-6 lg:block">
-            <p className="text-sm">猜测进度</p>
+            <p className="text-sm">{t`猜测进度`}</p>
             <LoadingBlock
               className="mt-3 h-8 w-20"
               animate={pending}
@@ -112,17 +113,17 @@ export function DailyGameLoading({
 
       <main className="app-game-main">
         <div className="app-game-container min-w-0">
-          <h1 className="sr-only">今日挑战</h1>
+          <h1 className="sr-only">{t`今日挑战`}</h1>
 
           <div className="mb-5 flex items-center justify-between border-y border-foreground/15 py-3 lg:hidden">
-            <span className="text-xs text-muted-foreground">剩余时间</span>
+            <span className="text-xs text-muted-foreground">{t`剩余时间`}</span>
             <LoadingBlock className="h-5 w-16" animate={pending} />
             <LoadingBlock className="h-3 w-10" animate={pending} />
           </div>
 
           <div className="flex min-h-16 items-center justify-between border-y border-foreground/20 px-5 py-4">
             <p className="text-sm font-medium">
-              正在获取今日统一题目
+              {t`正在获取今日统一题目`}
             </p>
             <div className="flex gap-1" aria-hidden="true">
               {Array.from({ length: 8 }, (_, index) => (
@@ -159,8 +160,8 @@ export function DailyGameLoading({
 
           <span className="sr-only">
             {error
-              ? "今日题目载入失败，可以重新载入。"
-              : "正在载入今日题目，轮次、计时和猜测进度将在题目准备后显示。"}
+              ? t`今日题目载入失败，可以重新载入。`
+              : t`正在载入今日题目，轮次、计时和猜测进度将在题目准备后显示。`}
           </span>
         </div>
       </main>
@@ -168,15 +169,15 @@ export function DailyGameLoading({
         open={pending}
         kind="progress"
         eyebrow="DAILY CHALLENGE"
-        title="正在载入今日题目"
-        description="正在同步今日统一题目、轮次与计时信息。"
+        title={t`正在载入今日题目`}
+        description={t`正在同步今日统一题目、轮次与计时信息。`}
       />
       <OperationStatusDialog
         open={Boolean(error)}
         kind="error"
         eyebrow="DAILY CHALLENGE"
-        title="每日挑战载入失败"
-        description={error?.message ?? "请检查网络连接后重新载入。"}
+        title={t`每日挑战载入失败`}
+        description={error?.message ?? t`请检查网络连接后重新载入。`}
       >
         {onRetry ? (
           <Button
@@ -184,7 +185,7 @@ export function DailyGameLoading({
             className="w-full rounded-none sm:w-auto"
             onClick={onRetry}
           >
-            重新载入
+            {t`重新载入`}
           </Button>
         ) : null}
       </OperationStatusDialog>

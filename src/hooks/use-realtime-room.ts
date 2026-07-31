@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   createContext,
   createElement,
@@ -125,11 +126,11 @@ export function socketIoAckResult(
 
 export function realtimeEventErrorMessage(event: ServerEvent) {
   if (event.code === "round_forfeited") {
-    return "本轮已判负，等待下一轮。";
+    return t`本轮已判负，等待下一轮。`;
   }
   return typeof event.message === "string"
     ? event.message
-    : "服务器拒绝了本次操作，请稍后重试。";
+    : t`服务器拒绝了本次操作，请稍后重试。`;
 }
 
 export function fatalRealtimeConnectReason(
@@ -251,7 +252,7 @@ function useRealtimeRoomConnection(
       setOfflineReason("configuration");
       clearCredentialsIfMatches(credentials);
       sendConnection({ type: "FATAL_CLOSE" });
-      setError("实时连接地址无效，请返回大厅后重新加入。");
+      setError(t`实时连接地址无效，请返回大厅后重新加入。`);
       return;
     }
     const owner: OwnedSocket = {
@@ -277,12 +278,12 @@ function useRealtimeRoomConnection(
           if (!isCurrent() || attempt !== owner.syncAttempt) return;
           const ack = socketIoAckResult(args);
           if (ack.error) {
-            setError("状态同步失败，请重试。");
+            setError(t`状态同步失败，请重试。`);
             return;
           }
           const parsed = parseRealtimeAck(ack.value);
           if (!parsed) {
-            setError("服务器返回了无法识别的同步响应，请重试。");
+            setError(t`服务器返回了无法识别的同步响应，请重试。`);
             return;
           }
           if (!parsed.accepted) {
@@ -295,10 +296,10 @@ function useRealtimeRoomConnection(
                   : null;
             setError(
               reason === "profile_invalid"
-                ? "当前身份已失效，请重新设置身份。"
+                ? t`当前身份已失效，请重新设置身份。`
                 : reason === "session_invalid"
-                ? "会话已失效，请退出后重新加入。"
-                : "状态同步失败，请重试。",
+                ? t`会话已失效，请退出后重新加入。`
+                : t`状态同步失败，请重试。`,
             );
             if (reason) {
               retire(owner, true);
@@ -310,7 +311,7 @@ function useRealtimeRoomConnection(
           }
           const next = parsed.snapshot;
           if (!next || !isAuthoritativeRoomSnapshot(next)) {
-            setError("服务器返回的房间状态不完整，请重试。");
+            setError(t`服务器返回的房间状态不完整，请重试。`);
             return;
           }
           const seq = next.seq;
@@ -346,7 +347,7 @@ function useRealtimeRoomConnection(
         setOfflineReason("reconnect_timeout");
         sendConnection({ type: "FATAL_CLOSE" });
         setError(
-          "连接超时，无法恢复实时连接。你可以立即重试或安全退出。",
+          t`连接超时，无法恢复实时连接。你可以立即重试或安全退出。`,
         );
       }, REALTIME_RECONNECT_TIMEOUT_MS);
     };
@@ -387,7 +388,7 @@ function useRealtimeRoomConnection(
           hasAuthoritativeSnapshotRef.current = true;
           setHasAuthoritativeSnapshot(true);
         } else {
-          setError("服务器返回的房间状态不完整，请重试。");
+          setError(t`服务器返回的房间状态不完整，请重试。`);
         }
       } else {
         if (typeof event.seq === "number") {
@@ -415,12 +416,12 @@ function useRealtimeRoomConnection(
         setOfflineReason("session_invalid");
         clearCredentialsIfMatches(credentials);
         sendConnection({ type: "FATAL_CLOSE" });
-        setError("会话已失效，请退出后重新加入。");
+        setError(t`会话已失效，请退出后重新加入。`);
         return;
       }
 
       sendConnection({ type: "TRANSIENT_CLOSE" });
-      setError("实时连接中断，正在自动重连。");
+      setError(t`实时连接中断，正在自动重连。`);
       armReconnectDeadline();
     };
 
@@ -434,14 +435,14 @@ function useRealtimeRoomConnection(
         sendConnection({ type: "FATAL_CLOSE" });
         setError(
           fatalReason === "profile_invalid"
-            ? "当前身份已失效，请重新设置身份。"
-            : "会话已失效，请退出后重新加入。",
+            ? t`当前身份已失效，请重新设置身份。`
+            : t`会话已失效，请退出后重新加入。`,
         );
         return;
       }
       if (everConnectedRef.current) {
         sendConnection({ type: "TRANSIENT_CLOSE" });
-        setError("实时连接中断，正在自动重连。");
+        setError(t`实时连接中断，正在自动重连。`);
         armReconnectDeadline();
       } else {
         // The manager is still performing its initial connection attempts.
@@ -508,7 +509,7 @@ function useRealtimeRoomConnection(
     ) => {
       const socket = ownerRef.current?.socket;
       if (!socket?.connected) {
-        setError("实时连接尚未恢复，请稍后重试。");
+        setError(t`实时连接尚未恢复，请稍后重试。`);
         onAcknowledged?.(false);
         return false;
       }
@@ -520,19 +521,19 @@ function useRealtimeRoomConnection(
         (...args: unknown[]) => {
           const ack = socketIoAckResult(args);
           if (ack.error) {
-            setError("指令未确认，请重试。");
+            setError(t`指令未确认，请重试。`);
             onAcknowledged?.(false);
             return;
           }
           const parsed = parseRealtimeAck(ack.value);
           if (!parsed) {
-            setError("服务器返回了无法识别的指令响应，请重试。");
+            setError(t`服务器返回了无法识别的指令响应，请重试。`);
             onAcknowledged?.(false);
           } else if (!parsed.accepted) {
             setError(
               parsed.error === "rate_limited"
-                ? "操作太频繁，请稍后再试。"
-                : "服务器未接受本次操作，请重试。",
+                ? t`操作太频繁，请稍后再试。`
+                : t`服务器未接受本次操作，请重试。`,
             );
             onAcknowledged?.(false);
           } else {

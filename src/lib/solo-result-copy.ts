@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 export type SoloLossReason = "timeout" | "attempts-exhausted";
 
 export function soloLossCopy(
@@ -6,21 +7,21 @@ export function soloLossCopy(
 ) {
   if (reason === "timeout") {
     return {
-      title: "时间已到",
-      dialogSummary: "本局时间已到，答案已经揭晓。",
-      panelSummary: "本局时间已到，答案已经揭晓。",
+      title: t`时间已到`,
+      dialogSummary: t`本局时间已到，答案已经揭晓。`,
+      panelSummary: t`本局时间已到，答案已经揭晓。`,
     };
   }
   if (reason === "attempts-exhausted") {
     return {
-      title: "机会已用完",
-      dialogSummary: `${maxGuesses} 次猜测机会已用完，答案已经揭晓。`,
-      panelSummary: `${maxGuesses} 次猜测机会已用完，答案已经揭晓。`,
+      title: t`机会已用完`,
+      dialogSummary: t`${maxGuesses} 次猜测机会已用完，答案已经揭晓。`,
+      panelSummary: t`${maxGuesses} 次猜测机会已用完，答案已经揭晓。`,
     };
   }
   return {
-    title: "单人练习结束",
-    dialogSummary: "本局答案已经揭晓。",
-    panelSummary: "本局答案已经揭晓。",
+    title: t`单人练习结束`,
+    dialogSummary: t`本局答案已经揭晓。`,
+    panelSummary: t`本局答案已经揭晓。`,
   };
 }

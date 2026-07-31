@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { players } from "@/data/players";
 import {
   debugPatchAnonymousProfile,
@@ -34,54 +35,54 @@ const AUDIT_ROOM_CODES: Record<string, string> = {
 };
 
 const AUDIT_LABELS: Record<string, string> = {
-  "identity-onboarding": "01 首次进入·身份引导",
-  lobby: "02 模式首页",
-  "identity-idle": "03 身份管理",
-  "identity-rolling": "04 身份抽取·滚动",
-  "identity-result": "05 身份抽取·结果",
-  "onboarding-rolling": "33 首次身份·滚动",
-  "onboarding-result": "34 首次身份·结果",
-  "solo-difficulty": "06 单人难度选择",
-  "solo-playing": "07 单人·进行中",
-  "solo-won": "08 单人·胜利结算",
-  "solo-lost": "09 单人·失败结算",
-  "daily-loading": "10 每日·加载中",
-  "daily-error": "11 每日·加载失败",
-  "daily-playing": "12 每日·进行中",
-  "daily-won": "13 每日·胜利结算",
-  "daily-lost": "14 每日·失败结算",
-  "quick-1v1": "15 快速匹配·1v1设置",
-  "quick-4p": "16 快速匹配·4人设置",
-  "matching-waiting": "17 匹配·等待中",
-  "matching-offline": "18 匹配·连接失败",
-  "matching-found": "19 匹配·成功进场",
-  "room-setup": "20 好友房·加入与创建",
-  "live-waiting": "21 好友房·等待开局",
-  "live-playing": "22 对战·进行中",
-  "live-reconnecting": "23 对战·重连中",
-  "live-offline": "24 对战·离线恢复",
-  "live-round-win": "25 对战·单局胜利",
-  "live-round-loss": "26 对战·单局失败",
-  "live-series-win": "27 对战·系列赛胜利",
-  "live-series-loss": "28 对战·系列赛失败",
-  "live-rematch-invite": "42 重赛·收到邀请",
-  "live-rematch-waiting": "43 重赛·等待回应",
-  "live-rematch-starting": "44 重赛·正在匹配",
-  "live-rematch-declined": "45 重赛·对手拒绝",
-  "live-rematch-offline": "46 重赛·对手离线",
-  "live-rematch-expired": "47 重赛·邀请超时",
-  "live-rematch-cancelled": "48 重赛·邀请取消",
-  "solo-result-panel": "29 单人·结算明细",
-  "daily-result-panel": "30 每日·结算明细",
-  "stats-list": "31 战绩·列表",
-  "stats-replay": "32 战绩·回放详情",
-  "quick-submitting": "35 快速匹配·提交中",
-  "quick-error": "36 快速匹配·提交失败",
-  "matching-canceling": "37 匹配·取消中",
-  "matching-cancel-error": "38 匹配·取消失败",
-  "room-submitting": "39 好友房·创建中",
-  "room-error": "40 好友房·创建失败",
-  "stats-empty": "41 战绩·空状态",
+  "identity-onboarding": t`01 首次进入·身份引导`,
+  lobby: t`02 模式首页`,
+  "identity-idle": t`03 身份管理`,
+  "identity-rolling": t`04 身份抽取·滚动`,
+  "identity-result": t`05 身份抽取·结果`,
+  "onboarding-rolling": t`33 首次身份·滚动`,
+  "onboarding-result": t`34 首次身份·结果`,
+  "solo-difficulty": t`06 单人难度选择`,
+  "solo-playing": t`07 单人·进行中`,
+  "solo-won": t`08 单人·胜利结算`,
+  "solo-lost": t`09 单人·失败结算`,
+  "daily-loading": t`10 每日·加载中`,
+  "daily-error": t`11 每日·加载失败`,
+  "daily-playing": t`12 每日·进行中`,
+  "daily-won": t`13 每日·胜利结算`,
+  "daily-lost": t`14 每日·失败结算`,
+  "quick-1v1": t`15 快速匹配·1v1设置`,
+  "quick-4p": t`16 快速匹配·4人设置`,
+  "matching-waiting": t`17 匹配·等待中`,
+  "matching-offline": t`18 匹配·连接失败`,
+  "matching-found": t`19 匹配·成功进场`,
+  "room-setup": t`20 好友房·加入与创建`,
+  "live-waiting": t`21 好友房·等待开局`,
+  "live-playing": t`22 对战·进行中`,
+  "live-reconnecting": t`23 对战·重连中`,
+  "live-offline": t`24 对战·离线恢复`,
+  "live-round-win": t`25 对战·单局胜利`,
+  "live-round-loss": t`26 对战·单局失败`,
+  "live-series-win": t`27 对战·系列赛胜利`,
+  "live-series-loss": t`28 对战·系列赛失败`,
+  "live-rematch-invite": t`42 重赛·收到邀请`,
+  "live-rematch-waiting": t`43 重赛·等待回应`,
+  "live-rematch-starting": t`44 重赛·正在匹配`,
+  "live-rematch-declined": t`45 重赛·对手拒绝`,
+  "live-rematch-offline": t`46 重赛·对手离线`,
+  "live-rematch-expired": t`47 重赛·邀请超时`,
+  "live-rematch-cancelled": t`48 重赛·邀请取消`,
+  "solo-result-panel": t`29 单人·结算明细`,
+  "daily-result-panel": t`30 每日·结算明细`,
+  "stats-list": t`31 战绩·列表`,
+  "stats-replay": t`32 战绩·回放详情`,
+  "quick-submitting": t`35 快速匹配·提交中`,
+  "quick-error": t`36 快速匹配·提交失败`,
+  "matching-canceling": t`37 匹配·取消中`,
+  "matching-cancel-error": t`38 匹配·取消失败`,
+  "room-submitting": t`39 好友房·创建中`,
+  "room-error": t`40 好友房·创建失败`,
+  "stats-empty": t`41 战绩·空状态`,
 };
 
 function difficultyCounts(seed: number): MatchmakingDifficultyCounts {
@@ -312,7 +313,7 @@ export function installAuditState() {
   if (!audit) return;
 
   document.documentElement.dataset.audit = audit;
-  document.title = `审查｜${AUDIT_LABELS[audit] ?? audit}`;
+  document.title = t`审查｜${AUDIT_LABELS[audit] ?? audit}`;
   const profile = getAnonymousProfileSnapshot();
   if (!profile.identityConfirmed) {
     debugPatchAnonymousProfile({ identityConfirmed: true });
@@ -354,9 +355,9 @@ export function installAuditState() {
     snapshot,
     events: [],
     error: offline
-      ? "实时连接暂时不可用，请检查网络后重试。"
+      ? t`实时连接暂时不可用，请检查网络后重试。`
       : reconnecting
-        ? "连接中断，正在尝试恢复对局。"
+        ? t`连接中断，正在尝试恢复对局。`
         : "",
   });
 }

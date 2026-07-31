@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   ArrowLeftIcon,
   ChartLineUpIcon,
@@ -38,6 +39,7 @@ import {
   reconcilePendingIdentityDraw,
   restorePreparedIdentityDraw,
 } from "@/lib/identity-draw";
+import { displayTeamName } from "@/lib/player-display";
 import { preloadPlayerImages } from "@/lib/player-image-preload";
 import { normalizeIdentityReturnTo } from "@/machines/user-journey-machine";
 
@@ -245,7 +247,7 @@ export function IdentityPage() {
     if (!pendingDraw || !prepared) {
       drawInProgressRef.current = false;
       if (pendingDrawRevisionRef.current === startingPendingRevision) {
-        setDrawError("抽取次数已变化，请检查网络或其他标签页后重试。");
+        setDrawError(t`抽取次数已变化，请检查网络或其他标签页后重试。`);
       }
       return;
     }
@@ -304,7 +306,7 @@ export function IdentityPage() {
     setDrawError(null);
     try {
       if (!(await identity.discardPendingDraw(draw.poolId, draw.winner.id))) {
-        setDrawError("未能保存选择，请重试。");
+        setDrawError(t`未能保存选择，请重试。`);
         return;
       }
       setDraw(null);
@@ -327,7 +329,7 @@ export function IdentityPage() {
       if (onboarding) {
         const completed = await identity.completeIdentitySetup(draw.winner.id);
         if (!completed) {
-          setDrawError("身份保存失败，请保留此窗口并重试。");
+          setDrawError(t`身份保存失败，请保留此窗口并重试。`);
           return;
         }
         setDraw(null);
@@ -339,7 +341,7 @@ export function IdentityPage() {
         draw.winner.id,
       );
       if (!adopted) {
-        setDrawError("身份保存失败，请保留此窗口并重试。");
+        setDrawError(t`身份保存失败，请保留此窗口并重试。`);
         return;
       }
       setDraw(null);
@@ -362,13 +364,13 @@ export function IdentityPage() {
   return (
     <div className="min-h-svh bg-background text-foreground">
       <AppHeader
-        subtitle={onboarding ? "首次设置" : "玩家身份"}
+        subtitle={onboarding ? t`首次设置` : t`玩家身份`}
         action={
           onboarding ? undefined : (
             <Button asChild variant="outline" size="sm" className="rounded-none">
               <Link to={returnTo}>
                 <ArrowLeftIcon />
-                返回
+                {t`返回`}
               </Link>
             </Button>
           )
@@ -378,17 +380,17 @@ export function IdentityPage() {
       <main className="app-main">
         <PageIntro
           eyebrow={onboarding ? "First Run" : "Player Identity"}
-          title={onboarding ? "设置初始身份" : "我的身份"}
+          title={onboarding ? t`设置初始身份` : t`我的身份`}
           description={
             onboarding
-              ? "抽取并确认一个匿名身份，用于对战昵称与战绩记录。"
+              ? t`抽取并确认一个匿名身份，用于对战昵称与战绩记录。`
               : undefined
           }
           help={
-            <InfoTip label="查看身份规则" side="right" className="size-10">
+            <InfoTip label={t`查看身份规则`} side="right" className="size-10">
               {onboarding
-                ? "初始身份从 Major 参赛池抽取，确认后会固定保留。"
-                : "胜利一局或累计输掉两局，均可获得一次抽取机会。"}
+                ? t`初始身份从 Major 参赛池抽取，确认后会固定保留。`
+                : t`胜利一局或累计输掉两局，均可获得一次抽取机会。`}
             </InfoTip>
           }
           aside={
@@ -400,11 +402,11 @@ export function IdentityPage() {
                 className="rounded-none px-3 py-1.5 font-mono"
               >
                 <DiceFiveIcon />
-                {identity.profile.drawCredits} 次抽取
+                {t`${identity.profile.drawCredits} 次抽取`}
               </Badge>
               {!onboarding ? (
                 <p className="font-mono text-xs text-muted-foreground">
-                  胜 1 局或累计负 2 局，可获得 1 次
+                  {t`胜 1 局或累计负 2 局，可获得 1 次`}
                 </p>
               ) : null}
             </div>
@@ -419,7 +421,7 @@ export function IdentityPage() {
             <div className="relative flex min-h-52 flex-col justify-between p-5 sm:min-h-64 sm:p-8">
               <div className="flex items-center justify-between gap-4">
                 <p className="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                  {onboarding ? "待设置身份" : "当前身份"}
+                  {onboarding ? t`待设置身份` : t`当前身份`}
                 </p>
                 <IdentificationCardIcon
                   className="size-8 text-primary"
@@ -437,12 +439,12 @@ export function IdentityPage() {
                 ) : null}
                 <div className="min-w-0">
                   <p className="break-words text-4xl font-bold tracking-[-0.06em] sm:text-5xl">
-                    {onboarding ? "等待抽取" : identity.player.nickname}
+                    {onboarding ? t`等待抽取` : identity.player.nickname}
                   </p>
                   <p className="mt-3 truncate text-sm text-muted-foreground">
                     {onboarding
-                      ? "从 Major 参赛选手中抽取固定匿名身份"
-                      : `${countryNameZh(identity.player.countryCode)} · ${identity.player.team}`}
+                      ? t`从 Major 参赛选手中抽取固定匿名身份`
+                      : `${countryNameZh(identity.player.countryCode)} · ${displayTeamName(identity.player.team)}`}
                   </p>
                 </div>
               </div>
@@ -450,7 +452,7 @@ export function IdentityPage() {
               <div className="mt-6 flex flex-wrap items-center gap-2 sm:mt-9">
                 <Badge variant="outline" className="rounded-none font-mono">
                   {onboarding
-                    ? "Major 参赛池"
+                    ? t`Major 参赛池`
                     : IDENTITY_POOLS.find(
                         (pool) => pool.id === identity.currentPool,
                       )?.label}
@@ -460,25 +462,25 @@ export function IdentityPage() {
 
             {onboarding ? (
               <div className="border-t border-foreground/20 px-5 py-4 text-xs text-muted-foreground">
-                身份确认后将持续用于后续对局。
+                {t`身份确认后将持续用于后续对局。`}
               </div>
             ) : (
               <div className="grid grid-cols-3 border-t border-foreground/20">
                 <div className="px-4 py-3">
                   <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <TrophyIcon />
-                    战绩
+                    {t`战绩`}
                   </p>
                   <p className="mt-1 font-mono text-xs leading-5 font-semibold sm:text-sm">
-                    {identity.profile.stats.wins}胜{" "}
-                    {identity.profile.stats.losses}负{" "}
-                    {identity.profile.stats.draws}平
+                    {identity.profile.stats.wins}{t`胜`}{" "}
+                    {identity.profile.stats.losses}{t`负`}{" "}
+                    {identity.profile.stats.draws}{t`平`}
                   </p>
                 </div>
                 <div className="border-x border-foreground/20 px-4 py-3">
                   <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <ChartLineUpIcon />
-                    胜率
+                    {t`胜率`}
                   </p>
                   <p className="mt-1 font-mono text-sm font-semibold">
                     {identity.winRate}%
@@ -487,10 +489,10 @@ export function IdentityPage() {
                 <div className="px-4 py-3">
                   <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <FireIcon />
-                    连胜
+                    {t`连胜`}
                   </p>
                   <p className="mt-1 font-mono text-sm font-semibold">
-                    {identity.profile.stats.currentStreak} 连胜
+                    {identity.profile.stats.currentStreak} {t`连胜`}
                   </p>
                 </div>
               </div>
@@ -499,23 +501,23 @@ export function IdentityPage() {
 
           <Card className="min-w-0 gap-0 rounded-none border-foreground/25 bg-transparent py-0 shadow-none">
             <PanelHeader
-              title={onboarding ? "初始选手池" : "选择选手池"}
+              title={onboarding ? t`初始选手池` : t`选择选手池`}
               icon={<DiceFiveIcon className="size-5 text-primary" />}
               action={
-                <InfoTip label="查看抽取说明" side="left" className="size-10">
+                <InfoTip label={t`查看抽取说明`} side="left" className="size-10">
                   <p>
                     {onboarding
-                      ? "首次只能从 Major 参赛池抽取，确认后身份会固定保留。"
-                      : "抽取消耗一次机会；结果可使用、保留当前身份或继续重抽。"}
+                      ? t`首次只能从 Major 参赛池抽取，确认后身份会固定保留。`
+                      : t`抽取消耗一次机会；结果可使用、保留当前身份或继续重抽。`}
                   </p>
                   <p className="mt-1">
-                    <strong>Major 参赛池：</strong>参加过 1–4 次且未夺冠。
+                    <strong>{t`Major 参赛池：`}</strong>{t`参加过 1–4 次且未夺冠。`}
                   </p>
                   <p className="mt-1">
-                    <strong>Major 资深池：</strong>参加过至少 5 次且未夺冠。
+                    <strong>{t`Major 资深池：`}</strong>{t`参加过至少 5 次且未夺冠。`}
                   </p>
                   <p className="mt-1">
-                    <strong>Major 冠军池：</strong>至少赢得过一次冠军。
+                    <strong>{t`Major 冠军池：`}</strong>{t`至少赢得过一次冠军。`}
                   </p>
                 </InfoTip>
               }
@@ -558,18 +560,18 @@ export function IdentityPage() {
                           <p className="font-semibold">{pool.label}</p>
                           {!onboarding && pool.id === identity.currentPool ? (
                             <span className="border border-primary px-1.5 py-0.5 font-mono text-xs text-primary">
-                              当前身份池
+                              {t`当前身份池`}
                             </span>
                           ) : unlocked ? (
                             <span className="border border-foreground/25 px-1.5 py-0.5 font-mono text-xs text-foreground">
-                              已解锁
+                              {t`已解锁`}
                             </span>
                           ) : null}
                         </div>
                         {!unlocked ? (
                           <p className="mt-1 font-mono text-xs text-foreground">
-                            再胜 {pool.unlockWins - identity.profile.stats.wins}{" "}
-                            场解锁
+                            {t`再胜`} {pool.unlockWins - identity.profile.stats.wins}{" "}
+                            {t`场解锁`}
                           </p>
                         ) : null}
                       </div>
@@ -598,25 +600,25 @@ export function IdentityPage() {
                         {requestingDraw ? (
                           <>
                             <Spinner aria-hidden="true" />
-                            正在请求…
+                            {t`正在请求…`}
                           </>
                         ) : canDraw
                           ? onboarding
-                            ? "抽取初始身份"
-                            : "抽取 · 消耗 1 次"
+                            ? t`抽取初始身份`
+                            : t`抽取 · 消耗 1 次`
                           : identity.profile.drawCredits < 1
-                            ? "抽取 · 暂无机会"
-                            : "抽取 · 正在准备"}
+                            ? t`抽取 · 暂无机会`
+                            : t`抽取 · 正在准备`}
                       </Button>
                     ) : (
                       <span className="min-w-0 text-sm text-muted-foreground sm:min-w-28 sm:text-right">
                         {draw
-                          ? "抽取中"
+                          ? t`抽取中`
                           : !unlocked
-                            ? `${pool.unlockWins} 胜解锁`
+                            ? t`${pool.unlockWins} 胜解锁`
                             : identity.profile.drawCredits < 1
-                              ? "暂无机会"
-                              : "正在准备头像"}
+                              ? t`暂无机会`
+                              : t`正在准备头像`}
                       </span>
                     )}
                   </div>
@@ -648,9 +650,9 @@ export function IdentityPage() {
           acceptLabel={
             onboarding
               ? returnTo === "/"
-                ? "确认身份并进入大厅"
-                : "确认身份并继续"
-              : "使用新身份"
+                ? t`确认身份并进入大厅`
+                : t`确认身份并继续`
+              : t`使用新身份`
           }
           onOpenChange={changeDrawDialog}
           onKeep={() => void keepCurrentIdentity()}

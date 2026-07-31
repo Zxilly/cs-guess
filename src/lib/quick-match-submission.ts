@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import type { SessionResponse } from "@/lib/realtime";
 import type {
   BestOf,
@@ -16,7 +17,7 @@ export interface QuickMatchSnapshot {
 
 export class QuickMatchTimeoutError extends Error {
   constructor() {
-    super("匹配请求超时，请重试。");
+    super(t`匹配请求超时，请重试。`);
     this.name = "QuickMatchTimeoutError";
   }
 }

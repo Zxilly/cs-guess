@@ -1,12 +1,13 @@
+import { t } from "@lingui/core/macro";
 import type {
   GameDifficulty,
   OpponentVisibility,
 } from "@/types/game";
 
 const difficultyNames: Record<GameDifficulty, string> = {
-  easy: "简单",
-  full: "完整",
-  hard: "困难",
+  easy: t`简单`,
+  full: t`完整`,
+  hard: t`困难`,
 };
 
 export function friendRoomSettings({
@@ -21,8 +22,8 @@ export function friendRoomSettings({
   bestOf: number;
 }) {
   return [
-    `${maxPlayers} 人`,
-    visibility === "open" ? "明牌" : "隐藏猜测",
+    t`${maxPlayers} 人`,
+    visibility === "open" ? t`明牌` : t`隐藏猜测`,
     difficultyNames[difficulty],
     `BO${bestOf}`,
   ];
@@ -41,12 +42,12 @@ export function friendRoomStartDisabledReason({
   requiredPlayers: number;
   startPending: boolean;
 }) {
-  if (!connected) return "正在连接服务器";
-  if (!isHost) return "仅房主可以开始";
+  if (!connected) return t`正在连接服务器`;
+  if (!isHost) return t`仅房主可以开始`;
   if (connectedPlayers < requiredPlayers) {
-    return `还需 ${requiredPlayers - connectedPlayers} 位成员连接`;
+    return t`还需 ${requiredPlayers - connectedPlayers} 位成员连接`;
   }
-  if (startPending) return "正在通知所有成员";
+  if (startPending) return t`正在通知所有成员`;
   return "";
 }
 

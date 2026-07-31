@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   useEffect,
   useId,
@@ -20,6 +21,7 @@ import {
 import { PlayerAvatar } from "@/components/PlayerAvatar";
 import type { Player } from "@/data/players";
 import { countryNameZh } from "@/lib/country-geography";
+import { displayTeamName } from "@/lib/player-display";
 import {
   completionSuffix,
   movePlayerHighlight,
@@ -96,8 +98,8 @@ export function PlayerSearch({
     : "";
   const completion = highlightedPlayer
     ? highlightedCompletion
-      ? `${highlightedCompletion}  ⇥ 补全`
-      : "  ↵ 提交"
+      ? t`${highlightedCompletion}  ⇥ 补全`
+      : t`  ↵ 提交`
     : "";
   const listboxVisible =
     open &&
@@ -107,7 +109,7 @@ export function PlayerSearch({
     query.trim().length > 0;
   const noResultsAnnouncement =
     listboxVisible && visiblePlayers.length === 0
-      ? `没有找到与“${query.trim()}”匹配的选手`
+      ? t`没有找到与“${query.trim()}”匹配的选手`
       : "";
   const activeOptionId =
     listboxVisible && effectiveHighlightedId ? activeOptionDomId : undefined;
@@ -483,8 +485,8 @@ export function PlayerSearch({
             aria-controls={listboxVisible ? listboxId : undefined}
             aria-activedescendant={activeOptionId}
             aria-autocomplete="both"
-            aria-label="搜索并选择猜测选手"
-            placeholder="搜索选手昵称、姓名、战队或国家"
+            aria-label={t`搜索并选择猜测选手`}
+            placeholder={t`搜索选手昵称、姓名、战队或国家`}
             className="px-1 text-base"
           />
           {listboxVisible ? (
@@ -493,9 +495,9 @@ export function PlayerSearch({
               className="relative z-20 mt-2 max-h-[min(20rem,45vh)] w-full border border-foreground/30 bg-popover shadow-xl sm:absolute sm:inset-x-0 sm:top-[calc(100%+0.5rem)] sm:z-50 sm:mt-0 sm:max-h-96"
             >
               <CommandEmpty aria-hidden="true">
-                没有找到这名选手
+                {t`没有找到这名选手`}
               </CommandEmpty>
-              <CommandGroup heading="搜索结果">
+              <CommandGroup heading={t`搜索结果`}>
                 {visiblePlayers.map((player) => (
                   <CommandItem
                     key={player.id}
@@ -533,7 +535,7 @@ export function PlayerSearch({
                         {player.nickname}
                       </span>
                       <span className="block truncate text-xs text-muted-foreground">
-                        {player.name} · {player.team}
+                        {player.name} · {displayTeamName(player.team)}
                       </span>
                     </span>
                   </CommandItem>
@@ -561,7 +563,7 @@ export function PlayerSearch({
         aria-busy={isSubmitting || undefined}
       >
         <CrosshairSimpleIcon className="size-4" aria-hidden="true" />
-        <span>提交猜测</span>
+        <span>{t`提交猜测`}</span>
       </Button>
     </div>
   );

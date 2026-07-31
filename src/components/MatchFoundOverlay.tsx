@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { useRef } from "react";
 import {
   ArrowRightIcon,
@@ -15,9 +16,9 @@ import {
 import type { GameDifficulty, PartySize } from "@/types/game";
 
 const difficultyLabels: Record<GameDifficulty, string> = {
-  easy: "简单",
-  full: "完整",
-  hard: "困难",
+  easy: t`简单`,
+  full: t`完整`,
+  hard: t`困难`,
 };
 
 interface MatchFoundOverlayProps {
@@ -41,7 +42,7 @@ export function MatchFoundOverlay({
     <Dialog open onOpenChange={() => {}}>
       <DialogContent
         showCloseButton={false}
-        aria-label="匹配成功"
+        aria-label={t`匹配成功`}
         onEscapeKeyDown={(event) => event.preventDefault()}
         onPointerDownOutside={(event) => event.preventDefault()}
         onOpenAutoFocus={(event) => {
@@ -65,10 +66,10 @@ export function MatchFoundOverlay({
             <LightningIcon className="size-7" weight="fill" />
           </span>
           <DialogTitle className="mt-6 text-4xl font-bold tracking-[-0.04em] sm:text-5xl">
-            对手已就位
+            {t`对手已就位`}
           </DialogTitle>
           <DialogDescription className="sr-only">
-            匹配已经完成，立即进入对局。
+            {t`匹配已经完成，立即进入对局。`}
           </DialogDescription>
 
           <div
@@ -78,10 +79,10 @@ export function MatchFoundOverlay({
             ].join(" ")}
           >
             {Array.from({ length: partySize }, (_, index) => {
-              const slotLabel = index === 0 ? "你" : `对手 ${index}`;
+              const slotLabel = index === 0 ? t`你` : t`对手 ${index}`;
               const playerName =
                 playerNames[index] ??
-                (index === 0 ? "你的身份" : `等待中的对手 ${index}`);
+                (index === 0 ? t`你的身份` : t`等待中的对手 ${index}`);
               return (
                 <div
                   key={`player-slot-${index}`}
@@ -109,7 +110,7 @@ export function MatchFoundOverlay({
             className="mt-8 min-w-48 justify-between rounded-none"
             onClick={onEnter}
           >
-            立即进入
+            {t`立即进入`}
             <ArrowRightIcon />
           </Button>
         </div>

@@ -1,17 +1,21 @@
+import { t } from "@lingui/core/macro";
 import generatedPlayers from "./players.generated.json";
 
 export type PlayerRole = "AWPer" | "Rifler" | "IGL" | "Entry" | "Unknown";
 
-const playerRoleNames: Record<PlayerRole, string> = {
-  AWPer: "狙击手",
-  Rifler: "步枪手",
-  IGL: "指挥",
-  Entry: "突破手",
-  Unknown: "未知",
-};
-
 export function playerRoleNameZh(role: PlayerRole) {
-  return playerRoleNames[role];
+  switch (role) {
+    case "AWPer":
+      return t`狙击手`;
+    case "Rifler":
+      return t`步枪手`;
+    case "IGL":
+      return t`指挥`;
+    case "Entry":
+      return t`突破手`;
+    default:
+      return t`未知`;
+  }
 }
 
 export interface Player {

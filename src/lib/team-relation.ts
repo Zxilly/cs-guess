@@ -1,18 +1,10 @@
 import type { Player } from "@/data/players";
+import { isUnattachedTeam } from "@/lib/player-display";
 import type { TeamRelation } from "@/types/game";
-
-const UNKNOWN_TEAMS = new Set([
-  "",
-  "无队伍",
-  "undefined",
-  "null",
-  "none",
-  "n/a",
-]);
 
 function normalizeTeamName(team: string) {
   const normalized = team.trim().replace(/\s+/g, " ").toLocaleLowerCase();
-  return UNKNOWN_TEAMS.has(normalized) ? null : normalized;
+  return isUnattachedTeam(normalized) ? null : normalized;
 }
 
 function normalizedTeams(teams: readonly string[]) {
