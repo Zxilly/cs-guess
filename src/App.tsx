@@ -1,5 +1,13 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useRef } from "react";
+import { t } from "@lingui/core/macro";
 import { CrosshairIcon } from "@phosphor-icons/react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import {
   Navigate,
   Outlet,
@@ -17,6 +25,7 @@ import {
   realtimeCredentialsMatch,
 } from "@/lib/realtime";
 import { hasConfirmedIdentity } from "@/lib/identity-profile";
+import { getActiveLocale, subscribeToLocale } from "@/i18n";
 import {
   installRoutePreloading,
   routeModules,
@@ -166,7 +175,7 @@ export function IdentityRouteLoading() {
     <div
       className="min-h-svh bg-background text-foreground"
       role="status"
-      aria-label="正在载入玩家身份"
+      aria-label={t`正在载入玩家身份`}
     >
       <header className="border-b border-foreground/20">
         <div className="app-container flex min-h-20 items-center gap-3 py-4">
@@ -179,7 +188,7 @@ export function IdentityRouteLoading() {
               CS GUESS
             </p>
             <p className="truncate text-xs text-muted-foreground">
-              玩家身份
+              {t`玩家身份`}
             </p>
           </div>
         </div>
@@ -217,7 +226,7 @@ export function IdentityRouteLoading() {
             </div>
           </div>
         </div>
-        <span className="sr-only">正在载入身份资料…</span>
+        <span className="sr-only">{t`正在载入身份资料…`}</span>
       </main>
     </div>
   );
@@ -228,14 +237,14 @@ function RouteLoading() {
     <div
       className="min-h-svh bg-background text-foreground"
       role="status"
-      aria-label="正在载入页面"
+      aria-label={t`正在载入页面`}
     >
       <header className="border-b border-foreground/20">
         <div className="app-container flex items-center gap-3 py-5">
           <CrosshairIcon className="size-9 text-primary" />
           <div>
             <p className="font-bold tracking-[0.08em]">CS GUESS</p>
-            <p className="text-xs text-muted-foreground">正在准备对局</p>
+            <p className="text-xs text-muted-foreground">{t`正在准备对局`}</p>
           </div>
         </div>
       </header>
@@ -246,13 +255,17 @@ function RouteLoading() {
           <div className="h-52 animate-pulse border-b border-foreground/20 bg-muted/45 motion-reduce:animate-none sm:border-r sm:border-b-0" />
           <div className="h-52 animate-pulse bg-muted/25 motion-reduce:animate-none" />
         </div>
-        <span className="sr-only">正在载入…</span>
+        <span className="sr-only">{t`正在载入…`}</span>
       </main>
     </div>
   );
 }
 
 export function App() {
+  // Re-render the active route on locale changes without remounting it, so an
+  // in-progress game keeps its local state while all `t` messages refresh.
+  useSyncExternalStore(subscribeToLocale, getActiveLocale, getActiveLocale);
+
   return (
     <>
       <ScrollToTop />

@@ -1,7 +1,9 @@
+import { t } from "@lingui/core/macro";
 import { ArrowLeftIcon, CrosshairIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { Link } from "react-router";
 
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { SoundToggle } from "@/components/SoundToggle";
 import { Button } from "@/components/ui/button";
 
@@ -44,6 +46,7 @@ export function AppHeader({
           className="flex min-w-0 items-center justify-end gap-1 sm:gap-2"
           data-layout="app-header-actions"
         >
+          <LanguageSwitcher />
           <SoundToggle />
           {action ??
             (backToLobby ? (
@@ -55,7 +58,7 @@ export function AppHeader({
               >
                 <Link to="/">
                   <ArrowLeftIcon />
-                  模式大厅
+                  {t`模式大厅`}
                 </Link>
               </Button>
             ) : null)}
