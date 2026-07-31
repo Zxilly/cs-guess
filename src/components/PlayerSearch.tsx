@@ -485,8 +485,8 @@ export function PlayerSearch({
             aria-controls={listboxVisible ? listboxId : undefined}
             aria-activedescendant={activeOptionId}
             aria-autocomplete="both"
-            aria-label={t`搜索并选择猜测选手`}
-            placeholder={t`搜索选手昵称、姓名、战队或国家`}
+            aria-label={t`按昵称、姓名、战队或国家搜索并选择选手`}
+            placeholder={t`搜索选手、战队或国家`}
             className="px-1 text-base"
           />
           {listboxVisible ? (

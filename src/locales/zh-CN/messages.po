@@ -107,11 +107,11 @@ msgstr "{0}未命中"
 msgid "{connectedPlayers} / {maxPlayers} 位成员已就位，由你开始本轮"
 msgstr "{connectedPlayers} / {maxPlayers} 位成员已就位，由你开始本轮"
 
-#: src/components/PlayerIdentity.tsx:157
+#: src/components/PlayerIdentity.tsx:171
 msgid "{drawCredits} 次抽取"
 msgstr "{drawCredits} 次抽取"
 
-#: src/components/PlayerIdentity.tsx:79
+#: src/components/PlayerIdentity.tsx:93
 msgid "{drawCredits} 次抽取 · 胜 1 局或累计负 2 局 +1"
 msgstr "{drawCredits} 次抽取 · 胜 1 局或累计负 2 局 +1"
 
@@ -265,7 +265,7 @@ msgstr "28 对战·系列赛失败"
 msgid "29 单人·结算明细"
 msgstr "29 单人·结算明细"
 
-#: src/pages/ModeLobby.tsx:140
+#: src/pages/ModeLobby.tsx:139
 msgid "3 分钟 · 8 次尝试 · 全服同题"
 msgstr "3 分钟 · 8 次尝试 · 全服同题"
 
@@ -311,13 +311,13 @@ msgstr "39 好友房·创建中"
 
 #: src/pages/LiveGamePage.tsx:1577
 #: src/pages/MatchmakingPage.tsx:472
-#: src/pages/ModeLobby.tsx:214
+#: src/pages/ModeLobby.tsx:213
 #: src/pages/QuickMatch.tsx:265
 #: src/pages/QuickMatch.tsx:347
 msgid "4 人乱斗"
 msgstr "4 人乱斗"
 
-#: src/pages/ModeLobby.tsx:192
+#: src/pages/ModeLobby.tsx:191
 msgid "4 人乱斗："
 msgstr "4 人乱斗："
 
@@ -373,7 +373,7 @@ msgstr "CS Guess — 每日 Counter-Strike 职业选手竞猜挑战"
 msgid "CS Guess — 每日选手竞猜"
 msgstr "CS Guess — 每日选手竞猜"
 
-#: src/pages/ModeLobby.tsx:238
+#: src/pages/ModeLobby.tsx:237
 msgid "GitHub 源码"
 msgstr "GitHub 源码"
 
@@ -387,7 +387,7 @@ msgstr "HOST · 同题竞速"
 msgid "Major 冠军"
 msgstr "Major 冠军"
 
-#: src/hooks/use-anonymous-profile.ts:104
+#: src/hooks/use-anonymous-profile.ts:107
 msgid "Major 冠军池"
 msgstr "Major 冠军池"
 
@@ -399,7 +399,7 @@ msgstr "Major 冠军池："
 msgid "Major 参赛"
 msgstr "Major 参赛"
 
-#: src/hooks/use-anonymous-profile.ts:92
+#: src/hooks/use-anonymous-profile.ts:95
 #: src/pages/IdentityPage.tsx:455
 msgid "Major 参赛池"
 msgstr "Major 参赛池"
@@ -417,7 +417,7 @@ msgstr "Major 参赛选手"
 msgid "Major 次数"
 msgstr "Major 次数"
 
-#: src/hooks/use-anonymous-profile.ts:98
+#: src/hooks/use-anonymous-profile.ts:101
 msgid "Major 资深池"
 msgstr "Major 资深池"
 
@@ -465,7 +465,7 @@ msgstr "中文"
 msgid "主动离开"
 msgstr "主动离开"
 
-#: src/pages/ModeLobby.tsx:182
+#: src/pages/ModeLobby.tsx:181
 msgid "了解对战模式"
 msgstr "了解对战模式"
 
@@ -512,7 +512,7 @@ msgstr "仅房主可以开始"
 #: src/components/DailyGameLoading.tsx:116
 #: src/components/ModeSidebar.tsx:28
 #: src/pages/GamePage.tsx:267
-#: src/pages/ModeLobby.tsx:126
+#: src/pages/ModeLobby.tsx:125
 #: src/pages/StatsPage.tsx:56
 msgid "今日挑战"
 msgstr "今日挑战"
@@ -551,7 +551,7 @@ msgstr "今日挑战载入失败"
 msgid "今日挑战进行中"
 msgstr "今日挑战进行中"
 
-#: src/pages/ModeLobby.tsx:138
+#: src/pages/ModeLobby.tsx:137
 msgid "今日神秘选手"
 msgstr "今日神秘选手"
 
@@ -680,7 +680,7 @@ msgstr "你赢得了本场系列赛。"
 msgid "你赢得了本局。"
 msgstr "你赢得了本局。"
 
-#: src/pages/ModeLobby.tsx:197
+#: src/pages/ModeLobby.tsx:196
 msgid "使用房间号加入，或创建 2–8 人房间。"
 msgstr "使用房间号加入，或创建 2–8 人房间。"
 
@@ -819,7 +819,7 @@ msgstr "创建或加入房间请求正在处理。"
 msgid "创建房间 · {maxPlayers} 人 · {difficultyLabel} · BO{bestOf}"
 msgstr "创建房间 · {maxPlayers} 人 · {difficultyLabel} · BO{bestOf}"
 
-#: src/lib/realtime.ts:435
+#: src/lib/realtime.ts:386
 msgid "创建房间失败，请检查房间设置后重试。"
 msgstr "创建房间失败，请检查房间设置后重试。"
 
@@ -897,7 +897,7 @@ msgstr "加入或创建好友房间"
 msgid "加入房间"
 msgstr "加入房间"
 
-#: src/lib/realtime.ts:434
+#: src/lib/realtime.ts:385
 msgid "加入房间失败，请检查房间号后重试。"
 msgstr "加入房间失败，请检查房间号后重试。"
 
@@ -925,7 +925,7 @@ msgstr "加入请求与上次操作冲突，请确认房间号后重试。"
 msgid "加载中"
 msgstr "加载中"
 
-#: src/lib/realtime.ts:655
+#: src/lib/realtime.ts:607
 msgid "匹配会话已经失效。"
 msgstr "匹配会话已经失效。"
 
@@ -961,7 +961,7 @@ msgstr "匹配成功进场"
 msgid "匹配条件"
 msgstr "匹配条件"
 
-#: src/lib/realtime.ts:657
+#: src/lib/realtime.ts:609
 msgid "匹配票据已经失效或取消。"
 msgstr "匹配票据已经失效或取消。"
 
@@ -990,7 +990,7 @@ msgid "匹配请求超时，请重试。"
 msgstr "匹配请求超时，请重试。"
 
 #: src/components/ModeSidebar.tsx:29
-#: src/pages/ModeLobby.tsx:161
+#: src/pages/ModeLobby.tsx:160
 #: src/pages/SoloDifficultyPage.tsx:93
 #: src/pages/SoloGamePage.tsx:312
 #: src/pages/StatsPage.tsx:57
@@ -1044,7 +1044,7 @@ msgstr "原对手"
 msgid "原对手当前离线"
 msgstr "原对手当前离线"
 
-#: src/hooks/use-anonymous-profile.ts:94
+#: src/hooks/use-anonymous-profile.ts:97
 msgid "参加过 1–4 次 Major、尚未夺冠的职业选手"
 msgstr "参加过 1–4 次 Major、尚未夺冠的职业选手"
 
@@ -1052,7 +1052,7 @@ msgstr "参加过 1–4 次 Major、尚未夺冠的职业选手"
 msgid "参加过 1–4 次且未夺冠。"
 msgstr "参加过 1–4 次且未夺冠。"
 
-#: src/hooks/use-anonymous-profile.ts:100
+#: src/hooks/use-anonymous-profile.ts:103
 msgid "参加过至少 5 次 Major、尚未夺冠的资深选手"
 msgstr "参加过至少 5 次 Major、尚未夺冠的资深选手"
 
@@ -1060,7 +1060,7 @@ msgstr "参加过至少 5 次 Major、尚未夺冠的资深选手"
 msgid "参加过至少 5 次且未夺冠。"
 msgstr "参加过至少 5 次且未夺冠。"
 
-#: src/pages/ModeLobby.tsx:189
+#: src/pages/ModeLobby.tsx:188
 msgid "双方同题竞速，先猜中者获胜。"
 msgstr "双方同题竞速，先猜中者获胜。"
 
@@ -1084,11 +1084,11 @@ msgstr "取消匹配中"
 msgid "取消匹配失败"
 msgstr "取消匹配失败"
 
-#: src/lib/realtime.ts:643
+#: src/lib/realtime.ts:595
 msgid "取消匹配失败，请检查网络后重试。"
 msgstr "取消匹配失败，请检查网络后重试。"
 
-#: src/lib/realtime.ts:658
+#: src/lib/realtime.ts:610
 #: src/pages/MatchmakingPage.tsx:80
 #: src/pages/MatchmakingPage.tsx:151
 msgid "取消匹配失败，请稍后重试。"
@@ -1146,7 +1146,7 @@ msgstr "同步房间成员进度并进行同题竞猜。"
 msgid "同洲接近"
 msgstr "同洲接近"
 
-#: src/lib/realtime.ts:686
+#: src/lib/realtime.ts:639
 msgid "后台清理未完成，服务器将自动回收匹配票据。"
 msgstr "后台清理未完成，服务器将自动回收匹配票据。"
 
@@ -1162,7 +1162,7 @@ msgstr "命中"
 msgid "四人同题竞速"
 msgstr "四人同题竞速"
 
-#: src/pages/ModeLobby.tsx:193
+#: src/pages/ModeLobby.tsx:192
 msgid "四人同题竞速，率先猜中者获胜。"
 msgstr "四人同题竞速，率先猜中者获胜。"
 
@@ -1218,7 +1218,7 @@ msgstr "国籍同洲接近"
 msgid "在"
 msgstr "在"
 
-#: src/pages/ModeLobby.tsx:234
+#: src/pages/ModeLobby.tsx:233
 msgid "在 GitHub 查看 CS Guess 源码（新标签页打开）"
 msgstr "在 GitHub 查看 CS Guess 源码（新标签页打开）"
 
@@ -1240,11 +1240,11 @@ msgstr "在线"
 msgid "在线 · 本轮已判负"
 msgstr "在线 · 本轮已判负"
 
-#: src/pages/ModeLobby.tsx:208
+#: src/pages/ModeLobby.tsx:207
 msgid "在线匹配 · 1 / 3 / 5 局赛制"
 msgstr "在线匹配 · 1 / 3 / 5 局赛制"
 
-#: src/pages/ModeLobby.tsx:215
+#: src/pages/ModeLobby.tsx:214
 msgid "在线匹配 · 4 人 · 1 / 3 / 5 局赛制"
 msgstr "在线匹配 · 4 人 · 1 / 3 / 5 局赛制"
 
@@ -1312,7 +1312,7 @@ msgstr "好友房请求失败"
 #: src/pages/LiveGamePage.tsx:1332
 #: src/pages/LiveGamePage.tsx:1579
 #: src/pages/LiveGamePage.tsx:1620
-#: src/pages/ModeLobby.tsx:221
+#: src/pages/ModeLobby.tsx:220
 #: src/pages/RoomEntry.tsx:297
 #: src/pages/StatsPage.tsx:59
 msgid "好友房间"
@@ -1322,7 +1322,7 @@ msgstr "好友房间"
 msgid "好友房间 · {difficultyLabel}"
 msgstr "好友房间 · {difficultyLabel}"
 
-#: src/pages/ModeLobby.tsx:196
+#: src/pages/ModeLobby.tsx:195
 msgid "好友房间："
 msgstr "好友房间："
 
@@ -1367,7 +1367,7 @@ msgstr "完整职业选手目录，包含未参加过 Major 的选手。"
 
 #: src/components/ModeSidebar.tsx:30
 #: src/pages/LiveGamePage.tsx:1577
-#: src/pages/ModeLobby.tsx:207
+#: src/pages/ModeLobby.tsx:206
 #: src/pages/QuickMatch.tsx:265
 msgid "实时 1v1"
 msgstr "实时 1v1"
@@ -1376,7 +1376,7 @@ msgstr "实时 1v1"
 msgid "实时 1v1 匹配"
 msgstr "实时 1v1 匹配"
 
-#: src/pages/ModeLobby.tsx:188
+#: src/pages/ModeLobby.tsx:187
 msgid "实时 1v1："
 msgstr "实时 1v1："
 
@@ -1407,7 +1407,7 @@ msgstr "实时连接地址无效，请返回大厅后重新加入。"
 msgid "实时连接尚未恢复，请稍后重试。"
 msgstr "实时连接尚未恢复，请稍后重试。"
 
-#: src/debug/install-audit-state.ts:358
+#: src/debug/install-audit-state.ts:311
 msgid "实时连接暂时不可用，请检查网络后重试。"
 msgstr "实时连接暂时不可用，请检查网络后重试。"
 
@@ -1417,7 +1417,7 @@ msgid "实时连接正常"
 msgstr "实时连接正常"
 
 #. placeholder {0}: AUDIT_LABELS[audit] ?? audit
-#: src/debug/install-audit-state.ts:316
+#: src/debug/install-audit-state.ts:269
 msgid "审查｜{0}"
 msgstr "审查｜{0}"
 
@@ -1441,7 +1441,7 @@ msgstr "对战席位"
 msgid "对战服务发生错误，请稍后重试。"
 msgstr "对战服务发生错误，请稍后重试。"
 
-#: src/lib/realtime.ts:512
+#: src/lib/realtime.ts:462
 msgid "对战服务器暂时无法完成请求，请稍后重试。"
 msgstr "对战服务器暂时无法完成请求，请稍后重试。"
 
@@ -1465,7 +1465,7 @@ msgstr "对战服务暂时无法创建房间，请稍后重试。"
 msgid "对战服务暂时无法加入房间，请稍后重试。"
 msgstr "对战服务暂时无法加入房间，请稍后重试。"
 
-#: src/pages/ModeLobby.tsx:174
+#: src/pages/ModeLobby.tsx:173
 msgid "对战模式"
 msgstr "对战模式"
 
@@ -1588,7 +1588,7 @@ msgstr "尚未取得可用的房间状态，请重试连接或安全退出。"
 msgid "尚未取得可用的房间状态。你可以重试连接，或安全退出本房间。"
 msgstr "尚未取得可用的房间状态。你可以重试连接，或安全退出本房间。"
 
-#: src/components/PlayerIdentity.tsx:171
+#: src/components/PlayerIdentity.tsx:185
 msgid "局即可获得下一次机会。"
 msgstr "局即可获得下一次机会。"
 
@@ -1742,7 +1742,7 @@ msgstr "开始下一场"
 msgid "开始下一题"
 msgstr "开始下一题"
 
-#: src/pages/ModeLobby.tsx:154
+#: src/pages/ModeLobby.tsx:153
 #: src/pages/StatsPage.tsx:498
 msgid "开始今日挑战"
 msgstr "开始今日挑战"
@@ -1775,7 +1775,7 @@ msgstr "当前会话已失效，请刷新页面后重新加入。"
 msgid "当前会话已失效，请重新匹配。"
 msgstr "当前会话已失效，请重新匹配。"
 
-#: src/components/PlayerIdentity.tsx:171
+#: src/components/PlayerIdentity.tsx:185
 msgid "当前再输"
 msgstr "当前再输"
 
@@ -1900,17 +1900,17 @@ msgstr "成员离开"
 msgid "我的猜测"
 msgstr "我的猜测"
 
-#: src/components/PlayerIdentity.tsx:51
+#: src/components/PlayerIdentity.tsx:53
 #: src/pages/IdentityPage.tsx:383
 msgid "我的身份"
 msgstr "我的身份"
 
-#: src/components/PlayerIdentity.tsx:67
+#: src/components/PlayerIdentity.tsx:78
 msgid "我的身份 ·"
 msgstr "我的身份 ·"
 
 #: src/pages/IdentityPage.tsx:472
-#: src/pages/ModeLobby.tsx:96
+#: src/pages/ModeLobby.tsx:95
 msgid "战绩"
 msgstr "战绩"
 
@@ -1981,7 +1981,7 @@ msgstr "房间已满或对局已经开始，请向房主确认后重试。"
 msgid "房间已满或对局已经开始。"
 msgstr "房间已满或对局已经开始。"
 
-#: src/lib/realtime.ts:509
+#: src/lib/realtime.ts:459
 msgid "房间已满或当前状态无法加入。"
 msgstr "房间已满或当前状态无法加入。"
 
@@ -2109,6 +2109,10 @@ msgstr "指令未确认，请重试。"
 msgid "指挥"
 msgstr "指挥"
 
+#: src/components/PlayerSearch.tsx:488
+msgid "按昵称、姓名、战队或国家搜索并选择选手"
+msgstr "按昵称、姓名、战队或国家搜索并选择选手"
+
 #: src/components/ModeSidebar.tsx:79
 msgid "挑战完成"
 msgstr "挑战完成"
@@ -2137,10 +2141,6 @@ msgstr "提交猜测"
 msgid "提交的信息无效，请检查房间号和对局设置。"
 msgstr "提交的信息无效，请检查房间号和对局设置。"
 
-#: src/components/PlayerSearch.tsx:488
-msgid "搜索并选择猜测选手"
-msgstr "搜索并选择猜测选手"
-
 #: src/components/PlayerSearch.tsx:500
 msgid "搜索结果"
 msgstr "搜索结果"
@@ -2150,8 +2150,8 @@ msgid "搜索职业选手并提交猜测。"
 msgstr "搜索职业选手并提交猜测。"
 
 #: src/components/PlayerSearch.tsx:489
-msgid "搜索选手昵称、姓名、战队或国家"
-msgstr "搜索选手昵称、姓名、战队或国家"
+msgid "搜索选手、战队或国家"
+msgstr "搜索选手、战队或国家"
 
 #: src/machines/user-journey-machine.ts:602
 msgid "播放匹配成功反馈后进入实时对局。"
@@ -2494,6 +2494,10 @@ msgstr "查看对手信息规则"
 msgid "查看已持久化的对局结果和历史记录。"
 msgstr "查看已持久化的对局结果和历史记录。"
 
+#: src/pages/ModeLobby.tsx:93
+msgid "查看战绩"
+msgstr "查看战绩"
+
 #: src/pages/IdentityPage.tsx:507
 msgid "查看抽取说明"
 msgstr "查看抽取说明"
@@ -2512,7 +2516,7 @@ msgstr "查看结果图例"
 msgid "查看身份、今日挑战和全部游戏模式入口。"
 msgstr "查看身份、今日挑战和全部游戏模式入口。"
 
-#: src/components/PlayerIdentity.tsx:164
+#: src/components/PlayerIdentity.tsx:178
 msgid "查看身份与抽取规则"
 msgstr "查看身份与抽取规则"
 
@@ -2823,7 +2827,7 @@ msgstr "此对局来自旧版本，未包含逐轮记录。"
 msgid "步枪手"
 msgstr "步枪手"
 
-#: src/pages/ModeLobby.tsx:130
+#: src/pages/ModeLobby.tsx:129
 msgid "每日刷新"
 msgstr "每日刷新"
 
@@ -3003,7 +3007,7 @@ msgstr "第 {0} 次猜测"
 #. placeholder {0}: challenge?.roundNumber ?? "—"
 #. placeholder {0}: round.roundNumber
 #: src/pages/LiveGamePage.tsx:1950
-#: src/pages/ModeLobby.tsx:144
+#: src/pages/ModeLobby.tsx:143
 msgid "第 {0} 轮"
 msgstr "第 {0} 轮"
 
@@ -3129,7 +3133,7 @@ msgstr "答案的当前战队，是猜测选手曾经效力过的战队"
 msgid "简单"
 msgstr "简单"
 
-#: src/pages/ModeLobby.tsx:162
+#: src/pages/ModeLobby.tsx:161
 msgid "简单 / 完整 / 困难 · 3 分钟"
 msgstr "简单 / 完整 / 困难 · 3 分钟"
 
@@ -3148,8 +3152,8 @@ msgstr "简单为高成就选手；完整包含所有参加过 Major\n"
 msgid "管理玩家身份：{0}"
 msgstr "管理玩家身份：{0}"
 
-#: src/components/PlayerIdentity.tsx:97
 #: src/components/PlayerIdentity.tsx:112
+#: src/components/PlayerIdentity.tsx:127
 msgid "管理身份"
 msgstr "管理身份"
 
@@ -3187,7 +3191,7 @@ msgstr "系列赛胜利。"
 msgid "系统只会匹配人数、赛制、题库难度和猜测可见性完全相同的玩家。"
 msgstr "系统只会匹配人数、赛制、题库难度和猜测可见性完全相同的玩家。"
 
-#: src/components/PlayerIdentity.tsx:176
+#: src/components/PlayerIdentity.tsx:190
 msgid "累计"
 msgstr "累计"
 
@@ -3239,7 +3243,7 @@ msgstr "职业选手竞猜"
 msgid "胜"
 msgstr "胜"
 
-#: src/components/PlayerIdentity.tsx:160
+#: src/components/PlayerIdentity.tsx:174
 msgid "胜 1 局或累计负 2 局 +1"
 msgstr "胜 1 局或累计负 2 局 +1"
 
@@ -3255,7 +3259,7 @@ msgstr "胜利"
 msgid "胜利一局或累计输掉两局，均可获得一次抽取机会。"
 msgstr "胜利一局或累计输掉两局，均可获得一次抽取机会。"
 
-#: src/components/PlayerIdentity.tsx:168
+#: src/components/PlayerIdentity.tsx:182
 msgid "胜利一局获得 1 次抽取；每累计输掉两局获得 1 次。"
 msgstr "胜利一局获得 1 次抽取；每累计输掉两局获得 1 次。"
 
@@ -3267,16 +3271,16 @@ msgstr "胜局最佳猜数"
 msgid "胜局猜数暂无 · 仅统计有猜测记录的胜利回合"
 msgstr "胜局猜数暂无 · 仅统计有猜测记录的胜利回合"
 
-#: src/components/PlayerIdentity.tsx:134
+#: src/components/PlayerIdentity.tsx:148
 #: src/pages/IdentityPage.tsx:483
 msgid "胜率"
 msgstr "胜率"
 
-#: src/components/PlayerIdentity.tsx:176
+#: src/components/PlayerIdentity.tsx:190
 msgid "胜解锁"
 msgstr "胜解锁"
 
-#: src/components/PlayerIdentity.tsx:125
+#: src/components/PlayerIdentity.tsx:139
 msgid "胜负"
 msgstr "胜负"
 
@@ -3284,7 +3288,7 @@ msgstr "胜负"
 msgid "自动重连"
 msgstr "自动重连"
 
-#: src/hooks/use-anonymous-profile.ts:106
+#: src/hooks/use-anonymous-profile.ts:109
 msgid "至少赢得过 1 次 Major 冠军的选手"
 msgstr "至少赢得过 1 次 Major 冠军的选手"
 
@@ -3359,12 +3363,6 @@ msgstr "赛制说明"
 msgid "距离未知"
 msgstr "距离未知"
 
-#: src/components/PlayerIdentity.tsx:98
-#: src/components/PlayerIdentity.tsx:113
-#: src/pages/ModeLobby.tsx:87
-msgid "身份"
-msgstr "身份"
-
 #: src/pages/IdentityPage.tsx:332
 #: src/pages/IdentityPage.tsx:344
 msgid "身份保存失败，请保留此窗口并重试。"
@@ -3390,7 +3388,7 @@ msgstr "输入 6 位房间号"
 msgid "输入好友分享的 6 位房间号。凭证只保存在当前标签页。"
 msgstr "输入好友分享的 6 位房间号。凭证只保存在当前标签页。"
 
-#: src/pages/ModeLobby.tsx:222
+#: src/pages/ModeLobby.tsx:221
 msgid "输入房间号 · 或创建房间"
 msgstr "输入房间号 · 或创建房间"
 
@@ -3431,7 +3429,7 @@ msgstr "连接中"
 msgid "连接中断"
 msgstr "连接中断"
 
-#: src/debug/install-audit-state.ts:360
+#: src/debug/install-audit-state.ts:313
 msgid "连接中断，正在尝试恢复对局。"
 msgstr "连接中断，正在尝试恢复对局。"
 
@@ -3474,7 +3472,7 @@ msgstr "连接队列中"
 msgid "连接需要处理"
 msgstr "连接需要处理"
 
-#: src/components/PlayerIdentity.tsx:143
+#: src/components/PlayerIdentity.tsx:157
 #: src/pages/IdentityPage.tsx:492
 #: src/pages/IdentityPage.tsx:495
 msgid "连胜"
@@ -3497,7 +3495,7 @@ msgstr "退出房间"
 msgid "退出房间失败，凭证已保留，请检查网络后重试。"
 msgstr "退出房间失败，凭证已保留，请检查网络后重试。"
 
-#: src/lib/realtime.ts:598
+#: src/lib/realtime.ts:547
 msgid "退出房间失败，请检查网络后重试。"
 msgstr "退出房间失败，请检查网络后重试。"
 
@@ -3509,7 +3507,7 @@ msgstr "选手卡横向滚动，并由中心指针选出新的身份。"
 msgid "选手已连接"
 msgstr "选手已连接"
 
-#: src/hooks/use-anonymous-profile.ts:141
+#: src/hooks/use-anonymous-profile.ts:144
 msgid "选手池为空"
 msgstr "选手池为空"
 
@@ -3521,11 +3519,11 @@ msgstr "选手目录已更新，已安全开始新的练习回合。"
 msgid "选择人数、题库、赛制和对手猜测可见性。"
 msgstr "选择人数、题库、赛制和对手猜测可见性。"
 
-#: src/pages/ModeLobby.tsx:104
+#: src/pages/ModeLobby.tsx:103
 msgid "选择游戏模式"
 msgstr "选择游戏模式"
 
-#: src/pages/ModeLobby.tsx:179
+#: src/pages/ModeLobby.tsx:178
 msgid "选择玩法"
 msgstr "选择玩法"
 

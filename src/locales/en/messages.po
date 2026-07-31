@@ -107,11 +107,11 @@ msgstr "{0}Miss"
 msgid "{connectedPlayers} / {maxPlayers} 位成员已就位，由你开始本轮"
 msgstr "{connectedPlayers} / {maxPlayers} members are in place, you start this round"
 
-#: src/components/PlayerIdentity.tsx:157
+#: src/components/PlayerIdentity.tsx:171
 msgid "{drawCredits} 次抽取"
 msgstr "{drawCredits, plural, one {# draw} other {# draws}}"
 
-#: src/components/PlayerIdentity.tsx:79
+#: src/components/PlayerIdentity.tsx:93
 msgid "{drawCredits} 次抽取 · 胜 1 局或累计负 2 局 +1"
 msgstr "{drawCredits, plural, one {# draw} other {# draws}} · Win 1 game or lose 2 games in total +1"
 
@@ -265,7 +265,7 @@ msgstr "28 Battle·Series Failed"
 msgid "29 单人·结算明细"
 msgstr "29 Single person·Settlement details"
 
-#: src/pages/ModeLobby.tsx:140
+#: src/pages/ModeLobby.tsx:139
 msgid "3 分钟 · 8 次尝试 · 全服同题"
 msgstr "3 minutes · 8 attempts · Same question on all servers"
 
@@ -311,13 +311,13 @@ msgstr "39 Friend Room·Creating"
 
 #: src/pages/LiveGamePage.tsx:1577
 #: src/pages/MatchmakingPage.tsx:472
-#: src/pages/ModeLobby.tsx:214
+#: src/pages/ModeLobby.tsx:213
 #: src/pages/QuickMatch.tsx:265
 #: src/pages/QuickMatch.tsx:347
 msgid "4 人乱斗"
 msgstr "4-Player Free-for-All"
 
-#: src/pages/ModeLobby.tsx:192
+#: src/pages/ModeLobby.tsx:191
 msgid "4 人乱斗："
 msgstr "4-Player Free-for-All:"
 
@@ -373,7 +373,7 @@ msgstr "CS Guess — A daily Counter-Strike pro player guessing challenge"
 msgid "CS Guess — 每日选手竞猜"
 msgstr "CS Guess — Daily Player Guessing"
 
-#: src/pages/ModeLobby.tsx:238
+#: src/pages/ModeLobby.tsx:237
 msgid "GitHub 源码"
 msgstr "GitHub source code"
 
@@ -385,9 +385,9 @@ msgstr "HOST·Same topic competition"
 #: src/components/DailyResultPanel.tsx:154
 #: src/components/GuessTable.tsx:114
 msgid "Major 冠军"
-msgstr "Major Titles"
+msgstr "Major Wins"
 
-#: src/hooks/use-anonymous-profile.ts:104
+#: src/hooks/use-anonymous-profile.ts:107
 msgid "Major 冠军池"
 msgstr "Major Champion Pool"
 
@@ -397,9 +397,9 @@ msgstr "Major Champion Pool:"
 
 #: src/components/GuessTable.tsx:113
 msgid "Major 参赛"
-msgstr "Major Participation"
+msgstr "Major Appearances"
 
-#: src/hooks/use-anonymous-profile.ts:92
+#: src/hooks/use-anonymous-profile.ts:95
 #: src/pages/IdentityPage.tsx:455
 msgid "Major 参赛池"
 msgstr "Major Participant Pool"
@@ -417,7 +417,7 @@ msgstr "Major Players"
 msgid "Major 次数"
 msgstr "Major Appearances"
 
-#: src/hooks/use-anonymous-profile.ts:98
+#: src/hooks/use-anonymous-profile.ts:101
 msgid "Major 资深池"
 msgstr "Major senior pool"
 
@@ -465,7 +465,7 @@ msgstr "Chinese"
 msgid "主动离开"
 msgstr "Leave voluntarily"
 
-#: src/pages/ModeLobby.tsx:182
+#: src/pages/ModeLobby.tsx:181
 msgid "了解对战模式"
 msgstr "Learn about Versus Mode"
 
@@ -512,7 +512,7 @@ msgstr "Only homeowners can start"
 #: src/components/DailyGameLoading.tsx:116
 #: src/components/ModeSidebar.tsx:28
 #: src/pages/GamePage.tsx:267
-#: src/pages/ModeLobby.tsx:126
+#: src/pages/ModeLobby.tsx:125
 #: src/pages/StatsPage.tsx:56
 msgid "今日挑战"
 msgstr "Daily Challenge"
@@ -551,7 +551,7 @@ msgstr "Today's challenge failed to load"
 msgid "今日挑战进行中"
 msgstr "Today's challenge is in progress"
 
-#: src/pages/ModeLobby.tsx:138
+#: src/pages/ModeLobby.tsx:137
 msgid "今日神秘选手"
 msgstr "Today’s mystery player"
 
@@ -680,7 +680,7 @@ msgstr "You win this series."
 msgid "你赢得了本局。"
 msgstr "You win this round."
 
-#: src/pages/ModeLobby.tsx:197
+#: src/pages/ModeLobby.tsx:196
 msgid "使用房间号加入，或创建 2–8 人房间。"
 msgstr "Join using your room number, or create a room of 2–8 people."
 
@@ -819,7 +819,7 @@ msgstr "The request to create or join a room is being processed."
 msgid "创建房间 · {maxPlayers} 人 · {difficultyLabel} · BO{bestOf}"
 msgstr "Create room · {maxPlayers} people · {difficultyLabel} · BO{bestOf}"
 
-#: src/lib/realtime.ts:435
+#: src/lib/realtime.ts:386
 msgid "创建房间失败，请检查房间设置后重试。"
 msgstr "Room creation failed, please check the room settings and try again."
 
@@ -897,7 +897,7 @@ msgstr "Join or Create a Friend Room"
 msgid "加入房间"
 msgstr "Join Room"
 
-#: src/lib/realtime.ts:434
+#: src/lib/realtime.ts:385
 msgid "加入房间失败，请检查房间号后重试。"
 msgstr "Failed to join the room, please check the room number and try again."
 
@@ -925,7 +925,7 @@ msgstr "The request to join conflicts with the last operation. Please confirm th
 msgid "加载中"
 msgstr "Loading"
 
-#: src/lib/realtime.ts:655
+#: src/lib/realtime.ts:607
 msgid "匹配会话已经失效。"
 msgstr "The matching session has expired."
 
@@ -961,7 +961,7 @@ msgstr "Successful match entry"
 msgid "匹配条件"
 msgstr "Match condition"
 
-#: src/lib/realtime.ts:657
+#: src/lib/realtime.ts:609
 msgid "匹配票据已经失效或取消。"
 msgstr "The matching ticket has expired or been cancelled."
 
@@ -990,7 +990,7 @@ msgid "匹配请求超时，请重试。"
 msgstr "The matching request timed out, please try again."
 
 #: src/components/ModeSidebar.tsx:29
-#: src/pages/ModeLobby.tsx:161
+#: src/pages/ModeLobby.tsx:160
 #: src/pages/SoloDifficultyPage.tsx:93
 #: src/pages/SoloGamePage.tsx:312
 #: src/pages/StatsPage.tsx:57
@@ -1009,7 +1009,7 @@ msgstr "Solo practice failed"
 #: src/components/CelebrationOverlay.tsx:179
 #: src/components/DailyResultPanel.tsx:84
 msgid "单人练习完成"
-msgstr "Single player exercise completed"
+msgstr "Solo Practice Complete"
 
 #: src/machines/user-journey-machine.ts:552
 msgid "单人练习成功"
@@ -1044,7 +1044,7 @@ msgstr "Original opponent"
 msgid "原对手当前离线"
 msgstr "The original opponent is currently offline"
 
-#: src/hooks/use-anonymous-profile.ts:94
+#: src/hooks/use-anonymous-profile.ts:97
 msgid "参加过 1–4 次 Major、尚未夺冠的职业选手"
 msgstr "Professional players who have participated in 1–4 Majors and have yet to win a championship"
 
@@ -1052,7 +1052,7 @@ msgstr "Professional players who have participated in 1–4 Majors and have yet 
 msgid "参加过 1–4 次且未夺冠。"
 msgstr "Participated 1–4 times without winning."
 
-#: src/hooks/use-anonymous-profile.ts:100
+#: src/hooks/use-anonymous-profile.ts:103
 msgid "参加过至少 5 次 Major、尚未夺冠的资深选手"
 msgstr "Senior players who have participated in at least 5 Majors and have yet to win a championship"
 
@@ -1060,7 +1060,7 @@ msgstr "Senior players who have participated in at least 5 Majors and have yet t
 msgid "参加过至少 5 次且未夺冠。"
 msgstr "Participated at least 5 times without winning."
 
-#: src/pages/ModeLobby.tsx:189
+#: src/pages/ModeLobby.tsx:188
 msgid "双方同题竞速，先猜中者获胜。"
 msgstr "Both sides compete on the same topic, and the first one to guess correctly wins."
 
@@ -1084,11 +1084,11 @@ msgstr "Canceling matching"
 msgid "取消匹配失败"
 msgstr "Unmatch failed"
 
-#: src/lib/realtime.ts:643
+#: src/lib/realtime.ts:595
 msgid "取消匹配失败，请检查网络后重试。"
 msgstr "Unmatching failed, please check the network and try again."
 
-#: src/lib/realtime.ts:658
+#: src/lib/realtime.ts:610
 #: src/pages/MatchmakingPage.tsx:80
 #: src/pages/MatchmakingPage.tsx:151
 msgid "取消匹配失败，请稍后重试。"
@@ -1146,7 +1146,7 @@ msgstr "Synchronize the progress of room members and compete on the same topic."
 msgid "同洲接近"
 msgstr "Close to the same continent"
 
-#: src/lib/realtime.ts:686
+#: src/lib/realtime.ts:639
 msgid "后台清理未完成，服务器将自动回收匹配票据。"
 msgstr "The background cleanup is not completed and the server will automatically recycle matching tickets."
 
@@ -1162,7 +1162,7 @@ msgstr "hit"
 msgid "四人同题竞速"
 msgstr "Four people racing on the same topic"
 
-#: src/pages/ModeLobby.tsx:193
+#: src/pages/ModeLobby.tsx:192
 msgid "四人同题竞速，率先猜中者获胜。"
 msgstr "Four people compete on the same question, and the first person to guess correctly wins."
 
@@ -1208,7 +1208,7 @@ msgstr "Country or Region"
 
 #: src/components/GuessTable.tsx:110
 msgid "国籍"
-msgstr "Country of Citizenship"
+msgstr "Country"
 
 #: src/components/GuessTable.tsx:592
 msgid "国籍同洲接近"
@@ -1218,7 +1218,7 @@ msgstr "Nationality close to the same continent"
 msgid "在"
 msgstr "exist"
 
-#: src/pages/ModeLobby.tsx:234
+#: src/pages/ModeLobby.tsx:233
 msgid "在 GitHub 查看 CS Guess 源码（新标签页打开）"
 msgstr "View CS Guess source code on GitHub (opens in new tab)"
 
@@ -1240,11 +1240,11 @@ msgstr "Online"
 msgid "在线 · 本轮已判负"
 msgstr "Online · This round has been lost"
 
-#: src/pages/ModeLobby.tsx:208
+#: src/pages/ModeLobby.tsx:207
 msgid "在线匹配 · 1 / 3 / 5 局赛制"
 msgstr "Online matching · 1 / 3 / 5 game format"
 
-#: src/pages/ModeLobby.tsx:215
+#: src/pages/ModeLobby.tsx:214
 msgid "在线匹配 · 4 人 · 1 / 3 / 5 局赛制"
 msgstr "Online matchmaking · 4 players · 1 / 3 / 5 rounds"
 
@@ -1312,7 +1312,7 @@ msgstr "Friend room request failed"
 #: src/pages/LiveGamePage.tsx:1332
 #: src/pages/LiveGamePage.tsx:1579
 #: src/pages/LiveGamePage.tsx:1620
-#: src/pages/ModeLobby.tsx:221
+#: src/pages/ModeLobby.tsx:220
 #: src/pages/RoomEntry.tsx:297
 #: src/pages/StatsPage.tsx:59
 msgid "好友房间"
@@ -1322,7 +1322,7 @@ msgstr "Friend Room"
 msgid "好友房间 · {difficultyLabel}"
 msgstr "Friend Room · {difficultyLabel}"
 
-#: src/pages/ModeLobby.tsx:196
+#: src/pages/ModeLobby.tsx:195
 msgid "好友房间："
 msgstr "Friend Room:"
 
@@ -1367,7 +1367,7 @@ msgstr "Complete professional player directory, including players who have not p
 
 #: src/components/ModeSidebar.tsx:30
 #: src/pages/LiveGamePage.tsx:1577
-#: src/pages/ModeLobby.tsx:207
+#: src/pages/ModeLobby.tsx:206
 #: src/pages/QuickMatch.tsx:265
 msgid "实时 1v1"
 msgstr "Live 1v1"
@@ -1376,7 +1376,7 @@ msgstr "Live 1v1"
 msgid "实时 1v1 匹配"
 msgstr "Live 1v1 matches"
 
-#: src/pages/ModeLobby.tsx:188
+#: src/pages/ModeLobby.tsx:187
 msgid "实时 1v1："
 msgstr "Live 1v1:"
 
@@ -1407,7 +1407,7 @@ msgstr "The real-time connection address is invalid, please return to the lobby 
 msgid "实时连接尚未恢复，请稍后重试。"
 msgstr "The live connection has not been restored, please try again later."
 
-#: src/debug/install-audit-state.ts:358
+#: src/debug/install-audit-state.ts:311
 msgid "实时连接暂时不可用，请检查网络后重试。"
 msgstr "The live connection is temporarily unavailable, please check the network and try again."
 
@@ -1417,7 +1417,7 @@ msgid "实时连接正常"
 msgstr "Real time connection is normal"
 
 #. placeholder {0}: AUDIT_LABELS[audit] ?? audit
-#: src/debug/install-audit-state.ts:316
+#: src/debug/install-audit-state.ts:269
 msgid "审查｜{0}"
 msgstr "Review｜{0}"
 
@@ -1441,7 +1441,7 @@ msgstr "Battle seat"
 msgid "对战服务发生错误，请稍后重试。"
 msgstr "An error occurred in the battle service, please try again later."
 
-#: src/lib/realtime.ts:512
+#: src/lib/realtime.ts:462
 msgid "对战服务器暂时无法完成请求，请稍后重试。"
 msgstr "The battle server is temporarily unable to complete the request. Please try again later."
 
@@ -1465,7 +1465,7 @@ msgstr "The battle service is temporarily unable to create a room, please try ag
 msgid "对战服务暂时无法加入房间，请稍后重试。"
 msgstr "The battle service is temporarily unable to join the room, please try again later."
 
-#: src/pages/ModeLobby.tsx:174
+#: src/pages/ModeLobby.tsx:173
 msgid "对战模式"
 msgstr "Versus Modes"
 
@@ -1588,7 +1588,7 @@ msgstr "The available room status has not been obtained, please try to connect a
 msgid "尚未取得可用的房间状态。你可以重试连接，或安全退出本房间。"
 msgstr "No available room status has been obtained. You can retry the connection, or exit the room safely."
 
-#: src/components/PlayerIdentity.tsx:171
+#: src/components/PlayerIdentity.tsx:185
 msgid "局即可获得下一次机会。"
 msgstr "game to get the next chance."
 
@@ -1742,7 +1742,7 @@ msgstr "Start next game"
 msgid "开始下一题"
 msgstr "Start Next Question"
 
-#: src/pages/ModeLobby.tsx:154
+#: src/pages/ModeLobby.tsx:153
 #: src/pages/StatsPage.tsx:498
 msgid "开始今日挑战"
 msgstr "Start today's challenge"
@@ -1775,7 +1775,7 @@ msgstr "The current session has expired, please refresh the page and join again.
 msgid "当前会话已失效，请重新匹配。"
 msgstr "The current session has expired, please try again."
 
-#: src/components/PlayerIdentity.tsx:171
+#: src/components/PlayerIdentity.tsx:185
 msgid "当前再输"
 msgstr "Lose now"
 
@@ -1900,17 +1900,17 @@ msgstr "members leave"
 msgid "我的猜测"
 msgstr "My Guesses"
 
-#: src/components/PlayerIdentity.tsx:51
+#: src/components/PlayerIdentity.tsx:53
 #: src/pages/IdentityPage.tsx:383
 msgid "我的身份"
 msgstr "My Identity"
 
-#: src/components/PlayerIdentity.tsx:67
+#: src/components/PlayerIdentity.tsx:78
 msgid "我的身份 ·"
 msgstr "my identity ·"
 
 #: src/pages/IdentityPage.tsx:472
-#: src/pages/ModeLobby.tsx:96
+#: src/pages/ModeLobby.tsx:95
 msgid "战绩"
 msgstr "History"
 
@@ -1981,7 +1981,7 @@ msgstr "The room is full or the game has started. Please confirm with the host a
 msgid "房间已满或对局已经开始。"
 msgstr "The room is full or the game has started."
 
-#: src/lib/realtime.ts:509
+#: src/lib/realtime.ts:459
 msgid "房间已满或当前状态无法加入。"
 msgstr "The room is full or cannot be joined due to current status."
 
@@ -2109,6 +2109,10 @@ msgstr "The command was not confirmed, please try again."
 msgid "指挥"
 msgstr "IGL"
 
+#: src/components/PlayerSearch.tsx:488
+msgid "按昵称、姓名、战队或国家搜索并选择选手"
+msgstr "Search and select a player by nickname, name, team, or country"
+
 #: src/components/ModeSidebar.tsx:79
 msgid "挑战完成"
 msgstr "Challenge completed"
@@ -2137,10 +2141,6 @@ msgstr "Submit a guess"
 msgid "提交的信息无效，请检查房间号和对局设置。"
 msgstr "The submitted information is invalid, please check the room number and game settings."
 
-#: src/components/PlayerSearch.tsx:488
-msgid "搜索并选择猜测选手"
-msgstr "Search and select guess player"
-
 #: src/components/PlayerSearch.tsx:500
 msgid "搜索结果"
 msgstr "Search results"
@@ -2150,8 +2150,8 @@ msgid "搜索职业选手并提交猜测。"
 msgstr "Search for pros and submit your guess."
 
 #: src/components/PlayerSearch.tsx:489
-msgid "搜索选手昵称、姓名、战队或国家"
-msgstr "Search for player nickname, name, team or country"
+msgid "搜索选手、战队或国家"
+msgstr "Search players, teams, or countries"
 
 #: src/machines/user-journey-machine.ts:602
 msgid "播放匹配成功反馈后进入实时对局。"
@@ -2494,13 +2494,17 @@ msgstr "View opponent information rules"
 msgid "查看已持久化的对局结果和历史记录。"
 msgstr "View persisted game results and history."
 
+#: src/pages/ModeLobby.tsx:93
+msgid "查看战绩"
+msgstr "View match history"
+
 #: src/pages/IdentityPage.tsx:507
 msgid "查看抽取说明"
 msgstr "View extraction instructions"
 
 #: src/components/ModeSidebar.tsx:271
 msgid "查看竞猜规则"
-msgstr "View betting rules"
+msgstr "How to Play"
 
 #: src/pages/GamePage.tsx:327
 #: src/pages/LiveGamePage.tsx:2006
@@ -2512,7 +2516,7 @@ msgstr "View the result legend"
 msgid "查看身份、今日挑战和全部游戏模式入口。"
 msgstr "View your identity, today's challenge, and access to all game modes."
 
-#: src/components/PlayerIdentity.tsx:164
+#: src/components/PlayerIdentity.tsx:178
 msgid "查看身份与抽取规则"
 msgstr "View identity and extraction rules"
 
@@ -2823,7 +2827,7 @@ msgstr "This match is from an older version and does not include round-by-round 
 msgid "步枪手"
 msgstr "Rifler"
 
-#: src/pages/ModeLobby.tsx:130
+#: src/pages/ModeLobby.tsx:129
 msgid "每日刷新"
 msgstr "Refreshed daily"
 
@@ -3003,7 +3007,7 @@ msgstr "Guess {0}"
 #. placeholder {0}: challenge?.roundNumber ?? "—"
 #. placeholder {0}: round.roundNumber
 #: src/pages/LiveGamePage.tsx:1950
-#: src/pages/ModeLobby.tsx:144
+#: src/pages/ModeLobby.tsx:143
 msgid "第 {0} 轮"
 msgstr "Round {0}"
 
@@ -3129,7 +3133,7 @@ msgstr "The current team of the answer is the team that the guessed player has p
 msgid "简单"
 msgstr "Easy"
 
-#: src/pages/ModeLobby.tsx:162
+#: src/pages/ModeLobby.tsx:161
 msgid "简单 / 完整 / 困难 · 3 分钟"
 msgstr "Easy / Complete / Hard · 3 min"
 
@@ -3148,8 +3152,8 @@ msgstr "Simply for high-achieving players; complete for all those who have parti
 msgid "管理玩家身份：{0}"
 msgstr "Manage player identity: {0}"
 
-#: src/components/PlayerIdentity.tsx:97
 #: src/components/PlayerIdentity.tsx:112
+#: src/components/PlayerIdentity.tsx:127
 msgid "管理身份"
 msgstr "Manage identities"
 
@@ -3187,7 +3191,7 @@ msgstr "Series win."
 msgid "系统只会匹配人数、赛制、题库难度和猜测可见性完全相同的玩家。"
 msgstr "The system will only match players with exactly the same number of players, format, question bank difficulty, and guess visibility."
 
-#: src/components/PlayerIdentity.tsx:176
+#: src/components/PlayerIdentity.tsx:190
 msgid "累计"
 msgstr "Grand total"
 
@@ -3239,7 +3243,7 @@ msgstr "Pro Player Guessing"
 msgid "胜"
 msgstr "W"
 
-#: src/components/PlayerIdentity.tsx:160
+#: src/components/PlayerIdentity.tsx:174
 msgid "胜 1 局或累计负 2 局 +1"
 msgstr "Win 1 game or lose 2 games in total +1"
 
@@ -3255,7 +3259,7 @@ msgstr "victory"
 msgid "胜利一局或累计输掉两局，均可获得一次抽取机会。"
 msgstr "If you win one round or lose two rounds, you will get a chance to draw."
 
-#: src/components/PlayerIdentity.tsx:168
+#: src/components/PlayerIdentity.tsx:182
 msgid "胜利一局获得 1 次抽取；每累计输掉两局获得 1 次。"
 msgstr "You will get 1 draw for winning a round; you will get 1 draw for every two rounds you lose."
 
@@ -3267,16 +3271,16 @@ msgstr "Fewest Guesses in a Win"
 msgid "胜局猜数暂无 · 仅统计有猜测记录的胜利回合"
 msgstr "No winning guess average yet · only wins with guesses are counted"
 
-#: src/components/PlayerIdentity.tsx:134
+#: src/components/PlayerIdentity.tsx:148
 #: src/pages/IdentityPage.tsx:483
 msgid "胜率"
 msgstr "Win Rate"
 
-#: src/components/PlayerIdentity.tsx:176
+#: src/components/PlayerIdentity.tsx:190
 msgid "胜解锁"
 msgstr "Win to unlock"
 
-#: src/components/PlayerIdentity.tsx:125
+#: src/components/PlayerIdentity.tsx:139
 msgid "胜负"
 msgstr "Victory or defeat"
 
@@ -3284,7 +3288,7 @@ msgstr "Victory or defeat"
 msgid "自动重连"
 msgstr "Automatically reconnect"
 
-#: src/hooks/use-anonymous-profile.ts:106
+#: src/hooks/use-anonymous-profile.ts:109
 msgid "至少赢得过 1 次 Major 冠军的选手"
 msgstr "Players who have won at least 1 Major"
 
@@ -3359,12 +3363,6 @@ msgstr "About series formats"
 msgid "距离未知"
 msgstr "unknown distance"
 
-#: src/components/PlayerIdentity.tsx:98
-#: src/components/PlayerIdentity.tsx:113
-#: src/pages/ModeLobby.tsx:87
-msgid "身份"
-msgstr "Identity"
-
 #: src/pages/IdentityPage.tsx:332
 #: src/pages/IdentityPage.tsx:344
 msgid "身份保存失败，请保留此窗口并重试。"
@@ -3390,7 +3388,7 @@ msgstr "Enter 6-digit room number"
 msgid "输入好友分享的 6 位房间号。凭证只保存在当前标签页。"
 msgstr "Enter the 6-digit room number shared by your friend. Credentials are only saved in the current tab."
 
-#: src/pages/ModeLobby.tsx:222
+#: src/pages/ModeLobby.tsx:221
 msgid "输入房间号 · 或创建房间"
 msgstr "Enter room code · or create a room"
 
@@ -3431,7 +3429,7 @@ msgstr "Connecting"
 msgid "连接中断"
 msgstr "Connection interrupted"
 
-#: src/debug/install-audit-state.ts:360
+#: src/debug/install-audit-state.ts:313
 msgid "连接中断，正在尝试恢复对局。"
 msgstr "The connection was interrupted, trying to resume the game."
 
@@ -3474,7 +3472,7 @@ msgstr "Connecting to Queue"
 msgid "连接需要处理"
 msgstr "Connection needs handling"
 
-#: src/components/PlayerIdentity.tsx:143
+#: src/components/PlayerIdentity.tsx:157
 #: src/pages/IdentityPage.tsx:492
 #: src/pages/IdentityPage.tsx:495
 msgid "连胜"
@@ -3497,7 +3495,7 @@ msgstr "Exit the room"
 msgid "退出房间失败，凭证已保留，请检查网络后重试。"
 msgstr "Failed to exit the room, the credentials have been retained, please check the network and try again."
 
-#: src/lib/realtime.ts:598
+#: src/lib/realtime.ts:547
 msgid "退出房间失败，请检查网络后重试。"
 msgstr "Failed to exit the room, please check the network and try again."
 
@@ -3509,7 +3507,7 @@ msgstr "The player card scrolls horizontally, and a new identity is selected by 
 msgid "选手已连接"
 msgstr "Player is connected"
 
-#: src/hooks/use-anonymous-profile.ts:141
+#: src/hooks/use-anonymous-profile.ts:144
 msgid "选手池为空"
 msgstr "Player pool is empty"
 
@@ -3521,11 +3519,11 @@ msgstr "The player directory has been updated and it is safe to start a new prac
 msgid "选择人数、题库、赛制和对手猜测可见性。"
 msgstr "Select the number of players, question bank, format and opponent guess visibility."
 
-#: src/pages/ModeLobby.tsx:104
+#: src/pages/ModeLobby.tsx:103
 msgid "选择游戏模式"
 msgstr "Choose a Game Mode"
 
-#: src/pages/ModeLobby.tsx:179
+#: src/pages/ModeLobby.tsx:178
 msgid "选择玩法"
 msgstr "Choose how to play"
 
@@ -3648,7 +3646,7 @@ msgstr "Timed guessing on random questions."
 
 #: src/pages/SoloGamePage.tsx:290
 msgid "难度选择"
-msgstr "Difficulty selection"
+msgstr "Change Difficulty"
 
 #: src/components/SoundToggle.tsx:19
 msgid "静音全站音效"

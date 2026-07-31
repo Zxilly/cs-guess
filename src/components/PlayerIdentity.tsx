@@ -48,14 +48,12 @@ export function PlayerIdentity({
   );
 
   return (
-    <section className="border border-foreground/25" aria-label={t`我的身份`}>
-      <div
-        className={
-          compact
-            ? "grid grid-cols-[minmax(0,1fr)_auto]"
-            : "grid sm:grid-cols-[minmax(0,1fr)_auto]"
-        }
-      >
+    <section
+      className="border border-foreground/25"
+      aria-label={t`我的身份`}
+      data-layout={compact ? "compact-player-identity" : undefined}
+    >
+      <div className="grid sm:grid-cols-[minmax(0,1fr)_auto]">
         <div className="flex min-w-0 items-center gap-3 px-4 py-3 sm:gap-4 sm:px-5 sm:py-4">
           <PlayerAvatar
             player={player}
@@ -63,7 +61,14 @@ export function PlayerIdentity({
             eager
           />
           <div className="min-w-0">
-            <p className="truncate font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground">
+            <p
+              data-layout={compact ? "compact-identity-pool" : undefined}
+              className={
+                compact
+                  ? "whitespace-normal font-mono text-xs leading-5 uppercase tracking-[0.08em] text-muted-foreground"
+                  : "truncate font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground"
+              }
+            >
               {t`我的身份 ·`} {
                 IDENTITY_POOLS.find((pool) => pool.id === currentPool)?.label
               }
@@ -75,7 +80,10 @@ export function PlayerIdentity({
               {countryNameZh(player.countryCode)} · {displayTeamName(player.team)}
             </p>
             {compact ? (
-              <p className="mt-1 truncate font-mono text-xs text-muted-foreground">
+              <p
+                data-layout="compact-identity-credit-rule"
+                className="mt-1 whitespace-normal font-mono text-xs leading-5 text-muted-foreground"
+              >
                 {t`${drawCredits} 次抽取 · 胜 1 局或累计负 2 局 +1`}
               </p>
             ) : null}
@@ -88,14 +96,14 @@ export function PlayerIdentity({
             variant="ghost"
             className={
               compact
-                ? "h-auto justify-center rounded-none px-3 text-primary sm:px-5"
+                ? "h-11 justify-center rounded-none border-t border-foreground/20 px-3 text-primary sm:h-auto sm:border-t-0 sm:border-l sm:px-5"
                 : "h-12 justify-center rounded-none px-5 text-primary sm:h-auto"
             }
+            data-layout={compact ? "identity-manage-action" : undefined}
             disabled
           >
             <DiceFiveIcon />
-            <span className={compact ? "hidden sm:inline" : ""}>{t`管理身份`}</span>
-            {compact ? <span className="sm:hidden">{t`身份`}</span> : null}
+            <span>{t`管理身份`}</span>
           </Button>
         ) : (
           <Button
@@ -103,14 +111,14 @@ export function PlayerIdentity({
             variant="ghost"
             className={
               compact
-                ? "h-auto justify-center rounded-none px-3 text-primary sm:px-5"
+                ? "h-11 justify-center rounded-none border-t border-foreground/20 px-3 text-primary sm:h-auto sm:border-t-0 sm:border-l sm:px-5"
                 : "h-12 justify-center rounded-none px-5 text-primary sm:h-auto"
             }
+            data-layout={compact ? "identity-manage-action" : undefined}
           >
             <Link to={manageHref}>
               <DiceFiveIcon />
-              <span className={compact ? "hidden sm:inline" : ""}>{t`管理身份`}</span>
-              {compact ? <span className="sm:hidden">{t`身份`}</span> : null}
+              <span>{t`管理身份`}</span>
             </Link>
           </Button>
         )}

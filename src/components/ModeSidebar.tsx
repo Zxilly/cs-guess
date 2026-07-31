@@ -135,17 +135,17 @@ export function ModeSidebar({
             </Link>
           </div>
 
-          <div className="flex items-center gap-1 lg:mt-7">
-            <SoundToggle />
+          <div className="flex min-w-0 items-center gap-1 lg:mt-7 lg:flex-col lg:items-stretch">
+            <SoundToggle className="lg:w-full lg:min-w-0 lg:justify-start lg:overflow-hidden" />
             <Button
               asChild
               variant="outline"
               size="sm"
-              className="rounded-none"
+              className="rounded-none lg:w-full lg:min-w-0 lg:justify-start lg:overflow-hidden"
             >
               <Link to={backHref} onClick={onExit}>
                 <ArrowLeftIcon />
-                {backLabel}
+                <span className="min-w-0 truncate">{backLabel}</span>
               </Link>
             </Button>
           </div>

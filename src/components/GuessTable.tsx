@@ -344,7 +344,7 @@ function GuessBoard({
               {ATTRIBUTES.map(([label]) => (
                 <TableHead
                   key={label}
-                  className="border-r border-foreground/15 text-center last:border-r-0"
+                  className="h-12 whitespace-normal border-r border-foreground/15 px-1 text-center text-xs leading-tight last:border-r-0"
                 >
                   {label}
                 </TableHead>
@@ -510,7 +510,7 @@ function OpponentBoard({
               {ATTRIBUTES.map(([label]) => (
                 <TableHead
                   key={label}
-                  className="border-r border-foreground/15 text-center last:border-r-0"
+                  className="h-12 whitespace-normal border-r border-foreground/15 px-1 text-center text-xs leading-tight last:border-r-0"
                 >
                   {label}
                 </TableHead>

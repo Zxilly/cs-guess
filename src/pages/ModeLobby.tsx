@@ -84,16 +84,15 @@ export function ModeLobby() {
                 aria-label={t`管理玩家身份：${identity.player.nickname}`}
               >
                 <IdentificationCardIcon />
-                <span className="sm:hidden">{t`身份`}</span>
                 <span className="hidden max-w-28 truncate sm:inline">
                   {identity.player.nickname}
                 </span>
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm" className="rounded-none">
-              <Link to="/stats">
+              <Link to="/stats" aria-label={t`查看战绩`}>
                 <ChartBarIcon />
-                {t`战绩`}
+                <span className="hidden sm:inline">{t`战绩`}</span>
               </Link>
             </Button>
           </div>
