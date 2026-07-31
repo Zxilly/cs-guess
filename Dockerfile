@@ -13,7 +13,7 @@ RUN --mount=type=cache,id=cs-guess-pnpm,target=/pnpm/store \
     pnpm config set store-dir /pnpm/store && \
     pnpm install --frozen-lockfile
 
-COPY components.json index.html tsconfig.app.json tsconfig.json tsconfig.node.json vite.config.ts ./
+COPY components.json index.html lingui.config.ts tsconfig.app.json tsconfig.json tsconfig.node.json vite.config.ts ./
 COPY public ./public
 COPY src ./src
 ARG VITE_API_BASE_URL=
