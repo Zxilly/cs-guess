@@ -3,7 +3,7 @@ import useSWRImmutable from "swr/immutable";
 import useSWRMutation from "swr/mutation";
 
 import {
-  acceptAuthoritativeProfile,
+  acceptAuthoritativeProfileCompletion,
   ensureAnonymousProfileReady,
   useAnonymousProfile,
 } from "@/hooks/use-anonymous-profile";
@@ -74,7 +74,7 @@ export function useDailyChallenge() {
         arg.guessIds,
         arg.timedOut,
       );
-      acceptAuthoritativeProfile(remote);
+      acceptAuthoritativeProfileCompletion(remote);
       return remote;
     },
   );

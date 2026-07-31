@@ -15,7 +15,10 @@ import {
   createServerProfile,
   discardServerIdentityDraw,
   loadServerProfile,
+  mergeServerProfileCompletion,
+  mergeServerProfileSummary,
   startServerIdentityDraw,
+  type ServerProfileCompletion,
   type ServerProfile,
 } from "@/lib/profile-api";
 import { deriveRoundSummary } from "@/lib/round-history";
@@ -478,10 +481,15 @@ function storeServerProfile(
   return saved;
 }
 
-export function acceptAuthoritativeProfile(remote: ServerProfile) {
+export function acceptAuthoritativeProfileCompletion(
+  completion: ServerProfileCompletion,
+) {
   const latest = readProfile();
-  if (!latest || latest.anonymousId !== remote.anonymousId) return;
-  storeServerProfile(remote, latest.syncToken);
+  if (!latest || latest.anonymousId !== completion.profile.anonymousId) return;
+  storeServerProfile(
+    mergeServerProfileCompletion(latest, completion),
+    latest.syncToken,
+  );
 }
 
 export async function refreshAnonymousProfile() {
@@ -566,12 +574,13 @@ export function spendDrawCreditSafely(
       await readyServerProfile(latest);
       let remote: ServerProfile;
       try {
-        remote = await startServerIdentityDraw(
+        const summary = await startServerIdentityDraw(
           latest,
           poolId,
           createRequestId(),
           replacedWinnerId,
         );
+        remote = mergeServerProfileSummary(latest, summary);
       } catch (error) {
         const recovered = await loadServerProfile(
           latest.anonymousId,
@@ -600,8 +609,11 @@ export async function discardPendingIdentityDraw(
   try {
     await queueServerMutation(async () => {
       await readyServerProfile(latest);
-      const remote = await discardServerIdentityDraw(latest, winnerId);
-      storeServerProfile(remote, latest.syncToken);
+      const summary = await discardServerIdentityDraw(latest, winnerId);
+      storeServerProfile(
+        mergeServerProfileSummary(latest, summary),
+        latest.syncToken,
+      );
     });
     return true;
   } catch {
@@ -632,8 +644,11 @@ export async function adoptPendingIdentityDraw(
   try {
     await queueServerMutation(async () => {
       await readyServerProfile(latest);
-      const remote = await adoptServerIdentityDraw(latest, selectedPlayer.id);
-      storeServerProfile(remote, latest.syncToken);
+      const summary = await adoptServerIdentityDraw(latest, selectedPlayer.id);
+      storeServerProfile(
+        mergeServerProfileSummary(latest, summary),
+        latest.syncToken,
+      );
     });
     return true;
   } catch {

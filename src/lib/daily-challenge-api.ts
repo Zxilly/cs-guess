@@ -2,7 +2,7 @@ import type { Player } from "@/data/players";
 import type { AnonymousProfile } from "@/hooks/use-anonymous-profile";
 import { API_BASE } from "@/lib/api-routing";
 import { displayTeamName, isUnattachedTeam } from "@/lib/player-display";
-import type { ServerProfile } from "@/lib/profile-api";
+import type { ServerProfileCompletion } from "@/lib/profile-api";
 
 export interface ServerDailyChallenge {
   date: string;
@@ -67,7 +67,7 @@ export async function completeDailyChallenge(
   profile: Pick<AnonymousProfile, "anonymousId" | "syncToken">,
   guessIds: readonly string[],
   timedOut: boolean,
-): Promise<ServerProfile> {
+): Promise<ServerProfileCompletion> {
   const response = await fetch(
     `${API_BASE}/v1/daily-challenges/current/completions`,
     {
@@ -86,5 +86,5 @@ export async function completeDailyChallenge(
   if (!response.ok) {
     throw new Error(`daily challenge completion failed: ${response.status}`);
   }
-  return (await response.json()) as ServerProfile;
+  return (await response.json()) as ServerProfileCompletion;
 }

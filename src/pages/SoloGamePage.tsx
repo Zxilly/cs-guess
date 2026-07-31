@@ -14,7 +14,7 @@ import { PlayerSearch } from "@/components/PlayerSearch";
 import { Timer } from "@/components/Timer";
 import { players } from "@/data/players";
 import {
-  acceptAuthoritativeProfile,
+  acceptAuthoritativeProfileCompletion,
   ensureAnonymousProfileReady,
   useAnonymousProfile,
 } from "@/hooks/use-anonymous-profile";
@@ -184,7 +184,7 @@ function SoloGame({
         arg.guessIds,
         arg.timedOut,
       );
-      acceptAuthoritativeProfile(remote);
+      acceptAuthoritativeProfileCompletion(remote);
       return remote;
     },
   );

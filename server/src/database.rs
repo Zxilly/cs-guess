@@ -171,7 +171,7 @@ impl DatabaseStore {
         &self,
         request: CreateProfileRequest,
         sync_token: &str,
-    ) -> Result<ProfileState, AppError> {
+    ) -> Result<(ProfileState, bool), AppError> {
         validate_sync_token(sync_token)?;
         let _guard = self.profile_mutation_lock.lock().await;
         let profile = ProfileState::new(request.anonymous_id, request.initial_player_id)?;
@@ -180,7 +180,7 @@ impl DatabaseStore {
             error!(%error, "failed to serialize initial profile");
             AppError::Internal
         })?;
-        sqlx::query(
+        let insert = sqlx::query(
             "INSERT INTO profiles (
                 anonymous_id, token_hash, player_id, identity_confirmed,
                 updated_at, state_json
@@ -196,7 +196,10 @@ impl DatabaseStore {
         .execute(&self.pool)
         .await
         .map_err(database_error)?;
-        self.load_profile(&profile.anonymous_id, sync_token).await
+        Ok((
+            self.load_profile(&profile.anonymous_id, sync_token).await?,
+            insert.rows_affected() == 1,
+        ))
     }
 
     pub async fn start_identity_draw(

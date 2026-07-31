@@ -18,7 +18,9 @@ use crate::{
     daily::{CompleteDailyChallengeRequest, DailyChallenge, DailyChallengeAttempt},
     database::DatabaseStore,
     error::AppError,
-    profile::{CreateProfileRequest, ProfileState, StartIdentityDrawRequest},
+    profile::{
+        CreateProfileRequest, ProfileCompletionResponse, ProfileState, StartIdentityDrawRequest,
+    },
     protocol::{
         Difficulty, DifficultyQueueCounts, QueueCounts, RoomKind, SessionResponse, Snapshot,
         Visibility,
@@ -345,7 +347,7 @@ impl AppState {
         &self,
         request: CreateProfileRequest,
         sync_token: &str,
-    ) -> Result<ProfileState, AppError> {
+    ) -> Result<(ProfileState, bool), AppError> {
         self.inner
             .database
             .create_profile(request, sync_token)
@@ -396,7 +398,7 @@ impl AppState {
         &self,
         sync_token: &str,
         request: CompleteDailyChallengeRequest,
-    ) -> Result<ProfileState, AppError> {
+    ) -> Result<ProfileCompletionResponse, AppError> {
         self.inner
             .database
             .load_profile(&request.anonymous_id, sync_token)
@@ -418,11 +420,14 @@ impl AppState {
                 ));
             }
         }
+        let round_id = format!("daily:{}", challenge.date);
         let settlement = challenge.settlement(request.guess_ids, request.timed_out)?;
-        self.inner
+        let profile = self
+            .inner
             .database
             .settle_profile_round(&request.anonymous_id, settlement)
-            .await
+            .await?;
+        Ok(profile.completion_response(&round_id))
     }
 
     pub async fn start_daily_challenge_attempt(
@@ -464,7 +469,7 @@ impl AppState {
         round_id: &str,
         sync_token: &str,
         request: CompleteSoloRoundRequest,
-    ) -> Result<ProfileState, AppError> {
+    ) -> Result<ProfileCompletionResponse, AppError> {
         let round = self
             .inner
             .database
@@ -475,10 +480,12 @@ impl AppState {
             .map(|duration| duration.as_millis().try_into().unwrap_or(u64::MAX))
             .unwrap_or(0);
         let settlement = round.settlement(request.guess_ids, request.timed_out, now_unix_ms)?;
-        self.inner
+        let profile = self
+            .inner
             .database
             .settle_profile_round(&request.anonymous_id, settlement)
-            .await
+            .await?;
+        Ok(profile.completion_response(round_id))
     }
 
     pub fn set_ready(&self, value: bool) {

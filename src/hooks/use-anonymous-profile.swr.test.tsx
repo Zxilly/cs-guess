@@ -84,6 +84,7 @@ describe("useAnonymousProfile SWR mutations", () => {
       vi
         .fn()
         .mockResolvedValueOnce(jsonResponse(serverProfile()))
+        .mockResolvedValueOnce(jsonResponse({ items: [] }))
         .mockReturnValueOnce(drawResponse),
     );
     const { useIdentityProfile } = await import(
@@ -109,7 +110,7 @@ describe("useAnonymousProfile SWR mutations", () => {
       root.render(<Probe />);
       await Promise.resolve();
     });
-    await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
 
     act(() => {
       container.querySelector("button")?.click();

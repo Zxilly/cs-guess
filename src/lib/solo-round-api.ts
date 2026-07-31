@@ -2,7 +2,7 @@ import type { Player } from "@/data/players";
 import type { AnonymousProfile } from "@/hooks/use-anonymous-profile";
 import { API_BASE } from "@/lib/api-routing";
 import { displayTeamName, isUnattachedTeam } from "@/lib/player-display";
-import type { ServerProfile } from "@/lib/profile-api";
+import type { ServerProfileCompletion } from "@/lib/profile-api";
 import type { SoloDifficulty } from "@/lib/solo-game";
 
 type ProfileCredentials = Pick<
@@ -79,7 +79,7 @@ export async function completeServerSoloRound(
   roundId: string,
   guessIds: readonly string[],
   timedOut: boolean,
-): Promise<ServerProfile> {
+): Promise<ServerProfileCompletion> {
   const response = await fetch(
     `${API_BASE}/v1/solo-rounds/${encodeURIComponent(roundId)}/completions`,
     {
@@ -95,5 +95,5 @@ export async function completeServerSoloRound(
   if (!response.ok) {
     throw new Error(`solo round completion failed: ${response.status}`);
   }
-  return (await response.json()) as ServerProfile;
+  return (await response.json()) as ServerProfileCompletion;
 }

@@ -67,9 +67,10 @@ describe("solo round API", () => {
 
   it("completes the issued round with guesses instead of a claimed result", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ anonymousId: profile.anonymousId }), {
-        status: 200,
-      }),
+      new Response(
+        JSON.stringify({ profile: { anonymousId: profile.anonymousId } }),
+        { status: 200 },
+      ),
     );
     vi.stubGlobal("fetch", fetchMock);
 

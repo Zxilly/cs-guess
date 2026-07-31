@@ -73,6 +73,10 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+function historyResponse() {
+  return jsonResponse({ items: [] });
+}
+
 describe("identity draw server operations", () => {
   let storage: MemoryStorage;
 
@@ -87,7 +91,13 @@ describe("identity draw server operations", () => {
   });
 
   it("reuses one authoritative profile load across readiness checks", async () => {
-    vi.mocked(fetch).mockResolvedValue(jsonResponse(serverProfile()));
+    vi.mocked(fetch).mockImplementation((input) =>
+      Promise.resolve(
+        String(input).includes("/history")
+          ? historyResponse()
+          : jsonResponse(serverProfile()),
+      ),
+    );
     const { ensureAnonymousProfileReady } = await import(
       "@/hooks/use-anonymous-profile"
     );
@@ -98,7 +108,7 @@ describe("identity draw server operations", () => {
     ]);
     await ensureAnonymousProfileReady();
 
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(2);
     expect(vi.mocked(fetch).mock.calls[0]?.[0]).toContain(
       `/v1/profiles/${profile().anonymousId}`,
     );
@@ -108,6 +118,7 @@ describe("identity draw server operations", () => {
     const draw = pendingDraw();
     vi.mocked(fetch)
       .mockResolvedValueOnce(jsonResponse(serverProfile()))
+      .mockResolvedValueOnce(historyResponse())
       .mockResolvedValueOnce(
         jsonResponse(
           serverProfile({
@@ -125,7 +136,7 @@ describe("identity draw server operations", () => {
     const stored = JSON.parse(storage.getItem(PROFILE_KEY) ?? "{}");
     expect(stored.drawCredits).toBe(1);
     expect(stored.pendingDraw).toEqual(draw);
-    expect(vi.mocked(fetch).mock.calls[1]?.[0]).toContain(
+    expect(vi.mocked(fetch).mock.calls[2]?.[0]).toContain(
       "/identity-draws",
     );
   });
@@ -133,7 +144,10 @@ describe("identity draw server operations", () => {
   it("does not spend a local credit when the server rejects the draw", async () => {
     vi.mocked(fetch)
       .mockResolvedValueOnce(jsonResponse(serverProfile()))
-      .mockResolvedValueOnce(jsonResponse({ code: "profile_conflict" }, 409));
+      .mockResolvedValueOnce(historyResponse())
+      .mockResolvedValueOnce(jsonResponse({ code: "profile_conflict" }, 409))
+      .mockResolvedValueOnce(jsonResponse(serverProfile()))
+      .mockResolvedValueOnce(historyResponse());
     const { spendDrawCreditSafely } = await import(
       "@/hooks/use-anonymous-profile"
     );
@@ -154,6 +168,7 @@ describe("identity draw server operations", () => {
       .mockResolvedValueOnce(
         jsonResponse(serverProfile({ pendingDraw: draw })),
       )
+      .mockResolvedValueOnce(historyResponse())
       .mockResolvedValueOnce(
         jsonResponse(
           serverProfile({
@@ -185,6 +200,7 @@ describe("identity draw server operations", () => {
       .mockResolvedValueOnce(
         jsonResponse(serverProfile({ pendingDraw: draw })),
       )
+      .mockResolvedValueOnce(historyResponse())
       .mockResolvedValueOnce(
         jsonResponse(serverProfile({ pendingDraw: undefined, updatedAt: 102 })),
       );
@@ -198,6 +214,6 @@ describe("identity draw server operations", () => {
     expect(
       JSON.parse(storage.getItem(PROFILE_KEY) ?? "{}").pendingDraw,
     ).toBeUndefined();
-    expect(vi.mocked(fetch).mock.calls[1]?.[1]?.method).toBe("DELETE");
+    expect(vi.mocked(fetch).mock.calls[2]?.[1]?.method).toBe("DELETE");
   });
 });

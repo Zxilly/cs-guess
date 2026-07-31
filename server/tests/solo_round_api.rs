@@ -2,7 +2,9 @@ use axum::{
     body::Body,
     http::{Request, StatusCode, header},
 };
-use cs_guess_server::{AppState, Config, app, daily::catalog_players, profile::ProfileState};
+use cs_guess_server::{
+    AppState, Config, app, daily::catalog_players, profile::ProfileCompletionResponse,
+};
 use http_body_util::BodyExt;
 use serde_json::{Value, json};
 use tower::ServiceExt;
@@ -112,11 +114,11 @@ async fn solo_round_is_issued_and_settled_by_the_server() {
         .await
         .unwrap();
     assert_eq!(completion.status(), StatusCode::OK);
-    let profile: ProfileState =
-        serde_json::from_value(json_body(completion).await).expect("profile state");
-    assert_eq!(profile.stats.wins, 1);
-    assert_eq!(profile.match_history[0].mode, "solo");
-    assert_eq!(profile.match_history[0].id, round_id);
+    let completion: ProfileCompletionResponse =
+        serde_json::from_value(json_body(completion).await).expect("completion response");
+    assert_eq!(completion.profile.stats.wins, 1);
+    assert_eq!(completion.history_entry.as_ref().unwrap().mode, "solo");
+    assert_eq!(completion.history_entry.as_ref().unwrap().id, round_id);
 
     let forged_completion = service
         .oneshot(

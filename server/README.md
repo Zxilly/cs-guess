@@ -40,6 +40,7 @@ per-profile `X-Profile-Token`; only its SHA-256 hash is stored.
 ```http
 POST   /v1/profiles
 GET    /v1/profiles/{anonymous_id}
+GET    /v1/profiles/{anonymous_id}/history?cursor={cursor}&limit={1..50}
 POST   /v1/profiles/{anonymous_id}/identity-draws
 POST   /v1/profiles/{anonymous_id}/identity-draws/{winner_id}/adopt
 DELETE /v1/profiles/{anonymous_id}/identity-draws/{winner_id}
@@ -52,6 +53,14 @@ results. Daily challenge, solo-round, and realtime room state machines derive
 the result and write the Profile aggregate directly. Identity draw requests
 carry a UUID so retrying the same request never charges twice; authoritative
 settlements are deduplicated by their server-owned round ID.
+
+Profile reads and identity mutations return a summary without the internal
+recorded-round ledger or match history. History is newest-first and cursor
+paginated through the dedicated endpoint. Round completion responses contain
+the updated summary plus the single affected `historyEntry`, allowing clients
+to merge the authoritative change without retransmitting the full history.
+The identity-draw request UUID remains internal and is not echoed in the wire
+representation.
 
 SQLite uses a bounded async connection pool, WAL journaling, `synchronous =
 NORMAL`, foreign keys, and a 5-second busy timeout. Profile domain mutations

@@ -2,8 +2,13 @@ use axum::{
     body::Body,
     http::{Request, StatusCode, header},
 };
-use cs_guess_server::{AppState, Config, app, daily::catalog_players, profile::ProfileState};
+use cs_guess_server::{
+    AppState, Config, app,
+    daily::catalog_players,
+    profile::{ProfileCompletionResponse, ProfileHistoryPage, ProfileSummary},
+};
 use http_body_util::BodyExt;
+use serde::de::DeserializeOwned;
 use serde_json::json;
 use tower::ServiceExt;
 
@@ -18,14 +23,14 @@ fn initial_player_id() -> &'static str {
         .id
 }
 
-async fn response_profile(response: axum::response::Response) -> ProfileState {
+async fn response_json<T: DeserializeOwned>(response: axum::response::Response) -> T {
     let bytes = response
         .into_body()
         .collect()
         .await
         .expect("profile response body")
         .to_bytes();
-    serde_json::from_slice(&bytes).expect("valid profile response")
+    serde_json::from_slice(&bytes).expect("valid JSON response")
 }
 
 #[tokio::test]
@@ -52,9 +57,28 @@ async fn profile_api_uses_authenticated_domain_operations() {
         .await
         .unwrap();
     assert_eq!(created.status(), StatusCode::CREATED);
-    let created = response_profile(created).await;
+    let created: ProfileSummary = response_json(created).await;
     assert!(!created.identity_confirmed);
     assert_eq!(created.draw_credits, 1);
+
+    let existing = service
+        .clone()
+        .oneshot(
+            Request::post("/v1/profiles")
+                .header(header::CONTENT_TYPE, "application/json")
+                .header("x-profile-token", SYNC_TOKEN)
+                .body(Body::from(
+                    json!({
+                        "anonymousId": ANONYMOUS_ID,
+                        "initialPlayerId": initial_player_id(),
+                    })
+                    .to_string(),
+                ))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(existing.status(), StatusCode::OK);
 
     let request_id = "52de8707-292b-4a83-82d5-c1776ed54a01";
     let drawn = service
@@ -75,10 +99,15 @@ async fn profile_api_uses_authenticated_domain_operations() {
         .await
         .unwrap();
     assert_eq!(drawn.status(), StatusCode::OK);
-    let drawn = response_profile(drawn).await;
+    let drawn: ProfileSummary = response_json(drawn).await;
     let pending = drawn.pending_draw.expect("server generated pending draw");
     assert_eq!(drawn.draw_credits, 0);
-    assert_eq!(pending.request_id.as_deref(), Some(request_id));
+    assert!(
+        serde_json::to_value(&pending)
+            .unwrap()
+            .get("requestId")
+            .is_none()
+    );
     assert_eq!(pending.item_ids.len(), 29);
     assert_eq!(pending.item_ids[pending.winner_index], pending.winner_id);
     assert_ne!(pending.winner_id, initial_player_id());
@@ -101,7 +130,8 @@ async fn profile_api_uses_authenticated_domain_operations() {
         .await
         .unwrap();
     assert_eq!(replayed.status(), StatusCode::OK);
-    assert_eq!(response_profile(replayed).await.draw_credits, 0);
+    let replayed: ProfileSummary = response_json(replayed).await;
+    assert_eq!(replayed.draw_credits, 0);
 
     let winner_id = pending.winner_id;
     let adopted = service
@@ -117,7 +147,7 @@ async fn profile_api_uses_authenticated_domain_operations() {
         .await
         .unwrap();
     assert_eq!(adopted.status(), StatusCode::OK);
-    let adopted = response_profile(adopted).await;
+    let adopted: ProfileSummary = response_json(adopted).await;
     assert!(adopted.identity_confirmed);
     assert_eq!(adopted.player_id, winner_id);
     assert!(adopted.pending_draw.is_none());
@@ -161,6 +191,7 @@ async fn profile_api_uses_authenticated_domain_operations() {
         challenge["mysteryPlayer"]["id"]
     );
 
+    let challenge_date = challenge["date"].as_str().unwrap().to_owned();
     let mystery_player_id = challenge["mysteryPlayer"]["id"].as_str().unwrap();
     let completion_payload = json!({
         "anonymousId": ANONYMOUS_ID,
@@ -179,10 +210,13 @@ async fn profile_api_uses_authenticated_domain_operations() {
         .await
         .unwrap();
     assert_eq!(recorded.status(), StatusCode::OK);
-    let recorded = response_profile(recorded).await;
-    assert_eq!(recorded.stats.wins, 1);
-    assert_eq!(recorded.draw_credits, 1);
-    assert_eq!(recorded.match_history.len(), 1);
+    let recorded: ProfileCompletionResponse = response_json(recorded).await;
+    assert_eq!(recorded.profile.stats.wins, 1);
+    assert_eq!(recorded.profile.draw_credits, 1);
+    assert_eq!(
+        recorded.history_entry.as_ref().unwrap().id,
+        format!("daily:{challenge_date}")
+    );
 
     let replayed_round = service
         .clone()
@@ -195,9 +229,42 @@ async fn profile_api_uses_authenticated_domain_operations() {
         )
         .await
         .unwrap();
-    let replayed_round = response_profile(replayed_round).await;
-    assert_eq!(replayed_round.stats.wins, 1);
-    assert_eq!(replayed_round.match_history.len(), 1);
+    let replayed_round: ProfileCompletionResponse = response_json(replayed_round).await;
+    assert_eq!(replayed_round.profile.stats.wins, 1);
+    assert_eq!(replayed_round.history_entry, recorded.history_entry);
+
+    let history = service
+        .clone()
+        .oneshot(
+            Request::get(format!("/v1/profiles/{ANONYMOUS_ID}/history?limit=1"))
+                .header("x-profile-token", SYNC_TOKEN)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(history.status(), StatusCode::OK);
+    assert_eq!(
+        history.headers()[header::CACHE_CONTROL],
+        "private, no-store"
+    );
+    let history: ProfileHistoryPage = response_json(history).await;
+    assert_eq!(history.items, vec![recorded.history_entry.clone().unwrap()]);
+    assert!(history.next_cursor.is_none());
+
+    let summary = service
+        .clone()
+        .oneshot(
+            Request::get(format!("/v1/profiles/{ANONYMOUS_ID}"))
+                .header("x-profile-token", SYNC_TOKEN)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let summary: serde_json::Value = response_json(summary).await;
+    assert!(summary.get("matchHistory").is_none());
+    assert!(summary.get("recordedRounds").is_none());
 
     let generic_round_write = service
         .clone()
@@ -231,7 +298,7 @@ async fn profile_api_uses_authenticated_domain_operations() {
         )
         .await
         .unwrap();
-    let second_draw = response_profile(second_draw).await;
+    let second_draw: ProfileSummary = response_json(second_draw).await;
     let second_winner_id = second_draw
         .pending_draw
         .expect("second pending draw")
@@ -249,7 +316,7 @@ async fn profile_api_uses_authenticated_domain_operations() {
         .await
         .unwrap();
     assert_eq!(discarded.status(), StatusCode::OK);
-    let discarded = response_profile(discarded).await;
+    let discarded: ProfileSummary = response_json(discarded).await;
     assert!(discarded.pending_draw.is_none());
     assert_eq!(discarded.player_id, winner_id);
 

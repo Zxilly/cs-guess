@@ -44,6 +44,46 @@ pub struct PendingIdentityDraw {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
+pub struct PendingIdentityDrawView {
+    pub pool_id: String,
+    pub item_ids: Vec<String>,
+    pub winner_id: String,
+    pub winner_index: usize,
+    pub created_at: u64,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ProfileSummary {
+    pub anonymous_id: String,
+    pub player_id: String,
+    pub identity_confirmed: bool,
+    pub stats: ProfileStats,
+    pub draw_credits: u32,
+    pub losses_toward_credit: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pending_draw: Option<PendingIdentityDrawView>,
+    pub updated_at: u64,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ProfileCompletionResponse {
+    pub profile: ProfileSummary,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub history_entry: Option<MatchHistoryEntry>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ProfileHistoryPage {
+    pub items: Vec<MatchHistoryEntry>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub next_cursor: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct ProfileStats {
     pub wins: u32,
     pub losses: u32,
@@ -150,6 +190,61 @@ impl ProfileState {
             pending_draw: None,
             updated_at: unix_timestamp_millis(),
         })
+    }
+
+    pub fn summary(&self) -> ProfileSummary {
+        ProfileSummary {
+            anonymous_id: self.anonymous_id.clone(),
+            player_id: self.player_id.clone(),
+            identity_confirmed: self.identity_confirmed,
+            stats: self.stats.clone(),
+            draw_credits: self.draw_credits,
+            losses_toward_credit: self.losses_toward_credit,
+            pending_draw: self
+                .pending_draw
+                .as_ref()
+                .map(PendingIdentityDrawView::from),
+            updated_at: self.updated_at,
+        }
+    }
+
+    pub fn completion_response(&self, round_id: &str) -> ProfileCompletionResponse {
+        ProfileCompletionResponse {
+            profile: self.summary(),
+            history_entry: self
+                .match_history
+                .iter()
+                .find(|entry| entry.id == round_id)
+                .cloned(),
+        }
+    }
+
+    pub fn history_page(
+        &self,
+        cursor: Option<&str>,
+        limit: usize,
+    ) -> Result<ProfileHistoryPage, AppError> {
+        if !(1..=MAX_HISTORY).contains(&limit) {
+            return Err(AppError::BadRequest(format!(
+                "history limit must be between 1 and {MAX_HISTORY}"
+            )));
+        }
+        let end = match cursor {
+            Some(cursor) => self
+                .match_history
+                .iter()
+                .position(|entry| entry.id == cursor)
+                .ok_or_else(|| AppError::BadRequest("history cursor is invalid".to_owned()))?,
+            None => self.match_history.len(),
+        };
+        let start = end.saturating_sub(limit);
+        let items = self.match_history[start..end]
+            .iter()
+            .rev()
+            .cloned()
+            .collect();
+        let next_cursor = (start > 0).then(|| self.match_history[start].id.clone());
+        Ok(ProfileHistoryPage { items, next_cursor })
     }
 
     pub fn validate(&self) -> Result<(), AppError> {
@@ -395,6 +490,18 @@ impl ProfileState {
     }
 }
 
+impl From<&PendingIdentityDraw> for PendingIdentityDrawView {
+    fn from(draw: &PendingIdentityDraw) -> Self {
+        Self {
+            pool_id: draw.pool_id.clone(),
+            item_ids: draw.item_ids.clone(),
+            winner_id: draw.winner_id.clone(),
+            winner_index: draw.winner_index,
+            created_at: draw.created_at,
+        }
+    }
+}
+
 impl PendingIdentityDraw {
     fn is_valid(&self) -> bool {
         self.request_id
@@ -567,7 +674,26 @@ fn valid_short_text(value: &str, max_length: usize) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{HistoryPlayerSnapshot, MatchHistoryEntry};
+    use super::{HistoryPlayerSnapshot, MatchHistoryEntry, ProfileState, ProfileStats};
+
+    fn history_entry(id: &str) -> MatchHistoryEntry {
+        MatchHistoryEntry {
+            id: id.to_owned(),
+            completed_at: "2026-07-27T12:00:00.000Z".to_owned(),
+            result: "win".to_owned(),
+            mode: "solo".to_owned(),
+            room_code: None,
+            round_number: 1,
+            best_of: 1,
+            answer_id: Some("donk".to_owned()),
+            answer_snapshot: None,
+            guess_ids: vec!["donk".to_owned()],
+            guess_snapshots: None,
+            opponent_names: vec![],
+            self_score: 1,
+            opponent_score: 0,
+        }
+    }
 
     #[test]
     fn solo_history_entries_are_valid() {
@@ -621,5 +747,48 @@ mod tests {
         };
 
         assert!(entry.is_valid());
+    }
+
+    #[test]
+    fn history_pages_are_newest_first_and_cursor_based() {
+        let profile = ProfileState {
+            anonymous_id: "anonymous-history-pagination".to_owned(),
+            player_id: "donk".to_owned(),
+            identity_confirmed: true,
+            stats: ProfileStats {
+                wins: 3,
+                losses: 0,
+                draws: 0,
+                current_streak: 3,
+                best_streak: 3,
+            },
+            draw_credits: 0,
+            losses_toward_credit: 0,
+            recorded_rounds: vec![],
+            match_history: vec![
+                history_entry("round-1"),
+                history_entry("round-2"),
+                history_entry("round-3"),
+            ],
+            pending_draw: None,
+            updated_at: 1,
+        };
+
+        let first = profile.history_page(None, 2).unwrap();
+        assert_eq!(
+            first
+                .items
+                .iter()
+                .map(|entry| entry.id.as_str())
+                .collect::<Vec<_>>(),
+            vec!["round-3", "round-2"]
+        );
+        assert_eq!(first.next_cursor.as_deref(), Some("round-2"));
+
+        let second = profile
+            .history_page(first.next_cursor.as_deref(), 2)
+            .unwrap();
+        assert_eq!(second.items[0].id, "round-1");
+        assert!(second.next_cursor.is_none());
     }
 }

@@ -37,7 +37,8 @@ use crate::{
     daily::{CompleteDailyChallengeRequest, DailyChallengeAttempt, DailyChallengeMetadata},
     error::AppError,
     profile::{
-        CreateProfileRequest, ProfileState, StartIdentityDrawRequest, validate_anonymous_id,
+        CreateProfileRequest, ProfileCompletionResponse, ProfileHistoryPage, ProfileSummary,
+        StartIdentityDrawRequest, validate_anonymous_id,
     },
     protocol::{
         ClientMessage, CreateRoomRequest, JoinRoomRequest, QueueCounts, QuickMatchRequest,
@@ -103,6 +104,10 @@ pub fn app(state: AppState) -> Router {
         )
         .route("/v1/profiles", post(create_profile))
         .route("/v1/profiles/{anonymous_id}", get(load_profile))
+        .route(
+            "/v1/profiles/{anonymous_id}/history",
+            get(load_profile_history),
+        )
         .route(
             "/v1/profiles/{anonymous_id}/identity-draws",
             post(start_identity_draw),
@@ -288,7 +293,7 @@ async fn complete_daily_challenge(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(request): Json<CompleteDailyChallengeRequest>,
-) -> Result<Json<ProfileState>, AppError> {
+) -> Result<Json<ProfileCompletionResponse>, AppError> {
     let sync_token = profile_sync_token(&headers)?;
     Ok(Json(
         state.complete_daily_challenge(sync_token, request).await?,
@@ -357,7 +362,7 @@ async fn complete_solo_round(
     Path(round_id): Path<String>,
     headers: HeaderMap,
     Json(request): Json<CompleteSoloRoundRequest>,
-) -> Result<Json<ProfileState>, AppError> {
+) -> Result<Json<ProfileCompletionResponse>, AppError> {
     let sync_token = profile_sync_token(&headers)?;
     Ok(Json(
         state
@@ -370,21 +375,50 @@ async fn load_profile(
     State(state): State<AppState>,
     Path(anonymous_id): Path<String>,
     headers: HeaderMap,
-) -> Result<Json<ProfileState>, AppError> {
+) -> Result<Json<ProfileSummary>, AppError> {
     validate_anonymous_id(&anonymous_id)?;
     let sync_token = profile_sync_token(&headers)?;
     let profile = state.load_profile(&anonymous_id, sync_token).await?;
-    Ok(Json(profile))
+    Ok(Json(profile.summary()))
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ProfileHistoryQuery {
+    cursor: Option<String>,
+    limit: Option<usize>,
+}
+
+async fn load_profile_history(
+    State(state): State<AppState>,
+    Path(anonymous_id): Path<String>,
+    Query(query): Query<ProfileHistoryQuery>,
+    headers: HeaderMap,
+) -> Result<Json<ProfileHistoryPage>, AppError> {
+    validate_anonymous_id(&anonymous_id)?;
+    let sync_token = profile_sync_token(&headers)?;
+    let profile = state.load_profile(&anonymous_id, sync_token).await?;
+    Ok(Json(profile.history_page(
+        query.cursor.as_deref(),
+        query.limit.unwrap_or(20),
+    )?))
 }
 
 async fn create_profile(
     State(state): State<AppState>,
     headers: HeaderMap,
     Json(request): Json<CreateProfileRequest>,
-) -> Result<(StatusCode, Json<ProfileState>), AppError> {
+) -> Result<(StatusCode, Json<ProfileSummary>), AppError> {
     let sync_token = profile_sync_token(&headers)?;
-    let profile = state.create_profile(request, sync_token).await?;
-    Ok((StatusCode::CREATED, Json(profile)))
+    let (profile, created) = state.create_profile(request, sync_token).await?;
+    Ok((
+        if created {
+            StatusCode::CREATED
+        } else {
+            StatusCode::OK
+        },
+        Json(profile.summary()),
+    ))
 }
 
 async fn start_identity_draw(
@@ -392,42 +426,39 @@ async fn start_identity_draw(
     Path(anonymous_id): Path<String>,
     headers: HeaderMap,
     Json(request): Json<StartIdentityDrawRequest>,
-) -> Result<Json<ProfileState>, AppError> {
+) -> Result<Json<ProfileSummary>, AppError> {
     validate_anonymous_id(&anonymous_id)?;
     let sync_token = profile_sync_token(&headers)?;
-    Ok(Json(
-        state
-            .start_identity_draw(&anonymous_id, sync_token, request)
-            .await?,
-    ))
+    let profile = state
+        .start_identity_draw(&anonymous_id, sync_token, request)
+        .await?;
+    Ok(Json(profile.summary()))
 }
 
 async fn adopt_identity_draw(
     State(state): State<AppState>,
     Path((anonymous_id, winner_id)): Path<(String, String)>,
     headers: HeaderMap,
-) -> Result<Json<ProfileState>, AppError> {
+) -> Result<Json<ProfileSummary>, AppError> {
     validate_anonymous_id(&anonymous_id)?;
     let sync_token = profile_sync_token(&headers)?;
-    Ok(Json(
-        state
-            .adopt_identity_draw(&anonymous_id, sync_token, &winner_id)
-            .await?,
-    ))
+    let profile = state
+        .adopt_identity_draw(&anonymous_id, sync_token, &winner_id)
+        .await?;
+    Ok(Json(profile.summary()))
 }
 
 async fn discard_identity_draw(
     State(state): State<AppState>,
     Path((anonymous_id, winner_id)): Path<(String, String)>,
     headers: HeaderMap,
-) -> Result<Json<ProfileState>, AppError> {
+) -> Result<Json<ProfileSummary>, AppError> {
     validate_anonymous_id(&anonymous_id)?;
     let sync_token = profile_sync_token(&headers)?;
-    Ok(Json(
-        state
-            .discard_identity_draw(&anonymous_id, sync_token, &winner_id)
-            .await?,
-    ))
+    let profile = state
+        .discard_identity_draw(&anonymous_id, sync_token, &winner_id)
+        .await?;
+    Ok(Json(profile.summary()))
 }
 
 fn profile_sync_token(headers: &HeaderMap) -> Result<&str, AppError> {

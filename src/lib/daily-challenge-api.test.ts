@@ -140,9 +140,12 @@ describe("daily challenge API", () => {
 
   it("submits only the daily guess trace and timeout fact", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ anonymousId: "anonymous-daily-test" }), {
-        status: 200,
-      }),
+      new Response(
+        JSON.stringify({
+          profile: { anonymousId: "anonymous-daily-test" },
+        }),
+        { status: 200 },
+      ),
     );
     vi.stubGlobal("fetch", fetchMock);
 
