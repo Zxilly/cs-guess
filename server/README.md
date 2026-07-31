@@ -67,13 +67,15 @@ POST /v1/daily-challenges/current/attempts
 POST /v1/daily-challenges/current/completions
 ```
 
-The server derives the current date in `Asia/Shanghai`, selects a player from
-the versioned catalog, and inserts the challenge once using the date as the
-SQLite primary key. Later requests and process restarts return the stored player
-snapshot, so catalog refreshes cannot change an already published challenge.
-The authenticated attempt endpoint persists a per-Profile deadline. The
-completion endpoint accepts only the guess trace and derives the win/loss
-before writing Profile; timeout losses are rejected until that deadline.
+The metadata GET returns only the date and round number, so opening the lobby
+does not start a timer or disclose the stored challenge. The server derives the
+current date in `Asia/Shanghai`, selects a player from the versioned catalog,
+and inserts the challenge once using the date as the SQLite primary key. The
+authenticated attempt endpoint returns the stored player snapshot and persists
+a per-Profile deadline, so catalog refreshes cannot change an already published
+challenge. The completion endpoint accepts only the guess trace and derives the
+win/loss before writing Profile; timeout losses are rejected until that
+deadline.
 
 ### Solo rounds
 

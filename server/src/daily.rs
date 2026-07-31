@@ -62,10 +62,38 @@ pub struct DailyChallenge {
 
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct DailyChallengeMetadata {
+    pub date: String,
+    pub round_number: u16,
+}
+
+impl From<&DailyChallenge> for DailyChallengeMetadata {
+    fn from(challenge: &DailyChallenge) -> Self {
+        Self {
+            date: challenge.date.clone(),
+            round_number: challenge.round_number,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DailyChallengeAttempt {
-    #[serde(flatten)]
-    pub challenge: DailyChallenge,
+    pub date: String,
+    pub round_number: u16,
+    pub mystery_player: CatalogPlayer,
     pub deadline_unix_ms: u64,
+}
+
+impl DailyChallengeAttempt {
+    pub fn new(challenge: DailyChallenge, deadline_unix_ms: u64) -> Self {
+        Self {
+            date: challenge.date,
+            round_number: challenge.round_number,
+            mystery_player: challenge.mystery_player,
+            deadline_unix_ms,
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]

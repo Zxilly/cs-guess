@@ -7,29 +7,40 @@ import type { ServerProfile } from "@/lib/profile-api";
 export interface ServerDailyChallenge {
   date: string;
   roundNumber: number;
-  mysteryPlayerId: string;
   mysteryPlayer: Player;
-  catalogVersion: string;
-  deadlineUnixMs?: number;
+  deadlineUnixMs: number;
 }
 
-export async function loadCurrentDailyChallenge(
+export type ServerDailyChallengeMetadata = Pick<
+  ServerDailyChallenge,
+  "date" | "roundNumber"
+>;
+
+export async function loadCurrentDailyChallengeMetadata(
   signal?: AbortSignal,
-  profile?: Pick<AnonymousProfile, "anonymousId" | "syncToken">,
+): Promise<ServerDailyChallengeMetadata> {
+  const response = await fetch(`${API_BASE}/v1/daily-challenges/current`, {
+    signal,
+  });
+  if (!response.ok) {
+    throw new Error(`daily challenge metadata load failed: ${response.status}`);
+  }
+  return (await response.json()) as ServerDailyChallengeMetadata;
+}
+
+export async function startCurrentDailyChallenge(
+  profile: Pick<AnonymousProfile, "anonymousId" | "syncToken">,
+  signal?: AbortSignal,
 ): Promise<ServerDailyChallenge> {
   const response = await fetch(
-    `${API_BASE}/v1/daily-challenges/current${profile ? "/attempts" : ""}`,
+    `${API_BASE}/v1/daily-challenges/current/attempts`,
     {
-      method: profile ? "POST" : "GET",
-      headers: profile
-        ? {
-            "Content-Type": "application/json",
-            "X-Profile-Token": profile.syncToken,
-          }
-        : undefined,
-      body: profile
-        ? JSON.stringify({ anonymousId: profile.anonymousId })
-        : undefined,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Profile-Token": profile.syncToken,
+      },
+      body: JSON.stringify({ anonymousId: profile.anonymousId }),
       signal,
     },
   );

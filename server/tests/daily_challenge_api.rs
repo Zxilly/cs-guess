@@ -27,6 +27,10 @@ async fn current_daily_challenge_survives_a_server_restart() {
         .await
         .unwrap();
     assert_eq!(first_response.status(), StatusCode::OK);
+    assert_eq!(
+        first_response.headers()[axum::http::header::CACHE_CONTROL],
+        "public, max-age=60, stale-while-revalidate=300"
+    );
     let first: Value = serde_json::from_slice(
         &first_response
             .into_body()
@@ -61,16 +65,7 @@ async fn current_daily_challenge_survives_a_server_restart() {
     assert_eq!(restarted, first);
     assert!(first["date"].as_str().is_some_and(|date| date.len() == 10));
     assert!(first["roundNumber"].as_u64().is_some_and(|round| round > 0));
-    assert!(
-        first["mysteryPlayerId"]
-            .as_str()
-            .is_some_and(|player_id| !player_id.is_empty())
-    );
-    assert!(
-        first["catalogVersion"]
-            .as_str()
-            .is_some_and(|version| !version.is_empty())
-    );
+    assert!(first.get("mysteryPlayer").is_none());
 
     let _ = std::fs::remove_file(&database_path);
     let _ = std::fs::remove_file(database_path.with_extension("sqlite-wal"));

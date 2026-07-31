@@ -5,7 +5,10 @@ import { createRoot, type Root } from "react-dom/client";
 import { SWRConfig } from "swr";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useDailyChallenge } from "@/hooks/use-daily-challenge";
+import {
+  useDailyChallenge,
+  useDailyChallengeMetadata,
+} from "@/hooks/use-daily-challenge";
 
 const profileMocks = vi.hoisted(() => ({
   ensureReady: vi.fn(),
@@ -16,6 +19,7 @@ const profileMocks = vi.hoisted(() => ({
 }));
 const dailyMocks = vi.hoisted(() => ({
   load: vi.fn(),
+  loadMetadata: vi.fn(),
 }));
 
 vi.mock("@/hooks/use-anonymous-profile", () => ({
@@ -24,7 +28,8 @@ vi.mock("@/hooks/use-anonymous-profile", () => ({
 }));
 
 vi.mock("@/lib/daily-challenge-api", () => ({
-  loadCurrentDailyChallenge: dailyMocks.load,
+  loadCurrentDailyChallengeMetadata: dailyMocks.loadMetadata,
+  startCurrentDailyChallenge: dailyMocks.load,
 }));
 
 let container: HTMLDivElement;
@@ -39,10 +44,19 @@ function DailyProbe({ label }: { label: string }) {
   );
 }
 
+function MetadataProbe() {
+  const { challenge } = useDailyChallengeMetadata();
+  return <output>{challenge?.roundNumber ?? "loading"}</output>;
+}
+
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   profileMocks.ensureReady.mockReset().mockResolvedValue(undefined);
   dailyMocks.load.mockReset().mockResolvedValue({
+    date: "2026-07-30",
+    roundNumber: 211,
+  });
+  dailyMocks.loadMetadata.mockReset().mockResolvedValue({
     date: "2026-07-30",
     roundNumber: 211,
   });
@@ -77,5 +91,21 @@ describe("useDailyChallenge request cache", () => {
     expect(profileMocks.ensureReady).toHaveBeenCalledTimes(1);
     expect(dailyMocks.load).toHaveBeenCalledTimes(1);
     expect(container.textContent).toBe("2026-07-302026-07-30");
+  });
+
+  it("loads lobby metadata without creating a profile-bound attempt", async () => {
+    await act(async () => {
+      root.render(
+        <SWRConfig value={{ provider: () => new Map() }}>
+          <MetadataProbe />
+        </SWRConfig>,
+      );
+      await Promise.resolve();
+    });
+
+    expect(dailyMocks.loadMetadata).toHaveBeenCalledOnce();
+    expect(dailyMocks.load).not.toHaveBeenCalled();
+    expect(profileMocks.ensureReady).not.toHaveBeenCalled();
+    expect(container.textContent).toBe("211");
   });
 });

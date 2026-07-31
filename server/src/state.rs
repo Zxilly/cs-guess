@@ -429,7 +429,7 @@ impl AppState {
         &self,
         anonymous_id: &str,
         sync_token: &str,
-    ) -> Result<DailyChallengeAttempt, AppError> {
+    ) -> Result<(DailyChallengeAttempt, bool), AppError> {
         self.inner
             .database
             .start_daily_challenge_attempt(anonymous_id, sync_token)

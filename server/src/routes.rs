@@ -34,7 +34,7 @@ use tracing::warn;
 
 use crate::{
     AppState,
-    daily::{CompleteDailyChallengeRequest, DailyChallengeAttempt},
+    daily::{CompleteDailyChallengeRequest, DailyChallengeAttempt, DailyChallengeMetadata},
     error::AppError,
     profile::{
         CreateProfileRequest, ProfileState, StartIdentityDrawRequest, validate_anonymous_id,
@@ -167,7 +167,13 @@ async fn apply_api_cache_policy(request: Request<Body>, next: Next) -> Response 
     let is_private = request.method() != Method::GET
         || path.starts_with("/v1/profiles/")
         || path.starts_with("/v1/solo-rounds/");
-    let cache_policy = if is_api && is_private {
+    let is_daily_metadata =
+        request.method() == Method::GET && path == "/v1/daily-challenges/current";
+    let cache_policy = if is_daily_metadata {
+        Some(HeaderValue::from_static(
+            "public, max-age=60, stale-while-revalidate=300",
+        ))
+    } else if is_api && is_private {
         Some(HeaderValue::from_static("private, no-store"))
     } else if is_api || is_health {
         Some(HeaderValue::from_static("no-store"))
@@ -273,8 +279,9 @@ async fn queue_counts(State(state): State<AppState>) -> Json<QueueCounts> {
 
 async fn current_daily_challenge(
     State(state): State<AppState>,
-) -> Result<Json<crate::daily::DailyChallenge>, AppError> {
-    Ok(Json(state.current_daily_challenge().await?))
+) -> Result<Json<DailyChallengeMetadata>, AppError> {
+    let challenge = state.current_daily_challenge().await?;
+    Ok(Json(DailyChallengeMetadata::from(&challenge)))
 }
 
 async fn complete_daily_challenge(
@@ -300,13 +307,16 @@ async fn start_daily_challenge_attempt(
     Json(request): Json<StartDailyChallengeAttemptRequest>,
 ) -> Result<(StatusCode, Json<DailyChallengeAttempt>), AppError> {
     let sync_token = profile_sync_token(&headers)?;
+    let (attempt, created) = state
+        .start_daily_challenge_attempt(&request.anonymous_id, sync_token)
+        .await?;
     Ok((
-        StatusCode::CREATED,
-        Json(
-            state
-                .start_daily_challenge_attempt(&request.anonymous_id, sync_token)
-                .await?,
-        ),
+        if created {
+            StatusCode::CREATED
+        } else {
+            StatusCode::OK
+        },
+        Json(attempt),
     ))
 }
 

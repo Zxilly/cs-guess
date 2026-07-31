@@ -9,7 +9,8 @@ import {
 } from "@/hooks/use-anonymous-profile";
 import {
   completeDailyChallenge,
-  loadCurrentDailyChallenge,
+  loadCurrentDailyChallengeMetadata,
+  startCurrentDailyChallenge,
   type ServerDailyChallenge,
 } from "@/lib/daily-challenge-api";
 
@@ -42,7 +43,7 @@ export function useDailyChallenge() {
     ],
     async () => {
       await ensureAnonymousProfileReady();
-      return loadCurrentDailyChallenge(undefined, {
+      return startCurrentDailyChallenge({
         anonymousId,
         syncToken,
       });
@@ -94,5 +95,20 @@ export function useDailyChallenge() {
     loading: isLoading,
     submitCompletion,
     completionPending,
+  };
+}
+
+export function useDailyChallengeMetadata() {
+  const date = shanghaiDateKey();
+  const { data, error, isLoading, mutate } = useSWRImmutable(
+    ["daily-challenge-metadata", date],
+    () => loadCurrentDailyChallengeMetadata(),
+  );
+
+  return {
+    challenge: data,
+    error,
+    loading: isLoading,
+    retry: () => void mutate(),
   };
 }

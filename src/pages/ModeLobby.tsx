@@ -22,7 +22,7 @@ import { PlayerIdentity } from "@/components/PlayerIdentity";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAnonymousProfile } from "@/hooks/use-anonymous-profile";
-import { useDailyChallenge } from "@/hooks/use-daily-challenge";
+import { useDailyChallengeMetadata } from "@/hooks/use-daily-challenge";
 import { trackEvent } from "@/lib/analytics";
 
 interface ModeOptionProps {
@@ -66,7 +66,7 @@ function ModeOption({
 }
 
 export function ModeLobby() {
-  const { challenge } = useDailyChallenge();
+  const { challenge } = useDailyChallengeMetadata();
   const identity = useAnonymousProfile();
 
   return (

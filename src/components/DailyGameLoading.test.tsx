@@ -96,9 +96,8 @@ describe("DailyGameLoading", () => {
     dailyState.challenge = {
       date: "2026-07-29",
       roundNumber: 210,
-      mysteryPlayerId: mysteryPlayer.id,
       mysteryPlayer,
-      catalogVersion: "test-catalog",
+      deadlineUnixMs: Date.now() + 180_000,
     };
 
     const markup = renderInRouter(<GamePage mode="daily" />);

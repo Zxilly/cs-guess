@@ -135,9 +135,33 @@ async fn profile_api_uses_authenticated_domain_operations() {
         )
         .await
         .unwrap();
+    assert_eq!(challenge.status(), StatusCode::CREATED);
     let challenge: serde_json::Value =
         serde_json::from_slice(&challenge.into_body().collect().await.unwrap().to_bytes()).unwrap();
-    let mystery_player_id = challenge["mysteryPlayerId"].as_str().unwrap();
+
+    let resumed = service
+        .clone()
+        .oneshot(
+            Request::post("/v1/daily-challenges/current/attempts")
+                .header(header::CONTENT_TYPE, "application/json")
+                .header("x-profile-token", SYNC_TOKEN)
+                .body(Body::from(
+                    json!({ "anonymousId": ANONYMOUS_ID }).to_string(),
+                ))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(resumed.status(), StatusCode::OK);
+    let resumed: serde_json::Value =
+        serde_json::from_slice(&resumed.into_body().collect().await.unwrap().to_bytes()).unwrap();
+    assert_eq!(resumed["deadlineUnixMs"], challenge["deadlineUnixMs"]);
+    assert_eq!(
+        resumed["mysteryPlayer"]["id"],
+        challenge["mysteryPlayer"]["id"]
+    );
+
+    let mystery_player_id = challenge["mysteryPlayer"]["id"].as_str().unwrap();
     let completion_payload = json!({
         "anonymousId": ANONYMOUS_ID,
         "guessIds": [mystery_player_id],

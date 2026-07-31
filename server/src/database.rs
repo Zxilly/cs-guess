@@ -497,12 +497,12 @@ impl DatabaseStore {
         &self,
         anonymous_id: &str,
         sync_token: &str,
-    ) -> Result<DailyChallengeAttempt, AppError> {
+    ) -> Result<(DailyChallengeAttempt, bool), AppError> {
         self.load_profile(anonymous_id, sync_token).await?;
         let challenge = self.current_daily_challenge().await?;
         let created_at = unix_timestamp_millis();
         let deadline_unix_ms = created_at.saturating_add(DAILY_ROUND_SECONDS * 1_000);
-        sqlx::query(
+        let insert = sqlx::query(
             "INSERT INTO daily_attempts (
                 anonymous_id, challenge_date, deadline_unix_ms, created_at
              ) VALUES (?, ?, ?, ?)
@@ -525,12 +525,15 @@ impl DatabaseStore {
         .fetch_one(&self.pool)
         .await
         .map_err(database_error)?;
-        Ok(DailyChallengeAttempt {
-            challenge,
-            deadline_unix_ms: deadline_unix_ms
-                .try_into()
-                .map_err(|_| AppError::Internal)?,
-        })
+        Ok((
+            DailyChallengeAttempt::new(
+                challenge,
+                deadline_unix_ms
+                    .try_into()
+                    .map_err(|_| AppError::Internal)?,
+            ),
+            insert.rows_affected() == 1,
+        ))
     }
 
     pub async fn daily_attempt_deadline(

@@ -2,19 +2,40 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   completeDailyChallenge,
-  loadCurrentDailyChallenge,
+  loadCurrentDailyChallengeMetadata,
+  startCurrentDailyChallenge,
 } from "@/lib/daily-challenge-api";
 
-describe("loadCurrentDailyChallenge", () => {
+const PROFILE = {
+  anonymousId: "anonymous-daily-test",
+  syncToken: "daily_test_sync_token_abcdefghijklmnopqrstuvwxyz",
+};
+
+describe("daily challenge API", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
-  it("returns the server-persisted player snapshot", async () => {
+  it("loads public metadata without starting an attempt", async () => {
+    const response = { date: "2026-07-27", roundNumber: 208 };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(response), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(loadCurrentDailyChallengeMetadata()).resolves.toEqual(
+      response,
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("/v1/daily-challenges/current"),
+      expect.not.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("returns the server-persisted player snapshot for an attempt", async () => {
     const response = {
       date: "2026-07-27",
       roundNumber: 208,
-      mysteryPlayerId: "donk",
       mysteryPlayer: {
         id: "donk",
         nickname: "donk",
@@ -27,7 +48,7 @@ describe("loadCurrentDailyChallenge", () => {
         majorAppearances: 5,
         majorWins: 1,
       },
-      catalogVersion: "catalog-sha256",
+      deadlineUnixMs: 1_800_000,
     };
     vi.stubGlobal(
       "fetch",
@@ -39,14 +60,13 @@ describe("loadCurrentDailyChallenge", () => {
       ),
     );
 
-    await expect(loadCurrentDailyChallenge()).resolves.toEqual(response);
+    await expect(startCurrentDailyChallenge(PROFILE)).resolves.toEqual(response);
   });
 
   it("replaces a legacy undefined snapshot team before rendering", async () => {
     const response = {
       date: "2026-07-28",
       roundNumber: 209,
-      mysteryPlayerId: "jedqr",
       mysteryPlayer: {
         id: "jedqr",
         nickname: "jedqr",
@@ -60,7 +80,7 @@ describe("loadCurrentDailyChallenge", () => {
         majorAppearances: 0,
         majorWins: 0,
       },
-      catalogVersion: "legacy-catalog",
+      deadlineUnixMs: 1_800_000,
     };
     vi.stubGlobal(
       "fetch",
@@ -72,7 +92,7 @@ describe("loadCurrentDailyChallenge", () => {
       ),
     );
 
-    const challenge = await loadCurrentDailyChallenge();
+    const challenge = await startCurrentDailyChallenge(PROFILE);
 
     expect(challenge.mysteryPlayer.team).toBe("无队伍");
     expect(challenge.mysteryPlayer.teamLogoUrl).toBeUndefined();
@@ -84,7 +104,6 @@ describe("loadCurrentDailyChallenge", () => {
         JSON.stringify({
           date: "2026-07-30",
           roundNumber: 211,
-          mysteryPlayerId: "donk",
           mysteryPlayer: {
             id: "donk",
             nickname: "donk",
@@ -97,7 +116,6 @@ describe("loadCurrentDailyChallenge", () => {
             majorAppearances: 5,
             majorWins: 1,
           },
-          catalogVersion: "catalog",
           deadlineUnixMs: 1_800_000,
         }),
         { status: 201 },
@@ -105,10 +123,7 @@ describe("loadCurrentDailyChallenge", () => {
     );
     vi.stubGlobal("fetch", fetchMock);
 
-    await loadCurrentDailyChallenge(undefined, {
-      anonymousId: "anonymous-daily-test",
-      syncToken: "daily_test_sync_token_abcdefghijklmnopqrstuvwxyz",
-    });
+    await startCurrentDailyChallenge(PROFILE);
 
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining("/v1/daily-challenges/current/attempts"),

@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { ModeLobby } from "@/pages/ModeLobby";
 
 vi.mock("@/hooks/use-daily-challenge", () => ({
-  useDailyChallenge: () => ({
+  useDailyChallengeMetadata: () => ({
     challenge: {
       date: "2026-07-28",
       roundNumber: 209,
