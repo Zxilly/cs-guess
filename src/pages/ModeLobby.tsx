@@ -3,6 +3,7 @@ import {
   ArrowRightIcon,
   CalendarDotsIcon,
   ChartBarIcon,
+  ClockCounterClockwiseIcon,
   CrosshairSimpleIcon,
   DoorOpenIcon,
   GithubLogoIcon,
@@ -22,9 +23,11 @@ import { PanelHeader } from "@/components/PanelHeader";
 import { PlayerIdentity } from "@/components/PlayerIdentity";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import catalogMetadata from "@/data/players.generated.meta.json";
 import { loadPlayers } from "@/data/players";
 import { useAnonymousProfile } from "@/hooks/use-anonymous-profile";
 import { useDailyChallengeMetadata } from "@/hooks/use-daily-challenge";
+import { getActiveLocale } from "@/i18n";
 import { trackEvent } from "@/lib/analytics";
 
 interface ModeOptionProps {
@@ -33,6 +36,17 @@ interface ModeOptionProps {
   title: string;
   meta: string;
   analyticsMode: "solo" | "quick-duel" | "quick-group" | "room";
+}
+
+function formatDataUpdatedAt(value: string) {
+  return new Intl.DateTimeFormat(getActiveLocale(), {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(value));
 }
 
 function usePlayerCatalogAfterFirstPaint() {
@@ -303,7 +317,14 @@ export function ModeLobby() {
           </Card>
         </div>
 
-        <div className="mt-7 flex justify-center border-t border-foreground/15 pt-5 sm:justify-end">
+        <footer className="mt-7 flex flex-col items-center justify-between gap-2 border-t border-foreground/15 pt-5 sm:flex-row">
+          <p className="inline-flex min-h-11 items-center gap-2 px-2 font-mono text-xs tracking-[0.04em] text-muted-foreground">
+            <ClockCounterClockwiseIcon className="size-4" weight="regular" />
+            <span>{t`数据更新时间`}</span>
+            <time dateTime={catalogMetadata.updatedAt}>
+              {formatDataUpdatedAt(catalogMetadata.updatedAt)}
+            </time>
+          </p>
           <a
             href="https://github.com/Zxilly/cs-guess"
             target="_blank"
@@ -314,7 +335,7 @@ export function ModeLobby() {
             <GithubLogoIcon className="size-5" weight="regular" />
             {t`GitHub 源码`}
           </a>
-        </div>
+        </footer>
       </main>
     </div>
   );

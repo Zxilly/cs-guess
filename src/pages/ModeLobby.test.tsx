@@ -121,6 +121,19 @@ describe("ModeLobby", () => {
     expect(markup).toContain("GitHub 源码");
   });
 
+  it("shows when the player data was last updated", () => {
+    const markup = renderToStaticMarkup(
+      <MemoryRouter>
+        <ModeLobby />
+      </MemoryRouter>,
+    );
+
+    expect(markup).toContain("数据更新时间");
+    expect(markup).toContain(
+      'dateTime="2026-07-30T14:19:11.552613Z"',
+    );
+  });
+
   it("limits directional arrow motion to motion-safe environments", () => {
     const markup = renderToStaticMarkup(
       <MemoryRouter>

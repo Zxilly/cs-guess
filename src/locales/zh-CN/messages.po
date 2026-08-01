@@ -51,7 +51,7 @@ msgid "{0} 次抽取"
 msgstr "{0} 次抽取"
 
 #. placeholder {0}: standing.guessCount
-#: src/pages/LiveGamePage.tsx:1984
+#: src/pages/LiveGamePage.tsx:1985
 msgid "{0} 次猜出"
 msgstr "{0} 次猜出"
 
@@ -61,12 +61,12 @@ msgid "{0} 胜解锁"
 msgstr "{0} 胜解锁"
 
 #. placeholder {0}: winner.displayName
-#: src/pages/LiveGamePage.tsx:1961
+#: src/pages/LiveGamePage.tsx:1962
 msgid "{0} 获胜"
 msgstr "{0} 获胜"
 
 #. placeholder {0}: roundResults.length
-#: src/pages/LiveGamePage.tsx:1919
+#: src/pages/LiveGamePage.tsx:1920
 msgid "{0} 轮"
 msgstr "{0} 轮"
 
@@ -82,7 +82,7 @@ msgid "{0}，可横向滚动"
 msgstr "{0}，可横向滚动"
 
 #. placeholder {0}: entry.name
-#: src/pages/LiveGamePage.tsx:720
+#: src/pages/LiveGamePage.tsx:721
 msgid "{0}（已离开）"
 msgstr "{0}（已离开）"
 
@@ -93,7 +93,7 @@ msgid "{0}命中"
 msgstr "{0}命中"
 
 #. placeholder {0}: rematchPendingNames(rematch).join("、") || t`原对手`
-#: src/pages/LiveGamePage.tsx:2166
+#: src/pages/LiveGamePage.tsx:2167
 msgid "{0}尚未回应，邀请将在 {rematchSeconds} 秒后失效。"
 msgstr "{0}尚未回应，邀请将在 {rematchSeconds} 秒后失效。"
 
@@ -103,15 +103,15 @@ msgstr "{0}尚未回应，邀请将在 {rematchSeconds} 秒后失效。"
 msgid "{0}未命中"
 msgstr "{0}未命中"
 
-#: src/pages/LiveGamePage.tsx:1499
+#: src/pages/LiveGamePage.tsx:1500
 msgid "{connectedPlayers} / {maxPlayers} 位成员已就位，由你开始本轮"
 msgstr "{connectedPlayers} / {maxPlayers} 位成员已就位，由你开始本轮"
 
-#: src/components/PlayerIdentity.tsx:171
+#: src/components/PlayerIdentity.tsx:165
 msgid "{drawCredits} 次抽取"
 msgstr "{drawCredits} 次抽取"
 
-#: src/components/PlayerIdentity.tsx:93
+#: src/components/PlayerIdentity.tsx:87
 msgid "{drawCredits} 次抽取 · 胜 1 局或累计负 2 局 +1"
 msgstr "{drawCredits} 次抽取 · 胜 1 局或累计负 2 局 +1"
 
@@ -265,7 +265,7 @@ msgstr "28 对战·系列赛失败"
 msgid "29 单人·结算明细"
 msgstr "29 单人·结算明细"
 
-#: src/pages/ModeLobby.tsx:139
+#: src/pages/ModeLobby.tsx:231
 msgid "3 分钟 · 8 次尝试 · 全服同题"
 msgstr "3 分钟 · 8 次尝试 · 全服同题"
 
@@ -309,15 +309,15 @@ msgstr "38 匹配·取消失败"
 msgid "39 好友房·创建中"
 msgstr "39 好友房·创建中"
 
-#: src/pages/LiveGamePage.tsx:1577
+#: src/pages/LiveGamePage.tsx:1578
 #: src/pages/MatchmakingPage.tsx:472
-#: src/pages/ModeLobby.tsx:213
+#: src/pages/ModeLobby.tsx:305
 #: src/pages/QuickMatch.tsx:265
 #: src/pages/QuickMatch.tsx:347
 msgid "4 人乱斗"
 msgstr "4 人乱斗"
 
-#: src/pages/ModeLobby.tsx:191
+#: src/pages/ModeLobby.tsx:283
 msgid "4 人乱斗："
 msgstr "4 人乱斗："
 
@@ -373,7 +373,7 @@ msgstr "CS Guess — 每日 Counter-Strike 职业选手竞猜挑战"
 msgid "CS Guess — 每日选手竞猜"
 msgstr "CS Guess — 每日选手竞猜"
 
-#: src/pages/ModeLobby.tsx:237
+#: src/pages/ModeLobby.tsx:336
 msgid "GitHub 源码"
 msgstr "GitHub 源码"
 
@@ -387,7 +387,7 @@ msgstr "HOST · 同题竞速"
 msgid "Major 冠军"
 msgstr "Major 冠军"
 
-#: src/hooks/use-anonymous-profile.ts:107
+#: src/hooks/use-anonymous-profile.ts:112
 msgid "Major 冠军池"
 msgstr "Major 冠军池"
 
@@ -399,7 +399,7 @@ msgstr "Major 冠军池："
 msgid "Major 参赛"
 msgstr "Major 参赛"
 
-#: src/hooks/use-anonymous-profile.ts:95
+#: src/hooks/use-anonymous-profile.ts:100
 #: src/pages/IdentityPage.tsx:455
 msgid "Major 参赛池"
 msgstr "Major 参赛池"
@@ -417,7 +417,7 @@ msgstr "Major 参赛选手"
 msgid "Major 次数"
 msgstr "Major 次数"
 
-#: src/hooks/use-anonymous-profile.ts:101
+#: src/hooks/use-anonymous-profile.ts:106
 msgid "Major 资深池"
 msgstr "Major 资深池"
 
@@ -441,7 +441,7 @@ msgstr "三分钟倒计时已结束，答案已经揭晓。"
 msgid "下一局"
 msgstr "下一局"
 
-#: src/pages/LiveGamePage.tsx:2030
+#: src/pages/LiveGamePage.tsx:2031
 msgid "下一局将在 {nextRoundSeconds} 秒后自动开始"
 msgstr "下一局将在 {nextRoundSeconds} 秒后自动开始"
 
@@ -465,7 +465,7 @@ msgstr "中文"
 msgid "主动离开"
 msgstr "主动离开"
 
-#: src/pages/ModeLobby.tsx:181
+#: src/pages/ModeLobby.tsx:273
 msgid "了解对战模式"
 msgstr "了解对战模式"
 
@@ -512,7 +512,7 @@ msgstr "仅房主可以开始"
 #: src/components/DailyGameLoading.tsx:116
 #: src/components/ModeSidebar.tsx:28
 #: src/pages/GamePage.tsx:267
-#: src/pages/ModeLobby.tsx:125
+#: src/pages/ModeLobby.tsx:217
 #: src/pages/StatsPage.tsx:56
 msgid "今日挑战"
 msgstr "今日挑战"
@@ -551,7 +551,7 @@ msgstr "今日挑战载入失败"
 msgid "今日挑战进行中"
 msgstr "今日挑战进行中"
 
-#: src/pages/ModeLobby.tsx:137
+#: src/pages/ModeLobby.tsx:229
 msgid "今日神秘选手"
 msgstr "今日神秘选手"
 
@@ -590,9 +590,9 @@ msgstr "会话失效"
 msgid "会话已失效，请退出后重新加入。"
 msgstr "会话已失效，请退出后重新加入。"
 
-#: src/pages/LiveGamePage.tsx:2044
-#: src/pages/LiveGamePage.tsx:2076
-#: src/pages/LiveGamePage.tsx:2338
+#: src/pages/LiveGamePage.tsx:2045
+#: src/pages/LiveGamePage.tsx:2077
+#: src/pages/LiveGamePage.tsx:2339
 msgid "会话已失效，请重新加入房间"
 msgstr "会话已失效，请重新加入房间"
 
@@ -600,8 +600,8 @@ msgstr "会话已失效，请重新加入房间"
 msgid "会话已失效，请重新加入房间。"
 msgstr "会话已失效，请重新加入房间。"
 
-#: src/pages/LiveGamePage.tsx:2052
-#: src/pages/LiveGamePage.tsx:2339
+#: src/pages/LiveGamePage.tsx:2053
+#: src/pages/LiveGamePage.tsx:2340
 msgid "会话已失效，请重新匹配"
 msgstr "会话已失效，请重新匹配"
 
@@ -620,10 +620,10 @@ msgstr "位置"
 #: src/components/BattleContext.tsx:221
 #: src/components/BattleContext.tsx:306
 #: src/components/MatchFoundOverlay.tsx:82
-#: src/pages/LiveGamePage.tsx:667
-#: src/pages/LiveGamePage.tsx:718
-#: src/pages/LiveGamePage.tsx:1803
-#: src/pages/LiveGamePage.tsx:1977
+#: src/pages/LiveGamePage.tsx:668
+#: src/pages/LiveGamePage.tsx:719
+#: src/pages/LiveGamePage.tsx:1804
+#: src/pages/LiveGamePage.tsx:1978
 msgid "你"
 msgstr "你"
 
@@ -631,7 +631,7 @@ msgstr "你"
 msgid "你已离开，服务器判定本系列结束。"
 msgstr "你已离开，服务器判定本系列结束。"
 
-#: src/pages/LiveGamePage.tsx:1587
+#: src/pages/LiveGamePage.tsx:1588
 msgid "你已连接"
 msgstr "你已连接"
 
@@ -660,7 +660,7 @@ msgid "你率先拿到本场所需胜局。"
 msgstr "你率先拿到本场所需胜局。"
 
 #: src/components/MatchFoundOverlay.tsx:85
-#: src/pages/LiveGamePage.tsx:651
+#: src/pages/LiveGamePage.tsx:652
 msgid "你的身份"
 msgstr "你的身份"
 
@@ -680,7 +680,7 @@ msgstr "你赢得了本场系列赛。"
 msgid "你赢得了本局。"
 msgstr "你赢得了本局。"
 
-#: src/pages/ModeLobby.tsx:196
+#: src/pages/ModeLobby.tsx:288
 msgid "使用房间号加入，或创建 2–8 人房间。"
 msgstr "使用房间号加入，或创建 2–8 人房间。"
 
@@ -782,7 +782,7 @@ msgstr "最近回合"
 msgid "准备重抽…"
 msgstr "准备重抽…"
 
-#: src/pages/LiveGamePage.tsx:1348
+#: src/pages/LiveGamePage.tsx:1349
 msgid "凭证已保存"
 msgstr "凭证已保存"
 
@@ -867,7 +867,7 @@ msgstr "初始选手池"
 #: src/components/DailyGameLoading.tsx:119
 #: src/components/ModeSidebar.tsx:207
 #: src/pages/GamePage.tsx:271
-#: src/pages/LiveGamePage.tsx:1669
+#: src/pages/LiveGamePage.tsx:1670
 #: src/pages/SoloGamePage.tsx:316
 msgid "剩余时间"
 msgstr "剩余时间"
@@ -990,7 +990,7 @@ msgid "匹配请求超时，请重试。"
 msgstr "匹配请求超时，请重试。"
 
 #: src/components/ModeSidebar.tsx:29
-#: src/pages/ModeLobby.tsx:160
+#: src/pages/ModeLobby.tsx:252
 #: src/pages/SoloDifficultyPage.tsx:93
 #: src/pages/SoloGamePage.tsx:312
 #: src/pages/StatsPage.tsx:57
@@ -1035,8 +1035,8 @@ msgstr "南极洲"
 msgid "历史数据不可用"
 msgstr "历史数据不可用"
 
-#: src/pages/LiveGamePage.tsx:2107
-#: src/pages/LiveGamePage.tsx:2166
+#: src/pages/LiveGamePage.tsx:2108
+#: src/pages/LiveGamePage.tsx:2167
 msgid "原对手"
 msgstr "原对手"
 
@@ -1044,7 +1044,7 @@ msgstr "原对手"
 msgid "原对手当前离线"
 msgstr "原对手当前离线"
 
-#: src/hooks/use-anonymous-profile.ts:97
+#: src/hooks/use-anonymous-profile.ts:102
 msgid "参加过 1–4 次 Major、尚未夺冠的职业选手"
 msgstr "参加过 1–4 次 Major、尚未夺冠的职业选手"
 
@@ -1052,7 +1052,7 @@ msgstr "参加过 1–4 次 Major、尚未夺冠的职业选手"
 msgid "参加过 1–4 次且未夺冠。"
 msgstr "参加过 1–4 次且未夺冠。"
 
-#: src/hooks/use-anonymous-profile.ts:103
+#: src/hooks/use-anonymous-profile.ts:108
 msgid "参加过至少 5 次 Major、尚未夺冠的资深选手"
 msgstr "参加过至少 5 次 Major、尚未夺冠的资深选手"
 
@@ -1060,11 +1060,11 @@ msgstr "参加过至少 5 次 Major、尚未夺冠的资深选手"
 msgid "参加过至少 5 次且未夺冠。"
 msgstr "参加过至少 5 次且未夺冠。"
 
-#: src/pages/ModeLobby.tsx:188
+#: src/pages/ModeLobby.tsx:280
 msgid "双方同题竞速，先猜中者获胜。"
 msgstr "双方同题竞速，先猜中者获胜。"
 
-#: src/pages/LiveGamePage.tsx:1538
+#: src/pages/LiveGamePage.tsx:1539
 msgid "双方就位，正在开始。"
 msgstr "双方就位，正在开始。"
 
@@ -1102,7 +1102,7 @@ msgstr "取消当前票据并防止重复操作。"
 msgid "取消请求超时，请重试。"
 msgstr "取消请求超时，请重试。"
 
-#: src/pages/LiveGamePage.tsx:2177
+#: src/pages/LiveGamePage.tsx:2178
 msgid "取消邀请"
 msgstr "取消邀请"
 
@@ -1118,7 +1118,7 @@ msgstr "只会匹配人数、赛制、题库难度和猜测可见性完全相同
 msgid "只公开对手命中的属性，不显示具体猜测选手。"
 msgstr "只公开对手命中的属性，不显示具体猜测选手。"
 
-#: src/pages/LiveGamePage.tsx:2048
+#: src/pages/LiveGamePage.tsx:2049
 msgid "可保留当前成员并开始一场全新的系列赛"
 msgstr "可保留当前成员并开始一场全新的系列赛"
 
@@ -1126,11 +1126,11 @@ msgstr "可保留当前成员并开始一场全新的系列赛"
 msgid "可接收广播并提交实时指令。"
 msgstr "可接收广播并提交实时指令。"
 
-#: src/pages/LiveGamePage.tsx:2054
+#: src/pages/LiveGamePage.tsx:2055
 msgid "可返回大厅或重新匹配"
 msgstr "可返回大厅或重新匹配"
 
-#: src/pages/LiveGamePage.tsx:1916
+#: src/pages/LiveGamePage.tsx:1917
 msgid "各轮回顾"
 msgstr "各轮回顾"
 
@@ -1162,11 +1162,11 @@ msgstr "命中"
 msgid "四人同题竞速"
 msgstr "四人同题竞速"
 
-#: src/pages/ModeLobby.tsx:192
+#: src/pages/ModeLobby.tsx:284
 msgid "四人同题竞速，率先猜中者获胜。"
 msgstr "四人同题竞速，率先猜中者获胜。"
 
-#: src/pages/LiveGamePage.tsx:1543
+#: src/pages/LiveGamePage.tsx:1544
 msgid "四人同题竞速。"
 msgstr "四人同题竞速。"
 
@@ -1178,7 +1178,7 @@ msgstr "回合"
 msgid "回合 / 赛制"
 msgstr "回合 / 赛制"
 
-#: src/pages/LiveGamePage.tsx:1669
+#: src/pages/LiveGamePage.tsx:1670
 msgid "回合状态"
 msgstr "回合状态"
 
@@ -1193,7 +1193,7 @@ msgstr "回合胜率"
 #: src/components/MatchFoundOverlay.tsx:21
 #: src/lib/friend-room.ts:10
 #: src/lib/solo-game.ts:30
-#: src/pages/LiveGamePage.tsx:451
+#: src/pages/LiveGamePage.tsx:452
 msgid "困难"
 msgstr "困难"
 
@@ -1218,7 +1218,7 @@ msgstr "国籍同洲接近"
 msgid "在"
 msgstr "在"
 
-#: src/pages/ModeLobby.tsx:233
+#: src/pages/ModeLobby.tsx:332
 msgid "在 GitHub 查看 CS Guess 源码（新标签页打开）"
 msgstr "在 GitHub 查看 CS Guess 源码（新标签页打开）"
 
@@ -1234,17 +1234,17 @@ msgid "在线"
 msgstr "在线"
 
 #: src/components/GuessTable.tsx:482
-#: src/pages/LiveGamePage.tsx:677
-#: src/pages/LiveGamePage.tsx:1819
-#: src/pages/LiveGamePage.tsx:1830
+#: src/pages/LiveGamePage.tsx:678
+#: src/pages/LiveGamePage.tsx:1820
+#: src/pages/LiveGamePage.tsx:1831
 msgid "在线 · 本轮已判负"
 msgstr "在线 · 本轮已判负"
 
-#: src/pages/ModeLobby.tsx:207
+#: src/pages/ModeLobby.tsx:299
 msgid "在线匹配 · 1 / 3 / 5 局赛制"
 msgstr "在线匹配 · 1 / 3 / 5 局赛制"
 
-#: src/pages/ModeLobby.tsx:214
+#: src/pages/ModeLobby.tsx:306
 msgid "在线匹配 · 4 人 · 1 / 3 / 5 局赛制"
 msgstr "在线匹配 · 4 人 · 1 / 3 / 5 局赛制"
 
@@ -1256,11 +1256,11 @@ msgstr "场解锁"
 msgid "塞尔维亚"
 msgstr "塞尔维亚"
 
-#: src/pages/LiveGamePage.tsx:1279
+#: src/pages/LiveGamePage.tsx:1280
 msgid "复制失败，请手动复制房间号"
 msgstr "复制失败，请手动复制房间号"
 
-#: src/pages/LiveGamePage.tsx:1636
+#: src/pages/LiveGamePage.tsx:1637
 msgid "复制房间号 {roomCode}"
 msgstr "复制房间号 {roomCode}"
 
@@ -1276,7 +1276,7 @@ msgstr "失败"
 msgid "好友房单回合结算"
 msgstr "好友房单回合结算"
 
-#: src/pages/LiveGamePage.tsx:1552
+#: src/pages/LiveGamePage.tsx:1553
 msgid "好友房同题竞速。"
 msgstr "好友房同题竞速。"
 
@@ -1300,7 +1300,7 @@ msgstr "好友房系列赛结算"
 msgid "好友房设置"
 msgstr "好友房设置"
 
-#: src/pages/LiveGamePage.tsx:1696
+#: src/pages/LiveGamePage.tsx:1697
 msgid "好友房设置与成员"
 msgstr "好友房设置与成员"
 
@@ -1309,20 +1309,20 @@ msgid "好友房请求失败"
 msgstr "好友房请求失败"
 
 #: src/components/ModeSidebar.tsx:31
-#: src/pages/LiveGamePage.tsx:1332
-#: src/pages/LiveGamePage.tsx:1579
-#: src/pages/LiveGamePage.tsx:1620
-#: src/pages/ModeLobby.tsx:220
+#: src/pages/LiveGamePage.tsx:1333
+#: src/pages/LiveGamePage.tsx:1580
+#: src/pages/LiveGamePage.tsx:1621
+#: src/pages/ModeLobby.tsx:312
 #: src/pages/RoomEntry.tsx:297
 #: src/pages/StatsPage.tsx:59
 msgid "好友房间"
 msgstr "好友房间"
 
-#: src/pages/LiveGamePage.tsx:1580
+#: src/pages/LiveGamePage.tsx:1581
 msgid "好友房间 · {difficultyLabel}"
 msgstr "好友房间 · {difficultyLabel}"
 
-#: src/pages/ModeLobby.tsx:195
+#: src/pages/ModeLobby.tsx:287
 msgid "好友房间："
 msgstr "好友房间："
 
@@ -1330,7 +1330,7 @@ msgstr "好友房间："
 msgid "安全返回"
 msgstr "安全返回"
 
-#: src/pages/LiveGamePage.tsx:1458
+#: src/pages/LiveGamePage.tsx:1459
 msgid "安全退出"
 msgstr "安全退出"
 
@@ -1366,8 +1366,8 @@ msgid "完整职业选手目录，包含未参加过 Major 的选手。"
 msgstr "完整职业选手目录，包含未参加过 Major 的选手。"
 
 #: src/components/ModeSidebar.tsx:30
-#: src/pages/LiveGamePage.tsx:1577
-#: src/pages/ModeLobby.tsx:206
+#: src/pages/LiveGamePage.tsx:1578
+#: src/pages/ModeLobby.tsx:298
 #: src/pages/QuickMatch.tsx:265
 msgid "实时 1v1"
 msgstr "实时 1v1"
@@ -1376,7 +1376,7 @@ msgstr "实时 1v1"
 msgid "实时 1v1 匹配"
 msgstr "实时 1v1 匹配"
 
-#: src/pages/ModeLobby.tsx:187
+#: src/pages/ModeLobby.tsx:279
 msgid "实时 1v1："
 msgstr "实时 1v1："
 
@@ -1384,9 +1384,9 @@ msgstr "实时 1v1："
 msgid "实时匹配"
 msgstr "实时匹配"
 
-#: src/pages/LiveGamePage.tsx:1332
-#: src/pages/LiveGamePage.tsx:1620
-#: src/pages/LiveGamePage.tsx:1663
+#: src/pages/LiveGamePage.tsx:1333
+#: src/pages/LiveGamePage.tsx:1621
+#: src/pages/LiveGamePage.tsx:1664
 msgid "实时对战"
 msgstr "实时对战"
 
@@ -1407,7 +1407,7 @@ msgstr "实时连接地址无效，请返回大厅后重新加入。"
 msgid "实时连接尚未恢复，请稍后重试。"
 msgstr "实时连接尚未恢复，请稍后重试。"
 
-#: src/debug/install-audit-state.ts:311
+#: src/debug/install-audit-state.ts:316
 msgid "实时连接暂时不可用，请检查网络后重试。"
 msgstr "实时连接暂时不可用，请检查网络后重试。"
 
@@ -1417,7 +1417,7 @@ msgid "实时连接正常"
 msgstr "实时连接正常"
 
 #. placeholder {0}: AUDIT_LABELS[audit] ?? audit
-#: src/debug/install-audit-state.ts:269
+#: src/debug/install-audit-state.ts:273
 msgid "审查｜{0}"
 msgstr "审查｜{0}"
 
@@ -1465,7 +1465,7 @@ msgstr "对战服务暂时无法创建房间，请稍后重试。"
 msgid "对战服务暂时无法加入房间，请稍后重试。"
 msgstr "对战服务暂时无法加入房间，请稍后重试。"
 
-#: src/pages/ModeLobby.tsx:173
+#: src/pages/ModeLobby.tsx:265
 msgid "对战模式"
 msgstr "对战模式"
 
@@ -1490,18 +1490,18 @@ msgid "对手"
 msgstr "对手"
 
 #. placeholder {0}: entry.seatIndex + 1
-#: src/pages/LiveGamePage.tsx:719
+#: src/pages/LiveGamePage.tsx:720
 msgid "对手 {0}"
 msgstr "对手 {0}"
 
 #. placeholder {0}: index + 1
 #. placeholder {1}: player.displayName
-#: src/pages/LiveGamePage.tsx:560
+#: src/pages/LiveGamePage.tsx:561
 msgid "对手 {0} · {1}"
 msgstr "对手 {0} · {1}"
 
 #: src/components/MatchFoundOverlay.tsx:82
-#: src/pages/LiveGamePage.tsx:667
+#: src/pages/LiveGamePage.tsx:668
 msgid "对手 {index}"
 msgstr "对手 {index}"
 
@@ -1580,15 +1580,15 @@ msgstr "对手重连宽限期结束，本局由你获胜。"
 msgid "尚无回合记录"
 msgstr "尚无回合记录"
 
-#: src/pages/LiveGamePage.tsx:1312
+#: src/pages/LiveGamePage.tsx:1313
 msgid "尚未取得可用的房间状态，请重试连接或安全退出。"
 msgstr "尚未取得可用的房间状态，请重试连接或安全退出。"
 
-#: src/pages/LiveGamePage.tsx:1394
+#: src/pages/LiveGamePage.tsx:1395
 msgid "尚未取得可用的房间状态。你可以重试连接，或安全退出本房间。"
 msgstr "尚未取得可用的房间状态。你可以重试连接，或安全退出本房间。"
 
-#: src/components/PlayerIdentity.tsx:185
+#: src/components/PlayerIdentity.tsx:179
 msgid "局即可获得下一次机会。"
 msgstr "局即可获得下一次机会。"
 
@@ -1653,7 +1653,7 @@ msgid "已先于对手确定目标选手。"
 msgstr "已先于对手确定目标选手。"
 
 #. placeholder {0}: opponentPlayer.displayName
-#: src/pages/LiveGamePage.tsx:1534
+#: src/pages/LiveGamePage.tsx:1535
 msgid "已匹配，等待 {0} 连接。"
 msgstr "已匹配，等待 {0} 连接。"
 
@@ -1667,7 +1667,7 @@ msgstr "已提交 {guesses} 次猜测"
 msgid "已提交，内容隐藏"
 msgstr "已提交，内容隐藏"
 
-#: src/pages/LiveGamePage.tsx:1983
+#: src/pages/LiveGamePage.tsx:1984
 msgid "已猜出"
 msgstr "已猜出"
 
@@ -1684,14 +1684,14 @@ msgstr "已等待"
 msgid "已解锁"
 msgstr "已解锁"
 
-#: src/pages/LiveGamePage.tsx:1711
-#: src/pages/LiveGamePage.tsx:1757
+#: src/pages/LiveGamePage.tsx:1712
+#: src/pages/LiveGamePage.tsx:1758
 #: src/pages/MatchmakingPage.tsx:409
 #: src/pages/MatchmakingPage.tsx:494
 msgid "已连接"
 msgstr "已连接"
 
-#: src/pages/LiveGamePage.tsx:1295
+#: src/pages/LiveGamePage.tsx:1296
 msgid "已连接，正在同步房间"
 msgstr "已连接，正在同步房间"
 
@@ -1708,7 +1708,7 @@ msgid "巴勒斯坦国"
 msgstr "巴勒斯坦国"
 
 #. placeholder {0}: seatIndex + 1
-#: src/pages/LiveGamePage.tsx:1759
+#: src/pages/LiveGamePage.tsx:1760
 msgid "席位 {0}"
 msgstr "席位 {0}"
 
@@ -1734,7 +1734,7 @@ msgstr "并列第 {rank}"
 msgid "建立实时连接"
 msgstr "建立实时连接"
 
-#: src/pages/LiveGamePage.tsx:2068
+#: src/pages/LiveGamePage.tsx:2069
 msgid "开始下一场"
 msgstr "开始下一场"
 
@@ -1742,7 +1742,7 @@ msgstr "开始下一场"
 msgid "开始下一题"
 msgstr "开始下一题"
 
-#: src/pages/ModeLobby.tsx:153
+#: src/pages/ModeLobby.tsx:245
 #: src/pages/StatsPage.tsx:498
 msgid "开始今日挑战"
 msgstr "开始今日挑战"
@@ -1751,7 +1751,7 @@ msgstr "开始今日挑战"
 msgid "开始匹配"
 msgstr "开始匹配"
 
-#: src/pages/LiveGamePage.tsx:1789
+#: src/pages/LiveGamePage.tsx:1790
 msgid "开始本轮"
 msgstr "开始本轮"
 
@@ -1771,11 +1771,11 @@ msgstr "当前会话已失效，请刷新页面后重新创建。"
 msgid "当前会话已失效，请刷新页面后重新加入。"
 msgstr "当前会话已失效，请刷新页面后重新加入。"
 
-#: src/pages/LiveGamePage.tsx:1093
+#: src/pages/LiveGamePage.tsx:1094
 msgid "当前会话已失效，请重新匹配。"
 msgstr "当前会话已失效，请重新匹配。"
 
-#: src/components/PlayerIdentity.tsx:185
+#: src/components/PlayerIdentity.tsx:179
 msgid "当前再输"
 msgstr "当前再输"
 
@@ -1795,7 +1795,7 @@ msgstr "当前对局结果不会改变，你可以继续查看或重新匹配。
 msgid "当前战队完全一致"
 msgstr "当前战队完全一致"
 
-#: src/pages/LiveGamePage.tsx:2257
+#: src/pages/LiveGamePage.tsx:2258
 msgid "当前房间会话已失效"
 msgstr "当前房间会话已失效"
 
@@ -1822,7 +1822,7 @@ msgstr "当前条件等待总数"
 
 #: src/components/DailyGameLoading.tsx:69
 #: src/components/ModeSidebar.tsx:157
-#: src/pages/LiveGamePage.tsx:1329
+#: src/pages/LiveGamePage.tsx:1330
 msgid "当前模式"
 msgstr "当前模式"
 
@@ -1830,7 +1830,7 @@ msgstr "当前模式"
 msgid "当前比分"
 msgstr "当前比分"
 
-#: src/pages/LiveGamePage.tsx:1495
+#: src/pages/LiveGamePage.tsx:1496
 msgid "当前离线，重连后由房主开始本轮"
 msgstr "当前离线，重连后由房主开始本轮"
 
@@ -1873,20 +1873,20 @@ msgstr "待设置身份"
 msgid "恢复上次配置"
 msgstr "恢复上次配置"
 
-#: src/pages/LiveGamePage.tsx:2045
-#: src/pages/LiveGamePage.tsx:2340
+#: src/pages/LiveGamePage.tsx:2046
+#: src/pages/LiveGamePage.tsx:2341
 msgid "恢复连接后可再次对战"
 msgstr "恢复连接后可再次对战"
 
-#: src/pages/LiveGamePage.tsx:1094
+#: src/pages/LiveGamePage.tsx:1095
 msgid "恢复连接后可再次对战。"
 msgstr "恢复连接后可再次对战。"
 
-#: src/pages/LiveGamePage.tsx:2077
+#: src/pages/LiveGamePage.tsx:2078
 msgid "恢复连接后可开始下一场"
 msgstr "恢复连接后可开始下一场"
 
-#: src/pages/LiveGamePage.tsx:2053
+#: src/pages/LiveGamePage.tsx:2054
 msgid "恢复连接后可重新匹配"
 msgstr "恢复连接后可重新匹配"
 
@@ -1905,12 +1905,12 @@ msgstr "我的猜测"
 msgid "我的身份"
 msgstr "我的身份"
 
-#: src/components/PlayerIdentity.tsx:78
+#: src/components/PlayerIdentity.tsx:72
 msgid "我的身份 ·"
 msgstr "我的身份 ·"
 
 #: src/pages/IdentityPage.tsx:472
-#: src/pages/ModeLobby.tsx:95
+#: src/pages/ModeLobby.tsx:190
 msgid "战绩"
 msgstr "战绩"
 
@@ -1935,11 +1935,11 @@ msgstr "战队未命中"
 
 #: src/components/BattleContext.tsx:108
 #: src/components/BattleContext.tsx:231
-#: src/pages/LiveGamePage.tsx:1750
+#: src/pages/LiveGamePage.tsx:1751
 msgid "房主"
 msgstr "房主"
 
-#: src/pages/LiveGamePage.tsx:1779
+#: src/pages/LiveGamePage.tsx:1780
 msgid "房主可以开始本轮"
 msgstr "房主可以开始本轮"
 
@@ -1956,12 +1956,12 @@ msgstr "房间不存在，请检查房间号。"
 msgid "房间人数"
 msgstr "房间人数"
 
-#: src/pages/LiveGamePage.tsx:1338
+#: src/pages/LiveGamePage.tsx:1339
 #: src/pages/RoomEntry.tsx:344
 msgid "房间号"
 msgstr "房间号"
 
-#: src/pages/LiveGamePage.tsx:1276
+#: src/pages/LiveGamePage.tsx:1277
 msgid "房间号已复制"
 msgstr "房间号已复制"
 
@@ -1989,11 +1989,11 @@ msgstr "房间已满或当前状态无法加入。"
 msgid "房间已连接"
 msgstr "房间已连接"
 
-#: src/pages/LiveGamePage.tsx:1721
+#: src/pages/LiveGamePage.tsx:1722
 msgid "房间席位"
 msgstr "房间席位"
 
-#: src/pages/LiveGamePage.tsx:1704
+#: src/pages/LiveGamePage.tsx:1705
 msgid "房间成员"
 msgstr "房间成员"
 
@@ -2009,7 +2009,7 @@ msgstr "房间正在重连"
 msgid "房间状态已变化，请重新创建。"
 msgstr "房间状态已变化，请重新创建。"
 
-#: src/pages/LiveGamePage.tsx:1769
+#: src/pages/LiveGamePage.tsx:1770
 msgid "房间设置"
 msgstr "房间设置"
 
@@ -2041,7 +2041,7 @@ msgstr "房间连接离线"
 msgid "所有参加过 Major 的选手，包括退役与无队伍选手。"
 msgstr "所有参加过 Major 的选手，包括退役与无队伍选手。"
 
-#: src/pages/LiveGamePage.tsx:2189
+#: src/pages/LiveGamePage.tsx:2190
 msgid "所有玩家均已同意，服务器正在重置比分并同步新的题目。"
 msgstr "所有玩家均已同意，服务器正在重置比分并同步新的题目。"
 
@@ -2105,7 +2105,7 @@ msgstr "拒绝"
 msgid "指令未确认，请重试。"
 msgstr "指令未确认，请重试。"
 
-#: src/data/players.ts:13
+#: src/data/player-types.ts:12
 msgid "指挥"
 msgstr "指挥"
 
@@ -2169,6 +2169,10 @@ msgstr "操作太频繁，请稍后再试。"
 #: src/pages/StatsPage.tsx:255
 msgid "数据按回合统计，最多保留最近 50 回合。同一房间的每个回合各占一行，比分为该回合结束时的累计比分。"
 msgstr "数据按回合统计，最多保留最近 50 回合。同一房间的每个回合各占一行，比分为该回合结束时的累计比分。"
+
+#: src/pages/ModeLobby.tsx:323
+msgid "数据更新时间"
+msgstr "数据更新时间"
 
 #: src/pages/LiveGamePage.tsx:264
 msgid "断线判负"
@@ -2312,7 +2316,7 @@ msgstr "服务器返回了无法识别的指令响应，请重试。"
 msgid "服务器返回的房间状态不完整，请重试。"
 msgstr "服务器返回的房间状态不完整，请重试。"
 
-#: src/pages/LiveGamePage.tsx:685
+#: src/pages/LiveGamePage.tsx:686
 msgid "未加入"
 msgstr "未加入"
 
@@ -2321,16 +2325,16 @@ msgstr "未加入"
 msgid "未命中"
 msgstr "未命中"
 
-#: src/pages/LiveGamePage.tsx:1985
+#: src/pages/LiveGamePage.tsx:1986
 msgid "未猜出"
 msgstr "未猜出"
 
-#: src/data/players.ts:17
+#: src/data/player-types.ts:16
 msgid "未知"
 msgstr "未知"
 
-#: src/pages/LiveGamePage.tsx:1943
-#: src/pages/LiveGamePage.tsx:1957
+#: src/pages/LiveGamePage.tsx:1944
+#: src/pages/LiveGamePage.tsx:1958
 msgid "未知选手"
 msgstr "未知选手"
 
@@ -2350,7 +2354,7 @@ msgstr "未能加入匹配队列"
 msgid "未能加入房间"
 msgstr "未能加入房间"
 
-#: src/pages/LiveGamePage.tsx:1304
+#: src/pages/LiveGamePage.tsx:1305
 msgid "未能连接房间"
 msgstr "未能连接房间"
 
@@ -2358,8 +2362,8 @@ msgstr "未能连接房间"
 msgid "未能退出匹配"
 msgstr "未能退出匹配"
 
-#: src/pages/LiveGamePage.tsx:1301
-#: src/pages/LiveGamePage.tsx:2124
+#: src/pages/LiveGamePage.tsx:1302
+#: src/pages/LiveGamePage.tsx:2125
 msgid "未能退出房间"
 msgstr "未能退出房间"
 
@@ -2381,21 +2385,21 @@ msgstr "本回合答案的历史数据不可用"
 
 #: src/components/CelebrationOverlay.tsx:269
 #: src/components/ModeSidebar.tsx:92
-#: src/pages/LiveGamePage.tsx:1684
+#: src/pages/LiveGamePage.tsx:1685
 msgid "本局失利"
 msgstr "本局失利"
 
-#: src/pages/LiveGamePage.tsx:1518
+#: src/pages/LiveGamePage.tsx:1519
 msgid "本局失利。"
 msgstr "本局失利。"
 
 #: src/components/CelebrationOverlay.tsx:275
 #: src/components/ModeSidebar.tsx:97
-#: src/pages/LiveGamePage.tsx:1685
+#: src/pages/LiveGamePage.tsx:1686
 msgid "本局平局"
 msgstr "本局平局"
 
-#: src/pages/LiveGamePage.tsx:1521
+#: src/pages/LiveGamePage.tsx:1522
 msgid "本局平局。"
 msgstr "本局平局。"
 
@@ -2420,15 +2424,15 @@ msgstr "本局答案已经揭晓。"
 
 #: src/components/CelebrationOverlay.tsx:262
 #: src/components/ModeSidebar.tsx:82
-#: src/pages/LiveGamePage.tsx:1682
+#: src/pages/LiveGamePage.tsx:1683
 msgid "本局胜利"
 msgstr "本局胜利"
 
-#: src/pages/LiveGamePage.tsx:1514
+#: src/pages/LiveGamePage.tsx:1515
 msgid "本局胜利。"
 msgstr "本局胜利。"
 
-#: src/pages/LiveGamePage.tsx:2207
+#: src/pages/LiveGamePage.tsx:2208
 msgid "本次邀请已经结束。"
 msgstr "本次邀请已经结束。"
 
@@ -2436,7 +2440,7 @@ msgstr "本次邀请已经结束。"
 msgid "本次邀请已结束，你仍可查看本局结果或重新匹配。"
 msgstr "本次邀请已结束，你仍可查看本局结果或重新匹配。"
 
-#: src/pages/LiveGamePage.tsx:1510
+#: src/pages/LiveGamePage.tsx:1511
 msgid "本系列已结束。"
 msgstr "本系列已结束。"
 
@@ -2448,7 +2452,7 @@ msgstr "本系列已结束。最终排名已保留。"
 msgid "本轮已判负"
 msgstr "本轮已判负"
 
-#: src/pages/LiveGamePage.tsx:1856
+#: src/pages/LiveGamePage.tsx:1857
 msgid "本轮已判负，等待下一轮"
 msgstr "本轮已判负，等待下一轮"
 
@@ -2456,11 +2460,11 @@ msgstr "本轮已判负，等待下一轮"
 msgid "本轮已判负，等待下一轮。"
 msgstr "本轮已判负，等待下一轮。"
 
-#: src/pages/LiveGamePage.tsx:1962
+#: src/pages/LiveGamePage.tsx:1963
 msgid "本轮平局"
 msgstr "本轮平局"
 
-#: src/pages/LiveGamePage.tsx:2027
+#: src/pages/LiveGamePage.tsx:2028
 msgid "本轮平局，继续加赛"
 msgstr "本轮平局，继续加赛"
 
@@ -2481,8 +2485,8 @@ msgid "条猜测的历史数据不可用"
 msgstr "条猜测的历史数据不可用"
 
 #: src/components/CelebrationOverlay.tsx:531
-#: src/pages/LiveGamePage.tsx:2088
-#: src/pages/LiveGamePage.tsx:2228
+#: src/pages/LiveGamePage.tsx:2089
+#: src/pages/LiveGamePage.tsx:2229
 msgid "查看对局"
 msgstr "查看对局"
 
@@ -2494,7 +2498,7 @@ msgstr "查看对手信息规则"
 msgid "查看已持久化的对局结果和历史记录。"
 msgstr "查看已持久化的对局结果和历史记录。"
 
-#: src/pages/ModeLobby.tsx:93
+#: src/pages/ModeLobby.tsx:188
 msgid "查看战绩"
 msgstr "查看战绩"
 
@@ -2507,7 +2511,7 @@ msgid "查看竞猜规则"
 msgstr "查看竞猜规则"
 
 #: src/pages/GamePage.tsx:327
-#: src/pages/LiveGamePage.tsx:2006
+#: src/pages/LiveGamePage.tsx:2007
 #: src/pages/SoloGamePage.tsx:370
 msgid "查看结果图例"
 msgstr "查看结果图例"
@@ -2516,7 +2520,7 @@ msgstr "查看结果图例"
 msgid "查看身份、今日挑战和全部游戏模式入口。"
 msgstr "查看身份、今日挑战和全部游戏模式入口。"
 
-#: src/components/PlayerIdentity.tsx:178
+#: src/components/PlayerIdentity.tsx:172
 msgid "查看身份与抽取规则"
 msgstr "查看身份与抽取规则"
 
@@ -2646,15 +2650,15 @@ msgid "正在匹配"
 msgstr "正在匹配"
 
 #: src/lib/rematch.ts:146
-#: src/pages/LiveGamePage.tsx:2188
+#: src/pages/LiveGamePage.tsx:2189
 msgid "正在匹配原对手"
 msgstr "正在匹配原对手"
 
-#: src/pages/LiveGamePage.tsx:2331
+#: src/pages/LiveGamePage.tsx:2332
 msgid "正在发送"
 msgstr "正在发送"
 
-#: src/pages/LiveGamePage.tsx:2177
+#: src/pages/LiveGamePage.tsx:2178
 msgid "正在取消"
 msgstr "正在取消"
 
@@ -2674,8 +2678,8 @@ msgstr "正在同步今日统一题目、轮次与计时信息。"
 msgid "正在向服务器确认房间设置，完成后会自动进入等待页面。"
 msgstr "正在向服务器确认房间设置，完成后会自动进入等待页面。"
 
-#: src/pages/LiveGamePage.tsx:1302
-#: src/pages/LiveGamePage.tsx:2124
+#: src/pages/LiveGamePage.tsx:1303
+#: src/pages/LiveGamePage.tsx:2125
 #: src/pages/MatchmakingPage.tsx:362
 msgid "正在完成退出"
 msgstr "正在完成退出"
@@ -2684,15 +2688,15 @@ msgstr "正在完成退出"
 msgid "正在寻找对手"
 msgstr "正在寻找对手"
 
-#: src/pages/LiveGamePage.tsx:1789
+#: src/pages/LiveGamePage.tsx:1790
 msgid "正在开始"
 msgstr "正在开始"
 
-#: src/pages/LiveGamePage.tsx:2144
+#: src/pages/LiveGamePage.tsx:2145
 msgid "正在开始本轮"
 msgstr "正在开始本轮"
 
-#: src/pages/LiveGamePage.tsx:2255
+#: src/pages/LiveGamePage.tsx:2256
 #: src/pages/MatchmakingPage.tsx:525
 msgid "正在恢复连接"
 msgstr "正在恢复连接"
@@ -2705,7 +2709,7 @@ msgstr "正在抽取"
 msgid "正在握手并同步服务器快照。"
 msgstr "正在握手并同步服务器快照。"
 
-#: src/pages/LiveGamePage.tsx:2152
+#: src/pages/LiveGamePage.tsx:2153
 msgid "正在清理上一场结果并同步新的系列赛状态。"
 msgstr "正在清理上一场结果并同步新的系列赛状态。"
 
@@ -2713,7 +2717,7 @@ msgstr "正在清理上一场结果并同步新的系列赛状态。"
 msgid "正在确认身份与对战参数，完成后会自动进入等待页面。"
 msgstr "正在确认身份与对战参数，完成后会自动进入等待页面。"
 
-#: src/pages/LiveGamePage.tsx:1539
+#: src/pages/LiveGamePage.tsx:1540
 msgid "正在等待对手加入。"
 msgstr "正在等待对手加入。"
 
@@ -2721,8 +2725,8 @@ msgstr "正在等待对手加入。"
 msgid "正在获取今日统一题目"
 msgstr "正在获取今日统一题目"
 
-#: src/pages/LiveGamePage.tsx:1313
-#: src/pages/LiveGamePage.tsx:1397
+#: src/pages/LiveGamePage.tsx:1314
+#: src/pages/LiveGamePage.tsx:1398
 msgid "正在获取服务器确认的房间设置、成员与对局状态。"
 msgstr "正在获取服务器确认的房间设置、成员与对局状态。"
 
@@ -2744,6 +2748,8 @@ msgid "正在载入今日题目，轮次、计时和猜测进度将在题目准�
 msgstr "正在载入今日题目，轮次、计时和猜测进度将在题目准备后显示。"
 
 #: src/App.tsx:178
+#: src/pages/ModeLobby.tsx:111
+#: src/pages/ModeLobby.tsx:113
 msgid "正在载入玩家身份"
 msgstr "正在载入玩家身份"
 
@@ -2757,11 +2763,11 @@ msgstr "正在载入页面"
 
 #: src/lib/live-presence.ts:11
 #: src/pages/LiveGamePage.tsx:192
-#: src/pages/LiveGamePage.tsx:1296
+#: src/pages/LiveGamePage.tsx:1297
 msgid "正在连接"
 msgstr "正在连接"
 
-#: src/pages/LiveGamePage.tsx:1491
+#: src/pages/LiveGamePage.tsx:1492
 msgid "正在连接，连接后由房主开始本轮"
 msgstr "正在连接，连接后由房主开始本轮"
 
@@ -2773,7 +2779,7 @@ msgstr "正在连接服务器"
 msgid "正在退出…"
 msgstr "正在退出…"
 
-#: src/pages/LiveGamePage.tsx:2145
+#: src/pages/LiveGamePage.tsx:2146
 msgid "正在通知房间成员并同步本轮题目。"
 msgstr "正在通知房间成员并同步本轮题目。"
 
@@ -2785,8 +2791,8 @@ msgstr "正在通知所有成员"
 msgid "正在通知服务器退出当前匹配，请勿重复操作。"
 msgstr "正在通知服务器退出当前匹配，请勿重复操作。"
 
-#: src/pages/LiveGamePage.tsx:1309
-#: src/pages/LiveGamePage.tsx:2127
+#: src/pages/LiveGamePage.tsx:1310
+#: src/pages/LiveGamePage.tsx:2128
 msgid "正在通知服务器释放当前席位，请勿重复操作。"
 msgstr "正在通知服务器释放当前席位，请勿重复操作。"
 
@@ -2802,32 +2808,32 @@ msgstr "正在重抽…"
 msgid "正在重新抽取身份"
 msgstr "正在重新抽取身份"
 
-#: src/pages/LiveGamePage.tsx:2068
+#: src/pages/LiveGamePage.tsx:2069
 msgid "正在重置"
 msgstr "正在重置"
 
-#: src/pages/LiveGamePage.tsx:2151
+#: src/pages/LiveGamePage.tsx:2152
 msgid "正在重置系列赛"
 msgstr "正在重置系列赛"
 
-#: src/pages/LiveGamePage.tsx:2047
+#: src/pages/LiveGamePage.tsx:2048
 msgid "正在重置系列赛…"
 msgstr "正在重置系列赛…"
 
 #: src/lib/live-presence.ts:12
-#: src/pages/LiveGamePage.tsx:1293
+#: src/pages/LiveGamePage.tsx:1294
 msgid "正在重连"
 msgstr "正在重连"
 
-#: src/pages/LiveGamePage.tsx:1996
+#: src/pages/LiveGamePage.tsx:1997
 msgid "此对局来自旧版本，未包含逐轮记录。"
 msgstr "此对局来自旧版本，未包含逐轮记录。"
 
-#: src/data/players.ts:11
+#: src/data/player-types.ts:10
 msgid "步枪手"
 msgstr "步枪手"
 
-#: src/pages/ModeLobby.tsx:129
+#: src/pages/ModeLobby.tsx:221
 msgid "每日刷新"
 msgstr "每日刷新"
 
@@ -2875,7 +2881,7 @@ msgstr "游戏中"
 msgid "状态同步失败，请重试。"
 msgstr "状态同步失败，请重试。"
 
-#: src/data/players.ts:9
+#: src/data/player-types.ts:8
 msgid "狙击手"
 msgstr "狙击手"
 
@@ -2922,7 +2928,7 @@ msgstr "猜测选手的当前战队，是答案曾经效力过的战队"
 
 #: src/pages/LiveGamePage.tsx:134
 #: src/pages/LiveGamePage.tsx:246
-#: src/pages/LiveGamePage.tsx:699
+#: src/pages/LiveGamePage.tsx:700
 msgid "玩家"
 msgstr "玩家"
 
@@ -2930,13 +2936,13 @@ msgstr "玩家"
 msgid "玩家就位后开始"
 msgstr "玩家就位后开始"
 
-#: src/pages/ModeLobby.tsx:79
+#: src/pages/ModeLobby.tsx:178
 msgid "玩家快捷操作"
 msgstr "玩家快捷操作"
 
 #: src/App.tsx:191
 #: src/pages/IdentityPage.tsx:367
-#: src/pages/LiveGamePage.tsx:1347
+#: src/pages/LiveGamePage.tsx:1348
 msgid "玩家身份"
 msgstr "玩家身份"
 
@@ -2944,7 +2950,7 @@ msgstr "玩家身份"
 msgid "用户主动退出后不再自动重连。"
 msgstr "用户主动退出后不再自动重连。"
 
-#: src/pages/LiveGamePage.tsx:2049
+#: src/pages/LiveGamePage.tsx:2050
 msgid "留在房间，等待房主开始下一场"
 msgstr "留在房间，等待房主开始下一场"
 
@@ -2987,7 +2993,7 @@ msgstr "离线"
 msgid "秒"
 msgstr "秒"
 
-#: src/data/players.ts:15
+#: src/data/player-types.ts:14
 msgid "突破手"
 msgstr "突破手"
 
@@ -2995,7 +3001,7 @@ msgstr "突破手"
 msgid "立即进入"
 msgstr "立即进入"
 
-#: src/pages/LiveGamePage.tsx:2282
+#: src/pages/LiveGamePage.tsx:2283
 msgid "立即重连"
 msgstr "立即重连"
 
@@ -3006,13 +3012,13 @@ msgstr "第 {0} 次猜测"
 
 #. placeholder {0}: challenge?.roundNumber ?? "—"
 #. placeholder {0}: round.roundNumber
-#: src/pages/LiveGamePage.tsx:1950
-#: src/pages/ModeLobby.tsx:143
+#: src/pages/LiveGamePage.tsx:1951
+#: src/pages/ModeLobby.tsx:235
 msgid "第 {0} 轮"
 msgstr "第 {0} 轮"
 
 #. placeholder {0}: round.roundNumber
-#: src/pages/LiveGamePage.tsx:1968
+#: src/pages/LiveGamePage.tsx:1969
 msgid "第 {0} 轮猜测结果"
 msgstr "第 {0} 轮猜测结果"
 
@@ -3026,7 +3032,7 @@ msgid "第 {rollKey} 次抽取结果：{0}"
 msgstr "第 {rollKey} 次抽取结果：{0}"
 
 #. placeholder {0}: opponentPlayer.displayName
-#: src/pages/LiveGamePage.tsx:1505
+#: src/pages/LiveGamePage.tsx:1506
 msgid "等待 {0} 建立实时连接"
 msgstr "等待 {0} 建立实时连接"
 
@@ -3038,7 +3044,7 @@ msgstr "等待中的对手 {index}"
 msgid "等待其余三名玩家"
 msgstr "等待其余三名玩家"
 
-#: src/pages/LiveGamePage.tsx:1746
+#: src/pages/LiveGamePage.tsx:1747
 msgid "等待加入"
 msgstr "等待加入"
 
@@ -3048,17 +3054,17 @@ msgid "等待匹配"
 msgstr "等待匹配"
 
 #: src/lib/rematch.ts:151
-#: src/pages/LiveGamePage.tsx:2163
+#: src/pages/LiveGamePage.tsx:2164
 msgid "等待原对手回应"
 msgstr "等待原对手回应"
 
-#: src/pages/LiveGamePage.tsx:1536
+#: src/pages/LiveGamePage.tsx:1537
 msgid "等待四位玩家就位。"
 msgstr "等待四位玩家就位。"
 
 #: src/components/BattleContext.tsx:160
 #: src/components/GuessTable.tsx:564
-#: src/pages/LiveGamePage.tsx:1804
+#: src/pages/LiveGamePage.tsx:1805
 msgid "等待对手"
 msgstr "等待对手"
 
@@ -3066,7 +3072,7 @@ msgstr "等待对手"
 msgid "等待已超过 10 分钟，可以重试房间连接或安全返回。"
 msgstr "等待已超过 10 分钟，可以重试房间连接或安全返回。"
 
-#: src/pages/LiveGamePage.tsx:1680
+#: src/pages/LiveGamePage.tsx:1681
 msgid "等待开始"
 msgstr "等待开始"
 
@@ -3074,7 +3080,7 @@ msgstr "等待开始"
 msgid "等待开局"
 msgstr "等待开局"
 
-#: src/pages/LiveGamePage.tsx:2029
+#: src/pages/LiveGamePage.tsx:2030
 msgid "等待成员重连后开始下一局"
 msgstr "等待成员重连后开始下一局"
 
@@ -3083,7 +3089,7 @@ msgid "等待成员重连后开始下一局。"
 msgstr "等待成员重连后开始下一局。"
 
 #. placeholder {0}: roomMembers.find((player) => player.playerId === hostPlayerId) ?.displayName ?? ""
-#: src/pages/LiveGamePage.tsx:1500
+#: src/pages/LiveGamePage.tsx:1501
 msgid "等待房主 {0} 开始本轮"
 msgstr "等待房主 {0} 开始本轮"
 
@@ -3103,16 +3109,16 @@ msgstr "等待抽取"
 msgid "等待猜测"
 msgstr "等待猜测"
 
-#: src/pages/LiveGamePage.tsx:651
+#: src/pages/LiveGamePage.tsx:652
 msgid "等待玩家"
 msgstr "等待玩家"
 
-#: src/pages/LiveGamePage.tsx:1506
+#: src/pages/LiveGamePage.tsx:1507
 msgid "等待玩家实时连接后开始"
 msgstr "等待玩家实时连接后开始"
 
 #: src/lib/live-presence.ts:16
-#: src/pages/LiveGamePage.tsx:684
+#: src/pages/LiveGamePage.tsx:685
 msgid "等待连接"
 msgstr "等待连接"
 
@@ -3133,7 +3139,7 @@ msgstr "答案的当前战队，是猜测选手曾经效力过的战队"
 msgid "简单"
 msgstr "简单"
 
-#: src/pages/ModeLobby.tsx:161
+#: src/pages/ModeLobby.tsx:253
 msgid "简单 / 完整 / 困难 · 3 分钟"
 msgstr "简单 / 完整 / 困难 · 3 分钟"
 
@@ -3147,13 +3153,17 @@ msgid "简单为高成就选手；完整包含所有参加过 Major\n"
 msgstr "简单为高成就选手；完整包含所有参加过 Major\n"
 "                      的选手，包括退役与无队伍选手；困难包含全部选手。"
 
+#: src/pages/ModeLobby.tsx:78
+msgid "管理玩家身份"
+msgstr "管理玩家身份"
+
 #. placeholder {0}: identity.player.nickname
-#: src/pages/ModeLobby.tsx:84
+#: src/pages/ModeLobby.tsx:95
 msgid "管理玩家身份：{0}"
 msgstr "管理玩家身份：{0}"
 
-#: src/components/PlayerIdentity.tsx:112
-#: src/components/PlayerIdentity.tsx:127
+#: src/components/PlayerIdentity.tsx:106
+#: src/components/PlayerIdentity.tsx:121
 msgid "管理身份"
 msgstr "管理身份"
 
@@ -3166,7 +3176,7 @@ msgstr "系列赛最终排行榜"
 msgid "系列赛失利"
 msgstr "系列赛失利"
 
-#: src/pages/LiveGamePage.tsx:1517
+#: src/pages/LiveGamePage.tsx:1518
 msgid "系列赛失利。"
 msgstr "系列赛失利。"
 
@@ -3174,7 +3184,7 @@ msgstr "系列赛失利。"
 msgid "系列赛已结束"
 msgstr "系列赛已结束"
 
-#: src/pages/LiveGamePage.tsx:1520
+#: src/pages/LiveGamePage.tsx:1521
 msgid "系列赛平局。"
 msgstr "系列赛平局。"
 
@@ -3183,7 +3193,7 @@ msgstr "系列赛平局。"
 msgid "系列赛胜利"
 msgstr "系列赛胜利"
 
-#: src/pages/LiveGamePage.tsx:1513
+#: src/pages/LiveGamePage.tsx:1514
 msgid "系列赛胜利。"
 msgstr "系列赛胜利。"
 
@@ -3191,7 +3201,7 @@ msgstr "系列赛胜利。"
 msgid "系统只会匹配人数、赛制、题库难度和猜测可见性完全相同的玩家。"
 msgstr "系统只会匹配人数、赛制、题库难度和猜测可见性完全相同的玩家。"
 
-#: src/components/PlayerIdentity.tsx:190
+#: src/components/PlayerIdentity.tsx:184
 msgid "累计"
 msgstr "累计"
 
@@ -3218,7 +3228,7 @@ msgid "结果"
 msgstr "结果"
 
 #: src/pages/GamePage.tsx:325
-#: src/pages/LiveGamePage.tsx:2005
+#: src/pages/LiveGamePage.tsx:2006
 #: src/pages/SoloGamePage.tsx:368
 msgid "结果图例"
 msgstr "结果图例"
@@ -3235,7 +3245,7 @@ msgstr "继续加赛"
 msgid "美洲"
 msgstr "美洲"
 
-#: src/pages/ModeLobby.tsx:75
+#: src/pages/ModeLobby.tsx:174
 msgid "职业选手竞猜"
 msgstr "职业选手竞猜"
 
@@ -3243,7 +3253,7 @@ msgstr "职业选手竞猜"
 msgid "胜"
 msgstr "胜"
 
-#: src/components/PlayerIdentity.tsx:174
+#: src/components/PlayerIdentity.tsx:168
 msgid "胜 1 局或累计负 2 局 +1"
 msgstr "胜 1 局或累计负 2 局 +1"
 
@@ -3259,7 +3269,7 @@ msgstr "胜利"
 msgid "胜利一局或累计输掉两局，均可获得一次抽取机会。"
 msgstr "胜利一局或累计输掉两局，均可获得一次抽取机会。"
 
-#: src/components/PlayerIdentity.tsx:182
+#: src/components/PlayerIdentity.tsx:176
 msgid "胜利一局获得 1 次抽取；每累计输掉两局获得 1 次。"
 msgstr "胜利一局获得 1 次抽取；每累计输掉两局获得 1 次。"
 
@@ -3271,16 +3281,16 @@ msgstr "胜局最佳猜数"
 msgid "胜局猜数暂无 · 仅统计有猜测记录的胜利回合"
 msgstr "胜局猜数暂无 · 仅统计有猜测记录的胜利回合"
 
-#: src/components/PlayerIdentity.tsx:148
+#: src/components/PlayerIdentity.tsx:142
 #: src/pages/IdentityPage.tsx:483
 msgid "胜率"
 msgstr "胜率"
 
-#: src/components/PlayerIdentity.tsx:190
+#: src/components/PlayerIdentity.tsx:184
 msgid "胜解锁"
 msgstr "胜解锁"
 
-#: src/components/PlayerIdentity.tsx:139
+#: src/components/PlayerIdentity.tsx:133
 msgid "胜负"
 msgstr "胜负"
 
@@ -3288,7 +3298,7 @@ msgstr "胜负"
 msgid "自动重连"
 msgstr "自动重连"
 
-#: src/hooks/use-anonymous-profile.ts:109
+#: src/hooks/use-anonymous-profile.ts:114
 msgid "至少赢得过 1 次 Major 冠军的选手"
 msgstr "至少赢得过 1 次 Major 冠军的选手"
 
@@ -3305,7 +3315,7 @@ msgstr "英文"
 msgid "蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。向上箭头表示目标数值更高，向下箭头表示更低。"
 msgstr "蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。向上箭头表示目标数值更高，向下箭头表示更低。"
 
-#: src/pages/LiveGamePage.tsx:2007
+#: src/pages/LiveGamePage.tsx:2008
 msgid "蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。隐藏模式不公开对手猜测的具体选手。"
 msgstr "蓝色代表完全一致，浅蓝色代表国籍同洲；国籍卡显示两国首都间的直线距离。隐藏模式不公开对手猜测的具体选手。"
 
@@ -3388,7 +3398,7 @@ msgstr "输入 6 位房间号"
 msgid "输入好友分享的 6 位房间号。凭证只保存在当前标签页。"
 msgstr "输入好友分享的 6 位房间号。凭证只保存在当前标签页。"
 
-#: src/pages/ModeLobby.tsx:221
+#: src/pages/ModeLobby.tsx:313
 msgid "输入房间号 · 或创建房间"
 msgstr "输入房间号 · 或创建房间"
 
@@ -3401,7 +3411,7 @@ msgid "返回匹配设置"
 msgstr "返回匹配设置"
 
 #: src/components/CelebrationOverlay.tsx:293
-#: src/pages/LiveGamePage.tsx:2096
+#: src/pages/LiveGamePage.tsx:2097
 msgid "返回模式大厅"
 msgstr "返回模式大厅"
 
@@ -3411,7 +3421,7 @@ msgid "返回设置"
 msgstr "返回设置"
 
 #. placeholder {0}: maxPlayers - connectedPlayers
-#: src/pages/LiveGamePage.tsx:1498
+#: src/pages/LiveGamePage.tsx:1499
 msgid "还需 {0} 位成员加入，由你开始本轮"
 msgstr "还需 {0} 位成员加入，由你开始本轮"
 
@@ -3425,11 +3435,11 @@ msgstr "还需 {0} 位成员连接"
 msgid "连接中"
 msgstr "连接中"
 
-#: src/pages/LiveGamePage.tsx:1758
+#: src/pages/LiveGamePage.tsx:1759
 msgid "连接中断"
 msgstr "连接中断"
 
-#: src/debug/install-audit-state.ts:313
+#: src/debug/install-audit-state.ts:318
 msgid "连接中断，正在尝试恢复对局。"
 msgstr "连接中断，正在尝试恢复对局。"
 
@@ -3446,16 +3456,16 @@ msgstr "连接中断，重连宽限期已开始。"
 msgid "连接已关闭"
 msgstr "连接已关闭"
 
-#: src/pages/LiveGamePage.tsx:1493
+#: src/pages/LiveGamePage.tsx:1494
 msgid "连接恢复后，房主可以开始本轮"
 msgstr "连接恢复后，房主可以开始本轮"
 
-#: src/pages/LiveGamePage.tsx:1396
+#: src/pages/LiveGamePage.tsx:1397
 msgid "连接恢复后会重新同步房间，不会使用过期数据填充比分或席位。"
 msgstr "连接恢复后会重新同步房间，不会使用过期数据填充比分或席位。"
 
 #: src/components/ModeSidebar.tsx:246
-#: src/pages/LiveGamePage.tsx:1343
+#: src/pages/LiveGamePage.tsx:1344
 msgid "连接状态"
 msgstr "连接状态"
 
@@ -3467,18 +3477,18 @@ msgstr "连接超时，无法恢复实时连接。你可以立即重试或安全
 msgid "连接队列中"
 msgstr "连接队列中"
 
-#: src/pages/LiveGamePage.tsx:2258
+#: src/pages/LiveGamePage.tsx:2259
 #: src/pages/MatchmakingPage.tsx:528
 msgid "连接需要处理"
 msgstr "连接需要处理"
 
-#: src/components/PlayerIdentity.tsx:157
+#: src/components/PlayerIdentity.tsx:151
 #: src/pages/IdentityPage.tsx:492
 #: src/pages/IdentityPage.tsx:495
 msgid "连胜"
 msgstr "连胜"
 
-#: src/pages/LiveGamePage.tsx:1031
+#: src/pages/LiveGamePage.tsx:1032
 msgid "退出匹配失败，凭证已保留，请检查网络后重试。"
 msgstr "退出匹配失败，凭证已保留，请检查网络后重试。"
 
@@ -3486,12 +3496,12 @@ msgstr "退出匹配失败，凭证已保留，请检查网络后重试。"
 msgid "退出尚未完成，原匹配已暂停恢复。请重试退出。"
 msgstr "退出尚未完成，原匹配已暂停恢复。请重试退出。"
 
-#: src/pages/LiveGamePage.tsx:1357
-#: src/pages/LiveGamePage.tsx:1437
+#: src/pages/LiveGamePage.tsx:1358
+#: src/pages/LiveGamePage.tsx:1438
 msgid "退出房间"
 msgstr "退出房间"
 
-#: src/pages/LiveGamePage.tsx:1040
+#: src/pages/LiveGamePage.tsx:1041
 msgid "退出房间失败，凭证已保留，请检查网络后重试。"
 msgstr "退出房间失败，凭证已保留，请检查网络后重试。"
 
@@ -3507,7 +3517,7 @@ msgstr "选手卡横向滚动，并由中心指针选出新的身份。"
 msgid "选手已连接"
 msgstr "选手已连接"
 
-#: src/hooks/use-anonymous-profile.ts:144
+#: src/hooks/use-anonymous-profile.ts:156
 msgid "选手池为空"
 msgstr "选手池为空"
 
@@ -3519,11 +3529,11 @@ msgstr "选手目录已更新，已安全开始新的练习回合。"
 msgid "选择人数、题库、赛制和对手猜测可见性。"
 msgstr "选择人数、题库、赛制和对手猜测可见性。"
 
-#: src/pages/ModeLobby.tsx:103
+#: src/pages/ModeLobby.tsx:198
 msgid "选择游戏模式"
 msgstr "选择游戏模式"
 
-#: src/pages/ModeLobby.tsx:178
+#: src/pages/ModeLobby.tsx:270
 msgid "选择玩法"
 msgstr "选择玩法"
 
@@ -3543,7 +3553,7 @@ msgstr "选择要查看的对手"
 msgid "选择选手池"
 msgstr "选择选手池"
 
-#: src/pages/LiveGamePage.tsx:2167
+#: src/pages/LiveGamePage.tsx:2168
 msgid "邀请已发送。"
 msgstr "邀请已发送。"
 
@@ -3552,7 +3562,7 @@ msgid "邀请已送达；所有对手同意后将直接开始新的系列赛。"
 msgstr "邀请已送达；所有对手同意后将直接开始新的系列赛。"
 
 #: src/components/CelebrationOverlay.tsx:295
-#: src/pages/LiveGamePage.tsx:2332
+#: src/pages/LiveGamePage.tsx:2333
 msgid "邀请重赛"
 msgstr "邀请重赛"
 
@@ -3560,26 +3570,26 @@ msgstr "邀请重赛"
 msgid "重抽 · {remainingCredits}"
 msgstr "重抽 · {remainingCredits}"
 
-#: src/pages/LiveGamePage.tsx:1419
-#: src/pages/LiveGamePage.tsx:1477
-#: src/pages/LiveGamePage.tsx:2273
-#: src/pages/LiveGamePage.tsx:2316
+#: src/pages/LiveGamePage.tsx:1420
+#: src/pages/LiveGamePage.tsx:1478
+#: src/pages/LiveGamePage.tsx:2274
+#: src/pages/LiveGamePage.tsx:2317
 msgid "重新加入房间"
 msgstr "重新加入房间"
 
-#: src/pages/LiveGamePage.tsx:1420
-#: src/pages/LiveGamePage.tsx:1478
-#: src/pages/LiveGamePage.tsx:2240
-#: src/pages/LiveGamePage.tsx:2274
-#: src/pages/LiveGamePage.tsx:2317
-#: src/pages/LiveGamePage.tsx:2319
+#: src/pages/LiveGamePage.tsx:1421
+#: src/pages/LiveGamePage.tsx:1479
+#: src/pages/LiveGamePage.tsx:2241
+#: src/pages/LiveGamePage.tsx:2275
+#: src/pages/LiveGamePage.tsx:2318
+#: src/pages/LiveGamePage.tsx:2320
 msgid "重新匹配"
 msgstr "重新匹配"
 
-#: src/pages/LiveGamePage.tsx:1417
-#: src/pages/LiveGamePage.tsx:1475
-#: src/pages/LiveGamePage.tsx:2271
-#: src/pages/LiveGamePage.tsx:2314
+#: src/pages/LiveGamePage.tsx:1418
+#: src/pages/LiveGamePage.tsx:1476
+#: src/pages/LiveGamePage.tsx:2272
+#: src/pages/LiveGamePage.tsx:2315
 #: src/pages/MatchmakingPage.tsx:547
 msgid "重新设置身份"
 msgstr "重新设置身份"
@@ -3588,14 +3598,14 @@ msgstr "重新设置身份"
 msgid "重新载入"
 msgstr "重新载入"
 
-#: src/pages/LiveGamePage.tsx:1428
-#: src/pages/LiveGamePage.tsx:1479
+#: src/pages/LiveGamePage.tsx:1429
+#: src/pages/LiveGamePage.tsx:1480
 #: src/pages/MatchmakingPage.tsx:566
 msgid "重试连接"
 msgstr "重试连接"
 
-#: src/pages/LiveGamePage.tsx:1472
-#: src/pages/LiveGamePage.tsx:2136
+#: src/pages/LiveGamePage.tsx:1473
+#: src/pages/LiveGamePage.tsx:2137
 #: src/pages/MatchmakingPage.tsx:388
 #: src/pages/MatchmakingPage.tsx:538
 msgid "重试退出"
@@ -3605,7 +3615,7 @@ msgstr "重试退出"
 msgid "重赛邀请已取消"
 msgstr "重赛邀请已取消"
 
-#: src/pages/LiveGamePage.tsx:2202
+#: src/pages/LiveGamePage.tsx:2203
 msgid "重赛邀请已结束"
 msgstr "重赛邀请已结束"
 
