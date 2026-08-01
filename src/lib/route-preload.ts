@@ -173,21 +173,23 @@ function scheduleBackgroundPreloads() {
 
   let cancelled = false;
   let cancelIdlePreloads: () => void = () => undefined;
-  const startAfterPageLoad = () => {
+  const startAfterDomReady = () => {
     if (!cancelled) {
       cancelIdlePreloads = scheduleIdleBackgroundPreloads();
     }
   };
 
-  if (document.readyState === "complete") {
-    startAfterPageLoad();
+  if (document.readyState !== "loading") {
+    startAfterDomReady();
   } else {
-    window.addEventListener("load", startAfterPageLoad, { once: true });
+    document.addEventListener("DOMContentLoaded", startAfterDomReady, {
+      once: true,
+    });
   }
 
   return () => {
     cancelled = true;
-    window.removeEventListener("load", startAfterPageLoad);
+    document.removeEventListener("DOMContentLoaded", startAfterDomReady);
     cancelIdlePreloads();
   };
 }

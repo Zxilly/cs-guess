@@ -27,7 +27,7 @@ import { PlayerSearch } from "@/components/PlayerSearch";
 import { RematchInviteCard } from "@/components/RematchInviteCard";
 import { Timer } from "@/components/Timer";
 import { Button } from "@/components/ui/button";
-import { players } from "@/data/players";
+import { players, usePlayers } from "@/data/players";
 import { useProfileRefresh } from "@/hooks/use-anonymous-profile";
 import { useBombCountdown } from "@/hooks/use-bomb-countdown";
 import { useRealtimeRoom } from "@/hooks/use-realtime-room";
@@ -274,6 +274,7 @@ function finishReasonLabel(reason?: BattleFinishReason) {
 }
 
 export function LiveGamePage({ mode }: LiveGamePageProps) {
+  usePlayers();
   const navigate = useNavigate();
   const location = useLocation();
   const { refreshProfile } = useProfileRefresh();

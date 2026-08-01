@@ -1,5 +1,5 @@
 import { t } from "@lingui/core/macro";
-import { players } from "@/data/players";
+import { loadPlayers, type Player } from "@/data/players";
 import {
   debugPatchAnonymousProfile,
   getAnonymousProfileSnapshot,
@@ -125,7 +125,11 @@ function queueCounts(): MatchmakingQueueCounts {
   };
 }
 
-function realtimeSnapshot(audit: string, roomCode: string) {
+function realtimeSnapshot(
+  audit: string,
+  roomCode: string,
+  players: readonly Player[],
+) {
   const profile = getAnonymousProfileSnapshot();
   const selfName =
     players.find((player) => player.id === profile.playerId)?.nickname ??
@@ -259,7 +263,7 @@ function realtimeSnapshot(audit: string, roomCode: string) {
   };
 }
 
-export function installAuditState() {
+export async function installAuditState() {
   if (!import.meta.env.DEV || typeof window === "undefined") return;
   const params = new URLSearchParams(window.location.search);
   const audit = params.get("audit");
@@ -276,11 +280,12 @@ export function installAuditState() {
 
   const roomCode = AUDIT_ROOM_CODES[audit];
   if (!roomCode) return;
+  const players = await loadPlayers();
   const mode = audit.startsWith("live-") &&
     window.location.pathname.includes("/room")
     ? "room"
     : "quick";
-  const snapshot = realtimeSnapshot(audit, roomCode);
+  const snapshot = realtimeSnapshot(audit, roomCode, players);
   const session: StoredRealtimeSession = {
     credentials: {
       roomCode,

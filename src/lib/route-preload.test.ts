@@ -36,7 +36,7 @@ describe("route preloading", () => {
     expect(shouldPreloadInBackground({ saveData: true })).toBe(false);
   });
 
-  it("waits for the initial page load before scheduling background imports", () => {
+  it("starts after DOM readiness without waiting for external resources", () => {
     const requestIdleCallback = vi.fn(() => 1);
     vi.stubGlobal("requestIdleCallback", requestIdleCallback);
     vi.spyOn(document, "readyState", "get").mockReturnValue("loading");
@@ -44,7 +44,7 @@ describe("route preloading", () => {
     const uninstall = installRoutePreloading();
     expect(requestIdleCallback).not.toHaveBeenCalled();
 
-    window.dispatchEvent(new Event("load"));
+    document.dispatchEvent(new Event("DOMContentLoaded"));
     expect(requestIdleCallback).toHaveBeenCalledOnce();
 
     uninstall();

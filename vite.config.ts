@@ -8,8 +8,20 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
+const productionOnlyScriptPattern =
+  /(?:\r?\n)?\s*<script\b[^>]*\bdata-production-only\b[^>]*>[\s\S]*?<\/script>/g;
+
 export default defineConfig({
   plugins: [
+    {
+      name: "production-only-scripts",
+      transformIndexHtml(html, context) {
+        if (context.server) {
+          return html.replace(productionOnlyScriptPattern, "");
+        }
+        return html.replace(/\sdata-production-only(?=[\s>])/g, "");
+      },
+    },
     react(),
     lingui({ failOnCompileError: true }),
     babel({
@@ -37,6 +49,15 @@ export default defineConfig({
     },
   },
   test: {
+    alias: [
+      {
+        find: /^@\/data\/players$/,
+        replacement: path.resolve(
+          import.meta.dirname,
+          "./src/data/players-test-support.ts",
+        ),
+      },
+    ],
     setupFiles: ["./src/test-setup.ts"],
   },
 });

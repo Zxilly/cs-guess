@@ -73,17 +73,14 @@ export function saveSoloDifficulty(
   storage?.setItem(SOLO_DIFFICULTY_KEY, difficulty);
 }
 
-const fullSoloMysteryPool = players.filter(
-  (player) => player.majorAppearances > 0,
-);
-
-const easySoloMysteryPool = fullSoloMysteryPool.filter(
-  (player) => player.majorWins > 0 || player.majorAppearances >= 5,
-);
-
 export function soloMysteryPool(difficulty: SoloDifficulty) {
-  if (difficulty === "easy") return easySoloMysteryPool;
-  if (difficulty === "full") return fullSoloMysteryPool;
+  const fullPool = players.filter((player) => player.majorAppearances > 0);
+  if (difficulty === "easy") {
+    return fullPool.filter(
+      (player) => player.majorWins > 0 || player.majorAppearances >= 5,
+    );
+  }
+  if (difficulty === "full") return fullPool;
   return players;
 }
 

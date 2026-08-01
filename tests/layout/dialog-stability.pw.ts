@@ -100,7 +100,7 @@ async function captureDialog(
   });
 
   try {
-    await page.goto(path);
+    await page.goto(path, { waitUntil: "domcontentloaded" });
     const dialog = page
       .locator('[role="dialog"], [role="alertdialog"]')
       .first();

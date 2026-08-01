@@ -5,7 +5,12 @@ import useSWRImmutable from "swr/immutable";
 import useSWRMutation from "swr/mutation";
 import { create } from "zustand";
 
-import { players, type Player } from "@/data/players";
+import {
+  loadPlayers,
+  players,
+  usePlayers,
+  type Player,
+} from "@/data/players";
 import {
   PROFILE_KEY,
   PROFILE_VERSION,
@@ -120,8 +125,11 @@ function randomIndex(length: number) {
   return Math.floor(Math.random() * length);
 }
 
-export function playersInPool(poolId: IdentityPoolId) {
-  return players.filter((player) => {
+export function playersInPool(
+  poolId: IdentityPoolId,
+  catalog: readonly Player[] = players,
+) {
+  return catalog.filter((player) => {
     if (poolId === "common") {
       return (
         player.majorAppearances >= 1 &&
@@ -136,8 +144,12 @@ export function playersInPool(poolId: IdentityPoolId) {
   });
 }
 
-function pickPlayer(poolId: IdentityPoolId, excludedId?: string) {
-  const pool = playersInPool(poolId);
+function pickPlayer(
+  poolId: IdentityPoolId,
+  excludedId?: string,
+  catalog: readonly Player[] = players,
+) {
+  const pool = playersInPool(poolId, catalog);
   const available = pool.filter((player) => player.id !== excludedId);
   const candidates = available.length > 0 ? available : pool;
   const player = candidates[randomIndex(candidates.length)];
@@ -145,10 +157,13 @@ function pickPlayer(poolId: IdentityPoolId, excludedId?: string) {
   return player;
 }
 
-function eligibleIdentityId(playerId: string) {
-  const current = players.find((player) => player.id === playerId);
+function eligibleIdentityId(
+  playerId: string,
+  catalog: readonly Player[] = players,
+) {
+  const current = catalog.find((player) => player.id === playerId);
   if (current && current.majorAppearances >= 1) return current.id;
-  return pickPlayer("common").id;
+  return pickPlayer("common", undefined, catalog).id;
 }
 
 function createAnonymousId() {
@@ -184,11 +199,11 @@ function createRequestId() {
   ].join("-");
 }
 
-function createProfile(): AnonymousProfile {
+function createPendingProfile(): AnonymousProfile {
   return {
     anonymousId: createAnonymousId(),
     syncToken: createSyncToken(),
-    playerId: pickPlayer("common").id,
+    playerId: "",
     identityConfirmed: false,
     stats: {
       wins: 0,
@@ -260,7 +275,7 @@ function readProfile(): AnonymousProfile | null {
         /^[A-Za-z0-9_-]{32,128}$/.test(stored.syncToken)
           ? stored.syncToken
           : createSyncToken(),
-      playerId: eligibleIdentityId(stored.playerId),
+      playerId: stored.playerId,
       identityConfirmed:
         (stored.version ?? 0) >= 6
           ? stored.identityConfirmed === true
@@ -306,17 +321,12 @@ function isValidPendingDraw(value: unknown): value is PendingIdentityDraw {
     ["common", "advanced", "star"].includes(draw.poolId ?? "") &&
     Array.isArray(draw.itemIds) &&
     draw.itemIds.length === 29 &&
-    draw.itemIds.every(
-      (id) => typeof id === "string" && players.some((player) => player.id === id),
-    ) &&
+    draw.itemIds.every((id) => typeof id === "string") &&
     typeof draw.winnerId === "string" &&
     Number.isInteger(draw.winnerIndex) &&
     (draw.winnerIndex ?? -1) >= 0 &&
     (draw.winnerIndex ?? 29) < draw.itemIds.length &&
     draw.itemIds[draw.winnerIndex ?? -1] === draw.winnerId &&
-    playersInPool(draw.poolId as IdentityPoolId).some(
-      (player) => player.id === draw.winnerId,
-    ) &&
     typeof draw.createdAt === "number" &&
     Number.isSafeInteger(draw.createdAt) &&
     draw.createdAt > 0
@@ -444,9 +454,9 @@ function readyServerProfile(local: AnonymousProfile) {
   return promise;
 }
 
-export function ensureAnonymousProfileReady(): Promise<ServerProfile> {
-  const latest = readProfile();
-  if (!latest) return Promise.reject(new Error("anonymous profile is unavailable"));
+export async function ensureAnonymousProfileReady(): Promise<ServerProfile> {
+  const catalog = await loadPlayers();
+  const latest = ensureProfileInitialized(catalog);
   return queueServerMutation(async () => {
     const remote = await readyServerProfile(latest);
     const current = readProfile();
@@ -507,23 +517,63 @@ export async function refreshAnonymousProfile() {
   return remote;
 }
 
-function loadOrCreateProfile() {
-  const profile = readProfile() ?? createProfile();
-  return saveProfile(profile, {
-    notify: false,
-    touch: false,
-  });
-}
-
 interface AnonymousProfileStore {
   profile: AnonymousProfile;
   replaceProfile: (profile: AnonymousProfile) => void;
 }
 
 const useAnonymousProfileStore = create<AnonymousProfileStore>()((set) => ({
-  profile: loadOrCreateProfile(),
+  profile: readProfile() ?? createPendingProfile(),
   replaceProfile: (profile) => set({ profile }),
 }));
+
+let profileCatalogInitialized = false;
+
+function pendingDrawMatchesCatalog(
+  draw: PendingIdentityDraw | undefined,
+  catalog: readonly Player[],
+) {
+  if (!draw) return true;
+  const playerIds = new Set(catalog.map((player) => player.id));
+  return (
+    draw.itemIds.every((id) => playerIds.has(id)) &&
+    playersInPool(draw.poolId, catalog).some(
+      (player) => player.id === draw.winnerId,
+    )
+  );
+}
+
+function ensureProfileInitialized(catalog: readonly Player[]) {
+  const current = useAnonymousProfileStore.getState().profile;
+  const playerId = eligibleIdentityId(current.playerId, catalog);
+  const pendingDraw = pendingDrawMatchesCatalog(
+    current.pendingDraw,
+    catalog,
+  )
+    ? current.pendingDraw
+    : undefined;
+  const changed =
+    current.playerId !== playerId || current.pendingDraw !== pendingDraw;
+
+  if (profileCatalogInitialized && !changed) return current;
+
+  const profile = changed
+    ? {
+        ...current,
+        playerId,
+        identityConfirmed: current.playerId
+          ? current.identityConfirmed
+          : false,
+        pendingDraw,
+      }
+    : current;
+  const saved = saveProfile(profile, { notify: false, touch: false });
+  profileCatalogInitialized = true;
+  if (saved !== current) {
+    useAnonymousProfileStore.getState().replaceProfile(saved);
+  }
+  return saved;
+}
 
 export function getAnonymousProfileSnapshot() {
   return useAnonymousProfileStore.getState().profile;
@@ -657,6 +707,8 @@ export async function adoptPendingIdentityDraw(
 }
 
 export function useAnonymousProfile() {
+  const catalog = usePlayers();
+  ensureProfileInitialized(catalog);
   const profile = useAnonymousProfileStore((state) => state.profile);
   const setProfile = useAnonymousProfileStore(
     (state) => state.replaceProfile,
@@ -668,15 +720,18 @@ export function useAnonymousProfile() {
   );
   const player = useMemo(
     () =>
-      players.find((candidate) => candidate.id === profile.playerId) ??
-      players[0],
-    [profile.playerId],
+      catalog.find((candidate) => candidate.id === profile.playerId) ??
+      catalog[0],
+    [catalog, profile.playerId],
   );
 
   useEffect(() => {
     function applyLatestProfile() {
       const latest = readProfile();
-      if (latest) setProfile(latest);
+      if (latest) {
+        profileCatalogInitialized = false;
+        setProfile(latest);
+      }
     }
 
     function syncProfile(event: StorageEvent) {

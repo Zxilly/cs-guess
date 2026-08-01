@@ -1,38 +1,63 @@
-import { t } from "@lingui/core/macro";
-import generatedPlayers from "./players.generated.json";
+import playersUrl from "./players.generated.json?url";
 
-export type PlayerRole = "AWPer" | "Rifler" | "IGL" | "Entry" | "Unknown";
+import type { Player } from "@/data/player-types";
 
-export function playerRoleNameZh(role: PlayerRole) {
-  switch (role) {
-    case "AWPer":
-      return t`狙击手`;
-    case "Rifler":
-      return t`步枪手`;
-    case "IGL":
-      return t`指挥`;
-    case "Entry":
-      return t`突破手`;
-    default:
-      return t`未知`;
+export {
+  playerRoleNameZh,
+  type Player,
+  type PlayerRole,
+} from "@/data/player-types";
+
+let cachedPlayers: readonly Player[] | undefined;
+let pendingPlayers: Promise<readonly Player[]> | undefined;
+let playerLoadError: unknown;
+
+interface PlayerLoadOptions {
+  priority?: "auto" | "high" | "low";
+}
+
+export function loadPlayers({ priority = "auto" }: PlayerLoadOptions = {}) {
+  if (cachedPlayers) return Promise.resolve(cachedPlayers);
+  if (playerLoadError) return Promise.reject(playerLoadError);
+  if (!pendingPlayers) {
+    const requestInit: RequestInit & { priority: "auto" | "high" | "low" } = {
+      credentials: "same-origin",
+      priority,
+    };
+    pendingPlayers = fetch(playersUrl, requestInit)
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`player catalog load failed: ${response.status}`);
+        }
+        const catalog = (await response.json()) as unknown;
+        if (!Array.isArray(catalog) || catalog.length === 0) {
+          throw new Error("player catalog response is not a non-empty array");
+        }
+        cachedPlayers = catalog as readonly Player[];
+        return cachedPlayers;
+      })
+      .catch((error: unknown) => {
+        playerLoadError = error;
+        throw error;
+      });
   }
+  return pendingPlayers;
 }
 
-export interface Player {
-  id: string;
-  nickname: string;
-  aliases?: readonly string[];
-  name: string;
-  team: string;
-  historicalTeams?: readonly string[];
-  teamLogoUrl?: string;
-  imageUrl?: string;
-  nationality: string;
-  countryCode: string;
-  age: number;
-  role: PlayerRole;
-  majorAppearances: number;
-  majorWins: number;
+export function readPlayers() {
+  if (cachedPlayers) return cachedPlayers;
+  if (playerLoadError) throw playerLoadError;
+  throw loadPlayers();
 }
 
-export const players = generatedPlayers as readonly Player[];
+export function usePlayers() {
+  return readPlayers();
+}
+
+export const players = new Proxy([] as Player[], {
+  get(_target, property) {
+    const catalog = readPlayers();
+    const value = Reflect.get(catalog, property, catalog);
+    return typeof value === "function" ? value.bind(catalog) : value;
+  },
+}) as readonly Player[];

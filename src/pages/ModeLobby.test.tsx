@@ -1,8 +1,24 @@
+// @vitest-environment jsdom
+
+import { act } from "react";
+import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ModeLobby } from "@/pages/ModeLobby";
+
+(globalThis as typeof globalThis & {
+  IS_REACT_ACT_ENVIRONMENT: boolean;
+}).IS_REACT_ACT_ENVIRONMENT = true;
+
+const mocks = vi.hoisted(() => ({
+  loadPlayers: vi.fn(() => Promise.resolve([])),
+}));
+
+vi.mock("@/data/players", () => ({
+  loadPlayers: mocks.loadPlayers,
+}));
 
 vi.mock("@/hooks/use-daily-challenge", () => ({
   useDailyChallengeMetadata: () => ({
@@ -37,6 +53,10 @@ vi.mock("@/components/PlayerIdentity", () => ({
 }));
 
 describe("ModeLobby", () => {
+  beforeEach(() => {
+    mocks.loadPlayers.mockClear();
+  });
+
   it("keeps every mode entry and the daily CTA visible in the lobby markup", () => {
     const markup = renderToStaticMarkup(
       <MemoryRouter>
@@ -81,7 +101,7 @@ describe("ModeLobby", () => {
 
     expect(markup).toContain('aria-label="CS GUESS · 职业选手竞猜"');
     expect(markup).toContain('href="/identity"');
-    expect(markup).toContain("管理玩家身份：steel");
+    expect(markup).toContain('aria-label="管理玩家身份"');
     expect(markup).not.toContain('<span class="sm:hidden">身份</span>');
     expect(markup).toContain('href="/stats"');
     expect(markup).toContain('aria-label="查看战绩"');
@@ -113,5 +133,39 @@ describe("ModeLobby", () => {
     );
     expect(markup).toContain("motion-reduce:transform-none");
     expect(markup).toContain("motion-reduce:transition-none");
+  });
+
+  it("renders the lobby before warming the player catalog after a paint", () => {
+    const frames: FrameRequestCallback[] = [];
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn((callback: FrameRequestCallback) => {
+        frames.push(callback);
+        return frames.length;
+      }),
+    );
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    const container = document.createElement("div");
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        <MemoryRouter>
+          <ModeLobby />
+        </MemoryRouter>,
+      );
+    });
+
+    expect(container.textContent).toContain("开始今日挑战");
+    expect(mocks.loadPlayers).not.toHaveBeenCalled();
+
+    act(() => frames.shift()?.(0));
+    expect(mocks.loadPlayers).not.toHaveBeenCalled();
+
+    act(() => frames.shift()?.(16));
+    expect(mocks.loadPlayers).toHaveBeenCalledWith({ priority: "low" });
+
+    act(() => root.unmount());
+    vi.unstubAllGlobals();
   });
 });

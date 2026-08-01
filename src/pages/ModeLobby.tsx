@@ -12,6 +12,7 @@ import {
   UsersThreeIcon,
 } from "@phosphor-icons/react";
 import type { Icon } from "@phosphor-icons/react";
+import { Suspense, useEffect, useState } from "react";
 import { Link } from "react-router";
 
 import { AppHeader } from "@/components/AppHeader";
@@ -21,6 +22,7 @@ import { PanelHeader } from "@/components/PanelHeader";
 import { PlayerIdentity } from "@/components/PlayerIdentity";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { loadPlayers } from "@/data/players";
 import { useAnonymousProfile } from "@/hooks/use-anonymous-profile";
 import { useDailyChallengeMetadata } from "@/hooks/use-daily-challenge";
 import { trackEvent } from "@/lib/analytics";
@@ -31,6 +33,89 @@ interface ModeOptionProps {
   title: string;
   meta: string;
   analyticsMode: "solo" | "quick-duel" | "quick-group" | "room";
+}
+
+function usePlayerCatalogAfterFirstPaint() {
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    let secondFrame: number | undefined;
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        void loadPlayers({ priority: "low" }).catch(() => undefined);
+        setStarted(true);
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      if (secondFrame !== undefined) {
+        window.cancelAnimationFrame(secondFrame);
+      }
+    };
+  }, []);
+
+  return started;
+}
+
+function LobbyIdentityActionLoading() {
+  return (
+    <Button asChild variant="ghost" size="sm" className="rounded-none">
+      <Link to="/identity" aria-label={t`管理玩家身份`}>
+        <IdentificationCardIcon />
+        <span className="hidden w-16 animate-pulse bg-foreground/10 text-transparent motion-reduce:animate-none sm:inline">
+          Loading
+        </span>
+      </Link>
+    </Button>
+  );
+}
+
+function LobbyIdentityAction() {
+  const identity = useAnonymousProfile();
+
+  return (
+    <Button asChild variant="ghost" size="sm" className="rounded-none">
+      <Link
+        to="/identity"
+        aria-label={t`管理玩家身份：${identity.player.nickname}`}
+      >
+        <IdentificationCardIcon />
+        <span className="hidden max-w-28 truncate sm:inline">
+          {identity.player.nickname}
+        </span>
+      </Link>
+    </Button>
+  );
+}
+
+function LobbyIdentityLoading() {
+  return (
+    <div
+      className="min-h-32 animate-pulse border border-foreground/25 bg-muted/20 motion-reduce:animate-none"
+      role="status"
+      aria-label={t`正在载入玩家身份`}
+    >
+      <span className="sr-only">{t`正在载入玩家身份`}</span>
+    </div>
+  );
+}
+
+function LobbyIdentity() {
+  const identity = useAnonymousProfile();
+
+  return (
+    <PlayerIdentity
+      player={identity.player}
+      stats={identity.profile.stats}
+      drawCredits={identity.profile.drawCredits}
+      lossesTowardCredit={identity.profile.lossesTowardCredit}
+      winRate={identity.winRate}
+      currentPool={identity.currentPool}
+      manageHref="/identity?return=%2F"
+      compact
+    />
+  );
 }
 
 function ModeOption({
@@ -67,7 +152,7 @@ function ModeOption({
 
 export function ModeLobby() {
   const { challenge } = useDailyChallengeMetadata();
-  const identity = useAnonymousProfile();
+  const playerCatalogStarted = usePlayerCatalogAfterFirstPaint();
 
   return (
     <div className="min-h-svh bg-background text-foreground">
@@ -78,17 +163,13 @@ export function ModeLobby() {
             className="flex items-center gap-1 sm:gap-4"
             aria-label={t`玩家快捷操作`}
           >
-            <Button asChild variant="ghost" size="sm" className="rounded-none">
-              <Link
-                to="/identity"
-                aria-label={t`管理玩家身份：${identity.player.nickname}`}
-              >
-                <IdentificationCardIcon />
-                <span className="hidden max-w-28 truncate sm:inline">
-                  {identity.player.nickname}
-                </span>
-              </Link>
-            </Button>
+            {playerCatalogStarted ? (
+              <Suspense fallback={<LobbyIdentityActionLoading />}>
+                <LobbyIdentityAction />
+              </Suspense>
+            ) : (
+              <LobbyIdentityActionLoading />
+            )}
             <Button asChild variant="outline" size="sm" className="rounded-none">
               <Link to="/stats" aria-label={t`查看战绩`}>
                 <ChartBarIcon />
@@ -103,16 +184,13 @@ export function ModeLobby() {
         <PageIntro eyebrow="Game Lobby" title={t`选择游戏模式`} />
 
         <div className="mt-6 sm:mt-8">
-          <PlayerIdentity
-            player={identity.player}
-            stats={identity.profile.stats}
-            drawCredits={identity.profile.drawCredits}
-            lossesTowardCredit={identity.profile.lossesTowardCredit}
-            winRate={identity.winRate}
-            currentPool={identity.currentPool}
-            manageHref="/identity?return=%2F"
-            compact
-          />
+          {playerCatalogStarted ? (
+            <Suspense fallback={<LobbyIdentityLoading />}>
+              <LobbyIdentity />
+            </Suspense>
+          ) : (
+            <LobbyIdentityLoading />
+          )}
         </div>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
