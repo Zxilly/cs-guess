@@ -6,6 +6,8 @@
 
 [在线体验 CS Guess](https://cs-guess.zxilly.com)
 
+玩法灵感来自 [BLAST Counter-Strikle](https://blast.tv/counter-strikle)。
+
 猜出本轮的神秘职业选手，并根据每次猜测结果逐步缩小答案范围。线索会比较选手的
 战队、国籍、年龄、位置、Major 参赛次数和 Major 冠军次数。
 

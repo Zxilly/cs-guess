@@ -6,6 +6,8 @@ An open-source guessing game for Counter-Strike esports fans.
 
 [Play CS Guess](https://cs-guess.zxilly.com)
 
+Inspired by [BLAST Counter-Strikle](https://blast.tv/counter-strikle).
+
 Guess the mystery professional player and use the result of each attempt to
 narrow down the answer. Clues compare the players' teams, nationalities, ages,
 roles, Major appearances, and Major wins.
