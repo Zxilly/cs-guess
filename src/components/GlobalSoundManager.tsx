@@ -2,8 +2,8 @@ import { useEffect } from "react";
 
 import {
   appSoundPreferenceKey,
+  installAppSoundPreloadOnFirstInteraction,
   legacyAppSoundPreferenceKey,
-  preloadAppSounds,
 } from "@/lib/app-sound";
 import { useSoundStore } from "@/stores/sound-store";
 
@@ -12,9 +12,7 @@ export function GlobalSoundManager() {
     (state) => state.syncFromStorage,
   );
 
-  useEffect(() => {
-    preloadAppSounds();
-  }, []);
+  useEffect(() => installAppSoundPreloadOnFirstInteraction(), []);
 
   useEffect(() => {
     const handleStorage = (event: StorageEvent) => {

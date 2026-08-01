@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   appSoundPreferenceKey,
+  installAppSoundPreloadOnFirstInteraction,
   legacyAppSoundPreferenceKey,
   loadAppSoundEnabled,
   playBattleResultSound,
@@ -61,6 +62,35 @@ describe("app sound", () => {
 
     expect(storage.getItem(legacyAppSoundPreferenceKey)).toBeNull();
     expect(storage.getItem(appSoundPreferenceKey)).toBe("1");
+  });
+
+  it("waits for the first interaction before preloading sound files", () => {
+    const sources: string[] = [];
+    vi.stubGlobal(
+      "Audio",
+      class {
+        preload = "";
+
+        constructor(src: string) {
+          sources.push(src);
+        }
+      },
+    );
+
+    const target = new EventTarget();
+    const cleanup = installAppSoundPreloadOnFirstInteraction(target);
+    expect(sources).toEqual([]);
+
+    target.dispatchEvent(new Event("pointerdown"));
+    expect(sources).toEqual([
+      "/audio/battle-headshot-win.mp3",
+      "/audio/battle-headshot-loss.mp3",
+      "/audio/bomb-ten-second-countdown.mp3",
+    ]);
+
+    target.dispatchEvent(new Event("keydown"));
+    expect(sources).toHaveLength(3);
+    cleanup();
   });
 
   it("plays each outcome once at its bounded volume and returns cleanup", async () => {

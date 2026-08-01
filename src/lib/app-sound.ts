@@ -18,6 +18,19 @@ export const bombCountdownWindowSeconds = 10;
 let preloaded = false;
 const preloadedAudio: HTMLAudioElement[] = [];
 
+interface SoundPreloadTarget {
+  addEventListener(
+    type: string,
+    listener: EventListener,
+    options?: boolean | AddEventListenerOptions,
+  ): void;
+  removeEventListener(
+    type: string,
+    listener: EventListener,
+    options?: boolean | EventListenerOptions,
+  ): void;
+}
+
 function localStorageOrUndefined(): Storage | undefined {
   try {
     if (typeof globalThis.localStorage === "undefined") return undefined;
@@ -65,6 +78,27 @@ export function preloadAppSounds() {
     audio.preload = "auto";
     preloadedAudio.push(audio);
   }
+}
+
+export function installAppSoundPreloadOnFirstInteraction(
+  target: SoundPreloadTarget = window,
+) {
+  const preload = () => {
+    cleanup();
+    preloadAppSounds();
+  };
+  const cleanup = () => {
+    target.removeEventListener("pointerdown", preload, true);
+    target.removeEventListener("keydown", preload, true);
+  };
+
+  target.addEventListener("pointerdown", preload, {
+    capture: true,
+    passive: true,
+  });
+  target.addEventListener("keydown", preload, { capture: true });
+
+  return cleanup;
 }
 
 export function playBattleResultSound(outcome: AudibleBattleOutcome) {
