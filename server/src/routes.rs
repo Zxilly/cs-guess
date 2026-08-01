@@ -24,6 +24,7 @@ use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 use tower::{ServiceExt as _, limit::ConcurrencyLimitLayer};
 use tower_http::{
+    compression::CompressionLayer,
     cors::CorsLayer,
     limit::RequestBodyLimitLayer,
     request_id::{MakeRequestUuid, PropagateRequestIdLayer, SetRequestIdLayer},
@@ -139,6 +140,7 @@ pub fn app(state: AppState) -> Router {
             }),
         )
         .layer(RequestBodyLimitLayer::new(128 * 1024))
+        .layer(CompressionLayer::new())
         .layer(ConcurrencyLimitLayer::new(config.http_concurrency_limit))
         .layer(socket_layer)
         .layer(cors)
@@ -789,9 +791,12 @@ async fn frontend_or_not_found(State(state): State<AppState>, request: Request<B
     {
         Ok(response) => {
             let mut response = response.map(Body::new);
-            response
-                .headers_mut()
-                .insert(CACHE_CONTROL, HeaderValue::from_static("no-cache"));
+            response.headers_mut().insert(
+                CACHE_CONTROL,
+                HeaderValue::from_static(
+                    "public, max-age=0, s-maxage=60, stale-while-revalidate=300",
+                ),
+            );
             response
         }
         Err(error) => match error {},
@@ -822,6 +827,7 @@ mod tests {
         )
         .unwrap();
         fs::write(static_dir.join("assets/app.js"), "window.CS_GUESS = true;").unwrap();
+        fs::write(static_dir.join("assets/large.js"), vec![b'a'; 16 * 1024]).unwrap();
         fs::write(static_dir.join("audio/effect.mp3"), b"audio").unwrap();
 
         let mut config = crate::Config::for_test();
@@ -841,7 +847,10 @@ mod tests {
                     .unwrap()
                     .starts_with("text/html")
             );
-            assert_eq!(response.headers()[header::CACHE_CONTROL], "no-cache");
+            assert_eq!(
+                response.headers()[header::CACHE_CONTROL],
+                "public, max-age=0, s-maxage=60, stale-while-revalidate=300"
+            );
             let body = response.into_body().collect().await.unwrap().to_bytes();
             assert!(body.windows(8).any(|value| value == b"CS Guess"));
         }
@@ -861,6 +870,28 @@ mod tests {
         assert_eq!(
             asset.headers()[header::CACHE_CONTROL],
             "public, max-age=31536000, immutable"
+        );
+
+        let compressed_asset = service
+            .clone()
+            .oneshot(
+                Request::get("/assets/large.js")
+                    .header(header::ACCEPT_ENCODING, "br")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(compressed_asset.headers()[header::CONTENT_ENCODING], "br");
+        assert!(
+            compressed_asset
+                .into_body()
+                .collect()
+                .await
+                .unwrap()
+                .to_bytes()
+                .len()
+                < 16 * 1024
         );
 
         let audio = service
