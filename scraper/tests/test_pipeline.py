@@ -196,6 +196,8 @@ def test_run_sync_uses_real_store_merges_sources_and_writes_auditable_report(
     )
     db_path = tmp_path / "players.sqlite3"
     output_path = tmp_path / "players.json"
+    catalog_path = tmp_path / "players.generated.json"
+    catalog_metadata_path = tmp_path / "players.generated.meta.json"
     report_path = tmp_path / "sync-report.json"
 
     with PlayerStore(db_path, schema_path=SCHEMA_PATH) as store:
@@ -204,6 +206,8 @@ def test_run_sync_uses_real_store_merges_sources_and_writes_auditable_report(
             liquipedia_client=FakeLiquipediaClient(),
             pandascore_client=FakePandaScoreClient(),
             output_path=output_path,
+            catalog_output_path=catalog_path,
+            catalog_metadata_output_path=catalog_metadata_path,
             report_path=report_path,
         )
         audit = store.audit()
@@ -248,6 +252,9 @@ def test_run_sync_uses_real_store_merges_sources_and_writes_auditable_report(
     assert records[0]["countryCode"] == "UA"
     assert records[0]["teamHistory"]
     assert json.loads(output_path.read_text(encoding="utf-8")) == records
+    assert json.loads(catalog_metadata_path.read_text(encoding="utf-8")) == {
+        "updatedAt": "2026-07-27T03:00:00Z"
+    }
     assert json.loads(report_path.read_text(encoding="utf-8")) == report
 
 

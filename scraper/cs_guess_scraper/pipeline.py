@@ -772,6 +772,7 @@ def run_sync(
     include_majors: bool = True,
     output_path: str | Path | None = None,
     catalog_output_path: str | Path | None = None,
+    catalog_metadata_output_path: str | Path | None = None,
     report_path: str | Path | None = None,
     reviewed_identity_merges: list[Mapping[str, Any]] | None = None,
     reviewed_source_quarantines: list[Mapping[str, Any]] | None = None,
@@ -938,6 +939,11 @@ def run_sync(
         )
         _write_json(catalog_output_path, catalog)
         report["catalogRecords"] = len(catalog)
+    if catalog_metadata_output_path is not None:
+        _write_json(
+            catalog_metadata_output_path,
+            {"updatedAt": report["finishedAt"]},
+        )
     if report_path is not None:
         _write_json(report_path, report)
     return report

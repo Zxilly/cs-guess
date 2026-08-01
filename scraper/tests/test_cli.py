@@ -46,10 +46,17 @@ def test_export_command_can_include_incomplete_source_players(tmp_path, capsys):
     assert json.loads(capsys.readouterr().out)["exportedRecords"] == 1
 
 
-def test_export_command_writes_compact_shared_app_catalog(tmp_path, capsys):
+def test_export_command_writes_compact_shared_app_catalog(
+    tmp_path, capsys, monkeypatch
+):
+    monkeypatch.setattr(
+        "cs_guess_scraper.cli._now",
+        lambda: "2026-07-30T14:19:11Z",
+    )
     db_path = tmp_path / "players.sqlite3"
     output_path = tmp_path / "players.json"
     catalog_path = tmp_path / "players.generated.json"
+    catalog_metadata_path = tmp_path / "players.generated.meta.json"
     with PlayerStore(db_path) as store:
         store.upsert_source_player(
             "liquipedia",
@@ -77,6 +84,8 @@ def test_export_command_writes_compact_shared_app_catalog(tmp_path, capsys):
             str(output_path),
             "--catalog-output",
             str(catalog_path),
+            "--catalog-metadata-output",
+            str(catalog_metadata_path),
         ]
     )
 
@@ -84,6 +93,9 @@ def test_export_command_writes_compact_shared_app_catalog(tmp_path, capsys):
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
     assert catalog[0]["id"] == "zywoo"
     assert catalog[0]["team"] == "Team Vitality"
+    assert json.loads(catalog_metadata_path.read_text(encoding="utf-8")) == {
+        "updatedAt": "2026-07-30T14:19:11Z"
+    }
     assert json.loads(capsys.readouterr().out)["catalogRecords"] == 1
 
 

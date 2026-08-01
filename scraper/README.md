@@ -42,6 +42,7 @@ uv run cs-guess-scraper sync \
   --output data/players.game.json \
   --report data/sync-report.json \
   --catalog-output ../src/data/players.generated.json \
+  --catalog-metadata-output ../src/data/players.generated.meta.json \
   --reviewed-identity-merges identity-merges.reviewed.json \
   --reviewed-source-quarantines source-quarantines.reviewed.json \
   --reviewed-identity-separations identity-separations.reviewed.json \
@@ -60,6 +61,7 @@ uv run cs-guess-scraper export \
   --db data/cs_guess.sqlite \
   --output data/players.game.json \
   --catalog-output ../src/data/players.generated.json \
+  --catalog-metadata-output ../src/data/players.generated.meta.json \
   --reviewed-major-winners reviewed-major-winners.json \
   --reviewed-major-appearances reviewed-major-appearances.json \
   --reviewed-player-overrides reviewed-player-overrides.json \

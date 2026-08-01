@@ -15,7 +15,7 @@ from .config import Settings, SettingsError
 from .hltv import HltvClient, HltvError, known_profile_mismatches
 from .liquipedia import LiquipediaClient
 from .pandascore import PandaScoreClient
-from .pipeline import _write_json, run_sync
+from .pipeline import _now, _write_json, run_sync
 from .store import PlayerStore
 
 
@@ -49,6 +49,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--catalog-output",
         type=Path,
         help="optional compact JSON shared by the frontend and game server",
+    )
+    sync.add_argument(
+        "--catalog-metadata-output",
+        type=Path,
+        help="optional JSON timestamp describing the shared catalog refresh",
     )
     sync.add_argument(
         "--reviewed-major-winners",
@@ -162,6 +167,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--catalog-output",
         type=Path,
         help="optional compact JSON shared by the frontend and game server",
+    )
+    export.add_argument(
+        "--catalog-metadata-output",
+        type=Path,
+        help="optional JSON timestamp describing the shared catalog refresh",
     )
     export.add_argument(
         "--reviewed-major-winners",
@@ -411,6 +421,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                     previous_catalog=read_previous_catalog(args.catalog_output),
                 ),
             )
+        if args.catalog_metadata_output is not None:
+            _write_json(
+                args.catalog_metadata_output,
+                {"updatedAt": _now()},
+            )
         _print_json(
             {
                 "output": str(args.output.resolve()),
@@ -629,6 +644,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             include_majors=not args.skip_majors,
             output_path=args.output,
             catalog_output_path=args.catalog_output,
+            catalog_metadata_output_path=args.catalog_metadata_output,
             report_path=args.report,
             reviewed_identity_merges=reviewed_identity_merges,
             reviewed_source_quarantines=reviewed_source_quarantines,
