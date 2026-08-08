@@ -31,6 +31,9 @@ COPY server/migrations ./server/migrations
 COPY server/vendor ./server/vendor
 COPY src/data/players.generated.json src/data/countries.generated.json ./src/data/
 
+ARG CS_GUESS_VERSION=development
+ENV CS_GUESS_VERSION=$CS_GUESS_VERSION
+
 RUN --mount=type=cache,id=cs-guess-cargo-registry,target=/usr/local/cargo/registry \
     --mount=type=cache,id=cs-guess-cargo-git,target=/usr/local/cargo/git \
     --mount=type=cache,id=cs-guess-cargo-target,target=/build/server/target \

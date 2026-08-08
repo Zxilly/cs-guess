@@ -20,11 +20,14 @@ directory.
 ```bash
 curl http://127.0.0.1:8080/health/live
 curl http://127.0.0.1:8080/health/ready
+curl http://127.0.0.1:8080/health/version
 ```
 
 `/health/live` only proves the process event loop is responsive.
 `/health/ready` becomes unavailable before graceful shutdown starts, so a load
 balancer can drain the instance.
+`/health/version` reports the immutable source revision embedded in production
+images, or `development` for local builds without `CS_GUESS_VERSION`.
 
 ## HTTP API
 
