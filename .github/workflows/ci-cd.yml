@@ -40,7 +40,7 @@ jobs:
         run: pnpm typecheck
 
       - name: Test
-        run: pnpm test:frontend
+        run: pnpm test:frontend --maxWorkers=1
 
       - name: Build
         run: pnpm build
