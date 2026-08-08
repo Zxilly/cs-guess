@@ -1,0 +1,18 @@
+# syntax=docker/dockerfile:1.7
+
+FROM scratch
+
+ARG SOURCE_REPOSITORY
+LABEL org.opencontainers.image.source=$SOURCE_REPOSITORY
+LABEL org.opencontainers.image.title="CS Guess player data snapshot"
+LABEL org.opencontainers.image.description="Canonical player database, generated catalogs, and audit reports"
+
+COPY scraper/data/cs_guess.sqlite /snapshot/scraper/data/
+COPY scraper/data/players.game.json /snapshot/scraper/data/
+COPY scraper/data/sync-report.json /snapshot/scraper/data/
+COPY scraper/data/data-quality-report.json /snapshot/scraper/data/
+COPY scraper/data/audit-report.json /snapshot/scraper/data/
+COPY src/data/players.generated.json /snapshot/src/data/
+COPY src/data/players.generated.meta.json /snapshot/src/data/
+COPY src/data/countries.generated.json /snapshot/src/data/
+
