@@ -1,0 +1,287 @@
+name: Refresh player data
+
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      source:
+        description: Provider set to refresh
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - liquipedia
+          - pandascore
+          - balldontlie
+          - bo3
+      skip_majors:
+        description: Skip the Liquipedia Major database
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+
+concurrency:
+  group: player-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Refresh and review player data
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          enable-cache: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Select snapshot image
+        id: snapshot
+        shell: bash
+        run: |
+          owner=$(tr '[:upper:]' '[:lower:]' <<<"${GITHUB_REPOSITORY_OWNER}")
+          image="ghcr.io/${owner}/cs-guess-data"
+          tag="run-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          echo "image=${image}" >> "$GITHUB_OUTPUT"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Restore previous canonical database
+        shell: bash
+        env:
+          SNAPSHOT_IMAGE: ${{ steps.snapshot.outputs.image }}
+        run: |
+          if ! docker pull "${SNAPSHOT_IMAGE}:latest"; then
+            echo "No previous GHCR snapshot exists; starting from repository data."
+            exit 0
+          fi
+
+          container_id=$(docker create "${SNAPSHOT_IMAGE}:latest" /bin/true)
+          trap 'docker rm --force "$container_id" >/dev/null 2>&1 || true' EXIT
+          docker cp "${container_id}:/snapshot/." .
+
+      - name: Configure data providers
+        shell: bash
+        env:
+          PANDASCORE_API_TOKEN: ${{ secrets.PANDASCORE_API_TOKEN }}
+          BALLDONTLIE_API_TOKEN: ${{ secrets.BALLDONTLIE_API_TOKEN }}
+          LIQUIPEDIA_USER_AGENT: ${{ vars.LIQUIPEDIA_USER_AGENT }}
+          REQUESTED_SOURCE: ${{ inputs.source || 'all' }}
+        run: |
+          if [[ -z "$PANDASCORE_API_TOKEN" ]]; then
+            echo "PANDASCORE_API_TOKEN is not configured." >&2
+            exit 1
+          fi
+          if [[ -z "$LIQUIPEDIA_USER_AGENT" ]]; then
+            echo "LIQUIPEDIA_USER_AGENT is not configured." >&2
+            exit 1
+          fi
+          if [[ "$REQUESTED_SOURCE" == "balldontlie" && -z "$BALLDONTLIE_API_TOKEN" ]]; then
+            echo "BALLDONTLIE_API_TOKEN is required for a BALLDONTLIE-only refresh." >&2
+            exit 1
+          fi
+
+          umask 077
+          {
+            printf 'PANDASCORE_API_TOKEN=%s\n' "$PANDASCORE_API_TOKEN"
+            printf 'BALLDONTLIE_API_TOKEN=%s\n' "$BALLDONTLIE_API_TOKEN"
+            printf 'LIQUIPEDIA_USER_AGENT=%s\n' "$LIQUIPEDIA_USER_AGENT"
+            printf 'ALLOW_HLTV_FALLBACK=false\n'
+          } > .env
+
+      - name: Refresh canonical data
+        shell: bash
+        env:
+          REQUESTED_SOURCE: ${{ inputs.source || 'all' }}
+          SKIP_MAJORS: ${{ inputs.skip_majors || false }}
+        run: |
+          args=(
+            sync
+            --source "$REQUESTED_SOURCE"
+            --db scraper/data/cs_guess.sqlite
+            --output scraper/data/players.game.json
+            --report scraper/data/sync-report.json
+            --catalog-output src/data/players.generated.json
+            --catalog-metadata-output src/data/players.generated.meta.json
+            --reviewed-identity-merges scraper/identity-merges.reviewed.json
+            --reviewed-source-quarantines scraper/source-quarantines.reviewed.json
+            --reviewed-identity-separations scraper/identity-separations.reviewed.json
+            --reviewed-major-winners scraper/reviewed-major-winners.json
+            --reviewed-major-appearances scraper/reviewed-major-appearances.json
+            --reviewed-player-overrides scraper/reviewed-player-overrides.json
+            --reviewed-role-overrides scraper/reviewed-role-overrides.json
+          )
+          if [[ "$SKIP_MAJORS" == "true" ]]; then
+            args+=(--skip-majors)
+          fi
+          uv run --project scraper --frozen cs-guess-scraper "${args[@]}"
+
+      - name: Enforce data quality
+        shell: bash
+        run: |
+          uv run --project scraper --frozen cs-guess-scraper quality \
+            --db scraper/data/cs_guess.sqlite \
+            --output scraper/data/data-quality-report.json \
+            --fail-on-critical
+          uv run --project scraper --frozen cs-guess-scraper audit \
+            --db scraper/data/cs_guess.sqlite \
+            > scraper/data/audit-report.json
+
+      - name: Summarize refresh
+        if: always()
+        shell: bash
+        run: |
+          if [[ ! -f scraper/data/sync-report.json ]]; then
+            echo "## Player data refresh" >> "$GITHUB_STEP_SUMMARY"
+            echo "The sync did not produce a report." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          jq -r '
+            "## Player data refresh\n\n" +
+            "| Metric | Value |\n| --- | ---: |\n" +
+            "| Players | \(.dataQuality.summary.players) |\n" +
+            "| Guessable players | \(.dataQuality.summary.guessablePlayers) |\n" +
+            "| Open conflicts | \(.audit.conflicts.open) |\n" +
+            "| Critical issues | \(.dataQuality.summary.criticalIssues) |\n" +
+            "| Warnings | \(.dataQuality.summary.warnings) |"
+          ' scraper/data/sync-report.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload review reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: player-data-review-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            scraper/data/sync-report.json
+            scraper/data/data-quality-report.json
+            scraper/data/audit-report.json
+            src/data/players.generated.meta.json
+
+      - name: Publish canonical snapshot to GHCR
+        id: publish
+        shell: bash
+        env:
+          SNAPSHOT_IMAGE: ${{ steps.snapshot.outputs.image }}
+          SNAPSHOT_TAG: ${{ steps.snapshot.outputs.tag }}
+        run: |
+          metadata_file="$RUNNER_TEMP/player-data-image.json"
+          docker buildx build \
+            --file scraper/Dockerfile.snapshot \
+            --build-arg "SOURCE_REPOSITORY=https://github.com/${GITHUB_REPOSITORY}" \
+            --label "org.opencontainers.image.created=$(date --utc +%Y-%m-%dT%H:%M:%SZ)" \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --tag "${SNAPSHOT_IMAGE}:${SNAPSHOT_TAG}" \
+            --tag "${SNAPSHOT_IMAGE}:latest" \
+            --metadata-file "$metadata_file" \
+            --provenance=mode=max \
+            --sbom=true \
+            --push \
+            .
+
+          digest=$(jq --raw-output '."containerimage.digest"' "$metadata_file")
+          if [[ -z "$digest" || "$digest" == "null" ]]; then
+            echo "The snapshot build did not report a registry digest." >&2
+            exit 1
+          fi
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+          echo "reference=${SNAPSHOT_IMAGE}@${digest}" >> "$GITHUB_OUTPUT"
+
+      - name: Retain latest eight canonical snapshots
+        continue-on-error: true
+        uses: actions/delete-package-versions@25ad4af5be03aef10e0b3376b248688b7a44c40b # v5
+        with:
+          owner: ${{ github.repository_owner }}
+          package-name: cs-guess-data
+          package-type: container
+          min-versions-to-keep: 8
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Detect catalog changes
+        id: catalog
+        shell: bash
+        run: |
+          if git diff --quiet -- src/data/players.generated.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create or update catalog pull request
+        if: steps.catalog.outputs.changed == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SNAPSHOT_REFERENCE: ${{ steps.publish.outputs.reference }}
+        run: |
+          branch="automation/player-data-refresh"
+          workflow_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          players=$(jq --raw-output '.dataQuality.summary.players' scraper/data/sync-report.json)
+          guessable=$(jq --raw-output '.dataQuality.summary.guessablePlayers' scraper/data/sync-report.json)
+          warnings=$(jq --raw-output '.dataQuality.summary.warnings' scraper/data/sync-report.json)
+          open_conflicts=$(jq --raw-output '.audit.conflicts.open' scraper/data/sync-report.json)
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --create "$branch"
+          git add -- \
+            src/data/players.generated.json \
+            src/data/players.generated.meta.json
+          git commit -m "data: refresh player catalog"
+          git fetch origin "$branch:refs/remotes/origin/$branch" || true
+          git push --force-with-lease origin "HEAD:refs/heads/${branch}"
+
+          body_file="$RUNNER_TEMP/player-data-pr.md"
+          {
+            echo "## Automated player-data refresh"
+            echo
+            echo "- Players: ${players}"
+            echo "- Guessable players: ${guessable}"
+            echo "- Open conflicts: ${open_conflicts}"
+            echo "- Quality warnings: ${warnings}"
+            echo "- Snapshot: \`${SNAPSHOT_REFERENCE}\`"
+            echo "- Workflow: ${workflow_url}"
+            echo
+            echo "The deterministic quality gate passed. Review the generated catalog diff and the attached audit reports before merging."
+          } > "$body_file"
+
+          pr_url=$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --head "$branch" \
+            --state open \
+            --json url \
+            --jq '.[0].url')
+          if [[ -n "$pr_url" ]]; then
+            gh pr edit "$pr_url" --body-file "$body_file"
+          else
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --base main \
+              --head "$branch" \
+              --title "data: refresh player catalog" \
+              --body-file "$body_file" \
+              --draft
+          fi
