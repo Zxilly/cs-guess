@@ -147,10 +147,16 @@ jobs:
           IMAGE_TAG: ${{ needs.publish.outputs.image_tag }}
           PORTAINER_STACK_WEBHOOK_URL: ${{ secrets.PORTAINER_STACK_WEBHOOK_URL }}
         run: |
+          separator="?"
+          case "$PORTAINER_STACK_WEBHOOK_URL" in
+            *\?|*\?*\&) separator="" ;;
+            *\?*) separator="&" ;;
+          esac
+
           curl --silent --show-error --fail-with-body \
             --retry 3 \
             --request POST \
-            "${PORTAINER_STACK_WEBHOOK_URL}?tag=${IMAGE_TAG}"
+            "${PORTAINER_STACK_WEBHOOK_URL}${separator}IMAGE_TAG=${IMAGE_TAG}"
 
       - name: Verify deployed revision
         shell: bash
