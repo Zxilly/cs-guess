@@ -114,3 +114,27 @@ provider ID 重放，并把核验链接写入 source record，避免不可追溯
 来源优先级、清洗规则和后续候选见
 [SOURCE_EVALUATION.md](SOURCE_EVALUATION.md)。数据模型见
 [DATA_MODEL.md](DATA_MODEL.md)，SQLite 结构见 [schema.sql](schema.sql)。
+
+## 自动刷新
+
+`Refresh player data` GitHub Actions 工作流每周一运行，也可手动选择单个来源。
+工作流先从 `ghcr.io/<owner>/cs-guess-data:latest` 恢复规范 SQLite 数据库，完成
+同步和 `quality --fail-on-critical` 后，将数据库、生成目录和审计报告发布成新的
+不可变 `run-<run-id>-<attempt>` OCI 镜像，并更新 `latest`。Docker 层由内容摘要
+寻址，未变化的层可由 registry 去重；工作流最多保留最近 8 个完整快照。
+
+当游戏目录发生变化时，工作流更新 `automation/player-data-refresh` 分支并创建
+Draft PR；关键质量问题或未解决身份冲突会在发布和 PR 之前阻断流程。需要在仓库
+中配置以下值：
+
+- Actions secret `PANDASCORE_API_TOKEN`；
+- 可选的 Actions secret `BALLDONTLIE_API_TOKEN`；
+- Actions variable `LIQUIPEDIA_USER_AGENT`，必须包含可联系的项目身份；
+- 仓库 Actions 设置中的 “Allow GitHub Actions to create and approve pull requests”。
+
+首次发布后可在 package settings 中把 `cs-guess-data` 设为 public；该包只包含公开
+来源数据与派生报告。保持 private 时，8 版上限用于约束 GitHub Packages 存储增长。
+
+同步报告、质量报告和完整审计会作为短期 Actions artifact 保留，完整可恢复状态则
+保存在 GHCR。Copilot 不参与自动身份合并；AI 只能在人工触发的独立审查流程中
+根据结构化冲突报告提出候选修正，修正仍需引用证据并经 PR 审核。
