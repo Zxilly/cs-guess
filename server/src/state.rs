@@ -1043,8 +1043,8 @@ pub fn validate_identity_id(value: &str) -> Result<(), AppError> {
     let count = trimmed.chars().count();
     if !(1..=96).contains(&count)
         || !trimmed
-            .bytes()
-            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_'))
+            .chars()
+            .all(|character| character.is_alphanumeric() || matches!(character, '-' | '_'))
     {
         return Err(AppError::BadRequest(
             "identity_id must be a valid player catalog ID".to_owned(),
@@ -1094,5 +1094,16 @@ pub fn validate_party_size(value: u8) -> Result<(), AppError> {
         Err(AppError::BadRequest(
             "party_size must be either 2 or 4".to_owned(),
         ))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::validate_identity_id;
+
+    #[test]
+    fn catalog_identity_ids_accept_unicode_letters() {
+        assert!(validate_identity_id("prb-no-preben-gammelsæter").is_ok());
+        assert!(validate_identity_id("invalid/player").is_err());
     }
 }
