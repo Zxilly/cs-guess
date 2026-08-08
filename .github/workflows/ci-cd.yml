@@ -1,0 +1,174 @@
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Verify frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 11.17.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test:frontend
+
+      - name: Build
+        run: pnpm build
+
+  server:
+    name: Verify server
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Install Rust toolchain
+        run: rustup toolchain install 1.97.1 --profile minimal --component rustfmt,clippy
+
+      - name: Check formatting
+        run: cargo +1.97.1 fmt --manifest-path server/Cargo.toml --all -- --check
+
+      - name: Lint
+        run: cargo +1.97.1 clippy --locked --manifest-path server/Cargo.toml --all-targets --all-features -- -D warnings
+
+      - name: Test
+        run: cargo +1.97.1 test --locked --manifest-path server/Cargo.toml
+
+  scraper:
+    name: Verify scraper
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          enable-cache: true
+
+      - name: Test
+        run: uv run --project scraper --frozen pytest
+
+  publish:
+    name: Publish image
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs:
+      - frontend
+      - server
+      - scraper
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      image_tag: ${{ steps.image.outputs.tag }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Select immutable image tag
+        id: image
+        shell: bash
+        run: echo "tag=sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: docker.io/zxilly/cs-guess:${{ steps.image.outputs.tag }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          build-args: |
+            CS_GUESS_VERSION=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: mode=max
+          sbom: true
+
+  deploy:
+    name: Deploy production
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs:
+      - publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: production
+      cancel-in-progress: false
+    environment:
+      name: production
+      url: https://cs-guess.zxilly.com
+    steps:
+      - name: Redeploy Portainer stack
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ needs.publish.outputs.image_tag }}
+          PORTAINER_STACK_WEBHOOK_URL: ${{ secrets.PORTAINER_STACK_WEBHOOK_URL }}
+        run: |
+          curl --silent --show-error --fail-with-body \
+            --retry 3 \
+            --request POST \
+            "${PORTAINER_STACK_WEBHOOK_URL}?tag=${IMAGE_TAG}"
+
+      - name: Verify deployed revision
+        shell: bash
+        env:
+          EXPECTED_VERSION: ${{ github.sha }}
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --silent --show-error --fail \
+              https://api.cs-guess.zxilly.com/health/ready >/dev/null; then
+              payload=$(curl --silent --show-error --fail \
+                https://api.cs-guess.zxilly.com/health/version || true)
+              if jq --exit-status --arg expected "$EXPECTED_VERSION" \
+                '.version == $expected' <<<"$payload" >/dev/null 2>&1; then
+                exit 0
+              fi
+            fi
+            sleep 2
+          done
+
+          echo "Production did not report revision ${EXPECTED_VERSION}." >&2
+          exit 1

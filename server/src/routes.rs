@@ -80,6 +80,7 @@ pub fn app(state: AppState) -> Router {
     Router::new()
         .route("/health/live", get(live))
         .route("/health/ready", get(ready))
+        .route("/health/version", get(version))
         .route("/v1/rooms", post(create_room))
         .route("/v1/rooms/{code}/join", post(join_room))
         .route("/v1/rooms/{code}", delete(leave_friend_room))
@@ -151,8 +152,24 @@ struct Health {
     status: &'static str,
 }
 
+#[derive(Serialize)]
+struct BuildVersion {
+    version: &'static str,
+}
+
+const BUILD_VERSION: &str = match option_env!("CS_GUESS_VERSION") {
+    Some(version) => version,
+    None => "development",
+};
+
 async fn live() -> Json<Health> {
     Json(Health { status: "ok" })
+}
+
+async fn version() -> Json<BuildVersion> {
+    Json(BuildVersion {
+        version: BUILD_VERSION,
+    })
 }
 
 async fn ready(State(state): State<AppState>) -> Response {
@@ -937,6 +954,18 @@ mod tests {
             .unwrap();
         assert_eq!(live.status(), StatusCode::OK);
         assert_eq!(live.headers()[header::CACHE_CONTROL], "no-store");
+
+        let version = service
+            .clone()
+            .oneshot(Request::get("/health/version").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+        assert_eq!(version.status(), StatusCode::OK);
+        assert_eq!(version.headers()[header::CACHE_CONTROL], "no-store");
+        let version_body: Value =
+            serde_json::from_slice(&version.into_body().collect().await.unwrap().to_bytes())
+                .unwrap();
+        assert_eq!(version_body["version"], BUILD_VERSION);
 
         let create = service
             .clone()
