@@ -116,6 +116,16 @@ def build_parser() -> argparse.ArgumentParser:
         default=2.0,
     )
     sync.add_argument(
+        "--liquipedia-max-retries",
+        type=_positive_int,
+        default=3,
+    )
+    sync.add_argument(
+        "--liquipedia-rate-limit-retry-delay",
+        type=float,
+        default=1.0,
+    )
+    sync.add_argument(
         "--pandascore-min-interval",
         type=float,
         default=0.1,
@@ -579,6 +589,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         LiquipediaClient(
             settings.liquipedia_user_agent,
             min_interval=args.liquipedia_min_interval,
+            max_retries=args.liquipedia_max_retries,
+            rate_limit_retry_delay=args.liquipedia_rate_limit_retry_delay,
         )
         if use_liquipedia
         else None

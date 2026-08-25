@@ -131,6 +131,8 @@ jobs:
             --reviewed-major-appearances scraper/reviewed-major-appearances.json
             --reviewed-player-overrides scraper/reviewed-player-overrides.json
             --reviewed-role-overrides scraper/reviewed-role-overrides.json
+            --liquipedia-max-retries 10
+            --liquipedia-rate-limit-retry-delay 60
           )
           if [[ "$SKIP_MAJORS" == "true" ]]; then
             args+=(--skip-majors)

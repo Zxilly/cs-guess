@@ -49,6 +49,34 @@ def test_iter_player_pages_retries_a_transient_server_error(monkeypatch):
     assert delays == [1.0]
 
 
+def test_iter_player_pages_uses_configured_delay_for_rate_limits(monkeypatch):
+    delays = []
+    calls = 0
+    response = {
+        "batchcomplete": True,
+        "query": {"pages": []},
+    }
+
+    def rate_limited_transport(url, headers):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise HTTPError(url, 429, "too many requests", {}, None)
+        return response
+
+    monkeypatch.setattr("cs_guess_scraper.liquipedia.time.sleep", delays.append)
+    client = LiquipediaClient(
+        "CSGuess/0.1 (contact@example.com)",
+        transport=rate_limited_transport,
+        min_interval=0,
+        rate_limit_retry_delay=60,
+    )
+
+    assert list(client.iter_player_pages()) == []
+    assert calls == 2
+    assert delays == [60.0]
+
+
 def test_iter_player_pages_follows_mediawiki_continue_and_returns_revisions():
     transport = StubTransport(
         [

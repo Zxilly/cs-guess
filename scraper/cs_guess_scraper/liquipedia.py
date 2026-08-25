@@ -77,11 +77,17 @@ class LiquipediaClient:
         user_agent: str,
         transport: Transport | None = None,
         min_interval: float = 2.0,
+        max_retries: int = MAX_RETRIES,
+        rate_limit_retry_delay: float = 1.0,
     ) -> None:
         if not user_agent.strip():
             raise ValueError("Liquipedia requires a non-empty custom User-Agent")
         if min_interval < 0:
             raise ValueError("min_interval must be non-negative")
+        if max_retries < 0:
+            raise ValueError("max_retries must be non-negative")
+        if rate_limit_retry_delay < 0:
+            raise ValueError("rate_limit_retry_delay must be non-negative")
         self._headers = {
             "User-Agent": user_agent,
             "Accept": "application/json",
@@ -89,6 +95,8 @@ class LiquipediaClient:
         }
         self._transport = transport or _default_transport
         self._min_interval = min_interval
+        self._max_retries = max_retries
+        self._rate_limit_retry_delay = rate_limit_retry_delay
         self._last_request_at: float | None = None
 
     def _request(self, params: Mapping[str, str]) -> JsonObject:
@@ -106,14 +114,19 @@ class LiquipediaClient:
             except HTTPError as error:
                 self._last_request_at = time.monotonic()
                 retryable = error.code == 429 or 500 <= error.code <= 599
-                if not retryable or retries >= MAX_RETRIES:
+                if not retryable or retries >= self._max_retries:
                     raise
-                time.sleep(float(2**retries))
+                delay = (
+                    self._rate_limit_retry_delay
+                    if error.code == 429
+                    else float(2**retries)
+                )
+                time.sleep(delay)
                 retries += 1
                 continue
             except (OSError, TimeoutError):
                 self._last_request_at = time.monotonic()
-                if retries >= MAX_RETRIES:
+                if retries >= self._max_retries:
                     raise
                 time.sleep(float(2**retries))
                 retries += 1
