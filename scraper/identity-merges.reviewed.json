@@ -913,5 +913,434 @@
       "external_id": "17958"
     },
     "basis": "Both records identify Nemanja huNter- Kovač with the exact 1996-01-03 birth date and current team; the country-code difference reflects the player's Bosnia and Herzegovina/Serbia association rather than a second identity."
-  }
+  },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "1NVISIBLEE"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "35034"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Bokor"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "42948"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Boombl4"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "18002"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Cabbi"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "26101"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Cerolzin"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "44590"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Chuckyy"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "43963"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "DERZKIY"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "19293"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Dev1ce"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "17507"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "ElectroNic"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "17682"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Frøslev"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "25133"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "H4SAN4TOR"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "41185"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Jimpphat"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "26600"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Lenci"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "26712"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "LyttleZ"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "39303"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Magisk"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "17538"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Mazay"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "60153"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "NeaLaN"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "19644"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Norwi"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "25546"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Ofvirkur"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "33626"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Ponter"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "26665"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Prime"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "31458"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "R3kt"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "44928"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "R3salt"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "34992"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Rendysky"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "45108"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "S1mple"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "17541"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Sdaim"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "37697"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Shyyne"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "28438"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Skrimo"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "36595"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Snow"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "39422"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Sol"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "30319"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Souz4h"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "40337"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Stadodo"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "23035"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Tatazin"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "20368"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Techno4K"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "30001"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "TeSeS"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "23037"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Urban0"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "40854"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "XANTARES"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "17674"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Xelex"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "56048"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    },
+    {
+      "survivor": {
+        "source": "liquipedia",
+        "external_id": "Zock (Uruguayan player)"
+      },
+      "duplicate": {
+        "source": "pandascore",
+        "external_id": "35407"
+      },
+      "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
+    }
 ]

@@ -211,5 +211,554 @@
     },
     "basis": "HLTV records nicoodoz reaching the IEM Rio 2022 quarter-final with fnatic.",
     "source_url": "https://www.hltv.org/player/13602/nicoodoz"
-  }
+  },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "Intel_Extreme_Masters/Season_XIII/World_Championship"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "ArT"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "FURIA"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists ArT as one of the five FURIA players.",
+      "source_url": "https://liquipedia.net/counterstrike/Intel_Extreme_Masters/Season_XIII/World_Championship"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "Intel_Extreme_Masters/Season_XIII/World_Championship"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "Dexter"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "Grayhound"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists Dexter as one of the five Grayhound players.",
+      "source_url": "https://liquipedia.net/counterstrike/Intel_Extreme_Masters/Season_XIII/World_Championship"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "StarLadder/2019/Major"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "ArT"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "FURIA"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists ArT as one of the five FURIA players.",
+      "source_url": "https://liquipedia.net/counterstrike/StarLadder/2019/Major"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "StarLadder/2019/Major"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "Sterling"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "Grayhound"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists Sterling as one of the five Grayhound players.",
+      "source_url": "https://liquipedia.net/counterstrike/StarLadder/2019/Major"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "StarLadder/2019/Major"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "Destiny"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "INTZ"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists Destiny as one of the five INTZ players.",
+      "source_url": "https://liquipedia.net/counterstrike/StarLadder/2019/Major"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "PGL/2021/Stockholm"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "ArT"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "FURIA"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true,
+        "placement": "5-8"
+      },
+      "basis": "Liquipedia's event participant roster lists ArT as one of the five FURIA players.",
+      "source_url": "https://liquipedia.net/counterstrike/PGL/2021/Stockholm"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "PGL/2021/Stockholm"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "Dexter"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "mousesports"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists Dexter as one of the five mousesports players.",
+      "source_url": "https://liquipedia.net/counterstrike/PGL/2021/Stockholm"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "PGL/2022/Antwerp"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "ArT"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "FURIA"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true,
+        "placement": "5-8"
+      },
+      "basis": "Liquipedia's event participant roster lists ArT as one of the five FURIA players.",
+      "source_url": "https://liquipedia.net/counterstrike/PGL/2022/Antwerp"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "PGL/2022/Antwerp"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "Kabal"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "ihc"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists Kabal as one of the five ihc players.",
+      "source_url": "https://liquipedia.net/counterstrike/PGL/2022/Antwerp"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "Intel_Extreme_Masters/2022/Rio"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "ArT"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "FURIA"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true,
+        "placement": "3-4"
+      },
+      "basis": "Liquipedia's event participant roster lists ArT as one of the five FURIA players.",
+      "source_url": "https://liquipedia.net/counterstrike/Intel_Extreme_Masters/2022/Rio"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "Intel_Extreme_Masters/2022/Rio"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "Kabal"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "ihc"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists Kabal as one of the five ihc players.",
+      "source_url": "https://liquipedia.net/counterstrike/Intel_Extreme_Masters/2022/Rio"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "Intel_Extreme_Masters/2022/Rio"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "Dexter"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "MOUZ"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true,
+        "placement": "3-4"
+      },
+      "basis": "Liquipedia's event participant roster lists Dexter as one of the five MOUZ players.",
+      "source_url": "https://liquipedia.net/counterstrike/Intel_Extreme_Masters/2022/Rio"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "Intel_Extreme_Masters/2022/Rio"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "XertioN"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "MOUZ"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true,
+        "placement": "3-4"
+      },
+      "basis": "Liquipedia's event participant roster lists XertioN as one of the five MOUZ players.",
+      "source_url": "https://liquipedia.net/counterstrike/Intel_Extreme_Masters/2022/Rio"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "BLAST/Major/2023/Paris"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "ArT"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "FURIA"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists ArT as one of the five FURIA players.",
+      "source_url": "https://liquipedia.net/counterstrike/BLAST/Major/2023/Paris"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "BLAST/Major/2023/Paris"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "Dexter"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "MOUZ"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists Dexter as one of the five MOUZ players.",
+      "source_url": "https://liquipedia.net/counterstrike/BLAST/Major/2023/Paris"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "BLAST/Major/2023/Paris"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "XertioN"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "MOUZ"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists XertioN as one of the five MOUZ players.",
+      "source_url": "https://liquipedia.net/counterstrike/BLAST/Major/2023/Paris"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "PGL/2024/Copenhagen"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "ArT"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "FURIA"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists ArT as one of the five FURIA players.",
+      "source_url": "https://liquipedia.net/counterstrike/PGL/2024/Copenhagen"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "PGL/2024/Copenhagen"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "XertioN"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "MOUZ"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true,
+        "placement": "5-8"
+      },
+      "basis": "Liquipedia's event participant roster lists XertioN as one of the five MOUZ players.",
+      "source_url": "https://liquipedia.net/counterstrike/PGL/2024/Copenhagen"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "Perfect World/Major/2024/Shanghai"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "Dexter"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "FlyQuest"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists Dexter as one of the five FlyQuest players.",
+      "source_url": "https://liquipedia.net/counterstrike/Perfect World/Major/2024/Shanghai"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "Perfect World/Major/2024/Shanghai"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "XertioN"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "MOUZ"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true,
+        "placement": "3-4"
+      },
+      "basis": "Liquipedia's event participant roster lists XertioN as one of the five MOUZ players.",
+      "source_url": "https://liquipedia.net/counterstrike/Perfect World/Major/2024/Shanghai"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "BLAST/Major/2025/Austin"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "ArT"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "Fluxo"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists ArT as one of the five Fluxo players.",
+      "source_url": "https://liquipedia.net/counterstrike/BLAST/Major/2025/Austin"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "BLAST/Major/2025/Austin"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "XertioN"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "MOUZ"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true,
+        "placement": "3-4"
+      },
+      "basis": "Liquipedia's event participant roster lists XertioN as one of the five MOUZ players.",
+      "source_url": "https://liquipedia.net/counterstrike/BLAST/Major/2025/Austin"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "StarLadder/2025/Major"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "ArT"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "Fluxo"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists ArT as one of the five Fluxo players.",
+      "source_url": "https://liquipedia.net/counterstrike/StarLadder/2025/Major"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "StarLadder/2025/Major"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "XertioN"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "MOUZ"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true,
+        "placement": "5-8"
+      },
+      "basis": "Liquipedia's event participant roster lists XertioN as one of the five MOUZ players.",
+      "source_url": "https://liquipedia.net/counterstrike/StarLadder/2025/Major"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "Intel_Extreme_Masters/2026/Cologne"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "ArT"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "Legacy"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists ArT as one of the five Legacy players.",
+      "source_url": "https://liquipedia.net/counterstrike/Intel_Extreme_Masters/2026/Cologne"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "Intel_Extreme_Masters/2026/Cologne"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "XertioN"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "MOUZ"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists XertioN as one of the five MOUZ players.",
+      "source_url": "https://liquipedia.net/counterstrike/Intel_Extreme_Masters/2026/Cologne"
+    },
+    {
+      "major": {
+        "source": "liquipedia",
+        "external_id": "Intel_Extreme_Masters/2026/Cologne"
+      },
+      "player": {
+        "source": "liquipedia",
+        "external_id": "Dexter"
+      },
+      "team": {
+        "source": "liquipedia",
+        "external_id": "THUNDERdOWNUNDER"
+      },
+      "overrides": {
+        "participation_kind": "participant",
+        "counts_toward_total": true
+      },
+      "basis": "Liquipedia's event participant roster lists Dexter as one of the five THUNDERdOWNUNDER players.",
+      "source_url": "https://liquipedia.net/counterstrike/Intel_Extreme_Masters/2026/Cologne"
+    }
 ]

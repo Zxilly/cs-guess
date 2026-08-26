@@ -107,10 +107,10 @@ async function renderDrawState(revealed: boolean) {
 }
 
 async function flushClose() {
-  for (let pass = 0; pass < 3; pass += 1) {
+  for (let pass = 0; pass < 5; pass += 1) {
     await act(async () => {
       await Promise.resolve();
-      await Promise.resolve();
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
     });
     const frames = animationFrames.splice(0);
     act(() => {
