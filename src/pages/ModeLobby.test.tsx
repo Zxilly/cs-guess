@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import catalogMetadata from "@/data/players.generated.meta.json";
 import { ModeLobby } from "@/pages/ModeLobby";
 
 (globalThis as typeof globalThis & {
@@ -129,9 +130,7 @@ describe("ModeLobby", () => {
     );
 
     expect(markup).toContain("数据更新时间");
-    expect(markup).toContain(
-      'dateTime="2026-07-30T14:19:11.552613Z"',
-    );
+    expect(markup).toContain(`dateTime="${catalogMetadata.updatedAt}"`);
   });
 
   it("limits directional arrow motion to motion-safe environments", () => {

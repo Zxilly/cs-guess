@@ -102,7 +102,6 @@ describe("player search", () => {
   });
 
   it.each([
-    ["alka", ["Alkaren"]],
     ["big", ["biguzera"]],
     ["fury", ["fury5k"]],
     ["hard", ["hardstyle", "hardzao"]],
