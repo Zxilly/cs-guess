@@ -205,7 +205,7 @@
     "id": "1mpala",
     "nickname": "1mpala",
     "name": "Stefan Ailazian",
-    "team": "无队伍",
+    "team": "V1dar Gaming",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 27,
@@ -213,7 +213,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "V1dar Gaming",
       "S-Gaming",
       "5balls",
       "Warthox Esport",
@@ -228,6 +227,7 @@
       "Chevrolet_Impala",
       "Стефан Айлазян"
     ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/133834/101px_v1dar_gaming_allmode.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/25465/1mpala_rog_masters_2019.png"
   },
   {
@@ -1006,7 +1006,7 @@
     "id": "abm",
     "nickname": "ABM",
     "name": "Leonardo Martín Mariano Acuña",
-    "team": "无队伍",
+    "team": "R2",
     "nationality": "Argentina",
     "countryCode": "AR",
     "age": 30,
@@ -1030,13 +1030,14 @@
     "aliases": [
       "Leonardo Martín Mariano Acuña"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/21014/image/webp-e1cb5beb81e36dba0e5f02e18ab40e41.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/31167/image/webp-03d131ec08669688927f321f95f30388.webp"
   },
   {
     "id": "abr",
     "nickname": "abr",
     "name": "Abraão Soares França Campagnac",
-    "team": "无队伍",
+    "team": "MEIA NOITE",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 27,
@@ -1173,7 +1174,7 @@
     "id": "acilion",
     "nickname": "AcilioN",
     "name": "Asger Grunnet Larsen",
-    "team": "Esport Academy Copenhagen",
+    "team": "Preasy Esport",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 29,
@@ -1182,7 +1183,6 @@
     "majorWins": 0,
     "historicalTeams": [
       "AaB Esport",
-      "Preasy Esport",
       "Preasy Rising",
       "Sashi Esport",
       "Ambush DK",
@@ -1208,7 +1208,7 @@
     "aliases": [
       "Asger Grunnet Larsen"
     ],
-    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/138685/esport_academy_copenhagen_allmode.png",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/6301/image/webp-4c5f40b4375bed6a9a38c610a434c6eb.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17991/675px_acilio_n_at_copenhagen_games_2018.png"
   },
   {
@@ -1264,6 +1264,7 @@
     "aliases": [
       "Дархан Жексенбай"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/22014/image/webp-d438648dd664fc201705a5e59d4da61b.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/51866/image/webp-f8246eb214159c8a93d048f1d5a63b16.webp"
   },
   {
@@ -2152,7 +2153,7 @@
     "id": "aimannn",
     "nickname": "aimaNNN",
     "name": "Nor Aiman bin Nor Azham",
-    "team": "无队伍",
+    "team": "FrostFire",
     "nationality": "Malaysia",
     "countryCode": "MY",
     "age": 33,
@@ -2160,7 +2161,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "FrostFire",
       "Fire Dragoon Esports",
       "JYP Gaming",
       "MVP Karnal",
@@ -2173,6 +2173,7 @@
       "NNNamia",
       "Nor Aiman bin Nor Azham"
     ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/125780/20181222224012_FrostFire.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/20575/600px_frost_fire_aima_nnn.png"
   },
   {
@@ -2225,7 +2226,7 @@
     "id": "aizy",
     "nickname": "aizy",
     "name": "Philip Aistrup Larsen",
-    "team": "无队伍",
+    "team": "Preasy Esport",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 30,
@@ -2233,7 +2234,6 @@
     "majorAppearances": 11,
     "majorWins": 0,
     "historicalTeams": [
-      "Preasy Esport",
       "Sashi Esport",
       "South",
       "HYENAS",
@@ -2254,6 +2254,7 @@
     "aliases": [
       "Philip Aistrup Larsen"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/6301/image/webp-4c5f40b4375bed6a9a38c610a434c6eb.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17520/900px_aizy_dream_hack_open_leipzig_2020.png"
   },
   {
@@ -3058,7 +3059,7 @@
     "id": "altekz",
     "nickname": "Altekz",
     "name": "Alexander Givskov Hansen",
-    "team": "无队伍",
+    "team": "Nordic Partners Gaming",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 23,
@@ -3079,6 +3080,7 @@
     "aliases": [
       "Alexander Givskov Hansen"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/25002/image/webp-a81485beb6762101de6fb99ff9af3353.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/31967/to_sy_qj6v_bd_u1_u6_gpl_uw_tfx_u7c_gxf_t0do_sykm4_qu3.png"
   },
   {
@@ -3826,7 +3828,7 @@
     "id": "ansg1",
     "nickname": "ANSG1",
     "name": "Richart Saleela Nielsen",
-    "team": "无队伍",
+    "team": "Washed",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 19,
@@ -4705,7 +4707,7 @@
     "countryCode": "BR",
     "age": 30,
     "role": "IGL",
-    "majorAppearances": 0,
+    "majorAppearances": 10,
     "majorWins": 0,
     "historicalTeams": [
       "Fluxo W7M",
@@ -5318,7 +5320,7 @@
     "id": "aunkere",
     "nickname": "Aunkere",
     "name": "Evgeniy Yuryevich Karyat",
-    "team": "无队伍",
+    "team": "5Actors",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 26,
@@ -5652,7 +5654,7 @@
     "id": "ax1le",
     "nickname": "Ax1Le",
     "name": "Sergey Aleksandrovich Rykhtorov",
-    "team": "1w Team",
+    "team": "1WIN",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 24,
@@ -5670,13 +5672,14 @@
     "aliases": [
       "Сергей Александрович Рыхторов"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/238/image/webp-6095482923ef3047986cef1e26fe80fa.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/18553/900px_ax1le___dh_sevilla_2019.png"
   },
   {
     "id": "axecho",
     "nickname": "AxEcHo",
     "name": "Filip Czajka",
-    "team": "Illuminar",
+    "team": "Illuminar Gaming",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 21,
@@ -5884,7 +5887,7 @@
     "id": "ayken",
     "nickname": "ayken",
     "name": "Bastian Schendzielorz",
-    "team": "无队伍",
+    "team": "FANTASY",
     "nationality": "Germany",
     "countryCode": "DE",
     "age": 32,
@@ -5901,7 +5904,8 @@
     ],
     "aliases": [
       "Bastian Schendzielorz"
-    ]
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/3778/image/dc362b7e1cfeb3f3c93cbe0ecaaa97ed.png"
   },
   {
     "id": "ayteel",
@@ -6382,7 +6386,7 @@
     "id": "b4rtin",
     "nickname": "b4rtiN",
     "name": "Bruno Manoel Câmara dos Santos Almeida",
-    "team": "无队伍",
+    "team": "Fake do Biru",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 24,
@@ -6406,6 +6410,7 @@
     "aliases": [
       "Bruno Manoel Câmara dos Santos Almeida"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/18899/image/webp-aed9bac11b03906e14227ede96d61dd5.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/20931/900px_b4rti_n_berlin_minor.png"
   },
   {
@@ -7897,7 +7902,7 @@
     "id": "blackpoison",
     "nickname": "blackpoisoN",
     "name": "Roberto Dall'Occo",
-    "team": "无队伍",
+    "team": "VINDICTIVE",
     "nationality": "South Africa",
     "countryCode": "ZA",
     "age": 33,
@@ -7906,7 +7911,6 @@
     "majorWins": 0,
     "historicalTeams": [
       "Nixuh",
-      "VINDICTIVE",
       "ATK",
       "Denial eSports",
       "Energy Esports",
@@ -8076,7 +8080,7 @@
     "id": "bld",
     "nickname": "bld",
     "name": "Victor Junqueira",
-    "team": "无队伍",
+    "team": "Rensga Esports",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 34,
@@ -8084,7 +8088,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Rensga Esports",
       "Team oNe eSports",
       "Imperial Esports",
       "Falkol e-Sports",
@@ -8104,6 +8107,7 @@
       "bldziN",
       "Victor Junqueira"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/204/image/c873922b1764abc1bff7ca5b7ceeea8e.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/23704/p15162.png"
   },
   {
@@ -8791,7 +8795,7 @@
     "id": "boltz",
     "nickname": "boltz",
     "name": "Ricardo de Souza Prass",
-    "team": "无队伍",
+    "team": "Imperial Esports",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 29,
@@ -8799,7 +8803,6 @@
     "majorAppearances": 6,
     "majorWins": 0,
     "historicalTeams": [
-      "Imperial Esports",
       "Last Dance",
       "MIBR",
       "BOOM Esports",
@@ -8823,6 +8826,7 @@
     "aliases": [
       "Ricardo de Souza Prass"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/1430/image/webp-c1f2d155d75d6d7f397fb61abb1ce1ad.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17501/boltz.png"
   },
   {
@@ -9646,7 +9650,7 @@
     "id": "bruninho",
     "nickname": "Bruninho",
     "name": "Bruno Rodrigues Motta",
-    "team": "无队伍",
+    "team": "MEIA NOITE",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 23,
@@ -10195,7 +10199,7 @@
     "id": "buzz",
     "nickname": "Buzz",
     "name": "Christian Møss Andersen",
-    "team": "无队伍",
+    "team": "ECSTATIC",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 23,
@@ -10203,7 +10207,6 @@
     "majorAppearances": 1,
     "majorWins": 0,
     "historicalTeams": [
-      "ECSTATIC",
       "OG",
       "entropiq",
       "Astralis",
@@ -10217,6 +10220,7 @@
     "aliases": [
       "Christian Møss Andersen"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/2245/image/webp-d7d5c35158b1be6d54a8a9769f19b50b.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/35326/get_player_picture.png"
   },
   {
@@ -10263,7 +10267,7 @@
     "id": "byali",
     "nickname": "byali",
     "name": "Paweł Mateusz Bieliński",
-    "team": "无队伍",
+    "team": "Teletubisie",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 32,
@@ -10347,7 +10351,7 @@
     "id": "byr9",
     "nickname": "byr9",
     "name": "Yaroslav Buriak",
-    "team": "无队伍",
+    "team": "ZOTIX",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 28,
@@ -10369,6 +10373,7 @@
     "aliases": [
       "Ярослав Буряк"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/6277/image/webp-da1343e5d4b35091c41f119886564a27.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/29084/image/webp-70ebb9c59d2912096ffba39e3d78ba38.webp"
   },
   {
@@ -10404,7 +10409,7 @@
     "id": "baaten",
     "nickname": "Bååten",
     "name": "Linus Bååt Andersson",
-    "team": "无队伍",
+    "team": "Kappa Bar",
     "nationality": "Sweden",
     "countryCode": "SE",
     "age": 27,
@@ -10412,7 +10417,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Kappa Bar",
       "Chaos Esports Club",
       "x6tence Galaxy",
       "Japaleno",
@@ -10425,6 +10429,7 @@
       "Baaten",
       "Linus Bååt Andersson"
     ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/129494/logo_247x300.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/19022/baaten.png"
   },
   {
@@ -11810,7 +11815,8 @@
       "cerol",
       "Diogo Terto Mascate de Sousa"
     ],
-    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/138276/338586.png"
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/138276/338586.png",
+    "imageUrl": "https://files.bo3.gg/uploads/player/34106/image/webp-5d38b5d2614c5fbd08e95a04fc9ddfc7.webp"
   },
   {
     "id": "cerq",
@@ -12848,7 +12854,7 @@
     "id": "cj-da-k1ng",
     "nickname": "cJ-dA-K1nG",
     "name": "Christopher Jones",
-    "team": "无队伍",
+    "team": "FarmVille",
     "nationality": "United States",
     "countryCode": "US",
     "age": 28,
@@ -12856,7 +12862,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "FarmVille",
       "Daaku",
       "Nouns Esports",
       "ChocoCheck",
@@ -13415,7 +13420,7 @@
     "id": "coldzera",
     "nickname": "coldzera",
     "name": "Marcelo Augusto David",
-    "team": "无队伍",
+    "team": "MAGNA",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 31,
@@ -13834,7 +13839,7 @@
     "id": "cptkurtka023",
     "nickname": "cptkurtka023",
     "name": "Arsenyi Derevynskyi",
-    "team": "IC Esports",
+    "team": "Inner Circle Esports",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 27,
@@ -13842,7 +13847,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Inner Circle Esports",
       "kONO.ECF",
       "B8",
       "The Incas"
@@ -13850,6 +13854,7 @@
     "aliases": [
       "Арсений Деревинский"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/19186/image/webp-6aedbd6f8fdc86d26052f90540031e1e.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/29943/image/webp-e40453e9361e9cbf68645471f52d153d.webp"
   },
   {
@@ -14171,7 +14176,7 @@
     "id": "cromen",
     "nickname": "cromen",
     "name": "Jørgen Robertsen",
-    "team": "无队伍",
+    "team": "Nordavind",
     "nationality": "Norway",
     "countryCode": "NO",
     "age": 31,
@@ -14179,7 +14184,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Nordavind",
       "2019",
       "FaZe Clan",
       "Heroic",
@@ -14294,7 +14298,7 @@
     "id": "crush",
     "nickname": "crush",
     "name": "Ihor Shevchenko",
-    "team": "无队伍",
+    "team": "FAVBET Team",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 31,
@@ -14302,7 +14306,6 @@
     "majorAppearances": 2,
     "majorWins": 0,
     "historicalTeams": [
-      "FAVBET Team",
       "Natus Vincere Youth",
       "Natus Vincere Junior",
       "Team Unique",
@@ -14320,6 +14323,7 @@
     "aliases": [
       "Ігор Шевченко"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/10601/image/webp-5d16106e67ba74128feeb5953166e1b8.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/18186/900px_crush_epicenter_2019.png"
   },
   {
@@ -14403,7 +14407,7 @@
     "id": "cryptic",
     "nickname": "Cryptic",
     "name": "Matthew Thomas Whitmore",
-    "team": "Life's A Game",
+    "team": "LAG Gaming",
     "nationality": "United States",
     "countryCode": "US",
     "age": 25,
@@ -14432,6 +14436,7 @@
     "aliases": [
       "Matthew Thomas Whitmore"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/5345/image/webp-0d7b7533338d7b3731a76da7c8626c2c.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/28746/image/webp-678b94278fa7a164d17a70453efa0fd5.webp"
   },
   {
@@ -15841,7 +15846,7 @@
     "id": "darkkis",
     "nickname": "Darkkis",
     "name": "Li Chi-nam",
-    "team": "无队伍",
+    "team": "100P",
     "nationality": "Hong Kong",
     "countryCode": "HK",
     "age": 34,
@@ -15859,7 +15864,8 @@
     ],
     "aliases": [
       "李之楠"
-    ]
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/1247/image/e591916c952be862dc02c1e4541f9125.png"
   },
   {
     "id": "darko",
@@ -16791,7 +16797,8 @@
     ],
     "aliases": [
       "Дмитро Лемещук"
-    ]
+    ],
+    "imageUrl": "https://cdn-api.pandascore.co/images/player/image/18728/def.png"
   },
   {
     "id": "def1zer",
@@ -17287,7 +17294,7 @@
     "id": "dennyslaw",
     "nickname": "dennyslaw",
     "name": "Denislav Dimitrov Dimitrov",
-    "team": "无队伍",
+    "team": "LAGUNA",
     "nationality": "Bulgaria",
     "countryCode": "BG",
     "age": 26,
@@ -17295,7 +17302,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "LAGUNA",
       "JiJieHao",
       "500",
       "SKADE",
@@ -17305,6 +17311,7 @@
       "denis2K",
       "Денислав Димитров Димитров"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/22481/image/webp-fe12948a7e993bffa9e1487dfbf560bd.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/23856/dennyslaw_header_e1582223661463.png"
   },
   {
@@ -17640,7 +17647,7 @@
     "countryCode": "BR",
     "age": 29,
     "role": "Entry",
-    "majorAppearances": 0,
+    "majorAppearances": 1,
     "majorWins": 0,
     "historicalTeams": [
       "Team Solid",
@@ -18080,7 +18087,7 @@
     "countryCode": "AU",
     "age": 32,
     "role": "IGL",
-    "majorAppearances": 0,
+    "majorAppearances": 6,
     "majorWins": 0,
     "historicalTeams": [
       "FlyQuest",
@@ -18468,7 +18475,7 @@
     "id": "dimaoneshot",
     "nickname": "Dimaoneshot",
     "name": "Dmitriy Anatolyevich Bandurka",
-    "team": "无队伍",
+    "team": "CS2News",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 31,
@@ -19437,7 +19444,7 @@
     "id": "dosia",
     "nickname": "Dosia",
     "name": "Mikhail Stolyarov",
-    "team": "XGOD",
+    "team": "Gluck",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 38,
@@ -20143,7 +20150,7 @@
     "id": "drop-br-andre-wagner-de-abreu",
     "nickname": "drop",
     "name": "André Wagner de Abreu",
-    "team": "无队伍",
+    "team": "RED Canids",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 22,
@@ -20151,7 +20158,6 @@
     "majorAppearances": 6,
     "majorWins": 0,
     "historicalTeams": [
-      "RED Canids",
       "MIBR",
       "FURIA eSports",
       "FURIA Academy",
@@ -20162,6 +20168,7 @@
     "aliases": [
       "André Wagner de Abreu"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/554/image/ccf20fb1f2ae97d355e6608f4e710da7.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/24811/800px_drop___pgl_major_stockholm_2021.png"
   },
   {
@@ -20747,7 +20754,7 @@
     "id": "dycha",
     "nickname": "dycha",
     "name": "Paweł Mateusz Dycha",
-    "team": "无队伍",
+    "team": "Teletubisie",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 29,
@@ -23556,7 +23563,7 @@
     "id": "fakzwall",
     "nickname": "fakzwall",
     "name": "Facundo Agustín Guzman",
-    "team": "无队伍",
+    "team": "LUNA Esports",
     "nationality": "Argentina",
     "countryCode": "AR",
     "age": 26,
@@ -23565,7 +23572,6 @@
     "majorWins": 0,
     "historicalTeams": [
       "R2 Esports Club",
-      "LUNA Esports",
       "WINDINGO",
       "Leviatán",
       "Isurus Gaming",
@@ -23577,6 +23583,7 @@
     "aliases": [
       "Facundo Agustín Guzman"
     ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/137993/luna_esports__argentinian_team__lightmode.png",
     "imageUrl": "https://files.bo3.gg/uploads/player/25448/image/webp-12f64422d355f2d5ddb5e2ff08a0ed94.webp"
   },
   {
@@ -24000,7 +24007,7 @@
     "id": "faydett",
     "nickname": "faydett",
     "name": "Yuriy Martirosov",
-    "team": "Insilio",
+    "team": "Bebop",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 27,
@@ -24008,6 +24015,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "Insilio",
       "YNT",
       "Nemiga Gaming",
       "Take Aim Gaming",
@@ -24019,7 +24027,6 @@
     "aliases": [
       "Юрий Мартиросов"
     ],
-    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/130064/148px_insilio_lightmode.png",
     "imageUrl": "https://files.bo3.gg/uploads/player/29288/image/webp-89cc6a4fa2ddb9a0ab13d18fdfa6a244.webp"
   },
   {
@@ -24384,7 +24391,8 @@
     "aliases": [
       "Fernanda Iza Adames Victorino"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/3370/image/49c8d96278fc1fd46ae2b9bdc20258c3.png"
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/3370/image/49c8d96278fc1fd46ae2b9bdc20258c3.png",
+    "imageUrl": "https://files.bo3.gg/uploads/player/33382/image/webp-f73041e5d980d220a0770681152624d6.webp"
   },
   {
     "id": "fessor",
@@ -24854,7 +24862,7 @@
     "id": "flamie",
     "nickname": "flamie",
     "name": "Egor Sergeyevich Vasilyev",
-    "team": "无队伍",
+    "team": "BOGATYRI",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 29,
@@ -24875,6 +24883,7 @@
       "flamienator",
       "Егор Сергеевич Васильев"
     ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/135498/137px_bogatyri_allmode.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17542/600px_flamie___epicenter_2019.png"
   },
   {
@@ -25648,7 +25657,7 @@
     "id": "fokiu",
     "nickname": "fokiu",
     "name": "Marcos Paulo Nunes Junior",
-    "team": "无队伍",
+    "team": "Back to Back",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 27,
@@ -25874,7 +25883,7 @@
     "id": "fostar",
     "nickname": "fostar",
     "name": "Stanislav Ostashevskyi",
-    "team": "无队伍",
+    "team": "Noir Verse",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 26,
@@ -25882,7 +25891,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Noir Verse",
       "illwill",
       "Ovoshi",
       "Permitta Esports",
@@ -25902,13 +25910,14 @@
     "aliases": [
       "Станіслав Осташевський"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/24506/image/webp-402aeea4c6409286fb5a0322ac5975c4.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/24681/image/webp-6ec53c469932db09fb11fbbeab0e2caa.webp"
   },
   {
     "id": "fox",
     "nickname": "fox",
     "name": "Ricardo Pacheco Miguel",
-    "team": "SAW",
+    "team": "Team USA",
     "nationality": "Portugal",
     "countryCode": "PT",
     "age": 39,
@@ -25943,7 +25952,6 @@
       "foxSdruviaQ",
       "Ricardo Pacheco Miguel"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/312/image/f106fa20c91423d0391f87d277ee3e8d.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17627/600px_fox_bps_madrid.png"
   },
   {
@@ -26029,7 +26037,7 @@
     "id": "fp1",
     "nickname": "fP1",
     "name": "Filipe de Caires",
-    "team": "无队伍",
+    "team": "lospegadinhas",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 31,
@@ -27015,7 +27023,8 @@
     "aliases": [
       "Magnus Frøslev"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/1059/image/webp-3acae7de5a0216513a57e32e0f1b6254.webp"
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/1059/image/webp-3acae7de5a0216513a57e32e0f1b6254.webp",
+    "imageUrl": "https://cdn-api.pandascore.co/images/player/image/25133/fr_253_fslev.png"
   },
   {
     "id": "fugly",
@@ -27126,7 +27135,7 @@
     "id": "furlan",
     "nickname": "Furlan",
     "name": "Damian Kisłowski",
-    "team": "无队伍",
+    "team": "Illuminar Gaming",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 31,
@@ -27134,7 +27143,6 @@
     "majorAppearances": 2,
     "majorWins": 0,
     "historicalTeams": [
-      "Illuminar Gaming",
       "Adaptation",
       "AGO esports",
       "Team Kinguin",
@@ -27148,6 +27156,7 @@
     "aliases": [
       "Damian Kisłowski"
     ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/126208/illuminar_gaminglogo_square.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17639/furlan_new.png"
   },
   {
@@ -28660,7 +28669,7 @@
     "id": "golden",
     "nickname": "Golden",
     "name": "Maikil Kunda Selim",
-    "team": "无队伍",
+    "team": "SAW",
     "nationality": "Sweden",
     "countryCode": "SE",
     "age": 32,
@@ -28668,7 +28677,6 @@
     "majorAppearances": 3,
     "majorWins": 0,
     "historicalTeams": [
-      "SAW",
       "EYEBALLERS",
       "GODSENT",
       "Savage",
@@ -28681,6 +28689,7 @@
       "GOLDN",
       "ميكيل سليم"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/312/image/f106fa20c91423d0391f87d277ee3e8d.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17719/900px_golden___epl_s10_finals.png"
   },
   {
@@ -28708,7 +28717,7 @@
     "id": "gooden",
     "nickname": "Gooden",
     "name": "Carlos Sebastian Palacios Cavion",
-    "team": "无队伍",
+    "team": "Hawks Finland",
     "nationality": "Argentina",
     "countryCode": "AR",
     "age": 26,
@@ -28727,7 +28736,8 @@
     "aliases": [
       "Carlos Sebastian Palacios Cavion",
       "iKrystal"
-    ]
+    ],
+    "imageUrl": "https://files.bo3.gg/uploads/player/29306/image/webp-2564e80f19f241ab5d8e7183f43d9f06.webp"
   },
   {
     "id": "goodfella",
@@ -29297,7 +29307,7 @@
     "id": "griller",
     "nickname": "Griller",
     "name": "Christian Vejlgaard Skou Sørensen",
-    "team": "无队伍",
+    "team": "Invicta",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 22,
@@ -29317,6 +29327,7 @@
     "aliases": [
       "Christian Vejlgaard Skou Sørensen"
     ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/137951/420px_invicta_cs2_allmode.png",
     "imageUrl": "https://files.bo3.gg/uploads/player/28646/image/webp-cb4aa9a2d3686ddfa5a93799521314f2.webp"
   },
   {
@@ -29726,7 +29737,8 @@
     ],
     "aliases": [
       "Kujtim Durmishi"
-    ]
+    ],
+    "imageUrl": "https://files.bo3.gg/uploads/player/29315/image/webp-edea2acf92ff846265b862f0784a4fbd.webp"
   },
   {
     "id": "gummy",
@@ -30820,7 +30832,7 @@
     "id": "hazel",
     "nickname": "Hazel",
     "name": "Fong Sin Man",
-    "team": "无队伍",
+    "team": "HSG fe",
     "nationality": "Hong Kong",
     "countryCode": "HK",
     "age": 31,
@@ -30837,7 +30849,8 @@
     "aliases": [
       "HazelBestt",
       "方倩雯"
-    ]
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/1454/image/352cb1f3084be5db9c369a4259c61bbd.png"
   },
   {
     "id": "hazr",
@@ -30876,7 +30889,7 @@
     "id": "headtr1ck",
     "nickname": "headtr1ck",
     "name": "Danyyl Valitov",
-    "team": "IC Esports",
+    "team": "Inner Circle Esports",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 22,
@@ -30884,7 +30897,6 @@
     "majorAppearances": 3,
     "majorWins": 0,
     "historicalTeams": [
-      "Inner Circle Esports",
       "B8",
       "Ninjas in Pyjamas",
       "Natus Vincere Junior",
@@ -30893,6 +30905,7 @@
     "aliases": [
       "Даниил Валітов"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/19186/image/webp-6aedbd6f8fdc86d26052f90540031e1e.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/28431/image/webp-cb60d6d898618bef8e5af741b7396f75.webp"
   },
   {
@@ -31591,7 +31604,7 @@
     "id": "hitmouse",
     "nickname": "hitMouse",
     "name": "Kiriłł Cariov",
-    "team": "无队伍",
+    "team": "NewBelarus",
     "nationality": "Belarus",
     "countryCode": "BY",
     "age": 36,
@@ -31608,6 +31621,7 @@
     "aliases": [
       "Кирилл Царёв"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/1497/image/706759519dc908b7f7ba2ccf200a5455.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/19635/hitmouse.png"
   },
   {
@@ -31813,7 +31827,7 @@
     "id": "honda",
     "nickname": "honda",
     "name": "Lucas Honda Cano",
-    "team": "ODDIK",
+    "team": "Players",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 26,
@@ -31833,7 +31847,6 @@
       "h0nda",
       "Lucas Honda Cano"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/3370/image/49c8d96278fc1fd46ae2b9bdc20258c3.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/30260/600px_furia_honda_may_2021.png"
   },
   {
@@ -31992,7 +32005,7 @@
     "id": "horizon",
     "nickname": "HorizoN",
     "name": "Andrey Charykov",
-    "team": "无队伍",
+    "team": "True Synergy Gaming",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 24,
@@ -32000,7 +32013,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "True Synergy Gaming",
       "Straight2Killin",
       "Make Your Mind",
       "Revenge Nation",
@@ -32011,7 +32023,8 @@
     ],
     "aliases": [
       "Андрей Чарыков"
-    ]
+    ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/137150/true_synergy_gaming_allmode.png"
   },
   {
     "id": "hornet",
@@ -33299,7 +33312,7 @@
     "id": "impression",
     "nickname": "ImpressioN",
     "name": "Anthony Lim Ying Jun",
-    "team": "Team Unitronic",
+    "team": "Nemesis SEA",
     "nationality": "Singapore",
     "countryCode": "SG",
     "age": 30,
@@ -34138,7 +34151,7 @@
     "id": "izaa",
     "nickname": "izaa",
     "name": "Izabella Bieberbach Galle",
-    "team": "无队伍",
+    "team": "FURIA fe",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 24,
@@ -34154,6 +34167,7 @@
     "aliases": [
       "Izabella Bieberbach Galle"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/1586/image/d8cfae6dc7caf2295c9b795e230f0a20.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/21846/izaa_santos.png"
   },
   {
@@ -34360,7 +34374,7 @@
     "id": "j3kie",
     "nickname": "j3kie",
     "name": "Yevhen Serhachev",
-    "team": "无队伍",
+    "team": "FAVBET Team",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 26,
@@ -34368,7 +34382,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "FAVBET Team",
       "Blessed",
       "ESC Gaming",
       "L&G",
@@ -34387,6 +34400,7 @@
     "aliases": [
       "Євген Сергачев"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/10601/image/webp-5d16106e67ba74128feeb5953166e1b8.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/30246/j3kie_at_eef_european_championship_2022.png"
   },
   {
@@ -35872,7 +35886,7 @@
       "Jimi Joonas Salo"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/3598/image/webp-49b8df76b0d121cc89c760c1ec16ebea.webp",
-    "imageUrl": "https://files.bo3.gg/uploads/player/26600/image/webp-a22945b0668a6153a1789512f3931142.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/26600/image/webp-6c60904b9b62e9746f9d587a220e3e81.webp"
   },
   {
     "id": "jinkz",
@@ -36662,7 +36676,7 @@
     "id": "jota",
     "nickname": "JOTA",
     "name": "Jhonatan Wilian Leopoldo Gaudencio",
-    "team": "无队伍",
+    "team": "Gaimin Gladiators",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 28,
@@ -36670,7 +36684,6 @@
     "majorAppearances": 2,
     "majorWins": 0,
     "historicalTeams": [
-      "Gaimin Gladiators",
       "w7m esports",
       "DESEMPREGUEIDOS",
       "LOS",
@@ -36685,6 +36698,7 @@
       "Jhonatan Wilian Leopoldo Gaudencio",
       "jntzika"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/2698/image/0c83dff472088d83727e158c572ead87.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/34259/jota_at_clutch_season_2.png"
   },
   {
@@ -37249,7 +37263,7 @@
     "id": "just",
     "nickname": "JUST",
     "name": "Paulo Tiago Alves Moura",
-    "team": "无队伍",
+    "team": "The animals",
     "nationality": "Portugal",
     "countryCode": "PT",
     "age": 30,
@@ -37495,7 +37509,8 @@
     ],
     "aliases": [
       "João Luis Vieira Lourenço"
-    ]
+    ],
+    "imageUrl": "https://files.bo3.gg/uploads/player/36216/image/webp-7663991aa92416126687dc9454e5c2d3.webp"
   },
   {
     "id": "k0mplex",
@@ -37683,7 +37698,7 @@
     "id": "k1nky",
     "nickname": "k1Nky",
     "name": "Francisco Alvares",
-    "team": "无队伍",
+    "team": "Cartel terraza",
     "nationality": "Mexico",
     "countryCode": "MX",
     "age": 35,
@@ -37691,7 +37706,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Cartel terraza",
       "Infinity eSports",
       "Forty Six and 2",
       "Resolute",
@@ -37816,7 +37830,7 @@
     "id": "kaahsensei",
     "nickname": "kaahSENSEI",
     "name": "Karina Takahashi",
-    "team": "无队伍",
+    "team": "FURIA fe",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 30,
@@ -37834,6 +37848,7 @@
       "kaah",
       "Karina Takahashi"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/1586/image/d8cfae6dc7caf2295c9b795e230f0a20.png",
     "imageUrl": "https://files.bo3.gg/uploads/player/31515/image/webp-2ae15e49e43122b8291ce7db77da0bff.webp"
   },
   {
@@ -37896,7 +37911,7 @@
     "countryCode": "MN",
     "age": 31,
     "role": "Rifler",
-    "majorAppearances": 0,
+    "majorAppearances": 2,
     "majorWins": 0,
     "historicalTeams": [
       "IHC Esports",
@@ -39470,7 +39485,7 @@
     "id": "kenzor",
     "nickname": "kenzor",
     "name": "Leonard Valeriiovych Volodarchuk",
-    "team": "无队伍",
+    "team": "LeeK",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 29,
@@ -40303,7 +40318,7 @@
     "id": "kissmyaug",
     "nickname": "kissmyaug",
     "name": "Ian Carruccio",
-    "team": "无队伍",
+    "team": "TEAM ORUGA",
     "nationality": "Argentina",
     "countryCode": "AR",
     "age": 30,
@@ -41557,7 +41572,7 @@
     "id": "kressy",
     "nickname": "kressy",
     "name": "Marko Đorđević",
-    "team": "无队伍",
+    "team": "PORTUGAL",
     "nationality": "Germany",
     "countryCode": "DE",
     "age": 30,
@@ -41803,7 +41818,7 @@
     "id": "krownii",
     "nickname": "KrowNii",
     "name": "Daniel Michel",
-    "team": "无队伍",
+    "team": "schadE halt",
     "nationality": "Germany",
     "countryCode": "DE",
     "age": 27,
@@ -41819,6 +41834,7 @@
     "aliases": [
       "Daniel Michel"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/946/image/webp-4da71223a9e930a5a569cb83b290a76d.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/25245/image/webp-f3daa678f444b284313a6fe3d6970204.webp"
   },
   {
@@ -41980,7 +41996,7 @@
     "id": "ksloks",
     "nickname": "ksloks",
     "name": "Italo Meinberg Couto",
-    "team": "无队伍",
+    "team": "Turma do Pagode",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 21,
@@ -42000,6 +42016,7 @@
     "aliases": [
       "Italo Meinberg Couto"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/4122/image/webp-ea1bb5263f3239d8ce63e28f95a340a4.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/34515/image/webp-ac6e06a93b48d0e689fda9e223a7e444.webp"
   },
   {
@@ -44189,7 +44206,7 @@
     "id": "leo_drk",
     "nickname": "leo_drk",
     "name": "Leonardo de Oliveira Carlos",
-    "team": "无队伍",
+    "team": "EHISTO BASE",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 26,
@@ -44493,7 +44510,7 @@
     "id": "liazz",
     "nickname": "Liazz",
     "name": "John James Tregillgas",
-    "team": "thunderdownunder",
+    "team": "THUNDER dOWNUNDER",
     "nationality": "Australia",
     "countryCode": "AU",
     "age": 28,
@@ -44518,6 +44535,7 @@
       "John James Tregillgas",
       "lyas"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/22032/image/webp-b69cc32fad1931aabdb86cd558d19c38.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17791/liazz_iem_beijing_2019.png"
   },
   {
@@ -47244,7 +47262,7 @@
     "id": "mallby",
     "nickname": "MaLLby",
     "name": "Marcello Czarneski Severo",
-    "team": "无队伍",
+    "team": "Prison Breakers",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 25,
@@ -48045,7 +48063,7 @@
     "id": "masked",
     "nickname": "mASKED",
     "name": "Bartłomiej Trybuła",
-    "team": "无队伍",
+    "team": "Drip Too Hard",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 25,
@@ -48884,7 +48902,7 @@
     "id": "mds-by-aleksandr-rubiec",
     "nickname": "mds",
     "name": "Aleksandr Rubiec",
-    "team": "DRGN Team",
+    "team": "yngods",
     "nationality": "Belarus",
     "countryCode": "BY",
     "age": 28,
@@ -48905,6 +48923,7 @@
     "aliases": [
       "Александр Рубец"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/21437/image/webp-3d2c0179c8bdde9799a0b81d78c5eee4.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/19637/websterz_mds_2022.png"
   },
   {
@@ -52673,7 +52692,7 @@
     "id": "naitte",
     "nickname": "naitte",
     "name": "João Maia Caldas",
-    "team": "无队伍",
+    "team": "Turma do Pagode",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 28,
@@ -52697,6 +52716,7 @@
       "João Maia Caldas",
       "naitte7"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/4122/image/webp-ea1bb5263f3239d8ce63e28f95a340a4.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/26681/image/webp-d52f40e1b2a6a9ecd502b1a461d89f55.webp"
   },
   {
@@ -54578,7 +54598,7 @@
     "id": "nikom",
     "nickname": "NikoM",
     "name": "Nicolás Miozzi",
-    "team": "无队伍",
+    "team": "RTT100",
     "nationality": "Argentina",
     "countryCode": "AR",
     "age": 29,
@@ -54822,7 +54842,7 @@
     "id": "ninjaz",
     "nickname": "ninjaZ",
     "name": "Icaro Bastos Cavalari",
-    "team": "无队伍",
+    "team": "Bounty Hunters Esports",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 23,
@@ -54830,7 +54850,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Bounty Hunters Esports",
       "Keyd Stars",
       "Swingers",
       "Desassalariados",
@@ -54848,6 +54867,7 @@
       "Icaro Bastos Cavalari",
       "ninjaz4n"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/6282/image/webp-d4ec7142d13d6270207e9537156a368b.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/27966/600px_galorys_ninja_z_2024.png"
   },
   {
@@ -55281,7 +55301,7 @@
     "id": "nodios",
     "nickname": "Nodios",
     "name": "Magnus Brok Olsen",
-    "team": "无队伍",
+    "team": "Tricked Esport",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 27,
@@ -55289,7 +55309,6 @@
     "majorAppearances": 1,
     "majorWins": 0,
     "historicalTeams": [
-      "Tricked Esport",
       "Gaimin Gladiators",
       "ECSTATIC",
       "TITANS",
@@ -55307,6 +55326,7 @@
     "aliases": [
       "Magnus Brok Olsen"
     ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/125071/222px_tricked_esport_2025_allmode.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/20482/nodios.png"
   },
   {
@@ -55369,7 +55389,7 @@
     "id": "noktse",
     "nickname": "Noktse",
     "name": "Nicolás Mariano Dávila",
-    "team": "无队伍",
+    "team": "Peladona",
     "nationality": "Argentina",
     "countryCode": "AR",
     "age": 33,
@@ -55447,7 +55467,7 @@
     "id": "nolkz",
     "nickname": "nolkz",
     "name": "Felipe Rodrigues Oliveira Alves",
-    "team": "无队伍",
+    "team": "RUSH",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 26,
@@ -55476,7 +55496,9 @@
     "aliases": [
       "Felipe Rodrigues Oliveira Alves",
       "n9lkz"
-    ]
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/24574/image/webp-b7458de31bf729d7fbdda1cd5dcd6af4.webp",
+    "imageUrl": "https://files.bo3.gg/uploads/player/31213/image/webp-915a3d3cba1701945d8ad5c648f8071a.webp"
   },
   {
     "id": "nomizz",
@@ -55606,7 +55628,7 @@
     "id": "nooz",
     "nickname": "nooz",
     "name": "Nelvin Andres Gonzalez Rodriguez",
-    "team": "无队伍",
+    "team": "1WIN NA",
     "nationality": "Venezuela, Bolivarian Republic of",
     "countryCode": "VE",
     "age": 30,
@@ -55961,7 +55983,7 @@
     "id": "notineki",
     "nickname": "notineki",
     "name": "Denys Kalachev",
-    "team": "无队伍",
+    "team": "INOX Division",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 21,
@@ -55975,6 +55997,7 @@
     "aliases": [
       "Денис Калачев"
     ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/138617/inox_division_allmode.png",
     "imageUrl": "https://files.bo3.gg/uploads/player/33348/image/webp-123ad6edf4192ff36f9bf73736d7f676.webp"
   },
   {
@@ -56209,7 +56232,7 @@
     "id": "nuko",
     "nickname": "Nuko",
     "name": "He Chi",
-    "team": "无队伍",
+    "team": "LaiShanHui",
     "nationality": "China",
     "countryCode": "CN",
     "age": 25,
@@ -56276,7 +56299,7 @@
     "id": "nyezin",
     "nickname": "nyezin",
     "name": "Marcelo Ramos Borges Junior",
-    "team": "无队伍",
+    "team": "MEIA NOITE",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 22,
@@ -56671,7 +56694,7 @@
     "id": "okoliciouz",
     "nickname": "OKOLICIOUZ",
     "name": "Michał Głowaty",
-    "team": "无队伍",
+    "team": "NLG",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 29,
@@ -56844,7 +56867,7 @@
     "id": "olofmeister",
     "nickname": "olofmeister",
     "name": "Olof Markus Kajbjer Gustafsson",
-    "team": "FaZe Clan",
+    "team": "Boomer Demons",
     "nationality": "Sweden",
     "countryCode": "SE",
     "age": 34,
@@ -56852,6 +56875,7 @@
     "majorAppearances": 16,
     "majorWins": 2,
     "historicalTeams": [
+      "FaZe Clan",
       "fnatic",
       "TEAMGLOBAL",
       "LGB eSports",
@@ -56865,7 +56889,6 @@
       "Olof Markus Kajbjer Gustafsson",
       "olofm"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/791/image/webp-cdbadd061dbbc67c745592dcac6c71eb.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17526/600px_olofmeister___iem_cologne_2021.png"
   },
   {
@@ -57617,7 +57640,7 @@
     "id": "pacmann",
     "nickname": "pacmanN",
     "name": "Renato Morales",
-    "team": "无队伍",
+    "team": "Cartel terraza",
     "nationality": "Peru",
     "countryCode": "PE",
     "age": 28,
@@ -57625,7 +57648,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Cartel terraza",
       "Infinity eSports",
       "Supremacy Gaming",
       "Shot eSports"
@@ -58663,7 +58685,7 @@
     "id": "pesadelo",
     "nickname": "pesadelo",
     "name": "Matheus Panisset Bilibio",
-    "team": "无队伍",
+    "team": "Back to Back",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 27,
@@ -58937,7 +58959,7 @@
     "id": "phx",
     "nickname": "phx",
     "name": "Gustavo Antonio Merigo",
-    "team": "无队伍",
+    "team": "Pugdesonesto",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 27,
@@ -58945,7 +58967,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Pugdesonesto",
       "CEBOLOS",
       "MIBR Academy",
       "Rehl Esports",
@@ -58958,6 +58979,7 @@
     "aliases": [
       "Gustavo Antonio Merigo"
     ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/133388/get_team_logos.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/26617/ex3k_x_yd1_400x400.png"
   },
   {
@@ -59710,6 +59732,7 @@
       "Juan Camilo Londoño",
       "londono"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/4264/image/webp-ba817cdd2def87e46d2d4f96623a5372.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/30251/image/webp-c8a8814d9436acebeb328400ae6f67c5.webp"
   },
   {
@@ -59813,7 +59836,7 @@
     "id": "polbandana",
     "nickname": "Polbandana",
     "name": "Zakhar Siledchyk",
-    "team": "无队伍",
+    "team": "Lazer Cats",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 22,
@@ -59831,6 +59854,7 @@
     "aliases": [
       "Захар Сіледчик"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/5391/image/3ccf372cc1bca18dd3c93bb0db29b241.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/34915/image/webp-0c766471c5a3d449355a303f6bc6c8cd.webp"
   },
   {
@@ -60025,7 +60049,7 @@
     "id": "poppins",
     "nickname": "poppins",
     "name": "Nadjila Sanchez Rodrigues",
-    "team": "MIBR Female",
+    "team": "MIBR fe",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 20,
@@ -60043,6 +60067,7 @@
     "aliases": [
       "Nadjila Sanchez Rodrigues"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/2456/image/06a208acb3df67c82b01537afc4d6b5c.png",
     "imageUrl": "https://files.bo3.gg/uploads/player/33985/image/webp-d48f8fcd782e172657403b3902b2f410.webp"
   },
   {
@@ -60712,6 +60737,32 @@
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17562/pronax.png"
   },
   {
+    "id": "propleh",
+    "nickname": "propleh",
+    "name": "Dmitriy Senigov",
+    "team": "Victory Zigzag",
+    "nationality": "Russian Federation",
+    "countryCode": "RU",
+    "age": 30,
+    "role": "Rifler",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "historicalTeams": [
+      "NASR Esports",
+      "Trident Clan",
+      "1WIN",
+      "MelBet Team",
+      "OwmS",
+      "Monolith Gaming",
+      "Spartak Esports"
+    ],
+    "aliases": [
+      "Дмитрий Сенигов"
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/6299/image/webp-4a99edb012d48e716e4af3e857f70e0e.webp",
+    "imageUrl": "https://cdn-api.pandascore.co/images/player/image/24696/propleh_spartak.png"
+  },
+  {
     "id": "proshow",
     "nickname": "proSHOW",
     "name": "Rodrigo Guluzian",
@@ -60765,7 +60816,7 @@
     "id": "proxure",
     "nickname": "Proxure",
     "name": "Cristian Rojas Venegas",
-    "team": "无队伍",
+    "team": "Australs",
     "nationality": "Chile",
     "countryCode": "CL",
     "age": 33,
@@ -60774,7 +60825,6 @@
     "majorWins": 0,
     "historicalTeams": [
       "Juegalo Esports",
-      "Australs",
       "Hawks",
       "LBS Esports",
       "Malvinas Gaming",
@@ -60789,7 +60839,8 @@
     ],
     "aliases": [
       "Cristian Rojas Venegas"
-    ]
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/1458/image/39c26bdd65bbc0af2439bffd6116526e.png"
   },
   {
     "id": "prt",
@@ -62687,7 +62738,7 @@
     "id": "rambutan",
     "nickname": "Rambutan",
     "name": "Phạm Xuân Giang",
-    "team": "无队伍",
+    "team": "GTV.Revolution",
     "nationality": "Viet Nam",
     "countryCode": "VN",
     "age": 28,
@@ -63191,7 +63242,7 @@
     "id": "rcf",
     "nickname": "RCF",
     "name": "Rodrigo Caponero Figueiredo",
-    "team": "无队伍",
+    "team": "Game Hunters",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 26,
@@ -63199,7 +63250,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Game Hunters",
       "FOLHA AMARELA",
       "Case Esports",
       "Asterys Gaming",
@@ -63220,6 +63270,7 @@
       "Recife",
       "Rodrigo Caponero Figueiredo"
     ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/135580/244px_game_hunters_allmode.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17748/rcf_dh_rio2019.png"
   },
   {
@@ -64321,7 +64372,7 @@
     "id": "renatoohaxx",
     "nickname": "renatoohaxx",
     "name": "Renato Alberto Reixa Lourenço Gonçalves",
-    "team": "无队伍",
+    "team": "GhoulsW",
     "nationality": "Portugal",
     "countryCode": "PT",
     "age": 30,
@@ -64329,7 +64380,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "GhoulsW",
       "Rhyno Esports",
       "SQUAD",
       "n00rg",
@@ -64347,6 +64397,7 @@
     "aliases": [
       "Renato Alberto Reixa Lourenço Gonçalves"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/2996/image/webp-4eac0cc76fc9cca06fb515b8e9f17ce6.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/24569/600px_renatoohaxx.png"
   },
   {
@@ -64583,7 +64634,7 @@
     "id": "reversive",
     "nickname": "reversive",
     "name": "Roberto Carlos Themtham",
-    "team": "无队伍",
+    "team": "c0kistas",
     "nationality": "Argentina",
     "countryCode": "AR",
     "age": 34,
@@ -65639,7 +65690,7 @@
     "id": "rochet",
     "nickname": "rochet",
     "name": "Felipe Ignacio Rochet Gajardo",
-    "team": "无队伍",
+    "team": "Rejected",
     "nationality": "Chile",
     "countryCode": "CL",
     "age": 29,
@@ -65647,7 +65698,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Rejected",
       "Accepted",
       "AION Esports",
       "9z Team",
@@ -66917,7 +66967,7 @@
     "id": "s0tf1k",
     "nickname": "S0tF1k",
     "name": "Dmitriy Forostyanko",
-    "team": "Team Spirit",
+    "team": "Team Spirit Academy",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 31,
@@ -66925,7 +66975,7 @@
     "majorAppearances": 2,
     "majorWins": 0,
     "historicalTeams": [
-      "Team Spirit Academy",
+      "Team Spirit",
       "ESPADA",
       "Team Phenomenon",
       "Arcade Esports",
@@ -66936,7 +66986,7 @@
       "SqtF1kk",
       "Дмитрий Форостянко"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/654/image/webp-41b22d18a871d982f8ff87652bbb0fe6.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/1309/image/31298dfc73c8f1de3f452f1d529f0344.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/19641/900px_s0t_f1k_berlin_minor.png"
   },
   {
@@ -67134,6 +67184,34 @@
     "imageUrl": "https://files.bo3.gg/uploads/player/76009/image/webp-f78dcbbfd9fe4c2f616fa44548274367.webp"
   },
   {
+    "id": "s3nsey",
+    "nickname": "S3NSEY",
+    "name": "Efekan Topaloglu",
+    "team": "HyperSpirit",
+    "nationality": "Austria",
+    "countryCode": "AT",
+    "age": 23,
+    "role": "AWPer",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "historicalTeams": [
+      "Fire Flux Esports",
+      "BIG Academy",
+      "Sangal Esports",
+      "Peak Esports",
+      "eSport Rhein-Neckar",
+      "touch the crown",
+      "CPLAY",
+      "eville",
+      "No Limit Gaming"
+    ],
+    "aliases": [
+      "Efekan Topaloglu"
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/9651/image/webp-f17d0a6e364b9a2ade1641ae95e1932c.webp",
+    "imageUrl": "https://files.bo3.gg/uploads/player/29798/image/webp-80460183aec4e3a58793078137140b27.webp"
+  },
+  {
     "id": "s4ltovsk1yy",
     "nickname": "s4ltovsk1yy",
     "name": "Kyrylo Lytvynov",
@@ -67273,7 +67351,7 @@
     "id": "sad",
     "nickname": "sad",
     "name": "Alaksandr Nizhnik",
-    "team": "无队伍",
+    "team": "playersclub",
     "nationality": "Belarus",
     "countryCode": "BY",
     "age": 23,
@@ -67514,7 +67592,7 @@
     "id": "salo_mux",
     "nickname": "SALO_MUX",
     "name": "Arkadii Balanda",
-    "team": "无队伍",
+    "team": "LFO 2",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 29,
@@ -68606,13 +68684,14 @@
     "aliases": [
       "Даниил Тупов"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/21388/image/webp-160641ad1ee216616765928a5ebc6a76.webp"
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/21388/image/webp-160641ad1ee216616765928a5ebc6a76.webp",
+    "imageUrl": "https://files.bo3.gg/uploads/player/31779/image/webp-31bdd904f25d980c7ca4029d449d32ed.webp"
   },
   {
     "id": "sdy",
     "nickname": "sdy",
     "name": "Viktor Orudzhev",
-    "team": "无队伍",
+    "team": "Passion UA",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 29,
@@ -68634,6 +68713,7 @@
       "somedieyoung",
       "Віктор Оруджев"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/7631/image/webp-be111847f9997eaebf26599d77aa1fa6.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/19643/600px_sdy___iem_cologne_2021.png"
   },
   {
@@ -68879,7 +68959,7 @@
     "id": "seized",
     "nickname": "seized",
     "name": "Denis Valeryevich Kostin",
-    "team": "无队伍",
+    "team": "BOGATYRI",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 31,
@@ -68913,6 +68993,7 @@
       "seizedwf",
       "Денис Валерьевич Костин"
     ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/135498/137px_bogatyri_allmode.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17539/600px_seized_wesg_2018.png"
   },
   {
@@ -69835,7 +69916,7 @@
     "id": "shara",
     "nickname": "Shara",
     "name": "Oleksandr Hordieiev",
-    "team": "无队伍",
+    "team": "ALGO Esports",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 34,
@@ -69843,7 +69924,6 @@
     "majorAppearances": 2,
     "majorWins": 0,
     "historicalTeams": [
-      "ALGO Esports",
       "ESC Gaming",
       "Cossacks",
       "Windigo Academy",
@@ -69856,6 +69936,7 @@
       "sharskix",
       "Олександр Гордєєв"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/19951/image/webp-d5f24a7b955bce9538cfa14b69242b74.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17648/900px_shara_at_eleague_season_1.png"
   },
   {
@@ -70387,7 +70468,7 @@
     "id": "short",
     "nickname": "short",
     "name": "Paulo Ballardini Souza Campos",
-    "team": "无队伍",
+    "team": "Elevate",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 25,
@@ -70396,7 +70477,6 @@
     "majorWins": 0,
     "historicalTeams": [
       "ProCamp",
-      "Elevate",
       "Bad News Chickens",
       "LOS",
       "Paquetá Gaming",
@@ -70410,6 +70490,7 @@
     "aliases": [
       "Paulo Ballardini Souza Campos"
     ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/128758/174px_elevate_2020_lightmode.png",
     "imageUrl": "https://files.bo3.gg/uploads/player/29447/image/webp-3301fa1e22af1cd7f967dc93d68db40f.webp"
   },
   {
@@ -71463,7 +71544,8 @@
       "Skrimoicho",
       "Димитър Янулов"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/21980/image/webp-6373fdbf9784805ac36ebf26c7b181ec.webp"
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/21980/image/webp-6373fdbf9784805ac36ebf26c7b181ec.webp",
+    "imageUrl": "https://files.bo3.gg/uploads/player/32077/image/webp-bd833d64bfc1798ea91dac9e303aaf2d.webp"
   },
   {
     "id": "skrossi",
@@ -71882,7 +71964,7 @@
     "id": "slight",
     "nickname": "SLIGHT",
     "name": "Keller Francis Nilan",
-    "team": "Life's A Game",
+    "team": "LAG Gaming",
     "nationality": "United States",
     "countryCode": "US",
     "age": 23,
@@ -71905,6 +71987,7 @@
     "aliases": [
       "Keller Francis Nilan"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/5345/image/webp-0d7b7533338d7b3731a76da7c8626c2c.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/25284/image/webp-89f2091ff48e72dd98e82fbc6799f361.webp"
   },
   {
@@ -72163,7 +72246,7 @@
     "id": "smash",
     "nickname": "Smash",
     "name": "Oleksandr Turchyn",
-    "team": "无队伍",
+    "team": "Jam",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 24,
@@ -72180,7 +72263,7 @@
     "aliases": [
       "Олександр Турчин"
     ],
-    "imageUrl": "https://files.bo3.gg/uploads/player/29085/image/webp-d8696c2b52e28f8d99168607eed140cf.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/29085/image/webp-ed679796cb38da3ed5dba14c76f44d8c.webp"
   },
   {
     "id": "smekk",
@@ -72259,7 +72342,7 @@
     "id": "smike",
     "nickname": "smike",
     "name": "Serhii Skliarenko",
-    "team": "无队伍",
+    "team": "schadE halt",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 28,
@@ -72282,6 +72365,7 @@
     "aliases": [
       "Сергій Скляренко"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/946/image/webp-4da71223a9e930a5a569cb83b290a76d.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17840/smike.png"
   },
   {
@@ -72647,7 +72731,7 @@
     "id": "snax",
     "nickname": "Snax",
     "name": "Janusz Andrzej Pogorzelski",
-    "team": "gl",
+    "team": "GamerLegion",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 33,
@@ -72656,7 +72740,6 @@
     "majorWins": 1,
     "historicalTeams": [
       "G2 Esports",
-      "GamerLegion",
       "Pompa Team",
       "Let Us Cook",
       "MONKEsports",
@@ -72678,6 +72761,7 @@
       "Janusz Andrzej Pogorzelski",
       "snaxb0b"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/594/image/webp-bcc947826ef96f444af02ed0ee79c537.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17502/600px_snax_moche_xl_esports_2019.png"
   },
   {
@@ -72772,7 +72856,7 @@
     "id": "snx",
     "nickname": "sNx",
     "name": "Rafał Snopek",
-    "team": "无队伍",
+    "team": "ins",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 24,
@@ -72792,7 +72876,9 @@
     ],
     "aliases": [
       "Rafał Snopek"
-    ]
+    ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/135688/46px_ins__polish_team__lightmode.png",
+    "imageUrl": "https://files.bo3.gg/uploads/player/29296/image/webp-4b94f54b3c9b5841a6ee766bed1f226e.webp"
   },
   {
     "id": "snyper",
@@ -73329,7 +73415,7 @@
       "Luiz Antonio de Souza Junior"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/24856/image/webp-e567022840886a428b97ddcfdff99bc9.webp",
-    "imageUrl": "https://files.bo3.gg/uploads/player/34125/image/webp-a862f9591d247c3f394255c64ac9fb0d.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/34125/image/webp-4e36a17210384f887d09b489cf9e0bbf.webp"
   },
   {
     "id": "sowalio",
@@ -73572,7 +73658,7 @@
     "id": "spayderrrr",
     "nickname": "spaydeRRRR",
     "name": "David Esquerra",
-    "team": "无队伍",
+    "team": "Estral",
     "nationality": "Mexico",
     "countryCode": "MX",
     "age": 38,
@@ -73590,6 +73676,7 @@
     "aliases": [
       "David Esquerra"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/1175/image/webp-75fd3af179218610be8cea438881972a.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/20592/399px_spayde_r_wesg.png"
   },
   {
@@ -74859,7 +74946,7 @@
     "id": "steel",
     "nickname": "steel",
     "name": "Lucas Benedito Lopes",
-    "team": "MIBR",
+    "team": "Afundacao",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 32,
@@ -74885,7 +74972,6 @@
       "Lucas Benedito Lopes",
       "steelega"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/755/image/webp-84e170577e1c963891b1c54b21fceb83.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17581/600px_steel_dream_hack_open_sevilla_2019.png"
   },
   {
@@ -74952,7 +75038,7 @@
     "countryCode": "NZ",
     "age": 28,
     "role": "AWPer",
-    "majorAppearances": 1,
+    "majorAppearances": 2,
     "majorWins": 0,
     "historicalTeams": [
       "TALON",
@@ -75594,7 +75680,7 @@
     "id": "styleeez",
     "nickname": "stYleEeZ",
     "name": "Pavle Stojanovski",
-    "team": "无队伍",
+    "team": "Budapest Five",
     "nationality": "North Macedonia",
     "countryCode": "MK",
     "age": 26,
@@ -75602,7 +75688,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Budapest Five",
       "Juggernauts",
       "BLUEJAYS",
       "AIRLYA",
@@ -75611,6 +75696,7 @@
     "aliases": [
       "Pavle Stojanovski"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/327/image/aae9a968b20c628540d527f85213810f.png",
     "imageUrl": "https://files.bo3.gg/uploads/player/29143/image/webp-5cabb32ee05a861101f8c68367abc1d2.webp"
   },
   {
@@ -76561,7 +76647,7 @@
     "id": "synyx",
     "nickname": "synyx",
     "name": "Danyyl Mazur",
-    "team": "33",
+    "team": "BET-M",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 22,
@@ -76581,7 +76667,9 @@
     ],
     "aliases": [
       "Даниил Мазур"
-    ]
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/22191/image/webp-396d0b6e7398071c866b380c73da0e50.webp",
+    "imageUrl": "https://files.bo3.gg/uploads/player/28433/image/webp-edecb03a9ee6641a0b817a88e6a8ca39.webp"
   },
   {
     "id": "syph0",
@@ -76874,7 +76962,7 @@
     "id": "t3ns1on",
     "nickname": "t3ns1on",
     "name": "Danyil Kashura",
-    "team": "无队伍",
+    "team": "INFURITY Gaming",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 22,
@@ -76889,6 +76977,7 @@
     "aliases": [
       "Даниїл Кашура"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/5716/image/webp-c20a9e1610e88a415162a8763a1b5430.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/33339/image/webp-ad2c0cde3f812e2d5cf8631b742d0081.webp"
   },
   {
@@ -77101,7 +77190,7 @@
     "id": "taco",
     "nickname": "TACO",
     "name": "Epitácio Pessoa de Melo Filho",
-    "team": "无队伍",
+    "team": "Sojoga",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 31,
@@ -77130,6 +77219,7 @@
       "TACOTN1",
       "VACO"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/7533/image/webp-06d41f6c69cff2617bc509998f17e135.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17500/taco_dream_hack_open_anaheim_2020.png"
   },
   {
@@ -79155,7 +79245,7 @@
     "id": "tomaszin",
     "nickname": "tomaszin",
     "name": "Martín Tomás Corna",
-    "team": "无队伍",
+    "team": "BESTIA",
     "nationality": "Argentina",
     "countryCode": "AR",
     "age": 22,
@@ -79163,7 +79253,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "BESTIA",
       "Boca Juniors Gaming",
       "Ape Gang",
       "Holkattes",
@@ -79173,6 +79262,7 @@
     "aliases": [
       "Martín Tomás Corna"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/5701/image/webp-ddb54dbf09ab14bb62ca024970df4b6b.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/40438/7a301acfe41071dc8ed2f09cc3aafd45caccbce2_full.png"
   },
   {
@@ -80019,7 +80109,7 @@
     "id": "truniq",
     "nickname": "TruNiQ",
     "name": "Danila Polumordvinov",
-    "team": "无队伍",
+    "team": "RUBY",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 22,
@@ -80037,6 +80127,7 @@
     "aliases": [
       "Данила Полумордвинов"
     ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/134363/137px_ruby_allmode.png",
     "imageUrl": "https://files.bo3.gg/uploads/player/32614/image/webp-1b7153ef7e56752be4093efd1b27a034.webp"
   },
   {
@@ -80180,7 +80271,7 @@
     "id": "ttyke",
     "nickname": "TTyke",
     "name": "Yousef Alawadi",
-    "team": "无队伍",
+    "team": "Onyx Ravens",
     "nationality": "United Arab Emirates",
     "countryCode": "AE",
     "age": 23,
@@ -80188,7 +80279,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Onyx Ravens",
       "Divine Vendetta",
       "Camel Riders",
       "Fraggerz",
@@ -80196,7 +80286,8 @@
     ],
     "aliases": [
       "يوسف العوادي"
-    ]
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/9839/image/webp-14bc3549560a0c78134e98085e9ee8b2.webp"
   },
   {
     "id": "tudson",
@@ -81086,7 +81177,7 @@
     "id": "undo",
     "nickname": "uNdo",
     "name": "Aleksandr Viesłavovič Kiziukievič",
-    "team": "无队伍",
+    "team": "Lagom",
     "nationality": "Belarus",
     "countryCode": "BY",
     "age": 31,
@@ -81195,7 +81286,7 @@
     "id": "uqlutzavr",
     "nickname": "uQlutzavr",
     "name": "Pavlo Bilov",
-    "team": "无队伍",
+    "team": "Royalty",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 27,
@@ -81469,7 +81560,7 @@
     "id": "v1w",
     "nickname": "v1w",
     "name": "Qëndrim Hajrizi",
-    "team": "无队伍",
+    "team": "M1X",
     "nationality": "XK",
     "countryCode": "XK",
     "age": 26,
@@ -82356,7 +82447,7 @@
     "id": "vilga",
     "nickname": "vilga",
     "name": "Ksenia Klyuenkova",
-    "team": "无队伍",
+    "team": "Let Her Cook",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 35,
@@ -82364,7 +82455,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Let Her Cook",
       "NIP Impact",
       "Fearless Cheetahs",
       "Nigma Galaxy",
@@ -82392,6 +82482,7 @@
     "aliases": [
       "Ксения Клюенкова"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/7426/image/webp-26db2dd71c7aef0c73e842fdb5c6b779.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/20332/vilga.png"
   },
   {
@@ -82594,7 +82685,7 @@
     "id": "vital",
     "nickname": "ViTaL",
     "name": "Davy Mickael Boulos",
-    "team": "无队伍",
+    "team": "BASEMENT BOYS",
     "nationality": "Lebanon",
     "countryCode": "LB",
     "age": 26,
@@ -82602,7 +82693,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "BASEMENT BOYS",
       "CS2News Ladies",
       "JiJieHao",
       "RGW Esports",
@@ -82616,6 +82706,7 @@
       "ViTaaa",
       "ديفي بولس"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/19881/image/webp-55213281cc053922938b770104b5ebc8.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/44172/iztvd_pt_ehbim_e_cvn_jp_lwma.png"
   },
   {
@@ -82791,7 +82882,8 @@
     "aliases": [
       "Vladimir Diaz Bancalari",
       "xVlaD"
-    ]
+    ],
+    "imageUrl": "https://cdn-api.pandascore.co/images/player/image/33033/622bb13cc6be1823172588.x2.png"
   },
   {
     "id": "vladir0x",
@@ -82968,7 +83060,7 @@
     "id": "voltera",
     "nickname": "voltera",
     "name": "Samuel Rodrigues da Silva",
-    "team": "无队伍",
+    "team": "2070",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 28,
@@ -83178,7 +83270,7 @@
     "id": "w1nt3r",
     "nickname": "w1nt3r",
     "name": "Älihan Köpjanov",
-    "team": "无队伍",
+    "team": "DEPO",
     "nationality": "Kazakhstan",
     "countryCode": "KZ",
     "age": 28,
@@ -83186,7 +83278,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "DEPO",
       "Team Unitronic",
       "Team Nemesis Asia",
       "RUBY",
@@ -83201,6 +83292,7 @@
     "aliases": [
       "Әлихан Көпжанов"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/18773/image/webp-9b912caeda00426bc0d5276ccb15b777.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17698/w1nt3r.png"
   },
   {
@@ -84406,7 +84498,7 @@
     "id": "wood7",
     "nickname": "WOOD7",
     "name": "Adriano Schwartz Cerato",
-    "team": "无队伍",
+    "team": "Turma do Pagode",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 31,
@@ -84420,7 +84512,6 @@
       "Bravos Gaming",
       "Team RUFUS",
       "RED Canids",
-      "Turma do Pagode",
       "Rude Game",
       "Londr4ma",
       "C4 Gaming",
@@ -84432,6 +84523,7 @@
       "Adriano Schwartz Cerato",
       "Woody"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/4122/image/webp-ea1bb5263f3239d8ce63e28f95a340a4.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/24740/_vbj_nx0_d_200x200.png"
   },
   {
@@ -84460,7 +84552,7 @@
     "id": "worldedit",
     "nickname": "WorldEdit",
     "name": "Georgiy Yaskin",
-    "team": "无队伍",
+    "team": "HAPPY PEOPLE",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 34,
@@ -84468,7 +84560,6 @@
     "majorAppearances": 10,
     "majorWins": 0,
     "historicalTeams": [
-      "HAPPY PEOPLE",
       "pro100",
       "Winstrike Team",
       "FlipSid3 Tactics",
@@ -85186,7 +85277,7 @@
       "Tiago Simão"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/765/image/bcbdcf50fb2c79b6ab45b0014300b9e0.png",
-    "imageUrl": "https://files.bo3.gg/uploads/player/59472/image/webp-c7e77046306700ae91bee296b0f9893b.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/59472/image/webp-810d1b84b5d026769de9587ac67b99da.webp"
   },
   {
     "id": "xellow",
@@ -85392,7 +85483,7 @@
     "countryCode": "IL",
     "age": 22,
     "role": "IGL",
-    "majorAppearances": 0,
+    "majorAppearances": 7,
     "majorWins": 0,
     "historicalTeams": [
       "MOUZ NXT",
@@ -85934,7 +86025,7 @@
     "id": "xotic",
     "nickname": "XotiC",
     "name": "Zechrie Elshani",
-    "team": "无队伍",
+    "team": "NRG",
     "nationality": "United States",
     "countryCode": "US",
     "age": 25,
@@ -85942,7 +86033,6 @@
     "majorAppearances": 1,
     "majorWins": 0,
     "historicalTeams": [
-      "NRG",
       "ChocoCheck",
       "Rebirth Esports",
       "Blood, Sweat, and Tears",
@@ -85960,6 +86050,7 @@
       "v1king",
       "Zechrie Elshani"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/751/image/webp-87de7c373cc69c650e0011c626ba0709.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/28066/image/webp-b5d033ce241193eafc6ae035c2785529.webp"
   },
   {
@@ -86079,7 +86170,7 @@
     "id": "xsepower",
     "nickname": "xsepower",
     "name": "Bogdan Chernikov",
-    "team": "无队伍",
+    "team": "bankaPEPSI",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 28,
@@ -86091,12 +86182,12 @@
       "PARIVISION",
       "Nemiga Gaming",
       "K23",
-      "bankaPEPSI",
       "FORZE"
     ],
     "aliases": [
       "Богдан Черников"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/1238/image/f1c8f0dd019642560f9c10997ff38a00.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/19247/900px_xsepower_berlin_minor.png"
   },
   {
@@ -86485,7 +86576,7 @@
     "id": "yel",
     "nickname": "yel",
     "name": "Gustavo Knittel Moreira",
-    "team": "无队伍",
+    "team": "Afundacao",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 34,
@@ -86813,7 +86904,7 @@
     "id": "yourwombat",
     "nickname": "yourwombat",
     "name": "William Allchin",
-    "team": "无队伍",
+    "team": "MARKandLARRY",
     "nationality": "Australia",
     "countryCode": "AU",
     "age": 27,
@@ -86888,7 +86979,7 @@
     "id": "yungher",
     "nickname": "yungher",
     "name": "Giovanna Yungh Mataveli",
-    "team": "MIBR Female",
+    "team": "MIBR fe",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 29,
@@ -86904,6 +86995,7 @@
     "aliases": [
       "Giovanna Yungh Mataveli"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/2456/image/06a208acb3df67c82b01537afc4d6b5c.png",
     "imageUrl": "https://files.bo3.gg/uploads/player/33984/image/webp-13cdb3720930a69ba11b69c2f97a77a5.webp"
   },
   {
@@ -87477,7 +87569,7 @@
     "id": "zana",
     "nickname": "Zana",
     "name": "Ana Sofia Queiroz Marques",
-    "team": "无队伍",
+    "team": "Peekaboo",
     "nationality": "Portugal",
     "countryCode": "PT",
     "age": 25,
@@ -87501,6 +87593,7 @@
       "ZAna-th",
       "ZanaSofs"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/21384/image/webp-373e467333444857400dec1d04d38606.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/29348/13320.png"
   },
   {
