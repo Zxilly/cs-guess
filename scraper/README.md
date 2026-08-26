@@ -118,14 +118,22 @@ provider ID 重放，并把核验链接写入 source record，避免不可追溯
 ## 自动刷新
 
 `Refresh player data` GitHub Actions 工作流每周一运行，也可手动选择单个来源。
-工作流先从 `ghcr.io/<owner>/cs-guess-data:latest` 恢复规范 SQLite 数据库，完成
-同步和 `quality --fail-on-critical` 后，将数据库、生成目录和审计报告发布成新的
-不可变 `run-<run-id>-<attempt>` OCI 镜像，并更新 `latest`。Docker 层由内容摘要
-寻址，未变化的层可由 registry 去重；工作流最多保留最近 8 个完整快照。
+工作流先从 `ghcr.io/<owner>/cs-guess-data:latest` 恢复规范 SQLite 数据库。每次同步
+都会把数据库、生成目录和审计报告保存为不可变的
+`run-<run-id>-<attempt>` OCI 候选快照；只有零 critical 的候选才会更新 `latest`。
+Docker 层由内容摘要寻址，未变化的层可由 registry 去重；工作流最多保留最近 8 个
+完整快照。
 
-当游戏目录发生变化时，工作流更新 `automation/player-data-refresh` 分支并创建
-Draft PR；关键质量问题或未解决身份冲突会在发布和 PR 之前阻断流程。需要在仓库
-中配置以下值：
+当游戏目录变化或候选仍有 critical 时，工作流使用独立的
+`automation/player-data-refresh-<run-id>-<attempt>` 分支创建 Draft PR，并提交包含
+快照 digest 和质量计数的 `player-data-candidate.json`。冲突不会丢失，也不会污染
+canonical `latest`。人工在 PR 中修改 reviewed JSON 后，
+`Review and promote player data candidate` 工作流直接恢复候选 SQLite、重放决策、
+重新导出并执行 `quality --fail-on-critical`，不会重新请求 Liquipedia、PandaScore、
+BALLDONTLIE 或 bo3。质量检查通过后再将 PR 标记为 ready 并合并；merge 到 `main`
+后，同一个轻量 workflow 会再次重放已合并的决策，并把通过门禁的 corrected
+snapshot 提升为 canonical `latest`，同样不会重新抓取 provider。需要在仓库中配置
+以下值：
 
 - Actions secret `PANDASCORE_API_TOKEN`；
 - 可选的 Actions secret `BALLDONTLIE_API_TOKEN`；
