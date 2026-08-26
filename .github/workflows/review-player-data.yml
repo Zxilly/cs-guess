@@ -1,0 +1,140 @@
+name: Review and promote player data candidate
+
+on:
+  pull_request:
+    paths:
+      - scraper/player-data-candidate.json
+      - scraper/*.reviewed.json
+      - src/data/players.generated.json
+      - src/data/players.generated.meta.json
+  push:
+    branches:
+      - main
+    paths:
+      - scraper/player-data-candidate.json
+      - scraper/*.reviewed.json
+      - src/data/players.generated.json
+      - src/data/players.generated.meta.json
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  review:
+    name: Replay candidate review
+    if: >-
+      github.event_name == 'push' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          enable-cache: true
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        if: github.event_name == 'push'
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Restore candidate database
+        shell: bash
+        run: |
+          snapshot=$(jq --raw-output '.snapshot' scraper/player-data-candidate.json)
+          if [[ -z "$snapshot" || "$snapshot" == "null" ]]; then
+            echo "Candidate manifest does not contain a snapshot reference." >&2
+            exit 1
+          fi
+          docker pull "$snapshot"
+          container_id=$(docker create "$snapshot" /bin/true)
+          trap 'docker rm --force "$container_id" >/dev/null 2>&1 || true' EXIT
+          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            docker cp "${container_id}:/snapshot/." .
+          else
+            mkdir -p scraper/data
+            docker cp "${container_id}:/snapshot/scraper/data/cs_guess.sqlite" scraper/data/cs_guess.sqlite
+          fi
+
+      - name: Replay reviewed decisions
+        shell: bash
+        run: |
+          uv run --project scraper --frozen cs-guess-scraper merge-reviewed \
+            --db scraper/data/cs_guess.sqlite \
+            --mappings scraper/identity-merges.reviewed.json \
+            --quarantines scraper/source-quarantines.reviewed.json \
+            --separations scraper/identity-separations.reviewed.json
+          uv run --project scraper --frozen cs-guess-scraper export \
+            --db scraper/data/cs_guess.sqlite \
+            --output scraper/data/players.game.json \
+            --catalog-output src/data/players.generated.json \
+            --reviewed-major-winners scraper/reviewed-major-winners.json \
+            --reviewed-major-appearances scraper/reviewed-major-appearances.json \
+            --reviewed-player-overrides scraper/reviewed-player-overrides.json \
+            --reviewed-role-overrides scraper/reviewed-role-overrides.json
+
+      - name: Enforce reviewed candidate quality
+        shell: bash
+        run: |
+          uv run --project scraper --frozen cs-guess-scraper audit \
+            --db scraper/data/cs_guess.sqlite \
+            > scraper/data/audit-report.json
+          uv run --project scraper --frozen cs-guess-scraper quality \
+            --db scraper/data/cs_guess.sqlite \
+            --output scraper/data/data-quality-report.json \
+            --fail-on-critical
+
+      - name: Verify committed catalog
+        shell: bash
+        run: git diff --exit-code -- src/data/players.generated.json
+
+      - name: Refresh canonical snapshot reports
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          updated_report="$RUNNER_TEMP/sync-report.json"
+          jq \
+            --slurpfile dataQuality scraper/data/data-quality-report.json \
+            --slurpfile audit scraper/data/audit-report.json \
+            '.dataQuality = $dataQuality[0] | .audit = $audit[0]' \
+            scraper/data/sync-report.json > "$updated_report"
+          mv "$updated_report" scraper/data/sync-report.json
+
+      - name: Promote reviewed snapshot to canonical latest
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          snapshot=$(jq --raw-output '.snapshot' scraper/player-data-candidate.json)
+          image="${snapshot%@sha256:*}"
+          docker buildx build \
+            --file scraper/Dockerfile.snapshot \
+            --build-arg "SOURCE_REPOSITORY=https://github.com/${GITHUB_REPOSITORY}" \
+            --label "org.opencontainers.image.created=$(date --utc +%Y-%m-%dT%H:%M:%SZ)" \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --tag "${image}:reviewed-${GITHUB_SHA}" \
+            --tag "${image}:latest" \
+            --provenance=mode=max \
+            --sbom=true \
+            --push \
+            .
+
+      - name: Upload review reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: player-data-candidate-review-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          path: |
+            scraper/data/data-quality-report.json
+            scraper/data/audit-report.json
+            src/data/players.generated.json

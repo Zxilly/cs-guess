@@ -139,16 +139,30 @@ jobs:
           fi
           uv run --project scraper --frozen cs-guess-scraper "${args[@]}"
 
-      - name: Enforce data quality
+      - name: Collect data quality
+        id: quality
         shell: bash
         run: |
           uv run --project scraper --frozen cs-guess-scraper quality \
             --db scraper/data/cs_guess.sqlite \
-            --output scraper/data/data-quality-report.json \
-            --fail-on-critical
+            --output scraper/data/data-quality-report.json
           uv run --project scraper --frozen cs-guess-scraper audit \
             --db scraper/data/cs_guess.sqlite \
             > scraper/data/audit-report.json
+
+          critical_issues=$(jq --raw-output '.summary.criticalIssues' scraper/data/data-quality-report.json)
+          open_conflicts=$(jq --raw-output '.conflicts.open' scraper/data/audit-report.json)
+          warnings=$(jq --raw-output '.summary.warnings' scraper/data/data-quality-report.json)
+          if [[ "$critical_issues" == "0" ]]; then
+            passed=true
+          else
+            passed=false
+            echo "::warning title=Player data needs review::${critical_issues} critical issues and ${open_conflicts} open conflicts were preserved in a draft PR candidate."
+          fi
+          echo "passed=${passed}" >> "$GITHUB_OUTPUT"
+          echo "critical_issues=${critical_issues}" >> "$GITHUB_OUTPUT"
+          echo "open_conflicts=${open_conflicts}" >> "$GITHUB_OUTPUT"
+          echo "warnings=${warnings}" >> "$GITHUB_OUTPUT"
 
       - name: Summarize refresh
         if: always()
@@ -183,21 +197,25 @@ jobs:
             scraper/data/audit-report.json
             src/data/players.generated.meta.json
 
-      - name: Publish canonical snapshot to GHCR
+      - name: Publish candidate snapshot to GHCR
         id: publish
         shell: bash
         env:
           SNAPSHOT_IMAGE: ${{ steps.snapshot.outputs.image }}
           SNAPSHOT_TAG: ${{ steps.snapshot.outputs.tag }}
+          QUALITY_PASSED: ${{ steps.quality.outputs.passed }}
         run: |
           metadata_file="$RUNNER_TEMP/player-data-image.json"
+          tags=(--tag "${SNAPSHOT_IMAGE}:${SNAPSHOT_TAG}")
+          if [[ "$QUALITY_PASSED" == "true" ]]; then
+            tags+=(--tag "${SNAPSHOT_IMAGE}:latest")
+          fi
           docker buildx build \
             --file scraper/Dockerfile.snapshot \
             --build-arg "SOURCE_REPOSITORY=https://github.com/${GITHUB_REPOSITORY}" \
             --label "org.opencontainers.image.created=$(date --utc +%Y-%m-%dT%H:%M:%SZ)" \
             --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
-            --tag "${SNAPSHOT_IMAGE}:${SNAPSHOT_TAG}" \
-            --tag "${SNAPSHOT_IMAGE}:latest" \
+            "${tags[@]}" \
             --metadata-file "$metadata_file" \
             --provenance=mode=max \
             --sbom=true \
@@ -212,7 +230,7 @@ jobs:
           echo "digest=${digest}" >> "$GITHUB_OUTPUT"
           echo "reference=${SNAPSHOT_IMAGE}@${digest}" >> "$GITHUB_OUTPUT"
 
-      - name: Retain latest eight canonical snapshots
+      - name: Retain latest eight data snapshots
         continue-on-error: true
         uses: actions/delete-package-versions@25ad4af5be03aef10e0b3376b248688b7a44c40b # v5
         with:
@@ -222,68 +240,106 @@ jobs:
           min-versions-to-keep: 8
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Detect catalog changes
-        id: catalog
+      - name: Write candidate review manifest
         shell: bash
+        env:
+          SNAPSHOT_REFERENCE: ${{ steps.publish.outputs.reference }}
+          QUALITY_PASSED: ${{ steps.quality.outputs.passed }}
+          CRITICAL_ISSUES: ${{ steps.quality.outputs.critical_issues }}
+          OPEN_CONFLICTS: ${{ steps.quality.outputs.open_conflicts }}
+          QUALITY_WARNINGS: ${{ steps.quality.outputs.warnings }}
         run: |
-          if git diff --quiet -- src/data/players.generated.json; then
+          jq --null-input \
+            --arg snapshot "$SNAPSHOT_REFERENCE" \
+            --arg workflowUrl "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
+            --arg runId "$GITHUB_RUN_ID" \
+            --arg runAttempt "$GITHUB_RUN_ATTEMPT" \
+            --arg createdAt "$(date --utc +%Y-%m-%dT%H:%M:%SZ)" \
+            --argjson passed "$QUALITY_PASSED" \
+            --argjson criticalIssues "$CRITICAL_ISSUES" \
+            --argjson openConflicts "$OPEN_CONFLICTS" \
+            --argjson warnings "$QUALITY_WARNINGS" \
+            '{
+              schemaVersion: 1,
+              snapshot: $snapshot,
+              workflowUrl: $workflowUrl,
+              runId: ($runId | tonumber),
+              runAttempt: ($runAttempt | tonumber),
+              createdAt: $createdAt,
+              quality: {
+                passed: $passed,
+                criticalIssues: $criticalIssues,
+                openConflicts: $openConflicts,
+                warnings: $warnings
+              }
+            }' > scraper/player-data-candidate.json
+
+      - name: Detect candidate review changes
+        id: candidate
+        shell: bash
+        env:
+          CRITICAL_ISSUES: ${{ steps.quality.outputs.critical_issues }}
+        run: |
+          if git diff --quiet -- src/data/players.generated.json && \
+              [[ "$CRITICAL_ISSUES" == "0" ]]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Create or update catalog pull request
-        if: steps.catalog.outputs.changed == 'true'
+      - name: Create candidate review pull request
+        if: steps.candidate.outputs.changed == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SNAPSHOT_REFERENCE: ${{ steps.publish.outputs.reference }}
+          QUALITY_PASSED: ${{ steps.quality.outputs.passed }}
+          CRITICAL_ISSUES: ${{ steps.quality.outputs.critical_issues }}
+          OPEN_CONFLICTS: ${{ steps.quality.outputs.open_conflicts }}
         run: |
-          branch="automation/player-data-refresh"
+          branch="automation/player-data-refresh-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           workflow_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           players=$(jq --raw-output '.dataQuality.summary.players' scraper/data/sync-report.json)
           guessable=$(jq --raw-output '.dataQuality.summary.guessablePlayers' scraper/data/sync-report.json)
           warnings=$(jq --raw-output '.dataQuality.summary.warnings' scraper/data/sync-report.json)
-          open_conflicts=$(jq --raw-output '.audit.conflicts.open' scraper/data/sync-report.json)
+          if [[ "$QUALITY_PASSED" == "true" ]]; then
+            quality_state="passed; this snapshot also updated the canonical latest tag"
+          else
+            quality_state="needs manual review; the canonical latest tag was not changed"
+          fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch --create "$branch"
           git add -- \
+            scraper/player-data-candidate.json \
             src/data/players.generated.json \
             src/data/players.generated.meta.json
-          git commit -m "data: refresh player catalog"
-          git fetch origin "$branch:refs/remotes/origin/$branch" || true
-          git push --force-with-lease origin "HEAD:refs/heads/${branch}"
+          git commit -m "data: review player catalog candidate"
+          git push origin "HEAD:refs/heads/${branch}"
 
           body_file="$RUNNER_TEMP/player-data-pr.md"
           {
-            echo "## Automated player-data refresh"
+            echo "## Player-data candidate"
             echo
             echo "- Players: ${players}"
             echo "- Guessable players: ${guessable}"
-            echo "- Open conflicts: ${open_conflicts}"
+            echo "- Open conflicts: ${OPEN_CONFLICTS}"
+            echo "- Critical issues: ${CRITICAL_ISSUES}"
             echo "- Quality warnings: ${warnings}"
+            echo "- Quality state: ${quality_state}"
             echo "- Snapshot: \`${SNAPSHOT_REFERENCE}\`"
             echo "- Workflow: ${workflow_url}"
             echo
-            echo "The deterministic quality gate passed. Review the generated catalog diff and the attached audit reports before merging."
+            echo "The run-specific snapshot preserves the fetched SQLite database and audit reports."
+            echo "Edit the reviewed JSON decisions in this PR, then use the fast candidate-review check to replay them without fetching provider data again."
+            echo "Keep this PR as a draft until the candidate-review quality gate passes."
           } > "$body_file"
 
-          pr_url=$(gh pr list \
+          gh pr create \
             --repo "$GITHUB_REPOSITORY" \
+            --base main \
             --head "$branch" \
-            --state open \
-            --json url \
-            --jq '.[0].url')
-          if [[ -n "$pr_url" ]]; then
-            gh pr edit "$pr_url" --body-file "$body_file"
-          else
-            gh pr create \
-              --repo "$GITHUB_REPOSITORY" \
-              --base main \
-              --head "$branch" \
-              --title "data: refresh player catalog" \
-              --body-file "$body_file" \
-              --draft
-          fi
+            --title "data: review player catalog candidate" \
+            --body-file "$body_file" \
+            --draft
