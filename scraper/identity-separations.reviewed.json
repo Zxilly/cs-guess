@@ -146,5 +146,16 @@
       "external_id": "43391"
     },
     "basis": "David dAVE Karivalis is from the United States, while David Dave Tereshin is Russian; their legal names and countries are distinct."
+  },
+  {
+    "left": {
+      "source": "liquipedia",
+      "external_id": "LEEROY"
+    },
+    "right": {
+      "source": "pandascore",
+      "external_id": "67345"
+    },
+    "basis": "Lee'Roy Blondeau is a French player, while Cristian Quijada is Chilean; their legal names, countries, and birth data are distinct despite sharing the leeroy nickname and a normalized current-team identity."
   }
 ]
