@@ -192,9 +192,12 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
           path: |
+            scraper/data/cs_guess.sqlite
+            scraper/data/players.game.json
             scraper/data/sync-report.json
             scraper/data/data-quality-report.json
             scraper/data/audit-report.json
+            src/data/players.generated.json
             src/data/players.generated.meta.json
 
       - name: Publish candidate snapshot to GHCR
