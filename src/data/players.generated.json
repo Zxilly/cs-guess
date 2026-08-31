@@ -300,7 +300,7 @@
     "id": "2high",
     "nickname": "2high",
     "name": "Ahmet Baftijari",
-    "team": "Unity",
+    "team": "UNITY",
     "nationality": "North Macedonia",
     "countryCode": "MK",
     "age": 26,
@@ -895,7 +895,7 @@
     "historicalTeams": [
       "Fine Wine",
       "Old Guys Club",
-      "CLG Red",
+      "Counter Logic Gaming Red",
       "eUnited",
       "splyce",
       "DOGMEN",
@@ -1202,7 +1202,7 @@
       "unu.AiN",
       "myxmg",
       "NO SIR!",
-      "MyRevenge e.V. DK",
+      "myRevenge e.V. DK",
       "eXeS-eSport"
     ],
     "aliases": [
@@ -1350,7 +1350,7 @@
       "Adam Marian"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/36/image/648d1128f28e25688996e78e1cc0663b.png",
-    "imageUrl": "https://files.bo3.gg/uploads/player/29999/image/webp-87815de877312fd0e270f112cbcf6df6.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/29999/image/webp-44b35fae2bdbfd692f85275ce847e0b7.webp"
   },
   {
     "id": "adaro",
@@ -1568,7 +1568,7 @@
       "Nouns Esports",
       "Team Liquid",
       "Mythic",
-      "Chill guys",
+      "Chill Guys",
       "Denial eSports",
       "The Stream Team",
       "Team iBUYPOWER",
@@ -1621,7 +1621,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "gBots",
-      "OpTic Gaming"
+      "OpTic"
     ],
     "aliases": [
       "Adrià Gispert"
@@ -1653,7 +1653,7 @@
     "id": "adron",
     "nickname": "ADRON",
     "name": "Roberto Paun",
-    "team": "aimclub",
+    "team": "Aimclub",
     "nationality": "Romania",
     "countryCode": "RO",
     "age": 24,
@@ -1837,7 +1837,7 @@
     "id": "afro",
     "nickname": "afro",
     "name": "Aurélien Drapier",
-    "team": "Luminosity",
+    "team": "Luminosity Gaming",
     "nationality": "France",
     "countryCode": "FR",
     "age": 27,
@@ -2114,7 +2114,7 @@
     "team": "1337HUANIA",
     "nationality": "Lithuania",
     "countryCode": "LT",
-    "age": 33,
+    "age": 34,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -2645,7 +2645,7 @@
       "KPI Gaming",
       "k1ck eSports.es",
       "EU4IA",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Atlantis Esports",
       "gBots eSports Club",
       "x6tence",
@@ -2671,7 +2671,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Betera Esports",
-      "MelBet Team",
+      "Melbet Team",
       "Cossacks",
       "hellraisers",
       "okura",
@@ -2789,7 +2789,7 @@
     "id": "alisson",
     "nickname": "Alisson",
     "name": "Alisson da Silva Farias",
-    "team": "largadosypelados",
+    "team": "LargadosyPelados",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 23,
@@ -2825,13 +2825,14 @@
     "majorAppearances": 6,
     "majorWins": 0,
     "historicalTeams": [
+      "thunderdownunder",
       "SemperFi Esports",
       "FlyQuest",
       "Jeeves",
       "Grayhound Gaming",
       "ORDER",
       "renegades",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Team ASDF",
       "Corvidae",
       "VALOR",
@@ -2954,7 +2955,7 @@
     "historicalTeams": [
       "JANO Esports",
       "team temp",
-      "OpTic Gaming",
+      "OpTic",
       "FaZe Clan",
       "Ninjas in Pyjamas",
       "3DMAX",
@@ -3211,7 +3212,7 @@
     "id": "ammar",
     "nickname": "ammar",
     "name": "Ammar Grashtica",
-    "team": "无队伍",
+    "team": "Illyrians",
     "nationality": "XK",
     "countryCode": "XK",
     "age": 23,
@@ -3221,12 +3222,12 @@
     "historicalTeams": [
       "MANA eSports",
       "KS-",
-      "Kubix Esports",
-      "ILLYRIANS"
+      "Kubix Esports"
     ],
     "aliases": [
       "Ammar Grashtica"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/3022/image/webp-33eb7ac2ebdab23cfa74867f1d0a1813.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/35207/image/webp-87fe39a3d5335bcf9a210a3ac0db233b.webp"
   },
   {
@@ -3453,7 +3454,7 @@
     "historicalTeams": [
       "Ze Pug Godz",
       "Team Envy",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Denial eSports",
       "out of nowhere",
       "ACE Gaming"
@@ -3492,7 +3493,7 @@
     "id": "andu",
     "nickname": "aNdu",
     "name": "Andreas Maasing",
-    "team": "Drip Too Hard",
+    "team": "PURE",
     "nationality": "Estonia",
     "countryCode": "EE",
     "age": 21,
@@ -3516,6 +3517,7 @@
       "Andreas Maasing",
       "aNdul0c0-"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/23113/image/webp-ebe398eb0aa2a648fc6128e6e25a610b.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/31789/image/webp-e9874ddeefcee4983336dad98251438c.webp"
   },
   {
@@ -3642,10 +3644,10 @@
       "Denial eSports",
       "PiedPiper",
       "Winterfox",
-      "Luminosity",
+      "Luminosity Gaming",
       "Netcode Guides",
       "The Stream Team",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "ibuypower",
       "Team Curse",
       "CheckSix Gaming",
@@ -3992,7 +3994,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Team Kaliber",
       "Without a Roof",
       "Obey Alliance",
@@ -4028,7 +4030,7 @@
       "clan-mystik",
       "Team eXtensive!",
       "PRIME CLAN",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Anexis eSports",
       "verygames",
       "3DMAX",
@@ -4066,7 +4068,7 @@
       "Avant Gaming",
       "ICON Esports",
       "Tainted Minds",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Winterfox",
       "Legacy Esports",
       "Team Immunity",
@@ -4120,7 +4122,7 @@
       "e-LEMON-ators",
       "DGG Esports",
       "VERTEX Esports Club",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Genuine Gaming",
       "TABOO",
       "MastermindsGC",
@@ -4295,7 +4297,7 @@
     "historicalTeams": [
       "Wikipediots",
       "xapso",
-      "ESrael",
+      "eSrael",
       "mTw",
       "Full Gaming",
       "p00nhandlers",
@@ -4576,7 +4578,7 @@
       "gBots eSports Club",
       "k1ck eSports.es",
       "EU4IA",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Atlantis Esports",
       "ASES e-Sports Club",
       "DN-Gaming",
@@ -4928,7 +4930,7 @@
       "DOGMEN",
       "3sUP Enterprises",
       "affNity",
-      "Luminosity",
+      "Luminosity Gaming",
       "SYNRGY Gaming",
       "Area51 Gaming",
       "Denial eSports",
@@ -5411,11 +5413,11 @@
     "majorWins": 1,
     "historicalTeams": [
       "NRG",
-      "EG",
+      "Evil Geniuses",
       "Gen.G Esports",
       "cloud9",
       "Team SoloMid",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Maximum Effort",
       "Tempo Storm",
       "Nihilum Gaming",
@@ -5428,6 +5430,7 @@
       "automatic",
       "Timothy Ta"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/4077/image/webp-1e6b8183acf330b3f25a737b9f4125f9.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17656/900px_autimatic_dho_anaheim_2020.png"
   },
   {
@@ -5558,7 +5561,7 @@
       "PARIVISION",
       "amkal esports",
       "DMS",
-      "MelBet Team",
+      "Melbet Team",
       "IookingForOrg",
       "flowstate",
       "Neon Rangers",
@@ -5571,7 +5574,7 @@
       "Андрей Анисимов"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/22218/image/webp-239b86baa849b6da4911c1df5e5a3220.webp",
-    "imageUrl": "https://files.bo3.gg/uploads/player/32165/image/webp-7071095466afbff9ef278ff934ecfea9.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/32165/image/webp-d69c82204cef895c322ce3f746ca36ce.webp"
   },
   {
     "id": "aw3some",
@@ -5601,7 +5604,7 @@
     "team": "INFURITY Gaming",
     "nationality": "Bulgaria",
     "countryCode": "BG",
-    "age": 22,
+    "age": 23,
     "role": "AWPer",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -5919,7 +5922,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Phantom"
+      "Phantom Esports"
     ],
     "aliases": [
       "Aleksy Landas"
@@ -6079,7 +6082,7 @@
     "id": "azuwu",
     "nickname": "AZUWU",
     "name": "Oscar Bell",
-    "team": "Luminosity",
+    "team": "Luminosity Gaming",
     "nationality": "United Kingdom",
     "countryCode": "GB",
     "age": 22,
@@ -6401,7 +6404,7 @@
       "RED Canids",
       "Fake Natty",
       "GODSENT",
-      "Team oNe eSports",
+      "Team oNe",
       "Team Reapers",
       "TEAM HARDNEJA",
       "Vitória eSports",
@@ -6710,7 +6713,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Unity",
+      "UNITY",
       "Not Academy",
       "Tempo Storm SE",
       "Rogue Academy",
@@ -6944,7 +6947,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "DU Black",
+      "Davenport University Black",
       "Davenport University"
     ],
     "aliases": [
@@ -7147,7 +7150,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Rugratz",
-      "CLG Red",
+      "Counter Logic Gaming Red",
       "UBINITED",
       "SK Ladies"
     ],
@@ -7185,7 +7188,7 @@
     "team": "无队伍",
     "nationality": "Sweden",
     "countryCode": "SE",
-    "age": 29,
+    "age": 30,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -7241,7 +7244,7 @@
       "Team Property",
       "FlipSid3 Tactics",
       "GreyFaceNoSpace",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Lemondogs"
     ],
     "aliases": [
@@ -7473,7 +7476,6 @@
     "majorWins": 0,
     "historicalTeams": [
       "Counter Logic Gaming Red",
-      "CLG Red",
       "Mindfreak",
       "Rooster 2",
       "Carnage Esports Female"
@@ -7776,7 +7778,6 @@
     "historicalTeams": [
       "lol123",
       "Chiefs Esports Club",
-      "Chiefs ESC",
       "Avant Gaming",
       "Legacy Esports",
       "Sin Gaming",
@@ -7984,9 +7985,9 @@
     "historicalTeams": [
       "fnatic",
       "Astralis",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Heroic",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Great Danes",
       "Aquiver eSports"
     ],
@@ -8088,7 +8089,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Team oNe eSports",
+      "Team oNe",
       "Imperial Esports",
       "Falkol e-Sports",
       "MADE IN CANIL",
@@ -8114,7 +8115,7 @@
     "id": "bledard",
     "nickname": "BledarD",
     "name": "Bledar Dula",
-    "team": "无队伍",
+    "team": "Illyrians",
     "nationality": "XK",
     "countryCode": "XK",
     "age": 24,
@@ -8126,7 +8127,6 @@
       "KS-",
       "Kubix Esports",
       "The Suspect",
-      "ILLYRIANS",
       "Team BLINK",
       "Team SKUAK",
       "EAGLES"
@@ -8134,6 +8134,7 @@
     "aliases": [
       "Bledar Dula"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/3022/image/webp-33eb7ac2ebdab23cfa74867f1d0a1813.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/29227/image/webp-36704360bde2d6cb29858428a0bdf282.webp"
   },
   {
@@ -8236,7 +8237,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Unity",
+      "UNITY",
       "Wings Up Gaming",
       "Team Sampi",
       "eSuba",
@@ -8460,7 +8461,7 @@
       "ENTERPRISE esports",
       "MNA Esports",
       "4Elements Esports",
-      "Epsilon eSports"
+      "Epsilon Esports"
     ],
     "aliases": [
       "Raul Gligor"
@@ -8545,7 +8546,7 @@
     "team": "Alter Ego",
     "nationality": "Indonesia",
     "countryCode": "ID",
-    "age": 30,
+    "age": 31,
     "role": "IGL",
     "majorAppearances": 3,
     "majorWins": 0,
@@ -8632,7 +8633,7 @@
     "historicalTeams": [
       "EYEBALLERS",
       "9INE",
-      "Johnny Speeds",
+      "Speeds",
       "GODSENT",
       "00 Prospects",
       "Lilmix",
@@ -8808,7 +8809,6 @@
       "BOOM Esports",
       "intz",
       "Luminosity Gaming",
-      "Luminosity",
       "Immortals",
       "SK Gaming",
       "Tempo Storm",
@@ -8929,7 +8929,7 @@
       "Natus Vincere",
       "Winstrike Team",
       "Quantum Bellator Fire",
-      "Elements Pro Gaming"
+      "EPG"
     ],
     "aliases": [
       "Кирилл Сергеевич Михайлов"
@@ -9159,7 +9159,7 @@
     "id": "boye",
     "nickname": "Boye",
     "name": "Jonas Boye Østergaard",
-    "team": "ECHO",
+    "team": "BBL Esports",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 22,
@@ -9167,6 +9167,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "ECHO",
       "Tricked Esport",
       "AaB Esport",
       "Preasy Esport",
@@ -9181,7 +9182,7 @@
     "aliases": [
       "Jonas Boye Østergaard"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/24570/image/webp-6cabeb73c934c8cc85afb394a9b166e3.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/25251/image/webp-e0125fddcdc4553cfbfdba57e291b6b1.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/34933/image/webp-1ca45aedab25b6aa3b9df9cef479dbd3.webp"
   },
   {
@@ -9365,7 +9366,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "NRG",
-      "EG",
+      "Evil Geniuses",
       "Selfless Gaming",
       "Team Kaliber",
       "Obey Alliance",
@@ -9374,6 +9375,7 @@
     "aliases": [
       "Vincent Cayonte"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/4077/image/webp-1e6b8183acf330b3f25a737b9f4125f9.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17714/900px_brehze_epicenter_2019.png"
   },
   {
@@ -9813,7 +9815,7 @@
     "historicalTeams": [
       "Game Hunters",
       "DESEMPREGUEIDOS",
-      "largadosypelados",
+      "LargadosyPelados",
       "Nitro.GG",
       "UNO MILLE",
       "Case Esports",
@@ -9862,7 +9864,7 @@
     "id": "bsover",
     "nickname": "bsover",
     "name": "Oliwer Ekbäck",
-    "team": "Johnny Speeds",
+    "team": "Speeds",
     "nationality": "Sweden",
     "countryCode": "SE",
     "age": 20,
@@ -9895,7 +9897,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Seleção do BT",
-      "Team oNe eSports",
+      "Team oNe",
       "GoldenGlory",
       "playArt",
       "Mibr",
@@ -9911,7 +9913,7 @@
     "id": "btn",
     "nickname": "BTN",
     "name": "Catalin-Ionut Stanescu",
-    "team": "Nexus Gaming",
+    "team": "Insiders",
     "nationality": "Romania",
     "countryCode": "RO",
     "age": 37,
@@ -9919,7 +9921,8 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "aimclub",
+      "Nexus Gaming",
+      "Aimclub",
       "NeXtPlease!",
       "The Elder Gods"
     ],
@@ -9927,7 +9930,6 @@
       "beet0n",
       "Catalin-Ionut Stanescu"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/326/image/webp-9ff12c1efbdab4dd7c29b1cfc37bab2d.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/25381/btn.png"
   },
   {
@@ -10108,7 +10110,7 @@
       "Grayhound Gaming",
       "Team Immunity",
       "ADD",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Trident Esports"
     ],
     "aliases": [
@@ -10326,7 +10328,7 @@
     "id": "bymas",
     "nickname": "Bymas",
     "name": "Aurimas Pipiras",
-    "team": "Luminosity",
+    "team": "Luminosity Gaming",
     "nationality": "Lithuania",
     "countryCode": "LT",
     "age": 23,
@@ -10383,7 +10385,7 @@
     "team": "Vitalem Aerem",
     "nationality": "China",
     "countryCode": "CN",
-    "age": 23,
+    "age": 24,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -10619,7 +10621,7 @@
       "FunPlus Phoenix",
       "North",
       "rogue",
-      "Unity",
+      "UNITY",
       "Team TBA",
       "Team Preparation",
       "fan jävla",
@@ -10687,7 +10689,7 @@
       "Isurus Gaming",
       "Paquetá Esports Gaming",
       "NE Whalers",
-      "Team oNe eSports",
+      "Team oNe",
       "Falkol e-Sports",
       "MADE IN CANIL",
       "YeaH! Gaming",
@@ -10769,14 +10771,14 @@
     "majorWins": 0,
     "historicalTeams": [
       "AGF Esport",
-      "OpTic Gaming",
+      "OpTic",
       "cloud9",
       "Team Dignitas",
       "Astralis",
       "?",
       "Team SoloMid",
       "copenhagen wolves",
-      "Leftoverz",
+      "LeftoverZ",
       "über G33KZ",
       "n!faculty",
       "PRIMETIME",
@@ -10856,7 +10858,7 @@
     "id": "caleyy",
     "nickname": "Caleyy",
     "name": "Ensar Ersuzi",
-    "team": "Endless Journey",
+    "team": "Saint Sinners",
     "nationality": "XK",
     "countryCode": "XK",
     "age": 24,
@@ -10868,7 +10870,7 @@
       "KS-",
       "Kubix Esports",
       "The Suspect",
-      "ILLYRIANS",
+      "Illyrians",
       "Team BLINK",
       "Team SKUAK"
     ],
@@ -10876,7 +10878,6 @@
       "Caley",
       "Ensar Ersuzi"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/20902/image/webp-47f62002c22ed715a64571809edc3eec.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/31896/image/webp-e156d7d20afca24e21b80c54f273c5a6.webp"
   },
   {
@@ -11327,7 +11328,7 @@
       "FreeStyle",
       "Bears e-Sports",
       "Santos e-Sports",
-      "Team oNe eSports",
+      "Team oNe",
       "SWS Gaming",
       "W7M Gaming"
     ],
@@ -11377,6 +11378,7 @@
       "CLG Red",
       "Dignitas Female",
       "Selfless Gaming Female",
+      "Counter Logic Gaming Red",
       "UBINITED"
     ],
     "aliases": [
@@ -11540,7 +11542,7 @@
     "id": "cej0t",
     "nickname": "cej0t",
     "name": "Jan Dyl",
-    "team": "Phantom",
+    "team": "Phantom Esports",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 19,
@@ -11605,7 +11607,7 @@
       "DREAM Gaming",
       "Accusata",
       "SERA Esport",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Ignite Esport"
     ],
     "aliases": [
@@ -11743,7 +11745,7 @@
     "id": "cerber",
     "nickname": "cerber",
     "name": "Serdar Mahmuti",
-    "team": "无队伍",
+    "team": "Illyrians",
     "nationality": "XK",
     "countryCode": "XK",
     "age": 28,
@@ -11754,12 +11756,12 @@
       "MANA eSports",
       "KS-",
       "The Suspect",
-      "ILLYRIANS",
       "X"
     ],
     "aliases": [
       "Serdar Mahmuti"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/3022/image/webp-33eb7ac2ebdab23cfa74867f1d0a1813.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/29226/image/webp-29d4f234811a99fc1e8b2dc09b810f04.webp"
   },
   {
@@ -11769,7 +11771,7 @@
     "team": "无队伍",
     "nationality": "France",
     "countryCode": "FR",
-    "age": 31,
+    "age": 32,
     "role": "AWPer",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -11822,7 +11824,7 @@
     "id": "cerq",
     "nickname": "CeRq",
     "name": "Tsvetelin Dimitrov",
-    "team": "SIXSEVEN",
+    "team": "Without a Roof",
     "nationality": "Bulgaria",
     "countryCode": "BG",
     "age": 26,
@@ -11832,7 +11834,7 @@
     "historicalTeams": [
       "500",
       "BLEED Esports",
-      "EG",
+      "Evil Geniuses",
       "NRG",
       "Outlaws",
       "WinFiction"
@@ -11840,6 +11842,7 @@
     "aliases": [
       "Цветелин Димитров"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/4077/image/webp-1e6b8183acf330b3f25a737b9f4125f9.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17725/900px_ce_rq_esl_one_ny_2019.png"
   },
   {
@@ -11906,13 +11909,13 @@
     "team": "INFURITY Gaming",
     "nationality": "Romania",
     "countryCode": "RO",
-    "age": 26,
+    "age": 27,
     "role": "IGL",
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
       "Nebula In Chaox",
-      "aimclub",
+      "Aimclub",
       "Infinite",
       "Entropy Gaming",
       "ROYALS",
@@ -11958,7 +11961,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Johnny Speeds",
+      "Speeds",
       "apeks",
       "Savage",
       "Galaxy Racer",
@@ -12008,7 +12011,7 @@
     "team": "无队伍",
     "nationality": "Russian Federation",
     "countryCode": "RU",
-    "age": 23,
+    "age": 24,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -12108,7 +12111,7 @@
       "intz",
       "NoTag (ex-Não Tem Como)",
       "Não Tem Como",
-      "Luminosity",
+      "Luminosity Gaming",
       "paiN Gaming",
       "Cyclone",
       "TEAMMATE",
@@ -12237,7 +12240,7 @@
       "彭俊豪"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/2506/image/0953fcf0cbcdfb2817eb106fdf5f14ae.png",
-    "imageUrl": "https://files.bo3.gg/uploads/player/25217/image/webp-84807c80ed925b74cc109d52851f0761.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/25217/image/webp-c447badd73cb4ae67db69a40b65e1373.webp"
   },
   {
     "id": "chill",
@@ -12253,7 +12256,7 @@
     "historicalTeams": [
       "ARCRED",
       "LEON Esports",
-      "aimclub",
+      "Aimclub",
       "Team Space",
       "Budapest Five",
       "Nemiga Gaming",
@@ -12448,7 +12451,7 @@
       "Christoffer Jung Storgaard"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/759/image/webp-1bfbd1b3d4fd35e75a874b7d032a0353.webp",
-    "imageUrl": "https://files.bo3.gg/uploads/player/35543/image/webp-6b5c784d4a76901b696c26f3da490c02.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/35543/image/webp-986c3bdf298592fe3a0e3022fcf23023.webp"
   },
   {
     "id": "chrisj",
@@ -12521,6 +12524,7 @@
       "Onestop",
       "Team Exile5",
       "Chiefs ESC",
+      "Chiefs Esports Club",
       "Avant Garde",
       "Team Skyfire",
       "Athletico Esports"
@@ -12755,7 +12759,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Infinity eSports",
+      "Infinity",
       "Black Rose",
       "Forty Six and 2",
       "Resolute",
@@ -12945,7 +12949,7 @@
       "adalYamigos",
       "Intense Game",
       "RED Canids",
-      "largadosypelados",
+      "LargadosyPelados",
       "Corinthians Esports",
       "HUMMER Esports",
       "São Caetano Esports",
@@ -13106,7 +13110,7 @@
     "id": "cld",
     "nickname": "cLd",
     "name": "Jonathan Cruz",
-    "team": "无队伍",
+    "team": "RUSH",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 24,
@@ -13123,6 +13127,7 @@
     "aliases": [
       "Jonathan Cruz"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/24574/image/webp-b7458de31bf729d7fbdda1cd5dcd6af4.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/69398/image/webp-cfca0d09285c2d26268b535953441ff5.webp"
   },
   {
@@ -13175,7 +13180,7 @@
     "id": "clon7",
     "nickname": "CloN7",
     "name": "Victor Mackieviez",
-    "team": "???",
+    "team": "RUSH",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 24,
@@ -13195,7 +13200,8 @@
     ],
     "aliases": [
       "Victor Mackieviez"
-    ]
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/24574/image/webp-b7458de31bf729d7fbdda1cd5dcd6af4.webp"
   },
   {
     "id": "clouda",
@@ -13434,12 +13440,12 @@
       "Legacy",
       "Fake Natty",
       "00 Nation",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "FaZe Clan",
       "MIBR",
       "YeaH! Gaming",
       "SK Gaming",
-      "Luminosity",
+      "Luminosity Gaming",
       "Keyd Stars",
       "Dexterity Team",
       "semXorah"
@@ -13487,7 +13493,7 @@
     "historicalTeams": [
       "TANTRUM",
       "MnM Gaming",
-      "se mi puta",
+      "Se mi puta",
       "Playing Ducks",
       "ESC Gaming",
       "xapso",
@@ -13785,7 +13791,7 @@
     "id": "cooper",
     "nickname": "Cooper",
     "name": "Austin Abadir",
-    "team": "Winners",
+    "team": "WINNERS",
     "nationality": "United States",
     "countryCode": "US",
     "age": 32,
@@ -14049,7 +14055,7 @@
     "team": "无队伍",
     "nationality": "Viet Nam",
     "countryCode": "VN",
-    "age": 29,
+    "age": 30,
     "role": "AWPer",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -14481,7 +14487,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "MnM Gaming",
-      "se mi puta",
+      "Se mi puta",
       "ESC Gaming",
       "xapso",
       "Playing Ducks",
@@ -14597,7 +14603,7 @@
     "aliases": [
       "Rahul Nemani"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/609/image/9cc88a3a756177de334f30a63b98e4db.png",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/24067/image/webp-b07b180451bda3a4f14895466f3b07ad.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/24056/444px_curry_triumph.png"
   },
   {
@@ -14696,7 +14702,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Marsborne",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Undone",
       "Party Astronauts",
       "Forsaken",
@@ -15272,7 +15278,7 @@
     "id": "damyo",
     "nickname": "damyo",
     "name": "Damon Portelli",
-    "team": "Team Abyssal",
+    "team": "Rooster",
     "nationality": "Australia",
     "countryCode": "AU",
     "age": 25,
@@ -15292,7 +15298,7 @@
     "aliases": [
       "Damon Portelli"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/22732/image/webp-e37218e0256f71d54d2ceca5d1ba9fb4.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/151/image/f21e5d8be8f367aaa516ca30378526bd.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/25702/damyo_csgo.png"
   },
   {
@@ -15344,7 +15350,7 @@
     "id": "dan9armatura",
     "nickname": "DAN9ARMATURA",
     "name": "Daniil Glotov",
-    "team": "CYBERSHOKE Prospects",
+    "team": "UPGRADE Team",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 18,
@@ -15352,12 +15358,13 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "CYBERSHOKE Prospects",
       "SENZA Esports"
     ],
     "aliases": [
       "Даниил Глотов"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/21752/image/webp-d62c4cfdd95567e786d38ae14a88e2a3.webp"
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/25212/image/webp-a1716a57fe225942b781f18550dfacb6.webp"
   },
   {
     "id": "dandaowang",
@@ -15479,7 +15486,7 @@
     "aliases": [
       "毛鹏翔"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/18940/image/webp-cd1f5419f83048c16cc0c8763adf11d0.webp"
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/18940/image/webp-73c18efabc1fa5260862e8b406b16c62.webp"
   },
   {
     "id": "danistzz",
@@ -15503,7 +15510,7 @@
       "Данил Росляков"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/2924/image/webp-c99e6e349fa66ece9a97d9d47a406986.webp",
-    "imageUrl": "https://files.bo3.gg/uploads/player/34800/image/webp-3feecab060366d20d5186f70ebaede8d.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/34800/image/webp-ddc87cdc13d22636bb4527421a6dd113.webp"
   },
   {
     "id": "dank1ng",
@@ -15580,7 +15587,7 @@
       "E-Xolos LAZER",
       "UNO MILLE",
       "RED Canids",
-      "largadosypelados",
+      "LargadosyPelados",
       "Corinthians Esports",
       "HUMMER Esports",
       "São Caetano Esports",
@@ -15696,14 +15703,14 @@
     "historicalTeams": [
       "Team Liquid",
       "Orgless",
-      "EG",
+      "Evil Geniuses",
       "Gen.G Esports",
       "cloud9",
-      "OpTic Gaming",
+      "OpTic",
       "Conquest",
       "Sponsorless",
       "Elevate",
-      "Chill guys",
+      "Chill Guys",
       "Denial eSports",
       "LunatiK eSports",
       "Dynamo Gaming"
@@ -15718,7 +15725,7 @@
     "id": "darber",
     "nickname": "Darber",
     "name": "Filip Böhm",
-    "team": "Unity",
+    "team": "UNITY",
     "nationality": "Czechia",
     "countryCode": "CZ",
     "age": 22,
@@ -15745,7 +15752,7 @@
     "team": "Mai Tai",
     "nationality": "Poland",
     "countryCode": "PL",
-    "age": 26,
+    "age": 27,
     "role": "IGL",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -15991,7 +15998,7 @@
       "Team10",
       "Rysix Gaming",
       "Agressive Gaming",
-      "Team oNe eSports",
+      "Team oNe",
       "Pelafustanes"
     ],
     "aliases": [
@@ -16074,7 +16081,7 @@
       "INDE IRAE",
       "GMT eSports",
       "1WIN",
-      "MelBet Team",
+      "Melbet Team",
       "OwmS",
       "Team Spirit",
       "Team Phenomenon",
@@ -16616,7 +16623,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "LAGUNA",
-      "ILLYRIANS",
+      "Illyrians",
       "KS-",
       "Team BLINK",
       "X",
@@ -16988,7 +16995,7 @@
     "id": "delle",
     "nickname": "delle",
     "name": "Jonathan Ahlstedt",
-    "team": "Entropy Gaming",
+    "team": "无队伍",
     "nationality": "Sweden",
     "countryCode": "SE",
     "age": 21,
@@ -17010,7 +17017,6 @@
     "aliases": [
       "Jonathan Ahlstedt"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/937/image/webp-187f5ece188a5728c9130bb9cec320d4.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/33656/image/webp-fb230f66635879ca34bb5771e2768630.webp"
   },
   {
@@ -17095,7 +17101,7 @@
     "historicalTeams": [
       "Fingers Crossed Female",
       "The Suspect",
-      "ILLYRIANS",
+      "Illyrians",
       "AGO esports",
       "OG Academy",
       "X",
@@ -17277,7 +17283,7 @@
       "LIONS",
       "SK Gaming",
       "Duttdutt",
-      "RG-Esports",
+      "RG-eSports",
       "Playzone",
       "Crystal"
     ],
@@ -17326,7 +17332,7 @@
     "majorAppearances": 3,
     "majorWins": 0,
     "historicalTeams": [
-      "Complexity Gaming",
+      "compLexity Gaming",
       "CAZ eSports",
       "VexstaR"
     ],
@@ -17520,7 +17526,7 @@
       "412 Crew",
       "Tectonic",
       "XFORCE",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Winterfox",
       "SKDC",
       "Fe.pro",
@@ -17544,7 +17550,7 @@
     "id": "desl3bio",
     "nickname": "desl3bio",
     "name": "Artur Gorbunov",
-    "team": "CYBERSHOKE Prospects",
+    "team": "UPGRADE Team",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 20,
@@ -17552,6 +17558,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "CYBERSHOKE Prospects",
       "Underrated",
       "5goblinz"
     ],
@@ -17559,7 +17566,7 @@
       "dezl3bio",
       "Артур Горбунов"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/21752/image/webp-d62c4cfdd95567e786d38ae14a88e2a3.webp"
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/25212/image/webp-a1716a57fe225942b781f18550dfacb6.webp"
   },
   {
     "id": "despair",
@@ -17627,7 +17634,7 @@
       "Athletico Esports",
       "Team Immunity",
       "ADD",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Team Exile5",
       "Vital Gaming",
       "mousegazm",
@@ -17660,7 +17667,7 @@
       "Tempo Storm",
       "Immortals",
       "paiN Gaming",
-      "Luminosity",
+      "Luminosity Gaming",
       "WinOut.net",
       "Keyd Stars",
       "g3nerationX",
@@ -17738,7 +17745,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Team Cursive",
-      "se mi puta",
+      "Se mi puta",
       "xapso",
       "SKB-EC"
     ],
@@ -17762,7 +17769,7 @@
       "2Game Esports",
       "Filhos de D10S",
       "RED Canids",
-      "largadosypelados",
+      "LargadosyPelados",
       "Daotsu Esports",
       "Black Dragons e-Sports",
       "FURIA Academy",
@@ -17857,7 +17864,7 @@
     "team": "无队伍",
     "nationality": "Czechia",
     "countryCode": "CZ",
-    "age": 29,
+    "age": 30,
     "role": "AWPer",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -17953,12 +17960,12 @@
       "CHAOS",
       "MAGICIANS",
       "passions",
-      "Epsilon eSports",
-      "OpTic Gaming",
+      "Epsilon Esports",
+      "OpTic",
       "Team Ancient",
       "Winterfox",
       "Mythic",
-      "Luminosity",
+      "Luminosity Gaming",
       "1337",
       "fnatic",
       "Western Wolves",
@@ -18100,7 +18107,7 @@
       "Funky Monkeys",
       "Tainted Minds",
       "Winterfox",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "SYF Gaming"
     ],
     "aliases": [
@@ -18257,7 +18264,7 @@
     "id": "dgl",
     "nickname": "DGL",
     "name": "Brajan Lemacha",
-    "team": "Reveal",
+    "team": "Phantom Esports",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 28,
@@ -18265,7 +18272,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Phantom",
       "Qiang",
       "Pera Esports",
       "GenOne",
@@ -18278,7 +18284,7 @@
     "aliases": [
       "Brajan Lemacha"
     ],
-    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/132551/153px_reveal_allmode.png",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/19204/image/webp-aa54c95718673f15a88b5bb5fa7f686e.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/30044/ft_fi21ky2_cnf_iu_stni_nip_v.png"
   },
   {
@@ -18339,7 +18345,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "CLG Red",
+      "Counter Logic Gaming Red",
       "UBINITED"
     ],
     "aliases": [
@@ -18695,7 +18701,7 @@
       "Red Reserve",
       "GODSENT",
       "fnatic",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Cringe Gods",
       "Aftermatch"
     ],
@@ -18835,7 +18841,7 @@
     "id": "divine",
     "nickname": "divine",
     "name": "Gustavo Santicioli Altapini",
-    "team": "largadosypelados",
+    "team": "LargadosyPelados",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 21,
@@ -18892,7 +18898,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "catman",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Legacy Esports",
       "Team FeroX",
       "Team Exile5",
@@ -19386,7 +19392,7 @@
       "movistar riders",
       "k1ck eSports.es",
       "EU4IA",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Atlantis Esports",
       "ASES e-Sports Club",
       "overGaming",
@@ -19745,7 +19751,7 @@
       "CheckSix.swe",
       "mTw",
       "Team Virus",
-      "ironZion",
+      "IronZion",
       "Örebro Mad Skillz",
       "Port22",
       "soet",
@@ -19759,7 +19765,7 @@
     "id": "draken",
     "nickname": "draken",
     "name": "William Fant Sundin",
-    "team": "Johnny Speeds",
+    "team": "Speeds",
     "nationality": "Sweden",
     "countryCode": "SE",
     "age": 30,
@@ -19778,7 +19784,7 @@
       "Uruguay3",
       "Red Reserve",
       "fnatic",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Cringe Gods",
       "European Misfits",
       "Aftermatch"
@@ -20038,7 +20044,7 @@
     "historicalTeams": [
       "Rensga Esports",
       "Team Glacon",
-      "Team oNe eSports",
+      "Team oNe",
       "Team O2"
     ],
     "aliases": [
@@ -20127,7 +20133,7 @@
     "team": "无队伍",
     "nationality": "United States",
     "countryCode": "US",
-    "age": 28,
+    "age": 29,
     "role": "Entry",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -20748,7 +20754,7 @@
       "Александр Пахневич"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/2720/image/f958862f2e46f042058744c797bd9b8c.png",
-    "imageUrl": "https://files.bo3.gg/uploads/player/35773/image/webp-9b328a252c615c61aec6810ef2f143b3.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/35773/image/webp-515e54492e11674ae556acdbd37d98d3.webp"
   },
   {
     "id": "dycha",
@@ -20895,7 +20901,7 @@
       "Case Esports",
       "Imperial Esports",
       "Keyd Stars",
-      "Inflames",
+      "inflames",
       "Santos e-Sports",
       "Virtue Gaming",
       "Dereguedere",
@@ -21079,7 +21085,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "aimclub",
+      "Aimclub",
       "Team Nostalgia",
       "ROYALS",
       "Infinite",
@@ -21498,7 +21504,7 @@
       "Winstrike Team",
       "HOLLYWOOD",
       "Monolith Gaming",
-      "Elements Pro Gaming",
+      "EPG",
       "KUNGAR",
       "Gambit Academy"
     ],
@@ -21729,7 +21735,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "FaZe Clan",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Elevate",
       "SapphireKelownaDotCom",
       "Team JusTus"
@@ -22099,7 +22105,7 @@
       "heX",
       "Lowkey Esports",
       "Hot Ass",
-      "Unity",
+      "UNITY",
       "InControl Gaming",
       "BLACK",
       "Final Feature Gaming",
@@ -22198,7 +22204,7 @@
       "Eternal Fire",
       "PCIFIC Espor",
       "The Chosen Few",
-      "ILLYRIANS",
+      "Illyrians",
       "Şahangiller Espor",
       "YeniCherry"
     ],
@@ -22244,7 +22250,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "CLG Red"
+      "Counter Logic Gaming Red"
     ],
     "aliases": [
       "Emma Choe"
@@ -22467,7 +22473,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Phantom",
+      "Phantom Esports",
       "Anonymo Esports",
       "los kogutos",
       "Permitta Esports",
@@ -22483,7 +22489,7 @@
     "aliases": [
       "Karol Lasota"
     ],
-    "imageUrl": "https://files.bo3.gg/uploads/player/29442/image/webp-fa096db09a96c35b11b9026602def4cb.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/29442/image/webp-7f3f0c424a483d0cc617bb7978d4d559.webp"
   },
   {
     "id": "er9k",
@@ -22572,7 +22578,7 @@
     "id": "ersin",
     "nickname": "ERSIN",
     "name": "Ersin Chiriac",
-    "team": "aimclub",
+    "team": "Aimclub",
     "nationality": "Romania",
     "countryCode": "RO",
     "age": 24,
@@ -22608,7 +22614,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Ninjas in Pyjamas",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "cloud9",
       "Astralis",
       "Heroic",
@@ -22707,7 +22713,7 @@
     "majorAppearances": 2,
     "majorWins": 0,
     "historicalTeams": [
-      "EG",
+      "Evil Geniuses",
       "NRG",
       "clg",
       "Counter Logic Gaming",
@@ -22735,7 +22741,7 @@
     "historicalTeams": [
       "SportsBetExpert",
       "LFO 4",
-      "Chill guys",
+      "Chill Guys",
       "Revenge Nation",
       "huge sweaty",
       "PSISTORM"
@@ -22757,7 +22763,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Evil Geniuses.ca",
-      "EG",
+      "Evil Geniuses",
       "eMazing Gaming",
       "United5",
       "JaX Money Crew"
@@ -22885,7 +22891,7 @@
       "verygames",
       "redLine",
       "Crack Clan",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "GlobalTeam",
       "Hardcore-Style"
     ],
@@ -22900,7 +22906,7 @@
     "team": "无队伍",
     "nationality": "India",
     "countryCode": "IN",
-    "age": 28,
+    "age": 29,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -23009,7 +23015,7 @@
     "team": "Fluxo W7M",
     "nationality": "Brazil",
     "countryCode": "BR",
-    "age": 29,
+    "age": 30,
     "role": "IGL",
     "majorAppearances": 4,
     "majorWins": 0,
@@ -23423,7 +23429,7 @@
       "FORZE",
       "Spartak Esports",
       "RuSh3D",
-      "Elements Pro Gaming",
+      "EPG",
       "PiTER",
       "Team Preparation",
       "ANOX",
@@ -23604,7 +23610,7 @@
       "MIBR",
       "YeaH! Gaming",
       "SK Gaming",
-      "Luminosity",
+      "Luminosity Gaming",
       "Keyd Stars",
       "KaBuM.TD",
       "KaBuM! e-Sports",
@@ -23616,7 +23622,7 @@
       "FireGamers",
       "Team TD",
       "TD.coL",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "TargeTDown",
       "vsONE",
       "Crashers",
@@ -23703,7 +23709,7 @@
       "Getting Info",
       "Party Astronauts",
       "NRG",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Extra Salt",
       "Rugratz",
       "Recon 5",
@@ -23722,6 +23728,7 @@
     "aliases": [
       "Justin Coakley"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/4077/image/webp-1e6b8183acf330b3f25a737b9f4125f9.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/23742/image/webp-8d223dc0938ccac57ea3a8533c99f532.webp"
   },
   {
@@ -24099,7 +24106,7 @@
       "MnM Gaming",
       "ALL4",
       "EZSkins.com",
-      "Fm!TOXiC",
+      "fm!TOXiC",
       "The Lone Rangers",
       "Team Infused"
     ],
@@ -24230,10 +24237,9 @@
       "Fluxo",
       "GODSENT",
       "BOOM Esports",
-      "Team oNe eSports",
+      "Team oNe",
       "Luminosity Gaming",
       "MIBR",
-      "Luminosity",
       "intz",
       "NoTag (ex-Não Tem Como)",
       "Não Tem Como",
@@ -24296,7 +24302,7 @@
       "00 Nation",
       "MIBR",
       "SK Gaming",
-      "Luminosity",
+      "Luminosity Gaming",
       "Keyd Stars",
       "KaBuM.TD",
       "KaBuM! e-Sports",
@@ -24355,7 +24361,7 @@
     "historicalTeams": [
       "i sleep",
       "MC ESPORTS",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Tainted Minds",
       "Athletico Esports",
       "plusvee",
@@ -24768,7 +24774,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Noble eSports",
-      "Luminosity",
+      "Luminosity Gaming",
       "NetcodeGuides.com",
       "Tempo Gaming",
       "Monomaniac eSports",
@@ -25039,7 +25045,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Athletico Esports",
       "Dark Sided",
       "Grinny Bankers"
@@ -25138,7 +25144,7 @@
     "majorAppearances": 4,
     "majorWins": 0,
     "historicalTeams": [
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Extra Salt",
       "cloud9",
       "ATK",
@@ -25209,7 +25215,7 @@
       "Hippopotamus",
       "Alchemists Unleashed",
       "Stockholm Angels",
-      "ironZion",
+      "IronZion",
       "AWTR"
     ],
     "aliases": [
@@ -25297,7 +25303,7 @@
       "cloud9",
       "GODSENT",
       "SY_b",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Western Wolves",
       "WRTT"
     ],
@@ -25456,7 +25462,7 @@
     "id": "fnl",
     "nickname": "fnl",
     "name": "David Mușuroiu",
-    "team": "Unity",
+    "team": "UNITY",
     "nationality": "Romania",
     "countryCode": "RO",
     "age": 20,
@@ -25494,7 +25500,7 @@
       "Riot Squad Esports",
       "eUnited",
       "cloud9",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Counter Logic Gaming",
       "Team SoloMid",
       "mouseSpaz",
@@ -25527,7 +25533,7 @@
       "100 Thieves",
       "Immortals",
       "SK Gaming",
-      "Luminosity",
+      "Luminosity Gaming",
       "Games Academy",
       "Dexterity Team",
       "MasterMind",
@@ -25540,7 +25546,7 @@
       "paiN Gaming",
       "GamerHouse",
       "TD.coL",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "TargeTDown",
       "FireGamers",
       "Rio Sinistro",
@@ -25689,8 +25695,10 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "Sashi Academy",
       "SERA Esport",
-      "Team Atlantic"
+      "Team Atlantic",
+      "Floki Esport"
     ],
     "aliases": [
       "Magnus Lind"
@@ -25895,7 +25903,7 @@
       "Ovoshi",
       "Permitta Esports",
       "RUBY",
-      "MelBet Team",
+      "Melbet Team",
       "Nemiga Gaming",
       "Cossacks",
       "1WIN",
@@ -26121,7 +26129,7 @@
     "id": "fr3nd",
     "nickname": "fr3nd",
     "name": "Sebastian Kuśmierz",
-    "team": "Betclic",
+    "team": "PURE",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 24,
@@ -26147,7 +26155,7 @@
     "aliases": [
       "Sebastian Kuśmierz"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/11101/image/webp-31317f85a872f9a1913120d2fba707be.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/23113/image/webp-ebe398eb0aa2a648fc6128e6e25a610b.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/27005/120134162_1029972960796563_1098245183142962318_o.png"
   },
   {
@@ -26337,7 +26345,7 @@
     "id": "freakazoid",
     "nickname": "freakazoid",
     "name": "Ryan Abadir",
-    "team": "Winners",
+    "team": "WINNERS",
     "nationality": "United States",
     "countryCode": "US",
     "age": 33,
@@ -26385,7 +26393,7 @@
       "Team Ancient",
       "Red Reserve",
       "GODSENT",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Cringe Gods",
       "Team Aftermatch"
     ],
@@ -26559,7 +26567,7 @@
       "Stifmeister Gaming",
       "Fierce Esports",
       "London Esports",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Wind and Rain",
       "Team Infused",
       "FMESPORTS"
@@ -26661,7 +26669,7 @@
     "id": "friberg",
     "nickname": "friberg",
     "name": "Adam Friberg",
-    "team": "Johnny Speeds",
+    "team": "Speeds",
     "nationality": "Sweden",
     "countryCode": "SE",
     "age": 34,
@@ -26671,10 +26679,10 @@
     "historicalTeams": [
       "Team Dignitas",
       "Heroic",
-      "OpTic Gaming",
+      "OpTic",
       "Ninjas in Pyjamas",
       "ROCKSTAR",
-      "Fm!TOXiC",
+      "fm!TOXiC",
       "eXelon Gaming",
       "30P-Gaming",
       "Blight Gaming",
@@ -27043,7 +27051,7 @@
       "NRG",
       "Counter Logic Gaming",
       "Team Liquid",
-      "Chill guys",
+      "Chill Guys",
       "Denial eSports",
       "LunatiK eSports"
     ],
@@ -27123,7 +27131,7 @@
     "historicalTeams": [
       "ANIMALS",
       "Team Cursive",
-      "se mi puta",
+      "Se mi puta",
       "myxmg",
       "SKB-EC"
     ],
@@ -27163,7 +27171,7 @@
     "id": "fury5k",
     "nickname": "fury5k",
     "name": "Davaasuren Ganbaatar",
-    "team": "BMZ",
+    "team": "Eruption",
     "nationality": "Mongolia",
     "countryCode": "MN",
     "age": 27,
@@ -27171,7 +27179,6 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Eruption",
       "Chinggis Warriors",
       "Aravt",
       "The Black Company",
@@ -27180,7 +27187,7 @@
     "aliases": [
       "Ганбаатарын Даваасүрэн"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/22559/image/webp-f78ddb36122f6afd2272ba70351a9340.webp",
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/132488/eruption_2023_lightmode.png",
     "imageUrl": "https://files.bo3.gg/uploads/player/31670/image/webp-a9e656f313c6ac7cb427a2b203974e7a.webp"
   },
   {
@@ -27225,7 +27232,7 @@
       "Ozyria",
       "Millenium",
       "Playing Ducks",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "BST",
       "WARMAKER",
       "WE GOT GAME",
@@ -27500,7 +27507,7 @@
       "BIG",
       "HYENAS",
       "North",
-      "OpTic Gaming",
+      "OpTic",
       "North Academy",
       "FUAH",
       "Team Singularity"
@@ -27543,7 +27550,7 @@
     "team": "无队伍",
     "nationality": "Denmark",
     "countryCode": "DK",
-    "age": 42,
+    "age": 43,
     "role": "Unknown",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -27629,7 +27636,7 @@
       "虎神",
       "丁一"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/18940/image/webp-cd1f5419f83048c16cc0c8763adf11d0.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/18940/image/webp-73c18efabc1fa5260862e8b406b16c62.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/24437/image/webp-7767ad37ee59d8df72e8be8d79d6688e.webp"
   },
   {
@@ -27734,7 +27741,7 @@
       "MANA eSports",
       "KS-",
       "Kubix Esports",
-      "ILLYRIANS",
+      "Illyrians",
       "X",
       "NASR Esports",
       "Team BLINK",
@@ -28202,17 +28209,17 @@
       "Reason Gaming.dk",
       "CPLAY",
       "No Problem!",
-      "Leftoverz",
+      "LeftoverZ",
       "ESC Gaming",
       "3DMAX",
       "n!faculty",
       "Western Wolves",
       "Anexis eSports",
       "Tt.Dragons",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Reason Gaming",
-      "U Need Us",
-      "Speedgaming",
+      "u need us",
+      "SpeedGaming",
       "Dynamic-Gaming",
       "PENTIA"
     ],
@@ -28235,7 +28242,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Tricked Esport",
-      "Unity",
+      "UNITY",
       "North Academy",
       "rogue",
       "Team TBA",
@@ -28477,7 +28484,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Melty eSport Club",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "clan-mystik",
       "Recursive",
       "WE GOT GAME",
@@ -28778,7 +28785,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "EG",
+      "Evil Geniuses",
       "Turmoil",
       "Gravitas Gaming",
       "X3O Gaming"
@@ -28845,7 +28852,7 @@
     "team": "OLDBOYS PL",
     "nationality": "Poland",
     "countryCode": "PL",
-    "age": 25,
+    "age": 26,
     "role": "Rifler",
     "majorAppearances": 2,
     "majorWins": 0,
@@ -28880,7 +28887,6 @@
     "historicalTeams": [
       "FlyQuest RED",
       "Counter Logic Gaming Red",
-      "CLG Red",
       "Dignitas Female",
       "Selfless Gaming Female",
       "UBINITED",
@@ -29343,7 +29349,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Passion UA",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Team Liquid",
       "Triumph",
       "Bad News Bears",
@@ -29631,7 +29637,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Cartel terraza",
-      "Infinity eSports",
+      "Infinity",
       "Supremacy Gaming",
       "NONAME",
       "NikNexus",
@@ -29787,7 +29793,6 @@
       "Nut-E Gaming",
       "lol123",
       "Chiefs Esports Club",
-      "Chiefs ESC",
       "R!OT Gaming",
       "Downfall Gaming",
       "Team Skyfire",
@@ -29860,7 +29865,7 @@
     "historicalTeams": [
       "AM Gaming",
       "bad news eagles",
-      "aimclub",
+      "Aimclub",
       "Guild Eagles",
       "Team BLINK",
       "Team uNiQUE"
@@ -30014,7 +30019,7 @@
       "magic",
       "Betera Esports",
       "DMS",
-      "MelBet Team",
+      "Melbet Team",
       "Cloud9 Academy",
       "Websterz",
       "IN.GAME",
@@ -30333,7 +30338,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Passion UA",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Team Dignitas",
       "Nordavind",
       "icsu",
@@ -30354,7 +30359,7 @@
     "id": "hampus",
     "nickname": "hampus",
     "name": "Hampus Poser",
-    "team": "Johnny Speeds",
+    "team": "Speeds",
     "nationality": "Sweden",
     "countryCode": "SE",
     "age": 27,
@@ -30440,7 +30445,7 @@
     "id": "happ",
     "nickname": "happ",
     "name": "Guilherme Henrique Bento",
-    "team": "largadosypelados",
+    "team": "LargadosyPelados",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 24,
@@ -30497,7 +30502,7 @@
       "Creativ'",
       "Crack Clan",
       "GlobalTeam",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Hardcore-Style"
     ],
     "aliases": [
@@ -30582,7 +30587,7 @@
     "team": "无队伍",
     "nationality": "France",
     "countryCode": "FR",
-    "age": 40,
+    "age": 41,
     "role": "Rifler",
     "majorAppearances": 2,
     "majorWins": 0,
@@ -30609,7 +30614,7 @@
     "id": "hasteka",
     "nickname": "hasteka",
     "name": "Chinguun Bayarmaa",
-    "team": "Chinggis Warriors",
+    "team": "NomadS",
     "nationality": "Mongolia",
     "countryCode": "MN",
     "age": 28,
@@ -30617,7 +30622,6 @@
     "majorAppearances": 1,
     "majorWins": 0,
     "historicalTeams": [
-      "NomadS",
       "Clutch Gaming",
       "The MongolZ",
       "IHC Esports",
@@ -30630,7 +30634,7 @@
     "aliases": [
       "Баярмаагийн Чингүүн"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/9974/image/webp-13470ab4ee340469f4a8784168a5e295.webp",
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/135219/143px_nomads_aug_2025_allmode.png",
     "imageUrl": "https://files.bo3.gg/uploads/player/27944/image/webp-5b15d2719372643e8a109f6138aca200.webp"
   },
   {
@@ -30784,7 +30788,7 @@
       "Cotch",
       "eSahara",
       "Next-Evo",
-      "Fm!TOXiC",
+      "fm!TOXiC",
       "Team Dignitas",
       "Blight Gaming",
       "Promise Keepers",
@@ -30813,7 +30817,7 @@
     "historicalTeams": [
       "Mythic",
       "Muffin Lightning",
-      "OpTic Gaming",
+      "OpTic",
       "Counter Logic Gaming",
       "mouseSpaz",
       "NetcodeGuides.com",
@@ -30912,7 +30916,7 @@
     "id": "heap",
     "nickname": "HEAP",
     "name": "Ludvig Alonso",
-    "team": "Johnny Speeds",
+    "team": "Speeds",
     "nationality": "Sweden",
     "countryCode": "SE",
     "age": 26,
@@ -31212,7 +31216,7 @@
       "00 Nation",
       "O Plano",
       "FURIA eSports",
-      "Luminosity",
+      "Luminosity Gaming",
       "Não Tem Como",
       "100 Thieves",
       "Immortals",
@@ -31263,7 +31267,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "eSuba",
-      "Unity",
+      "UNITY",
       "Dark Tigers",
       "ENSOX",
       "Raging Wolves",
@@ -31410,7 +31414,7 @@
     "historicalTeams": [
       "M80",
       "NRG",
-      "EG",
+      "Evil Geniuses",
       "Evil Geniuses Black",
       "Carpe Diem",
       "RBG Esports",
@@ -31561,7 +31565,7 @@
       "GX",
       "ibuypower",
       "cloud9",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Quantic Gaming",
       "Lurking and Working",
       "4Nothing",
@@ -31903,7 +31907,7 @@
       "OwmS",
       "Runtime.gg",
       "UnderPressure",
-      "Elements Pro Gaming",
+      "EPG",
       "s4s",
       "Gambit Gaming",
       "HS.GG",
@@ -32131,10 +32135,10 @@
       "Uruguay3",
       "2019",
       "Tempo Storm",
-      "OpTic Gaming",
+      "OpTic",
       "PENTA Sports",
       "rogue",
-      "Unity",
+      "UNITY",
       "Team TBA",
       "Iwku Gaming",
       "CSGO2x.com",
@@ -32324,7 +32328,7 @@
       "a2g",
       "iGamerz",
       "Playzone",
-      "Concode"
+      "concode"
     ],
     "aliases": [
       "Hugo Cortes Lopez"
@@ -32347,7 +32351,6 @@
       "Looking For Orgre",
       "lol123",
       "Chiefs Esports Club",
-      "Chiefs ESC",
       "Avant Gaming",
       "Genuine Gaming",
       "Legacy Esports",
@@ -32439,7 +32442,7 @@
       "Brøndby Rangers",
       "HastaLaVista",
       "Tt.Dragons",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Reason Gaming",
       "XayaGaming",
       "DSRack"
@@ -32776,7 +32779,7 @@
     "id": "hyper",
     "nickname": "Hyper",
     "name": "Bartosz Wolny",
-    "team": "Phantom",
+    "team": "Phantom Esports",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 36,
@@ -32853,7 +32856,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "The Suspect",
-      "ILLYRIANS",
+      "Illyrians",
       "Team BLINK",
       "Team SKUAK",
       "EAGLES"
@@ -33005,7 +33008,7 @@
     "id": "iceberg",
     "nickname": "IceBerg",
     "name": "Oliver Berg",
-    "team": "ECHO",
+    "team": "BBL Esports",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 26,
@@ -33013,6 +33016,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "ECHO",
       "Tricked Esport",
       "Sashi Esport",
       "Espionage",
@@ -33025,7 +33029,7 @@
       "jaNNiKgREN",
       "Oliver Berg"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/24570/image/webp-6cabeb73c934c8cc85afb394a9b166e3.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/25251/image/webp-e0125fddcdc4553cfbfdba57e291b6b1.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/27470/n4_rki6_ea.png"
   },
   {
@@ -33139,7 +33143,7 @@
       "inSanitY Sports",
       "Age Sports",
       "LOS + oNe",
-      "Team oNe eSports",
+      "Team oNe",
       "FreeStyle",
       "Paquetá Gaming",
       "Imperial Esports",
@@ -33585,6 +33589,7 @@
     "historicalTeams": [
       "Team Aftershock",
       "Chiefs ESC",
+      "Chiefs Esports Club",
       "Ground Zero Gaming",
       "Avant Garde",
       "Athletico Esports",
@@ -33682,7 +33687,7 @@
       "ORDER",
       "renegades",
       "Tainted Minds",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Team ASDF",
       "Corvidae",
       "Team Storm",
@@ -34136,7 +34141,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Corvidae",
       "Athletico Esports",
       "Avant Garde",
@@ -34717,7 +34722,7 @@
       "Дмитро Семера"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/786/image/ad89f7dc89e3fa6517672637f67cefb5.png",
-    "imageUrl": "https://files.bo3.gg/uploads/player/37272/image/webp-530a5e66ed0f71fa9387b3d76ff75205.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/37272/image/webp-b8704b18f4bea37a30c16861b7a21a5b.webp"
   },
   {
     "id": "jame",
@@ -35059,7 +35064,7 @@
     "id": "jasonr",
     "nickname": "jasonR",
     "name": "Jason Ruchelski",
-    "team": "Winners",
+    "team": "WINNERS",
     "nationality": "Canada",
     "countryCode": "CA",
     "age": 32,
@@ -35067,7 +35072,7 @@
     "majorAppearances": 1,
     "majorWins": 0,
     "historicalTeams": [
-      "OpTic Gaming",
+      "OpTic",
       "splyce",
       "DOGMEN",
       "3sUP Enterprises",
@@ -35123,7 +35128,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Nexus Gaming",
-      "aimclub",
+      "Aimclub",
       "IGotGame",
       "NeXtPlease!"
     ],
@@ -35192,7 +35197,7 @@
       "Begrip",
       "EsportsAdviser",
       "Property",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Snabbabrillor",
       "renegades",
       "Fnatic Academy",
@@ -35345,7 +35350,7 @@
     "team": "无队伍",
     "nationality": "United States",
     "countryCode": "US",
-    "age": 30,
+    "age": 31,
     "role": "AWPer",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -35541,7 +35546,7 @@
       "Team Endpoint",
       "Orgles5",
       "Wind and Rain",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Method",
       "FMESPORTS",
       "Radix eSports",
@@ -35642,7 +35647,7 @@
     "historicalTeams": [
       "Team Voca",
       "Nouns Esports",
-      "EG",
+      "Evil Geniuses",
       "Evil Geniuses Black",
       "Squirtle Squad",
       "Gaimin Gladiators",
@@ -35716,7 +35721,7 @@
     "team": "无队伍",
     "nationality": "Canada",
     "countryCode": "CA",
-    "age": 30,
+    "age": 31,
     "role": "IGL",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -35970,7 +35975,7 @@
     "historicalTeams": [
       "Vantage Esports",
       "Antic Esports",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Genuine Gaming",
       "TABOO",
       "MastermindsGC",
@@ -36062,7 +36067,7 @@
     "historicalTeams": [
       "Team Liquid",
       "G2 Esports",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "100 Thieves",
       "renegades",
       "Legion",
@@ -36144,7 +36149,7 @@
       "LAN DODGERS",
       "Winstrike Team",
       "Quantum Bellator Fire",
-      "Elements Pro Gaming",
+      "EPG",
       "PiTER",
       "Team Preparation",
       "Worst Players",
@@ -36217,7 +36222,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Johnny Speeds",
+      "Speeds",
       "Young Ninjas",
       "The Prodigies Sweden",
       "ENERGYULTRA",
@@ -36842,7 +36847,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Passion UA",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Extra Salt",
       "Cloud9",
       "ATK",
@@ -36920,7 +36925,7 @@
       "South",
       "Astralis",
       "North",
-      "OpTic Gaming",
+      "OpTic",
       "Heroic",
       "Tricked Esport",
       "Alpha Gaming",
@@ -37005,7 +37010,7 @@
       "TSM Impact",
       "26 Rising",
       "Evil Geniuses Gold",
-      "CLG Red"
+      "Counter Logic Gaming Red"
     ],
     "aliases": [
       "Juliana Tosic"
@@ -37136,7 +37141,7 @@
     "team": "Shimmer",
     "nationality": "United States",
     "countryCode": "US",
-    "age": 24,
+    "age": 25,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -37147,7 +37152,7 @@
       "Detonate",
       "Unjustified Gaming",
       "Villainous Black",
-      "DU Black",
+      "Davenport University Black",
       "InControl Nation",
       "Davenport University"
     ],
@@ -37217,9 +37222,9 @@
       "BLUEJAYS",
       "Moneyball",
       "Nouns Esports",
-      "EG",
+      "Evil Geniuses",
       "Evil Geniuses Black",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Bad News Bears",
       "FURIA eSports",
       "Triumph",
@@ -37455,7 +37460,7 @@
       "fnatic",
       "GODSENT",
       "SY_b",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Gosu.se",
       "WRTT",
       "HeLlSlAyErZ"
@@ -37550,8 +37555,8 @@
     "historicalTeams": [
       "Ninjas in Pyjamas",
       "Astralis",
-      "Complexity Gaming",
-      "OpTic Gaming",
+      "compLexity Gaming",
+      "OpTic",
       "North",
       "Team Dignitas",
       "SK Gaming",
@@ -37573,7 +37578,7 @@
     "team": "INOX Division",
     "nationality": "Russian Federation",
     "countryCode": "RU",
-    "age": 23,
+    "age": 24,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -37602,7 +37607,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Unity",
+      "UNITY",
       "Dynamo Eclot",
       "Team Sampi",
       "Eclot Gaming",
@@ -37706,7 +37711,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Infinity eSports",
+      "Infinity",
       "Forty Six and 2",
       "Resolute",
       "Team Jaguar",
@@ -37763,7 +37768,7 @@
       "BIG",
       "BIG Academy",
       "sprout",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "ALTERNATE aTTaX",
       "Berzerk",
       "DIVIZON",
@@ -37874,7 +37879,7 @@
       "Crave Gaming",
       "Publiclir.se",
       "WRTT",
-      "Epsilon eSports"
+      "Epsilon Esports"
     ],
     "aliases": [
       "'.'",
@@ -38320,12 +38325,12 @@
       "passions",
       "Prophecy",
       "Polaris Gaming",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "ArchAngels",
       "Epiphany Bolt",
       "BX3 eSports Club",
       "ESC Gaming",
-      "RG-Esports",
+      "RG-eSports",
       "Alchemists Unleashed",
       "Online Kingdom",
       "LIONS",
@@ -38523,7 +38528,6 @@
       "Prototype Blaze",
       "FlyQuest RED",
       "Counter Logic Gaming Red",
-      "CLG Red",
       "New School Crew",
       "Fragbox Gaming Female",
       "Playing Ducks Female"
@@ -38730,7 +38734,7 @@
       "Team SoloMid",
       "Team Dignitas",
       "copenhagen wolves",
-      "Leftoverz",
+      "LeftoverZ",
       "Reason Gaming",
       "n!faculty",
       "Playing Ducks",
@@ -39096,7 +39100,7 @@
     "id": "keen",
     "nickname": "keen",
     "name": "Kristers Dārznieks",
-    "team": "SemperFi Esports",
+    "team": "PURE",
     "nationality": "Latvia",
     "countryCode": "LV",
     "age": 26,
@@ -39104,6 +39108,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "SemperFi Esports",
       "JiJieHao",
       "The Prodigies",
       "Budapest Five",
@@ -39117,7 +39122,7 @@
     "aliases": [
       "Kristers Dārznieks"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/11042/image/webp-f92cc5eb685ca52411b75a10af659111.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/23113/image/webp-ebe398eb0aa2a648fc6128e6e25a610b.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/29333/image/webp-a75757d46eeac8a9ca8c68189542a7b7.webp"
   },
   {
@@ -39148,7 +39153,7 @@
     "id": "kei",
     "nickname": "KEi",
     "name": "Kamil Dariusz Pietkun",
-    "team": "Phantom",
+    "team": "Phantom Esports",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 25,
@@ -39204,7 +39209,7 @@
     "team": "无队伍",
     "nationality": "Sweden",
     "countryCode": "SE",
-    "age": 35,
+    "age": 36,
     "role": "Unknown",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -39212,7 +39217,7 @@
       "H2k",
       "a2g",
       "Lions eSportsKlubb",
-      "RG-Esports",
+      "RG-eSports",
       "Begrip",
       "Playzone",
       "TCM-Gaming"
@@ -39238,7 +39243,7 @@
       "E-Xolos LAZER",
       "Arctic eSports",
       "Daotsu Esports",
-      "Team oNe eSports",
+      "Team oNe",
       "DETONA Gaming",
       "Santos e-Sports",
       "UP e-Sports",
@@ -39714,7 +39719,7 @@
     "team": "HLTZINC",
     "nationality": "Algeria",
     "countryCode": "DZ",
-    "age": 31,
+    "age": 32,
     "role": "Entry",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -39881,7 +39886,7 @@
     "team": "无队伍",
     "nationality": "India",
     "countryCode": "IN",
-    "age": 26,
+    "age": 27,
     "role": "Unknown",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -40160,7 +40165,7 @@
       "Team EnVyUs",
       "Team LDLC.com",
       "Mercenary",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Nameless",
       "clan-mystik",
       "In Your Head",
@@ -40268,6 +40273,25 @@
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/22191/image/webp-396d0b6e7398071c866b380c73da0e50.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/28652/image/webp-c29ea1b819eb946e364797184ab86359.webp"
+  },
+  {
+    "id": "kiryasoo",
+    "nickname": "Kiryasoo",
+    "name": "Kirill Solovkov",
+    "team": "Team Spirit Academy",
+    "nationality": "Russian Federation",
+    "countryCode": "RU",
+    "age": 16,
+    "role": "AWPer",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "historicalTeams": [
+      "Team Spirit Academy White"
+    ],
+    "aliases": [
+      "Кирилл Соловков"
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/1309/image/31298dfc73c8f1de3f452f1d529f0344.png"
   },
   {
     "id": "kishi",
@@ -40435,7 +40459,7 @@
       "copenhagen wolves",
       "Isak-eSport",
       "NO SIR!",
-      "MyRevenge e.V. DK"
+      "myRevenge e.V. DK"
     ],
     "aliases": [
       "BJERKAI",
@@ -40557,7 +40581,7 @@
     "historicalTeams": [
       "Galaxy Racer Female",
       "Assassins",
-      "CLG Red",
+      "Counter Logic Gaming Red",
       "Team Karma"
     ],
     "aliases": [
@@ -40789,7 +40813,7 @@
     "team": "无队伍",
     "nationality": "Thailand",
     "countryCode": "TH",
-    "age": 28,
+    "age": 29,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -41208,7 +41232,7 @@
     "team": "无队伍",
     "nationality": "France",
     "countryCode": "FR",
-    "age": 35,
+    "age": 36,
     "role": "AWPer",
     "majorAppearances": 3,
     "majorWins": 0,
@@ -41616,7 +41640,7 @@
       "Mock-it Esports",
       "Smoke Criminals",
       "Wizards e-Sports Club",
-      "Elements Pro Gaming",
+      "EPG",
       "OnceAgainst",
       "OnceAgainst EU",
       "Fragsport",
@@ -41649,7 +41673,7 @@
       "MyGame Esports",
       "TENSE",
       "Lilmix.Ourplays",
-      "Unity",
+      "UNITY",
       "Not Academy",
       "Tempo Storm SE",
       "Rogue Academy",
@@ -42217,7 +42241,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Phantom",
+      "Phantom Esports",
       "Modern Players"
     ],
     "aliases": [
@@ -42356,7 +42380,7 @@
     "team": "Eternal Fire",
     "nationality": "Ukraine",
     "countryCode": "UA",
-    "age": 24,
+    "age": 25,
     "role": "Rifler",
     "majorAppearances": 1,
     "majorWins": 0,
@@ -42424,7 +42448,7 @@
     "id": "kwertzz",
     "nickname": "KWERTZZ",
     "name": "Simon Horák",
-    "team": "Unity",
+    "team": "UNITY",
     "nationality": "Czechia",
     "countryCode": "CZ",
     "age": 24,
@@ -42533,7 +42557,7 @@
     "id": "kylar",
     "nickname": "Kylar",
     "name": "Kacper Walukiewicz",
-    "team": "Phantom",
+    "team": "Phantom Esports",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 26,
@@ -43008,7 +43032,7 @@
       "EL'quvet",
       "forZe.FY",
       "FORZE",
-      "Elements Pro Gaming"
+      "EPG"
     ],
     "aliases": [
       "lazeika",
@@ -43442,7 +43466,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Chicago Chimera",
-      "EG"
+      "Evil Geniuses"
     ],
     "aliases": [
       "Pasha Lari",
@@ -43596,7 +43620,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Nexus Gaming",
-      "aimclub",
+      "Aimclub",
       "Revenant Esports",
       "BLEED Esports",
       "Team Falcons",
@@ -43817,7 +43841,7 @@
       "1leaf",
       "Nathan Orf"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/609/image/9cc88a3a756177de334f30a63b98e4db.png",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/24067/image/webp-b07b180451bda3a4f14895466f3b07ad.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/72985/image/webp-00ef9ef31c083a6cb56876dad26223b5.webp"
   },
   {
@@ -43869,7 +43893,7 @@
     "id": "leakz",
     "nickname": "Leakz",
     "name": "Jamie Bugge West Jensen",
-    "team": "ECHO",
+    "team": "BBL Esports",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 23,
@@ -43877,6 +43901,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "ECHO",
       "Tricked Esport",
       "WOPA Esport",
       "Alpha Gaming",
@@ -43887,7 +43912,7 @@
     "aliases": [
       "Jamie Bugge West Jensen"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/24570/image/webp-6cabeb73c934c8cc85afb394a9b166e3.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/25251/image/webp-e0125fddcdc4553cfbfdba57e291b6b1.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/34931/image/webp-892b5516e5e9b15d3e0021832b259440.webp"
   },
   {
@@ -44095,7 +44120,7 @@
     "id": "lekr0",
     "nickname": "Lekr0",
     "name": "Jonas Olofsson",
-    "team": "Johnny Speeds",
+    "team": "Speeds",
     "nationality": "Sweden",
     "countryCode": "SE",
     "age": 33,
@@ -44267,7 +44292,7 @@
     "id": "leomonster",
     "nickname": "Leomonster",
     "name": "Leonardo Enrique de Souza",
-    "team": "largadosypelados",
+    "team": "LargadosyPelados",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 23,
@@ -44444,7 +44469,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Unity",
+      "UNITY",
       "eSuba",
       "headhunterss",
       "ENTERPRISE esports",
@@ -44474,7 +44499,7 @@
       "Mythic",
       "Whatever It Takes",
       "Winterfox",
-      "Luminosity",
+      "Luminosity Gaming",
       "NetcodeGuides.com"
     ],
     "aliases": [
@@ -44513,7 +44538,7 @@
     "team": "THUNDER dOWNUNDER",
     "nationality": "Australia",
     "countryCode": "AU",
-    "age": 28,
+    "age": 29,
     "role": "Rifler",
     "majorAppearances": 8,
     "majorWins": 0,
@@ -44554,7 +44579,7 @@
       "n!faculty",
       "Absolute Legends",
       "Team X",
-      "RG-Esports",
+      "RG-eSports",
       "Begrip",
       "a2g",
       "ESC Gaming"
@@ -44963,7 +44988,7 @@
       "FunPlus Phoenix",
       "Fragsters",
       "Tricked Esport",
-      "Unity",
+      "UNITY",
       "North Academy",
       "FUAH",
       "X",
@@ -45309,7 +45334,7 @@
       "O Plano",
       "MIBR",
       "Imperial Esports",
-      "Luminosity",
+      "Luminosity Gaming",
       "Não Tem Como",
       "100 Thieves",
       "Immortals",
@@ -45701,7 +45726,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "ENTERPRISE Genesis",
-      "Unity",
+      "UNITY",
       "eSuba",
       "Dark Tigers",
       "Cryptova",
@@ -45818,7 +45843,7 @@
       "Team WinFakt",
       "paistit",
       "Power Gaming",
-      "EG",
+      "Evil Geniuses",
       "Crack Clan",
       "GamePlay.TV",
       "4Kings",
@@ -45839,7 +45864,7 @@
     "id": "lux",
     "nickname": "lux",
     "name": "Lucas Christofoletti Meneghini",
-    "team": "Luminosity",
+    "team": "Luminosity Gaming",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 24,
@@ -46033,7 +46058,7 @@
       "ACE Gaming",
       "Area 51 Gaming",
       "3DMAX",
-      "Fm!TOXiC",
+      "fm!TOXiC",
       "San Francisco Optx",
       "EFGaming"
     ],
@@ -46071,7 +46096,7 @@
     "id": "m1key",
     "nickname": "M1key",
     "name": "Jakub Krausko",
-    "team": "Unity",
+    "team": "UNITY",
     "nationality": "Slovakia",
     "countryCode": "SK",
     "age": 22,
@@ -46449,7 +46474,6 @@
       "Wanted Goons",
       "FlyQuest RED",
       "Counter Logic Gaming Red",
-      "CLG Red",
       "Please Send Help"
     ],
     "aliases": [
@@ -46493,7 +46517,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Epsilon eSports",
+      "Epsilon Esports",
       "ajukreizi",
       "Tricked Esport",
       "Escape Gaming",
@@ -46550,7 +46574,7 @@
     "historicalTeams": [
       "Lycus Empire",
       "LFO 4",
-      "Chill guys",
+      "Chill Guys",
       "Revenge Nation",
       "Datejust",
       "Hound",
@@ -46587,7 +46611,7 @@
     "id": "magila",
     "nickname": "MAGILA",
     "name": "Matas Magila",
-    "team": "PURE",
+    "team": "Azuolas",
     "nationality": "Lithuania",
     "countryCode": "LT",
     "age": 24,
@@ -46595,6 +46619,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "PURE",
       "Millennium Esports",
       "Fingers Crossed",
       "Lazer Cats",
@@ -46609,7 +46634,6 @@
     "aliases": [
       "Matas Magila"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/23113/image/webp-ebe398eb0aa2a648fc6128e6e25a610b.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/33000/image/webp-9b708b07d053d9f72fbc2babf7b0f1b8.webp"
   },
   {
@@ -46627,7 +46651,7 @@
       "Astralis",
       "Team Falcons",
       "Team Vitality",
-      "OpTic Gaming",
+      "OpTic",
       "North",
       "Team Dignitas",
       "SK Gaming",
@@ -46854,7 +46878,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Alliance",
-      "Johnny Speeds",
+      "Speeds",
       "GODSENT",
       "Young Gods",
       "Lilmix CaZa",
@@ -47133,7 +47157,7 @@
       "G2 Esports",
       "M80",
       "LOS",
-      "Team oNe eSports",
+      "Team oNe",
       "00 Nation",
       "Infinity eSports",
       "FULL SEND",
@@ -47160,7 +47184,7 @@
     "majorAppearances": 1,
     "majorWins": 0,
     "historicalTeams": [
-      "EG",
+      "Evil Geniuses",
       "G2 Esports",
       "3DMAX",
       "Team Envy",
@@ -47322,7 +47346,7 @@
       "VERTEX Esports Club",
       "renegades",
       "Grayhound Gaming",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Team ASDF",
       "ORGLESS WARRIORS",
       "Incept eSports"
@@ -47349,7 +47373,7 @@
       "inSanitY Sports",
       "Age Sports",
       "LOS + oNe",
-      "Team oNe eSports",
+      "Team oNe",
       "GameCrashers",
       "Army5 Gaming",
       "playArt",
@@ -47433,7 +47457,7 @@
     "historicalTeams": [
       "Team LDLC.com",
       "rogue",
-      "Unity",
+      "UNITY",
       "Team TBA",
       "Team EnVyUs",
       "titan",
@@ -47485,7 +47509,7 @@
     "historicalTeams": [
       "fnatic",
       "a2g",
-      "RG-Esports",
+      "RG-eSports",
       "Playzone"
     ],
     "aliases": [
@@ -47928,7 +47952,7 @@
       "Zomblers",
       "Spate Esports",
       "Cartel terraza",
-      "Infinity eSports"
+      "Infinity"
     ],
     "aliases": [
       "Bryan Valles Valenzuela"
@@ -48205,7 +48229,7 @@
       "Святаслаў Масько"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/22218/image/webp-239b86baa849b6da4911c1df5e5a3220.webp",
-    "imageUrl": "https://files.bo3.gg/uploads/player/31812/image/webp-4be26c3636198f7a674a7121869520f5.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/31812/image/webp-e12ac5f8ea194ac6532b115620520906.webp"
   },
   {
     "id": "matafe",
@@ -48337,7 +48361,7 @@
     "id": "maty",
     "nickname": "maty",
     "name": "Armandas Kneita",
-    "team": "PURE",
+    "team": "Azuolas",
     "nationality": "Lithuania",
     "countryCode": "LT",
     "age": 25,
@@ -48345,6 +48369,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "PURE",
       "LT5",
       "Entropy Gaming",
       "SD Invicta",
@@ -48357,7 +48382,6 @@
     "aliases": [
       "Armandas Kneita"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/23113/image/webp-ebe398eb0aa2a648fc6128e6e25a610b.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/25679/image/webp-69ddf32b81a4934db67b9e070ac6ea59.webp"
   },
   {
@@ -48628,7 +48652,7 @@
       "Max Jim Jonas Jansson"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/3254/image/webp-0cb971f64329d464365ebe3bdeaacea9.webp",
-    "imageUrl": "https://files.bo3.gg/uploads/player/31156/image/webp-ed4dc0dbf146e4fc3266bc469139fd3d.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/31156/image/webp-7ff53d57e9d18d5be13fcac3aad5905b.webp"
   },
   {
     "id": "maxx",
@@ -48700,7 +48724,6 @@
     "historicalTeams": [
       "Looking For Orgre",
       "Chiefs Esports Club",
-      "Chiefs ESC",
       "Dire Wolves",
       "Ground Zero Gaming",
       "Genuine Gaming",
@@ -48826,7 +48849,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Team oNe eSports",
+      "Team oNe",
       "Red Reserve",
       "Orbit Esport",
       "g3nerationX",
@@ -49043,7 +49066,7 @@
     "id": "melavi",
     "nickname": "Melavi",
     "name": "Patryk Baranski",
-    "team": "Mai Tai",
+    "team": "yologang",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 23,
@@ -49264,7 +49287,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "LFO 4",
-      "Chill guys",
+      "Chill Guys",
       "Revenge Nation",
       "DASH",
       "L&G",
@@ -49387,7 +49410,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Complexity Gaming",
+      "compLexity Gaming",
       "JaX Money Crew",
       "New York 3D",
       "Team 3D",
@@ -49579,7 +49602,7 @@
     "historicalTeams": [
       "IKLA",
       "MAD Lions",
-      "EG",
+      "Evil Geniuses",
       "Team Envy",
       "Virtus.pro",
       "Team Kinguin",
@@ -49739,7 +49762,7 @@
     "aliases": [
       "Mikael Gaup"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/609/image/9cc88a3a756177de334f30a63b98e4db.png",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/24067/image/webp-b07b180451bda3a4f14895466f3b07ad.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/18346/do1_q4426.1000x563.png"
   },
   {
@@ -50280,7 +50303,7 @@
     "team": "YUME",
     "nationality": "Spain",
     "countryCode": "ES",
-    "age": 32,
+    "age": 33,
     "role": "AWPer",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -50383,7 +50406,7 @@
       "Platinium-Servers",
       "Melty eSport Club",
       "webSPELL",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "clan-mystik"
     ],
     "aliases": [
@@ -50548,10 +50571,10 @@
       "cloud9",
       "movistar riders",
       "G2 Esports",
-      "OpTic Gaming",
+      "OpTic",
       "gBots eSports Club",
       "x6tence",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Atlantis Esports",
       "overGaming",
       "34united Club",
@@ -50609,7 +50632,7 @@
       "Дмитрий Кондратьев"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/2720/image/f958862f2e46f042058744c797bd9b8c.png",
-    "imageUrl": "https://files.bo3.gg/uploads/player/31632/image/webp-fd40682452e0707853cfb4a0fdf0d391.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/31632/image/webp-a084435c356106d46b7079b60a9b403c.webp"
   },
   {
     "id": "mizzy",
@@ -50810,9 +50833,9 @@
       "FlipSid3 Tactics",
       "fnatic",
       "SY_b",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "ESC Gaming",
-      "RG-Esports",
+      "RG-eSports",
       "Alchemists Unleashed",
       "Meet Your Makers",
       "H2k",
@@ -51347,7 +51370,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Unity",
+      "UNITY",
       "SINNERS Esports",
       "ENTERPRISE esports",
       "entropiq",
@@ -51424,7 +51447,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "88-Gaming",
+      "88-gaming",
       "FORZE",
       "RuSh3D",
       "emax",
@@ -51784,7 +51807,7 @@
       "South",
       "GORILLAZ",
       "North",
-      "OpTic Gaming",
+      "OpTic",
       "rogue",
       "Team Dignitas",
       "copenhagen wolves",
@@ -51800,7 +51823,7 @@
       "MoD-eSport.mix",
       "DSRack",
       "Badboyk",
-      "Speedgaming"
+      "SpeedGaming"
     ],
     "aliases": [
       "Mathias Sommer Lauridsen"
@@ -51880,7 +51903,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "nerve",
-      "EG"
+      "Evil Geniuses"
     ],
     "aliases": [
       "Ronan Ryan"
@@ -52013,7 +52036,7 @@
     "team": "Solid-Ch",
     "nationality": "Brazil",
     "countryCode": "BR",
-    "age": 24,
+    "age": 25,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -52112,7 +52135,7 @@
     "id": "mwlky",
     "nickname": "mwlky",
     "name": "Łukasz Pachucki",
-    "team": "Phantom",
+    "team": "Phantom Esports",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 23,
@@ -52153,11 +52176,11 @@
     "historicalTeams": [
       "Anexis eSports",
       "mousesports",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Power Gaming",
       "Team Dignitas",
       "Crack Clan",
-      "Fm!TOXiC",
+      "fm!TOXiC",
       "Level??",
       "Landed"
     ],
@@ -52195,7 +52218,7 @@
     "id": "mynio",
     "nickname": "mynio",
     "name": "Wiktor Kruk",
-    "team": "Phantom",
+    "team": "Phantom Esports",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 30,
@@ -52361,7 +52384,7 @@
     "majorAppearances": 10,
     "majorWins": 0,
     "historicalTeams": [
-      "Complexity Gaming",
+      "compLexity Gaming",
       "cloud9",
       "Quantic Gaming",
       "Lurking and Working",
@@ -52369,7 +52392,7 @@
       "TEAM4NOT",
       "Maximum Effort",
       "Back2Back Gaming",
-      "EG",
+      "Evil Geniuses",
       "X3O Gaming",
       "Turmoil",
       "CheckSix Gaming"
@@ -52568,7 +52591,7 @@
       "Legacy",
       "Fake Natty",
       "00 Nation",
-      "largadosypelados",
+      "LargadosyPelados",
       "Young Gods",
       "The Union",
       "NineNine"
@@ -52608,7 +52631,7 @@
     "team": "BESTIA",
     "nationality": "Argentina",
     "countryCode": "AR",
-    "age": 22,
+    "age": 23,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -52643,12 +52666,12 @@
     "majorWins": 0,
     "historicalTeams": [
       "renegades",
-      "OpTic Gaming",
+      "OpTic",
       "Conquest",
       "Sponsorless",
       "Elevate",
-      "Luminosity",
-      "Chill guys",
+      "Luminosity Gaming",
+      "Chill Guys",
       "Denial eSports",
       "LunatiK eSports",
       "High Rollers Gaming",
@@ -52726,7 +52749,7 @@
     "team": "Mai Tai",
     "nationality": "Poland",
     "countryCode": "PL",
-    "age": 24,
+    "age": 25,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -52956,7 +52979,7 @@
       "Liquid Ice",
       "Allstars",
       "Lahti eSports",
-      "ironZion",
+      "IronZion",
       "Excello",
       "Coercere"
     ],
@@ -52992,7 +53015,7 @@
     "id": "nawwk",
     "nickname": "nawwk",
     "name": "Tim Carl Jonasson",
-    "team": "Johnny Speeds",
+    "team": "Speeds",
     "nationality": "Sweden",
     "countryCode": "SE",
     "age": 28,
@@ -53224,7 +53247,7 @@
     "historicalTeams": [
       "1win Team",
       "GamerLegion",
-      "EG",
+      "Evil Geniuses",
       "K23",
       "Syman Gaming",
       "zARLANS"
@@ -53402,7 +53425,6 @@
       "paiN Gaming",
       "O Plano",
       "Luminosity Gaming",
-      "Luminosity",
       "Cyclone",
       "TEAMMATE",
       "T Show",
@@ -53542,7 +53564,7 @@
     "majorAppearances": 2,
     "majorWins": 0,
     "historicalTeams": [
-      "Unity",
+      "UNITY",
       "SINNERS Esports",
       "Dynamo Eclot",
       "into the breach",
@@ -54113,7 +54135,7 @@
       "Winstrike Team",
       "pro100",
       "Monolith Gaming",
-      "Elements Pro Gaming",
+      "EPG",
       "Team Spirit Academy",
       "Team1337",
       "RuSh3D",
@@ -54154,7 +54176,7 @@
     "id": "nickyb",
     "nickname": "NickyB",
     "name": "Nicky Bruhn",
-    "team": "ECHO",
+    "team": "BBL Esports",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 21,
@@ -54162,6 +54184,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "ECHO",
       "Tricked Esport",
       "Prestige Esport",
       "Floki Esport"
@@ -54169,7 +54192,7 @@
     "aliases": [
       "Nicky Bruhn"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/24570/image/webp-6cabeb73c934c8cc85afb394a9b166e3.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/25251/image/webp-e0125fddcdc4553cfbfdba57e291b6b1.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/52435/image/webp-2b0bc77213b5179c07211dbc5a7a7563.webp"
   },
   {
@@ -54187,7 +54210,7 @@
       "HastaLaVista",
       "Team Dignitas",
       "copenhagen wolves",
-      "Leftoverz",
+      "LeftoverZ",
       "Western Wolves",
       "Anexis eSports"
     ],
@@ -54199,7 +54222,7 @@
     "id": "nicoodoz",
     "nickname": "nicoodoz",
     "name": "Nico Tamjidi",
-    "team": "Phantom",
+    "team": "Phantom Esports",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 26,
@@ -54259,7 +54282,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Passion UA",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "timbermen",
       "Life's A Game",
       "Take Flyte",
@@ -54432,7 +54455,7 @@
     "team": "Lazer Cats",
     "nationality": "Ukraine",
     "countryCode": "UA",
-    "age": 19,
+    "age": 20,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -54463,7 +54486,7 @@
       "Athletico Esports",
       "Team Exile5",
       "Team Skyfire",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Control e-Sports",
       "Dire Wolves"
     ],
@@ -54491,7 +54514,7 @@
       "00 Nation",
       "OG",
       "Heroic",
-      "OpTic Gaming",
+      "OpTic",
       "rogue",
       "North",
       "Tricked Esport",
@@ -54612,7 +54635,7 @@
       "DETONA Gaming",
       "Isurus Gaming",
       "x6tence",
-      "Team oNe eSports",
+      "Team oNe",
       "Guerreros del Mouse",
       "Furious Gaming",
       "Perfectionvore"
@@ -54669,7 +54692,7 @@
       "Linus Bergman"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/759/image/webp-1bfbd1b3d4fd35e75a874b7d032a0353.webp",
-    "imageUrl": "https://files.bo3.gg/uploads/player/29248/image/webp-2a580b38ccb44caded7f571e9ffd8aba.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/29248/image/webp-c5052cf232c6b075ddf98047c6dcb354.webp"
   },
   {
     "id": "nilsson",
@@ -54736,9 +54759,9 @@
     "historicalTeams": [
       "Good Guys",
       "SK Gaming",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "X3O Gaming",
-      "EG"
+      "Evil Geniuses"
     ],
     "aliases": [
       "Ryan Bell"
@@ -54933,7 +54956,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Unity",
+      "UNITY",
       "Dark Tigers",
       "ENTERPRISE esports",
       "headhunterss",
@@ -55047,7 +55070,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Team Liquid",
-      "Chill guys",
+      "Chill Guys",
       "Denial eSports",
       "Torqued",
       "ibuypower",
@@ -55851,7 +55874,7 @@
       "Евгений Ермолин"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/2924/image/webp-c99e6e349fa66ece9a97d9d47a406986.webp",
-    "imageUrl": "https://files.bo3.gg/uploads/player/29992/image/webp-7aa692efba04dd1432094afc6ac2c5a8.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/29992/image/webp-d014fe6b3c9617e914bcfff4777f990e.webp"
   },
   {
     "id": "nosrac",
@@ -56134,7 +56157,7 @@
       "Lucas Soares Assumpção e Silva"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/755/image/webp-84e170577e1c963891b1c54b21fceb83.webp",
-    "imageUrl": "https://files.bo3.gg/uploads/player/30006/image/webp-0c080b90cd8a7f7113a55e0c493a4bf9.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/30006/image/webp-c46c45f11d2cb9a4f3080771c47f9d78.webp"
   },
   {
     "id": "nsty",
@@ -56426,8 +56449,8 @@
     "majorAppearances": 2,
     "majorWins": 0,
     "historicalTeams": [
-      "EG",
-      "Complexity Gaming",
+      "Evil Geniuses",
+      "compLexity Gaming",
       "Old Guys Club",
       "FeelsUnderAgeMan",
       "Guerrilla Tactics",
@@ -56590,7 +56613,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Avant Gaming",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "ICON Esports",
       "Tainted Minds",
       "Animal Squad",
@@ -56882,7 +56905,7 @@
       "Absolute Legends",
       "H2k",
       "a2g",
-      "RG-Esports"
+      "RG-eSports"
     ],
     "aliases": [
       "olof",
@@ -57648,7 +57671,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Infinity eSports",
+      "Infinity",
       "Supremacy Gaming",
       "Shot eSports"
     ],
@@ -57806,7 +57829,7 @@
     "historicalTeams": [
       "Vengeance",
       "Evolution",
-      "Windigo Academy",
+      "Windigo.A",
       "eXplosive",
       "Art of Cybergame",
       "Amazing Gaming"
@@ -58117,7 +58140,7 @@
       "mouseSpaz",
       "The Stream Team",
       "Ultimax Gaming",
-      "EG",
+      "Evil Geniuses",
       "SK Gaming",
       "Damage INC",
       "Loaded",
@@ -58140,7 +58163,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "ProGaming Esports",
-      "Team oNe eSports",
+      "Team oNe",
       "g3nerationX",
       "NeedJobs",
       "Santos Dexterity",
@@ -58269,7 +58292,7 @@
       "LOS + oNe",
       "Imperial Esports",
       "Last Dance",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "MAD Lions",
       "Heroic",
       "TYLOO",
@@ -58307,7 +58330,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Unity",
+      "UNITY",
       "ENTERPRISE esports",
       "eSuba",
       "Team Sampi",
@@ -58334,7 +58357,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Respawn Ninja Black",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "SYF Gaming",
       "Onestop",
       "Team Exile5",
@@ -58416,7 +58439,7 @@
       "Ground Zero Gaming",
       "Athletico Esports",
       "PGTV",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Avant Garde",
       "Team Skyfire"
     ],
@@ -58698,7 +58721,7 @@
       "Age Sports",
       "LOS",
       "LOS + oNe",
-      "Team oNe eSports",
+      "Team oNe",
       "RED Canids",
       "Turma do Pagode",
       "No2B e-Sports Clube",
@@ -58853,7 +58876,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "nerve",
-      "EG"
+      "Evil Geniuses"
     ],
     "aliases": [
       "Vunya Griffith"
@@ -58959,7 +58982,7 @@
     "id": "phx",
     "nickname": "phx",
     "name": "Gustavo Antonio Merigo",
-    "team": "Pugdesonesto",
+    "team": "???",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 27,
@@ -58967,6 +58990,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "Pugdesonesto",
       "CEBOLOS",
       "MIBR Academy",
       "Rehl Esports",
@@ -58979,7 +59003,6 @@
     "aliases": [
       "Gustavo Antonio Merigo"
     ],
-    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/133388/get_team_logos.png",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/26617/ex3k_x_yd1_400x400.png"
   },
   {
@@ -59115,7 +59138,7 @@
       "Team Liquid",
       "SK Gaming",
       "copenhagen wolves",
-      "Leftoverz",
+      "LeftoverZ",
       "Reason Gaming",
       "3DMAX",
       "unu.AiN",
@@ -59267,7 +59290,7 @@
       "Lemondogs",
       "Absolute Legends",
       "X",
-      "Concode",
+      "concode",
       "fnatic",
       "RAGE",
       "Meet Your Makers",
@@ -59327,7 +59350,7 @@
       "paiN Gaming",
       "Team Wild",
       "Virtue Gaming",
-      "Luminosity",
+      "Luminosity Gaming",
       "WinOut.net",
       "g3nerationX",
       "Desempregados",
@@ -59504,17 +59527,20 @@
     "id": "pleynnn",
     "nickname": "pleynnn",
     "name": "Artur Syzdykov",
-    "team": "CYBERSHOKE Prospects",
+    "team": "UPGRADE Team",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 17,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
+    "historicalTeams": [
+      "CYBERSHOKE Prospects"
+    ],
     "aliases": [
       "Артур Сыздыков"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/21752/image/webp-d62c4cfdd95567e786d38ae14a88e2a3.webp"
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/25212/image/webp-a1716a57fe225942b781f18550dfacb6.webp"
   },
   {
     "id": "plopski",
@@ -59668,7 +59694,7 @@
     "team": "无队伍",
     "nationality": "Japan",
     "countryCode": "JP",
-    "age": 28,
+    "age": 29,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -59720,6 +59746,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "JERSA ESPORTS",
+      "Infinity",
       "Infinity eSports",
       "FULL SEND",
       "Cartel Bowlcuts",
@@ -59749,7 +59776,7 @@
     "historicalTeams": [
       "tsm",
       "fnatic",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Windigo Gaming",
       "BPro Gaming"
     ],
@@ -59787,7 +59814,7 @@
     "id": "pol0",
     "nickname": "Pol0",
     "name": "Marco Hernandez",
-    "team": "Winners",
+    "team": "WINNERS",
     "nationality": "United States",
     "countryCode": "US",
     "age": 24,
@@ -59836,7 +59863,7 @@
     "id": "polbandana",
     "nickname": "Polbandana",
     "name": "Zakhar Siledchyk",
-    "team": "Lazer Cats",
+    "team": "PURE",
     "nationality": "Ukraine",
     "countryCode": "UA",
     "age": 22,
@@ -59854,7 +59881,7 @@
     "aliases": [
       "Захар Сіледчик"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/5391/image/3ccf372cc1bca18dd3c93bb0db29b241.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/23113/image/webp-ebe398eb0aa2a648fc6128e6e25a610b.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/34915/image/webp-0c766471c5a3d449355a303f6bc6c8cd.webp"
   },
   {
@@ -60036,7 +60063,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "RG-Esports",
+      "RG-eSports",
       "Begrip",
       "H2k Gaming",
       "CAI"
@@ -60573,7 +60600,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "hypewrld",
-      "88-Gaming",
+      "88-gaming",
       "Vyalie Pitoni",
       "House Club",
       "pro100 Academy",
@@ -60656,7 +60683,7 @@
     "majorAppearances": 1,
     "majorWins": 0,
     "historicalTeams": [
-      "Complexity Gaming",
+      "compLexity Gaming",
       "NRG",
       "Muffin Lightning",
       "splyce",
@@ -60723,7 +60750,7 @@
       "Absolute Legends",
       "a2g",
       "ESC Gaming",
-      "RG-Esports",
+      "RG-eSports",
       "Swedish Housemafia",
       "Begrip",
       "H2k Gaming",
@@ -60751,7 +60778,7 @@
       "NASR Esports",
       "Trident Clan",
       "1WIN",
-      "MelBet Team",
+      "Melbet Team",
       "OwmS",
       "Monolith Gaming",
       "Spartak Esports"
@@ -60774,7 +60801,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "largadosypelados",
+      "LargadosyPelados",
       "Crashers",
       "América eSports",
       "Sensei Team",
@@ -60862,7 +60889,7 @@
       "TropiCaos",
       "Sojoga",
       "FreeStyle",
-      "Team oNe eSports",
+      "Team oNe",
       "DETONA Gaming",
       "Circa eSports",
       "C4 Gaming",
@@ -60965,14 +60992,14 @@
       "Riot Squad Esports",
       "Test Takers",
       "Team Dignitas",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "NRG",
       "Method",
       "splyce",
       "FolloweSports.com",
       "eLevate",
       "Mythic",
-      "Luminosity",
+      "Luminosity Gaming",
       "Counter Logic Gaming",
       "mouseSpaz",
       "Team JusTus",
@@ -61111,6 +61138,33 @@
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/20024/image/webp-3b9d65f29b1068343a52b4d22b9c6f53.webp"
   },
   {
+    "id": "puni",
+    "nickname": "puni",
+    "name": "Victor Marques",
+    "team": "Alka Esports",
+    "nationality": "Brazil",
+    "countryCode": "BR",
+    "age": 26,
+    "role": "Rifler",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "historicalTeams": [
+      "BURN",
+      "OneMore eSports",
+      "C4 BASE",
+      "Los Grandes Academy",
+      "Arctic eSports",
+      "Redragon Academy",
+      "Redragon",
+      "Keyd Stars"
+    ],
+    "aliases": [
+      "Victor Marques"
+    ],
+    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/138276/338586.png",
+    "imageUrl": "https://cdn-api.pandascore.co/images/player/image/29461/lzj_uh_al_x.png"
+  },
+  {
     "id": "pupcake",
     "nickname": "pupcake",
     "name": "Kevin Henning",
@@ -61153,7 +61207,7 @@
       "Luka Eklund"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/36/image/648d1128f28e25688996e78e1cc0663b.png",
-    "imageUrl": "https://files.bo3.gg/uploads/player/34882/image/webp-793d6819f85bbe7aa7070bc218084494.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/34882/image/webp-4e63491a7f1ec441e116c14ebf0f872b.webp"
   },
   {
     "id": "pwnalone",
@@ -61238,7 +61292,7 @@
       "Ninjas in Pyjamas",
       "Winterfox",
       "Mythic",
-      "Luminosity",
+      "Luminosity Gaming",
       "GreyFaceNoSpace",
       "Team Orbit",
       "Unwanted",
@@ -61549,7 +61603,7 @@
       "qqGODx",
       "Иван Ивлев"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/18940/image/webp-cd1f5419f83048c16cc0c8763adf11d0.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/18940/image/webp-73c18efabc1fa5260862e8b406b16c62.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/33653/image/webp-255e9500a9ff68c7f5247cbce35a566f.webp"
   },
   {
@@ -62277,7 +62331,7 @@
     "id": "rack",
     "nickname": "Rack",
     "name": "Elias Karttunen",
-    "team": "Johnny Speeds",
+    "team": "Speeds",
     "nationality": "Sweden",
     "countryCode": "SE",
     "age": 22,
@@ -62400,7 +62454,7 @@
       "SAW Youngsters",
       "OFFSET Esports",
       "Galatics Esports Club",
-      "PRoNetAgEm",
+      "pRoNetAgEm",
       "XF Iberia Esports"
     ],
     "aliases": [
@@ -62452,7 +62506,7 @@
       "Hard Legion Esports",
       "Project X",
       "WaitForTag",
-      "Windigo Academy",
+      "Windigo.A",
       "Lin4evateli",
       "Vengeance",
       "Victory eSports",
@@ -62495,7 +62549,7 @@
     "id": "ragga",
     "nickname": "ragga",
     "name": "Cosmin Teodorescu",
-    "team": "aimclub",
+    "team": "Aimclub",
     "nationality": "Romania",
     "countryCode": "RO",
     "age": 26,
@@ -62596,7 +62650,7 @@
     "team": "100 Thieves",
     "nationality": "Norway",
     "countryCode": "NO",
-    "age": 31,
+    "age": 32,
     "role": "IGL",
     "majorAppearances": 19,
     "majorWins": 1,
@@ -62623,7 +62677,7 @@
     "id": "rainwaker",
     "nickname": "Rainwaker",
     "name": "Aleks Ognyanov Petrov",
-    "team": "Luminosity",
+    "team": "Luminosity Gaming",
     "nationality": "Bulgaria",
     "countryCode": "BG",
     "age": 25,
@@ -62825,7 +62879,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Golden Knights Gaming",
-      "88-Gaming",
+      "88-gaming",
       "Syman Gaming",
       "LAN DODGERS",
       "Tengri",
@@ -63229,7 +63283,7 @@
       "Sequential Gaming",
       "vox eminor",
       "fSociety",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Dire Wolves"
     ],
     "aliases": [
@@ -63451,7 +63505,7 @@
     "majorAppearances": 1,
     "majorWins": 0,
     "historicalTeams": [
-      "largadosypelados",
+      "LargadosyPelados",
       "Nitro.GG",
       "UNO MILLE",
       "Vikings KR",
@@ -63855,7 +63909,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "CLG Red"
+      "Counter Logic Gaming Red"
     ],
     "aliases": [
       "Jennifer Le"
@@ -63909,13 +63963,13 @@
     "historicalTeams": [
       "9INE",
       "Preasy Esport",
-      "EG",
+      "Evil Geniuses",
       "sprout",
       "Heroic",
       "MAD Lions",
       "x6tence",
       "copenhagen flames",
-      "OpTic Gaming",
+      "OpTic",
       "Fragsters",
       "Tricked Esport",
       "Team Singularity",
@@ -64675,7 +64729,7 @@
     "team": "无队伍",
     "nationality": "Finland",
     "countryCode": "FI",
-    "age": 36,
+    "age": 37,
     "role": "Unknown",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -64751,7 +64805,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Ninjas in Pyjamas",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Cringe Gods"
     ],
     "aliases": [
@@ -64905,7 +64959,7 @@
       "Mindfreak",
       "Team Aftershock",
       "ORDER",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "rogue",
       "Counter Logic Gaming",
       "renegades",
@@ -64951,7 +65005,7 @@
     "team": "无队伍",
     "nationality": "India",
     "countryCode": "IN",
-    "age": 33,
+    "age": 34,
     "role": "AWPer",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -65309,7 +65363,7 @@
     "team": "LAGUNA",
     "nationality": "Belgium",
     "countryCode": "BE",
-    "age": 27,
+    "age": 28,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -65323,7 +65377,7 @@
       "LowLandLions",
       "BENELUX5",
       "Tenerife Titans",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "dizLown",
       "Sector One"
     ],
@@ -65469,7 +65523,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Johnny Speeds",
+      "Speeds",
       "GODSENT",
       "Team 7AM",
       "00 Prospects",
@@ -65480,7 +65534,7 @@
       "Kalle Johansson"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/3254/image/webp-0cb971f64329d464365ebe3bdeaacea9.webp",
-    "imageUrl": "https://files.bo3.gg/uploads/player/32517/image/webp-33f4dc8944bbbcfc66b3cf476314bcfd.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/32517/image/webp-f2de4f8987fee1d684157e8915a0d081.webp"
   },
   {
     "id": "robby",
@@ -65536,7 +65590,7 @@
       "MANS NOT HOT",
       "Team Endpoint",
       "Team Ancient",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Team Singularity",
       "The Gatekeepers",
       "fightclub",
@@ -65674,7 +65728,7 @@
       "Team Dignitas",
       "splyce",
       "Echo Fox",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Maximum Effort",
       "Tempo Storm",
       "Elevate",
@@ -66232,7 +66286,7 @@
       "verygames",
       "ROCCAT",
       "Nameless",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "H2k Gaming",
       "STUD",
       "Zback",
@@ -66294,7 +66348,7 @@
     "id": "ruben",
     "nickname": "rubeN",
     "name": "Cai Xiaohan",
-    "team": "XDM",
+    "team": "TEAM XDM",
     "nationality": "China",
     "countryCode": "CN",
     "age": 27,
@@ -66302,6 +66356,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "Wept Xyloid Melancholy",
       "Take Me Away Gaming",
       "Morningstar",
       "Kaleido Gaming",
@@ -66434,11 +66489,11 @@
     "historicalTeams": [
       "Nouns Esports",
       "Party Astronauts",
-      "EG",
+      "Evil Geniuses",
       "Evil Geniuses Black",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "cloud9",
-      "OpTic Gaming",
+      "OpTic",
       "Conquest",
       "Sponsorless",
       "Elevate",
@@ -66697,7 +66752,7 @@
     "team": "无队伍",
     "nationality": "Brazil",
     "countryCode": "BR",
-    "age": 32,
+    "age": 33,
     "role": "Entry",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -66799,7 +66854,7 @@
       "splyce",
       "Echo Fox",
       "Torqued",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Conquest",
       "Sponsorless",
       "Tempo Storm",
@@ -66852,7 +66907,7 @@
     "team": "Isurus Gaming",
     "nationality": "Argentina",
     "countryCode": "AR",
-    "age": 21,
+    "age": 22,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -66905,7 +66960,7 @@
       "Team Envy",
       "Test Takers",
       "Old Guys Club",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Naventic"
     ],
     "aliases": [
@@ -67240,7 +67295,7 @@
     "id": "sa1nty",
     "nickname": "Sa1nTy",
     "name": "Grigoriy Chernev",
-    "team": "BAKS Esports",
+    "team": "Saint Sinners",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 20,
@@ -67248,12 +67303,11 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Saint Sinners"
+      "BAKS Esports"
     ],
     "aliases": [
       "Григорий Чернев"
-    ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/2924/image/webp-c99e6e349fa66ece9a97d9d47a406986.webp"
+    ]
   },
   {
     "id": "saadzin",
@@ -67534,14 +67588,15 @@
     "id": "salazar",
     "nickname": "salazar",
     "name": "Jason Salazar",
-    "team": "ECHO",
+    "team": "BBL Esports",
     "nationality": "Denmark",
     "countryCode": "DK",
-    "age": 21,
+    "age": 22,
     "role": "AWPer",
     "majorAppearances": 1,
     "majorWins": 0,
     "historicalTeams": [
+      "ECHO",
       "Tricked Esport",
       "Gaimin Gladiators",
       "ECSTATIC",
@@ -67556,7 +67611,7 @@
       "Sa!azaR",
       "Sa1azaR"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/24570/image/webp-6cabeb73c934c8cc85afb394a9b166e3.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/25251/image/webp-e0125fddcdc4553cfbfdba57e291b6b1.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/31961/image/webp-5b3b0449c97058b250e1a8b7cd6334e1.webp"
   },
   {
@@ -67701,7 +67756,7 @@
       "Ghost Gaming",
       "Pnda Gaming",
       "Muffin Lightning",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Maximum Effort",
       "Nihilum Gaming",
       "Denial eSports",
@@ -67811,7 +67866,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "1win Team",
-      "MelBet Team",
+      "Melbet Team",
       "Virtus.pro",
       "avangar",
       "Syman Gaming"
@@ -67892,7 +67947,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Johnny Speeds",
+      "Speeds",
       "Metizport",
       "EYEBALLERS",
       "Young Ninjas",
@@ -68186,7 +68241,7 @@
     "team": "eSuba",
     "nationality": "Slovakia",
     "countryCode": "SK",
-    "age": 22,
+    "age": 23,
     "role": "Unknown",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -68611,7 +68666,7 @@
       "Titan",
       "Gamers2",
       "Team Kinguin",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "BST",
       "verygames",
       "Imaginary Gaming",
@@ -69073,7 +69128,7 @@
       "Team Envy",
       "Splyce",
       "Team SoloMid",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Maximum Effort",
       "Nihilum Gaming",
       "cloud9",
@@ -69104,7 +69159,7 @@
     "historicalTeams": [
       "M1X",
       "bad news eagles",
-      "aimclub",
+      "Aimclub",
       "DRILLAS",
       "Guild Eagles",
       "Team BLINK",
@@ -69435,7 +69490,7 @@
     "majorAppearances": 2,
     "majorWins": 0,
     "historicalTeams": [
-      "Epsilon eSports",
+      "Epsilon Esports",
       "BST",
       "clan-mystik",
       "LDLC.com",
@@ -69459,7 +69514,7 @@
     "historicalTeams": [
       "amkal esports",
       "DMS",
-      "MelBet Team",
+      "Melbet Team",
       "IookingForOrg",
       "flowstate",
       "Neon Rangers",
@@ -69516,7 +69571,7 @@
       "Echo Fox",
       "Torqued",
       "cloud9",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Quantic Gaming",
       "Lurking and Working",
       "4Nothing",
@@ -69664,7 +69719,7 @@
     "id": "shadiy",
     "nickname": "shadiy",
     "name": "Martins Gūtmanis",
-    "team": "SemperFi Esports",
+    "team": "Alter Ego",
     "nationality": "Latvia",
     "countryCode": "LV",
     "age": 23,
@@ -69672,6 +69727,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "SemperFi Esports",
       "Soda Gaming",
       "MALCO",
       "Gucci Gaming Academy",
@@ -69680,7 +69736,7 @@
     "aliases": [
       "Martins Gūtmanis"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/11042/image/webp-f92cc5eb685ca52411b75a10af659111.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/4170/image/webp-5286adf6a88fa070ea8c355e5adbe22e.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/29280/image/webp-7ff7c0d26760943107daa567cef49862.webp"
   },
   {
@@ -69698,7 +69754,7 @@
       "No Limit Gaming",
       "GameAgents",
       "Wizards e-Sports Club",
-      "Unity",
+      "UNITY",
       "Not Academy",
       "Tempo Storm SE",
       "Rogue Academy",
@@ -69747,7 +69803,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Chicago Chimera",
-      "EG",
+      "Evil Geniuses",
       "Team 3D",
       "NoA",
       "zEx"
@@ -69768,8 +69824,8 @@
     "majorAppearances": 5,
     "majorWins": 0,
     "historicalTeams": [
-      "Complexity Gaming",
-      "OpTic Gaming",
+      "compLexity Gaming",
+      "OpTic",
       "Misfits Gaming",
       "Team SoloMid",
       "Echo Fox",
@@ -69873,7 +69929,7 @@
       "Shane Dressler"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/21550/image/webp-390c8d6d840faad43f69aea15e6c4802.webp",
-    "imageUrl": "https://files.bo3.gg/uploads/player/27443/image/webp-3e4d7fbbf2573c54b3f6709618e7e073.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/27443/image/webp-e7e27d96dff1ae80e1157eeb3a954ceb.webp"
   },
   {
     "id": "shaney",
@@ -69926,7 +69982,7 @@
     "historicalTeams": [
       "ESC Gaming",
       "Cossacks",
-      "Windigo Academy",
+      "Windigo.A",
       "Spray'n'pray",
       "FlipSid3 Tactics",
       "KerchNET"
@@ -70213,7 +70269,7 @@
     "team": "无队伍",
     "nationality": "France",
     "countryCode": "FR",
-    "age": 37,
+    "age": 38,
     "role": "Unknown",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -70237,7 +70293,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Johnny Speeds",
+      "Speeds",
       "Metizport",
       "EYEBALLERS",
       "AURA",
@@ -70278,7 +70334,7 @@
       "rogue",
       "Enigma6 Group",
       "eUnited",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Denial eSports",
       "Trifecta Gaming",
       "Casaless",
@@ -70435,7 +70491,7 @@
       "verygames",
       "redLine",
       "Crack Clan",
-      "Epsilon eSports"
+      "Epsilon Esports"
     ],
     "aliases": [
       "Ludovic Martin"
@@ -70553,7 +70609,7 @@
     "team": "MIBR",
     "nationality": "Brazil",
     "countryCode": "BR",
-    "age": 33,
+    "age": 34,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -70605,7 +70661,7 @@
       "Team EnVyUs",
       "Team LDLC.com",
       "Mercenary",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "clan-mystik",
       "verygames",
       "TCM-Gaming",
@@ -70700,7 +70756,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "cloud9",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Manajuma",
       "Exertus eSports",
       "Slow Motion"
@@ -70835,14 +70891,14 @@
       "BOOM Esports",
       "intz",
       "Keyd Stars",
-      "Inflames",
+      "inflames",
       "Imperial Esports",
       "YeaH! Gaming",
       "Dereguedere",
       "Tempo Storm",
       "Immortals",
       "paiN Gaming",
-      "Luminosity",
+      "Luminosity Gaming",
       "Remo Brave e-Sports",
       "MK3 e-Sports"
     ],
@@ -70864,7 +70920,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Chaos Esports Club",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "rogue",
       "Misfits Gaming",
       "Team SoloMid",
@@ -70952,7 +71008,7 @@
       "Trident Esports",
       "vox eminor",
       "fSociety",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Dire Wolves"
     ],
     "aliases": [
@@ -71193,7 +71249,7 @@
       "LowLandLions",
       "BENELUX5",
       "Tenerife Titans",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "dizLown",
       "Sector One",
       "Spawn eSport",
@@ -71304,6 +71360,26 @@
     "imageUrl": "https://files.bo3.gg/uploads/player/35926/image/webp-c4dc94538a304efe128fa0cb1dabddf8.webp"
   },
   {
+    "id": "sirius",
+    "nickname": "sirius",
+    "name": "Emil Standal",
+    "team": "INFURITY Gaming",
+    "nationality": "Norway",
+    "countryCode": "NO",
+    "age": 31,
+    "role": "IGL",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "historicalTeams": [
+      "777 Esports",
+      "Expert Gaming"
+    ],
+    "aliases": [
+      "Emil Standal"
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/5716/image/webp-c20a9e1610e88a415162a8763a1b5430.webp"
+  },
+  {
     "id": "siuhy",
     "nickname": "siuhy",
     "name": "Kamil Tomasz Szkaradek",
@@ -71345,7 +71421,7 @@
       "EnVyUs Academy",
       "Team Envy",
       "Millenium",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "WARMAKER",
       "eSahara",
       "FACE2FACE",
@@ -71591,7 +71667,7 @@
       "Wicadia本人",
       "郝世枫"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/18940/image/webp-cd1f5419f83048c16cc0c8763adf11d0.webp"
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/18940/image/webp-73c18efabc1fa5260862e8b406b16c62.webp"
   },
   {
     "id": "skull",
@@ -71614,7 +71690,7 @@
       "Bizarre Gaming",
       "Bantz Gaming",
       "Incept eSports",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Genuine Gaming",
       "TABOO",
       "MastermindsGC",
@@ -71645,10 +71721,9 @@
       "ODDIK",
       "UNO MILLE",
       "Liberty",
-      "Team oNe eSports",
+      "Team oNe",
       "W7M Gaming",
       "Luminosity Gaming",
-      "Luminosity",
       "EOX Gaming",
       "WePlayGames",
       "YeaH! Gaming"
@@ -71769,7 +71844,7 @@
     "team": "Infinite",
     "nationality": "Hungary",
     "countryCode": "HU",
-    "age": 21,
+    "age": 22,
     "role": "AWPer",
     "majorAppearances": 1,
     "majorWins": 0,
@@ -71874,7 +71949,7 @@
       "Iberian Family",
       "Caronte Gaming",
       "Galatics Esports Club",
-      "PRoNetAgEm",
+      "pRoNetAgEm",
       "XF Iberia Esports"
     ],
     "aliases": [
@@ -71937,13 +72012,13 @@
     "team": "无队伍",
     "nationality": "United States",
     "countryCode": "US",
-    "age": 35,
+    "age": 36,
     "role": "IGL",
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
       "Test Takers",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Selfless Gaming",
       "cloud9",
       "Without a Roof",
@@ -72122,7 +72197,7 @@
     "aliases": [
       "Steffen Amundsen"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/609/image/9cc88a3a756177de334f30a63b98e4db.png",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/24067/image/webp-b07b180451bda3a4f14895466f3b07ad.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/19965/9_p7_a2778.1000x563.png"
   },
   {
@@ -72230,7 +72305,7 @@
     "team": "无队伍",
     "nationality": "China",
     "countryCode": "CN",
-    "age": 38,
+    "age": 39,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -72326,7 +72401,7 @@
       "myxmg",
       "Reason Gaming",
       "AWESOME",
-      "Fm!TOXiC",
+      "fm!TOXiC",
       "CPLAY",
       "Tt.Dragons",
       "Team eXtensive!",
@@ -72448,7 +72523,7 @@
       "c0ntact Gaming",
       "Chaos Esports Club",
       "BIG",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Team Endpoint",
       "CeX",
       "exceL eSports",
@@ -72604,7 +72679,7 @@
       "TIGER",
       "Heroic",
       "FunPlus Phoenix",
-      "OpTic Gaming",
+      "OpTic",
       "Team X",
       "unu.AiN",
       "copenhagen wolves",
@@ -72992,7 +73067,7 @@
       "x6tence White",
       "k1ck eSports Club.es",
       "EU4IA",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Atlantis Esports",
       "overGaming",
       "ASES e-Sports Club",
@@ -73520,7 +73595,7 @@
       "FULL SEND",
       "Marca Registrada",
       "Cartel terraza",
-      "Infinity eSports",
+      "Infinity",
       "Forty Six and 2",
       "ETHEREAL",
       "VAULT",
@@ -73718,13 +73793,13 @@
     "majorWins": 0,
     "historicalTeams": [
       "Oxuji Esports",
-      "88-Gaming",
+      "88-gaming",
       "HOLLYWOOD",
       "LAN DODGERS",
       "Quantum Bellator Fire",
       "NewTeam",
       "HEY",
-      "Elements Pro Gaming",
+      "EPG",
       "s4s",
       "Gambit Gaming",
       "Method",
@@ -74244,7 +74319,7 @@
     "majorAppearances": 1,
     "majorWins": 0,
     "historicalTeams": [
-      "Johnny Speeds",
+      "Speeds",
       "sprout",
       "00 Prospects",
       "Nordavind Talent",
@@ -74413,17 +74488,20 @@
     "id": "squezxc",
     "nickname": "SquEzxc",
     "name": "Maxim Grebenko",
-    "team": "CYBERSHOKE Prospects",
+    "team": "UPGRADE Team",
     "nationality": "Belarus",
     "countryCode": "BY",
     "age": 17,
     "role": "AWPer",
     "majorAppearances": 0,
     "majorWins": 0,
+    "historicalTeams": [
+      "CYBERSHOKE Prospects"
+    ],
     "aliases": [
       "Максим Гребенко"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/21752/image/webp-d62c4cfdd95567e786d38ae14a88e2a3.webp"
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/25212/image/webp-a1716a57fe225942b781f18550dfacb6.webp"
   },
   {
     "id": "ssamba",
@@ -74617,7 +74695,7 @@
       "Super Nova",
       "Diversity",
       "Rebirth_Esports_(American_team)",
-      "Unity",
+      "UNITY",
       "Sinai Villagers",
       "MDL Jammers"
     ],
@@ -74674,10 +74752,10 @@
       "Evil Geniuses Black",
       "BHOP Esports",
       "Disconnected",
-      "EG",
+      "Evil Geniuses",
       "NRG",
-      "Complexity Gaming",
-      "OpTic Gaming",
+      "compLexity Gaming",
+      "OpTic",
       "Team Liquid",
       "Conquest",
       "Team Coast",
@@ -74733,7 +74811,7 @@
       "AVE",
       "Hard Legion Esports",
       "1WIN",
-      "MelBet Team",
+      "Melbet Team",
       "OwmS",
       "Runtime.gg",
       "UnderPressure",
@@ -74940,6 +75018,7 @@
       "steeel",
       "steel_"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/4077/image/webp-1e6b8183acf330b3f25a737b9f4125f9.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17605/600px_steel_dream_hack_open_atlanta_2019.png"
   },
   {
@@ -74958,7 +75037,6 @@
       "Case Esports",
       "movistar riders",
       "Luminosity Gaming",
-      "Luminosity",
       "Team Liquid",
       "Immortals",
       "g3nerationX",
@@ -75048,7 +75126,7 @@
       "Avant Gaming",
       "Grayhound Gaming",
       "Legacy Esports",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Dark Sided",
       "Riotous Raccoons",
       "Incept eSports",
@@ -75079,7 +75157,7 @@
       "LowLandLions",
       "BENELUX5",
       "Tenerife Titans",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "dizLown",
       "Sector One",
       "Spawn eSport",
@@ -75126,7 +75204,7 @@
     "majorWins": 1,
     "historicalTeams": [
       "Legacy",
-      "EG",
+      "Evil Geniuses",
       "Team Liquid",
       "MIBR",
       "SK Gaming",
@@ -75143,6 +75221,7 @@
       "stew-iwnl",
       "Stewie"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/4077/image/webp-1e6b8183acf330b3f25a737b9f4125f9.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/17657/900px_stewie2k_iem_katowice_2019.png"
   },
   {
@@ -75186,7 +75265,7 @@
       "mTw",
       "mousesports",
       "Team Convention",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Power Gaming",
       "LeetGamerZ"
     ],
@@ -75355,9 +75434,9 @@
       "United5",
       "High Rollers Gaming",
       "CheckSix Gaming",
-      "EG",
+      "Evil Geniuses",
       "Los Angeles Complexity",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "The Stomping Ground"
     ],
     "aliases": [
@@ -75944,7 +76023,7 @@
     "historicalTeams": [
       "3DMAX",
       "Team Dynamic",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "JaX Money Crew",
       "Dallas Venom",
       "X3O Gaming",
@@ -76143,7 +76222,7 @@
       "Phoenix",
       "Epsilon Esports",
       "Method",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "nerdRage",
       "Team Infused",
       "Team BEASTS",
@@ -76213,7 +76292,7 @@
     "id": "svedjehed",
     "nickname": "Svedjehed",
     "name": "Leo Svedjehed",
-    "team": "Johnny Speeds",
+    "team": "Speeds",
     "nationality": "Sweden",
     "countryCode": "SE",
     "age": 23,
@@ -76324,7 +76403,7 @@
       "GX",
       "cloud9",
       "ibuypower",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Quantic Gaming",
       "Lurking and Working",
       "Team Dynamic",
@@ -76428,7 +76507,7 @@
     "id": "swetsi",
     "nickname": "swetsi",
     "name": "Ilya Alyukin",
-    "team": "FORZE Reload",
+    "team": "Saint Sinners",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 20,
@@ -76436,12 +76515,12 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "FORZE Reload",
       "BAKS Esports"
     ],
     "aliases": [
       "Илья Алюкин"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/10703/image/webp-92eaa662a17536804e61e165cc3226e3.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/68818/image/webp-6589fcf61d77b35041e8d799aa9210d5.webp"
   },
   {
@@ -76835,7 +76914,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "ALGO Esports",
-      "Phantom",
+      "Phantom Esports",
       "copenhagen wolves",
       "Project G",
       "Illuminar Gaming",
@@ -76910,7 +76989,7 @@
       "GROND",
       "Team Finest",
       "Adaptation",
-      "88-Gaming",
+      "88-gaming",
       "Team Moops",
       "Syman Gaming",
       "Entropy Gaming",
@@ -77087,7 +77166,7 @@
       "LOS",
       "Fluxo",
       "RED Canids",
-      "largadosypelados",
+      "LargadosyPelados",
       "B4 Esports",
       "Elevate",
       "BD.ECHO",
@@ -77176,7 +77255,7 @@
     "historicalTeams": [
       "BX3 eSports Club",
       "ESC Gaming",
-      "RG-Esports",
+      "RG-eSports",
       "Alchemists Unleashed",
       ".no",
       "Online Kingdom",
@@ -77206,7 +77285,7 @@
       "Team Liquid",
       "SK Gaming",
       "YeaH! Gaming",
-      "Luminosity",
+      "Luminosity Gaming",
       "Games Academy",
       "Não Tem Como",
       "Dexterity Team",
@@ -77298,7 +77377,7 @@
     "id": "tak",
     "nickname": "tAk",
     "name": "Vilius Keserauskas",
-    "team": "G2 Ares",
+    "team": "BRUTE",
     "nationality": "Lithuania",
     "countryCode": "LT",
     "age": 21,
@@ -77306,6 +77385,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "G2 Ares",
       "Sprout Academy",
       "AGO esports",
       "SD Invicta",
@@ -77314,7 +77394,7 @@
     "aliases": [
       "Vilius Keserauskas"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/10994/image/webp-9170e7e2f6809e21f35e0038c86745a1.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/370/image/webp-3330752279ec113b69996a25fa7a6948.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/33963/image/webp-220d9e7ee93b6fb0590317d547a5ea33.webp"
   },
   {
@@ -77421,11 +77501,11 @@
     "majorAppearances": 9,
     "majorWins": 1,
     "historicalTeams": [
-      "EG",
+      "Evil Geniuses",
       "NRG",
       "MIBR",
       "cloud9",
-      "OpTic Gaming",
+      "OpTic",
       "Counter Logic Gaming",
       "mouseSpaz",
       "NetcodeGuides.com"
@@ -77851,7 +77931,7 @@
     "id": "tein",
     "nickname": "tein",
     "name": "Dawid Śladkowski",
-    "team": "无队伍",
+    "team": "PURE",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 20,
@@ -77869,7 +77949,8 @@
     ],
     "aliases": [
       "Dawid Śladkowski"
-    ]
+    ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/23113/image/webp-ebe398eb0aa2a648fc6128e6e25a610b.webp"
   },
   {
     "id": "teko",
@@ -78130,11 +78211,11 @@
       "The Imperial",
       "MANS NOT HOT",
       "Team Dignitas",
-      "Unity",
+      "UNITY",
       "Team TBA",
       "SK Gaming",
       "Reason Gaming.dk",
-      "se mi puta",
+      "Se mi puta",
       "ESC Gaming",
       "CPH Wolves",
       "myxmg",
@@ -78218,7 +78299,7 @@
     "historicalTeams": [
       "Heroic",
       "copenhagen flames",
-      "OpTic Gaming",
+      "OpTic",
       "GoldenGitte",
       "Squared Esports",
       "Reason Gaming.dk",
@@ -78285,7 +78366,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Mindfreak",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Athletico Esports",
       "Dark Sided",
       "Grinny Bakers"
@@ -78623,7 +78704,7 @@
       "Falkol e-Sports",
       "SkullZ Gaming",
       "Neverest eSports",
-      "Inflames",
+      "inflames",
       "Imperial Esports",
       "Santos e-Sports",
       "C4 Gaming",
@@ -78854,7 +78935,7 @@
     "historicalTeams": [
       "AM Gaming",
       "Reveal",
-      "aimclub",
+      "Aimclub",
       "entropiq",
       "ALTERNATE aTTaX",
       "KILLERFISH eSport",
@@ -78919,7 +79000,7 @@
     "id": "tmb",
     "nickname": "TMB",
     "name": "Thomas Bundsbæk",
-    "team": "Phantom",
+    "team": "Phantom Esports",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 24,
@@ -79072,7 +79153,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Phantom",
+      "Phantom Esports",
       "ENTERPRISE esports",
       "ThunderFlash",
       "lajtbitexe",
@@ -79245,7 +79326,7 @@
     "id": "tomaszin",
     "nickname": "tomaszin",
     "name": "Martín Tomás Corna",
-    "team": "BESTIA",
+    "team": "MIBR",
     "nationality": "Argentina",
     "countryCode": "AR",
     "age": 22,
@@ -79253,6 +79334,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "BESTIA",
       "Boca Juniors Gaming",
       "Ape Gang",
       "Holkattes",
@@ -79262,7 +79344,7 @@
     "aliases": [
       "Martín Tomás Corna"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/5701/image/webp-ddb54dbf09ab14bb62ca024970df4b6b.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/755/image/webp-84e170577e1c963891b1c54b21fceb83.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/40438/7a301acfe41071dc8ed2f09cc3aafd45caccbce2_full.png"
   },
   {
@@ -79405,7 +79487,7 @@
       "9Pandas Fearless",
       "Take Aim Gaming",
       "1WIN",
-      "MelBet Team",
+      "Melbet Team",
       "OwmS",
       "vega squadron",
       "FORZE",
@@ -79453,7 +79535,7 @@
       "KHAN",
       "Natus Vincere Junior",
       "Vengeance",
-      "Windigo Academy",
+      "Windigo.A",
       "Wanted.hatoR"
     ],
     "aliases": [
@@ -79604,14 +79686,14 @@
     "team": "无队伍",
     "nationality": "Peru",
     "countryCode": "PE",
-    "age": 26,
+    "age": 27,
     "role": "Entry",
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
       "CatEvil",
       "Mad Kings Esports",
-      "Infinity eSports",
+      "Infinity",
       "Supremacy Gaming",
       "NONAME",
       "Team Jaguar",
@@ -79716,8 +79798,8 @@
     "majorWins": 0,
     "historicalTeams": [
       "Chicago Chimera",
-      "EG",
-      "Complexity Gaming",
+      "Evil Geniuses",
+      "compLexity Gaming",
       "United5"
     ],
     "aliases": [
@@ -79737,7 +79819,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "HOLLYWOOD",
-      "Elements Pro Gaming",
+      "EPG",
       "ESPADA",
       "Team Spirit Academy",
       "Comanche"
@@ -79778,7 +79860,7 @@
     "team": "Rare Atom",
     "nationality": "China",
     "countryCode": "CN",
-    "age": 21,
+    "age": 22,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -79810,7 +79892,7 @@
       "WhiteBird",
       "PARIVISION",
       "1WIN",
-      "MelBet Team",
+      "Melbet Team",
       "OwmS",
       "Atlants Gaming",
       "Underdogs"
@@ -80064,7 +80146,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "LOS",
-      "Team oNe eSports",
+      "Team oNe",
       "00 Nation",
       "O Plano",
       "MIBR"
@@ -80202,7 +80284,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Epsilon eSports",
+      "Epsilon Esports",
       "MnM Gaming",
       "The Working Men",
       "x6tence",
@@ -80490,17 +80572,20 @@
     "id": "tw1sterzaza",
     "nickname": "tw1sterzaza",
     "name": "Aliaksei Mukhin",
-    "team": "CYBERSHOKE Prospects",
+    "team": "UPGRADE Team",
     "nationality": "Belarus",
     "countryCode": "BY",
     "age": 20,
     "role": "IGL",
     "majorAppearances": 0,
     "majorWins": 0,
+    "historicalTeams": [
+      "CYBERSHOKE Prospects"
+    ],
     "aliases": [
       "Алексей Мухин"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/21752/image/webp-d62c4cfdd95567e786d38ae14a88e2a3.webp",
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/25212/image/webp-a1716a57fe225942b781f18550dfacb6.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/79405/image/webp-e2765ac7706a28218a1d41e8ed95d8a8.webp"
   },
   {
@@ -80650,7 +80735,7 @@
     "team": "struggletony",
     "nationality": "Denmark",
     "countryCode": "DK",
-    "age": 27,
+    "age": 28,
     "role": "IGL",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -80898,7 +80983,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Monolith Gaming",
-      "Elements Pro Gaming",
+      "EPG",
       "PiTER",
       "Team Preparation",
       "ANOX",
@@ -80925,7 +81010,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "rogue",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Selfless Gaming",
       "Enemy",
       "Tempo Gaming"
@@ -80971,8 +81056,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "FlyQuest RED",
-      "Counter Logic Gaming Red",
-      "CLG Red"
+      "Counter Logic Gaming Red"
     ],
     "aliases": [
       "Kelsie Click"
@@ -81396,7 +81480,7 @@
       "Owly Six",
       "Ozyria",
       "WE GOT GAME",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "BST",
       "LDLC.com",
       "Recursive",
@@ -81569,7 +81653,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Kubix Esports",
-      "ILLYRIANS",
+      "Illyrians",
       "KS-",
       "X",
       "XGaming",
@@ -81802,7 +81886,7 @@
     "id": "valon",
     "nickname": "vAloN",
     "name": "Valon Etemi",
-    "team": "无队伍",
+    "team": "Illyrians",
     "nationality": "North Macedonia",
     "countryCode": "MK",
     "age": 27,
@@ -81811,7 +81895,6 @@
     "majorWins": 0,
     "historicalTeams": [
       "The Suspect",
-      "ILLYRIANS",
       "Team BLINK",
       "Team SKUAK",
       "EAGLES"
@@ -81820,6 +81903,7 @@
       "Valon Etemi",
       "vAloN9"
     ],
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/3022/image/webp-33eb7ac2ebdab23cfa74867f1d0a1813.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/29229/image/webp-475f2d01eba6c233ae6fea2bed0d0a3a.webp"
   },
   {
@@ -81901,7 +81985,7 @@
     "team": "无队伍",
     "nationality": "United Kingdom",
     "countryCode": "GB",
-    "age": 28,
+    "age": 29,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -82177,7 +82261,7 @@
       "Grayhound Gaming",
       "ORDER",
       "VERTEX Esports Club",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "4 and a half men",
       "Buckets",
       "Fighting 4 Freedom",
@@ -82978,7 +83062,7 @@
       "Elevate",
       "The Stream Team",
       "Team Dynamic",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "JaX Money Crew",
       "New York 3D",
       "Team 3D",
@@ -83358,7 +83442,7 @@
       "Party Astronauts",
       "NRG",
       "Carpe Diem",
-      "EG",
+      "Evil Geniuses",
       "Evil Geniuses Black",
       "RBG Esports",
       "Cyclone",
@@ -83642,7 +83726,7 @@
       "EXTREMUM",
       "Winstrike Team",
       "Quantum Bellator Fire",
-      "Elements Pro Gaming",
+      "EPG",
       "PiTER",
       "Method"
     ],
@@ -83716,7 +83800,7 @@
     "id": "wazz",
     "nickname": "waZz",
     "name": "Andrei Corneliu Lipoșteanu",
-    "team": "aimclub",
+    "team": "Aimclub",
     "nationality": "Romania",
     "countryCode": "RO",
     "age": 23,
@@ -84115,7 +84199,7 @@
     "id": "wilky",
     "nickname": "Wilky",
     "name": "Reece Wilkerson",
-    "team": "无队伍",
+    "team": "For Fun v4",
     "nationality": "United States",
     "countryCode": "US",
     "age": 26,
@@ -84141,7 +84225,7 @@
   },
   {
     "id": "will1zera",
-    "nickname": "Will1ZERA",
+    "nickname": "will1ZERA",
     "name": "Williams Saboia",
     "team": "无队伍",
     "nationality": "Brazil",
@@ -84252,7 +84336,7 @@
       "GX",
       "Enigma6 Group",
       "Mythic",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Denial eSports",
       "Trifecta Gaming",
       "Casaless",
@@ -84299,7 +84383,7 @@
     "majorWins": 0,
     "historicalTeams": [
       "Forsaken",
-      "EG",
+      "Evil Geniuses",
       "Evil Geniuses Black",
       "RBG Esports",
       "Cyclone",
@@ -84332,7 +84416,7 @@
       "Avant Garde",
       "Alpha Sydney",
       "Sequential Gaming",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Dire Wolves"
     ],
     "aliases": [
@@ -84530,7 +84614,7 @@
     "id": "woozzzi",
     "nickname": "woozzzi",
     "name": "Ruslan Aliev",
-    "team": "Unity",
+    "team": "UNITY",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 19,
@@ -84730,7 +84814,7 @@
     "team": "ScarX",
     "nationality": "Iran, Islamic Republic of",
     "countryCode": "IR",
-    "age": 26,
+    "age": 27,
     "role": "AWPer",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -84810,7 +84894,7 @@
       "Tenerife Titans",
       "Smoke Criminals",
       "Asterion",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "TTFU"
     ],
     "aliases": [
@@ -85179,7 +85263,7 @@
       "Денис Скленин"
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/2924/image/webp-c99e6e349fa66ece9a97d9d47a406986.webp",
-    "imageUrl": "https://files.bo3.gg/uploads/player/35900/image/webp-190fbca421fb722efd74deeb9cc32361.webp"
+    "imageUrl": "https://files.bo3.gg/uploads/player/35900/image/webp-a266dfe95dc32988d03910ea02544f3e.webp"
   },
   {
     "id": "xeedo",
@@ -85291,7 +85375,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "aimclub",
+      "Aimclub",
       "Nexus Gaming",
       "sprout",
       "ECSTATIC",
@@ -85318,7 +85402,7 @@
       "AliGon",
       "MyGame Esports",
       "Crowns Esports Club",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Games4u.se",
       "Team Property",
       "SK Gaming",
@@ -85989,7 +86073,7 @@
       "E-Xolos LAZER",
       "Filhos de D10S",
       "Paquetá Gaming",
-      "Team oNe eSports",
+      "Team oNe",
       "Santos e-Sports"
     ],
     "aliases": [
@@ -86214,7 +86298,7 @@
       "Team Mistral",
       "SAILORS",
       "eternalPlayerz",
-      "RG-Esports",
+      "RG-eSports",
       "coroDailex",
       "Teddybears"
     ],
@@ -86328,7 +86412,7 @@
       "Ildal Lions",
       "DkH Multigaming",
       "Wikipediots",
-      "ESrael",
+      "eSrael",
       "xapso",
       "zeDANES"
     ],
@@ -86362,7 +86446,7 @@
     "id": "yakuza",
     "nickname": "yakuza",
     "name": "Ernestas Veržinskis",
-    "team": "PURE",
+    "team": "Azuolas",
     "nationality": "Lithuania",
     "countryCode": "LT",
     "age": 23,
@@ -86370,13 +86454,13 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "PURE",
       "LT5",
       "LastWind"
     ],
     "aliases": [
       "Ernestas Veržinskis"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/23113/image/webp-ebe398eb0aa2a648fc6128e6e25a610b.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/29069/image/webp-89bc24283f09c5dab311277667e2fbf2.webp"
   },
   {
@@ -86391,7 +86475,7 @@
     "majorAppearances": 1,
     "majorWins": 0,
     "historicalTeams": [
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Space Soldiers",
       "Tainted Minds",
       "renegades",
@@ -86505,7 +86589,7 @@
       "Lazarus Esports",
       "Bad News Bears",
       "MASSIVEimpact",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Synthetik Gaming",
       "eUnited",
       "VAULT",
@@ -86562,7 +86646,7 @@
       "Team Liquid",
       "Virtus.pro",
       "pro100",
-      "Elements Pro Gaming"
+      "EPG"
     ],
     "aliases": [
       "Mareks Gaļinskis",
@@ -86591,7 +86675,7 @@
       "MIBR",
       "BOOM Esports",
       "intz",
-      "Luminosity",
+      "Luminosity Gaming",
       "WinOut.net",
       "g3nerationX",
       "Desempregados",
@@ -86754,6 +86838,32 @@
     ],
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/10994/image/webp-9170e7e2f6809e21f35e0038c86745a1.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/74275/image/webp-188904cc88d9f864b4cf8310f8c9b636.webp"
+  },
+  {
+    "id": "ync",
+    "nickname": "yNc",
+    "name": "Yannick Van Boven",
+    "team": "无队伍",
+    "nationality": "Belgium",
+    "countryCode": "BE",
+    "age": 30,
+    "role": "Rifler",
+    "majorAppearances": 0,
+    "majorWins": 0,
+    "historicalTeams": [
+      "Sector One",
+      "dizLown",
+      "mCon esports",
+      "Trust Gaming",
+      "Team Endpoint",
+      "Leonid Gaming",
+      "Radix eSports",
+      "LowLandLions",
+      "CAZ eSports"
+    ],
+    "aliases": [
+      "Yannick Van Boven"
+    ]
   },
   {
     "id": "yngtrxpstxr",
@@ -87689,7 +87799,7 @@
     "team": "无队伍",
     "nationality": "Sweden",
     "countryCode": "SE",
-    "age": 31,
+    "age": 32,
     "role": "Rifler",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -88189,7 +88299,7 @@
     "historicalTeams": [
       "DGG Esports",
       "Paradox Esports",
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "Incept eSports",
       "Ground Zero Gaming",
       "ORDER",
@@ -88343,7 +88453,7 @@
     "team": "TYLOO",
     "nationality": "China",
     "countryCode": "CN",
-    "age": 20,
+    "age": 21,
     "role": "Rifler",
     "majorAppearances": 1,
     "majorWins": 0,
@@ -88461,7 +88571,7 @@
       "Meet Your Makers",
       "SK Gaming",
       "Los Angeles Complexity",
-      "Complexity Gaming",
+      "compLexity Gaming",
       "Ninjas in Pyjamas",
       "SSV Lehnitz",
       "Ownage",
@@ -88598,7 +88708,7 @@
     "team": "无队伍",
     "nationality": "Norway",
     "countryCode": "NO",
-    "age": 40,
+    "age": 41,
     "role": "Unknown",
     "majorAppearances": 0,
     "majorWins": 0,
@@ -88626,12 +88736,12 @@
       "Team Liquid",
       "Fluxo",
       "O Plano",
-      "EG",
+      "Evil Geniuses",
       "MIBR",
       "YeaH! Gaming",
       "Immortals",
       "SK Gaming",
-      "Luminosity",
+      "Luminosity Gaming",
       "Games Academy",
       "Yakuz4 e-SPORTS",
       "ProGaming.TD",
@@ -88656,12 +88766,13 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Chiefs ESC",
+      "Chiefs Esports Club",
       "ICON Esports",
       "Tainted Minds",
       "Animal Squad",
       "Winterfox",
       "Team Immunity",
+      "Chiefs ESC",
       "Team Exile5",
       "Team Skyfire",
       "Available!",
@@ -88676,7 +88787,7 @@
     "id": "zewts",
     "nickname": "zewts",
     "name": "Gabriel-Cosmin Letcanu",
-    "team": "aimclub",
+    "team": "Aimclub",
     "nationality": "Romania",
     "countryCode": "RO",
     "age": 25,
@@ -88769,7 +88880,7 @@
       "x6tence Galaxy",
       "Property",
       "Snabbabrillor",
-      "Epsilon eSports"
+      "Epsilon Esports"
     ],
     "aliases": [
       "Gustav Björk"
@@ -88886,7 +88997,7 @@
     "id": "zmb",
     "nickname": "zmb",
     "name": "Leonardo D’Angelo Toledo",
-    "team": "largadosypelados",
+    "team": "LargadosyPelados",
     "nationality": "Brazil",
     "countryCode": "BR",
     "age": 27,
@@ -88935,7 +89046,7 @@
       "Team Property",
       "FlipSid3 Tactics",
       "fnatic",
-      "Epsilon eSports",
+      "Epsilon Esports",
       "Absolute Legends",
       "Western Wolves",
       "SY_b",
@@ -89373,7 +89484,7 @@
       "HUMMER Esports",
       "São Caetano Esports",
       "Keyd Stars",
-      "Inflames",
+      "inflames",
       "YeaH! Gaming",
       "Immortals",
       "Merciless Gaming",
