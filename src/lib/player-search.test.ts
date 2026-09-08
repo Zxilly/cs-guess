@@ -115,21 +115,34 @@ describe("player search", () => {
   ])(
     "keeps nickname prefixes ahead of an exact team match for %s",
     (query, expectedNicknames) => {
-      const results = searchPlayers(players, query, players.length);
-      const lastNicknamePrefix = Math.max(
+      // Keep these ranking regressions independent of roster refreshes.
+      const candidate = (id: string, nickname: string, team: string): Player => ({
+        id,
+        nickname,
+        name: "Unrelated Name",
+        team,
+        nationality: "Canada",
+        countryCode: "CA",
+        age: 25,
+        role: "Rifler",
+        majorAppearances: 0,
+        majorWins: 0,
+      });
+      const candidates = [
+        candidate("team-match", "unrelated", query),
         ...expectedNicknames.map((nickname) =>
-          results.findIndex((player) => player.nickname === nickname),
+          candidate(nickname, nickname, "Unrelated Team"),
         ),
+      ];
+      const results = searchPlayers(candidates, query, candidates.length);
+      const nicknameIndexes = expectedNicknames.map((nickname) =>
+        results.findIndex((player) => player.id === nickname),
       );
-      const firstExactTeam = results.findIndex(
-        (player) =>
-          normalizeSearchText(player.nickname).startsWith(query) === false &&
-          normalizeSearchText(player.team) === query,
-      );
+      const firstExactTeam = results.findIndex((player) => player.id === "team-match");
 
-      expect(lastNicknamePrefix).toBeGreaterThanOrEqual(0);
+      for (const index of nicknameIndexes) expect(index).toBeGreaterThanOrEqual(0);
       expect(firstExactTeam).toBeGreaterThanOrEqual(0);
-      expect(lastNicknamePrefix).toBeLessThan(firstExactTeam);
+      expect(Math.max(...nicknameIndexes)).toBeLessThan(firstExactTeam);
     },
   );
 
