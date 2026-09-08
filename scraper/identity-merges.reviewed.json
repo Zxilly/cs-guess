@@ -1342,5 +1342,31 @@
         "external_id": "35407"
       },
       "basis": "Matching nickname, normalized current-team identity, and compatible biographical evidence across Liquipedia and PandaScore identify the same player."
-    }
+    },
+  {
+    "survivor": {
+      "source": "pandascore",
+      "external_id": "67569"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "67704"
+    },
+    "basis": "PandaScore 67569 and 67704 both identify the Russian Bottega666 on Vexar, with matching available identity fields and no conflicting personal data. HLTV identifies Vladislav Galimov and records his Vexar appearances in August 2026; bo3 independently lists the same player in the Vexar lineup on 6 September 2026. Preserve the older canonical identity and both provider IDs.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "26535",
+        "url": "https://www.hltv.org/player/26535/bottega666"
+      },
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/bottega666"
+      },
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/matches/vexar-vs-noir-verse-06-09-2026"
+      }
+    ]
+  }
 ]
