@@ -67,6 +67,10 @@ uv run cs-guess-scraper export \
   --reviewed-player-overrides reviewed-player-overrides.json \
   --reviewed-role-overrides reviewed-role-overrides.json
 
+# 回放已提交的目录时，使用其 players.generated.meta.json 中 updatedAt 的 UTC 日期。
+# 在 export 命令中传入 --catalog-date YYYY-MM-DD，并省略 --catalog-metadata-output，
+# 保留原始生成时间，避免跨生日回放时出现年龄差异。
+
 # 仅在 .env 显式启用后，为一个已知规范选手定向补字段
 uv run cs-guess-scraper hltv \
   --db data/cs_guess.sqlite \

@@ -99,6 +99,30 @@ def test_export_command_writes_compact_shared_app_catalog(
     assert json.loads(capsys.readouterr().out)["catalogRecords"] == 1
 
 
+@pytest.mark.parametrize(
+    ("catalog_date", "expected_age"),
+    [("2026-09-14", 25), ("2026-09-15", 26)],
+)
+def test_export_replays_catalog_at_recorded_date(
+    tmp_path, monkeypatch, catalog_date, expected_age
+):
+    monkeypatch.setattr("cs_guess_scraper.cli._now", lambda: "2027-01-01T00:00:00Z")
+    db_path = tmp_path / "players.sqlite3"
+    catalog_path = tmp_path / "catalog.json"
+    with PlayerStore(db_path) as store:
+        store.upsert_source_player("liquipedia", {
+            "external_id": "Birthday", "nickname": "Birthday",
+            "full_name": "Birthday Player", "country_code": "FR",
+            "birth_date": "2000-09-15", "roles": ["awper"],
+        })
+        store.merge_all()
+    assert main([
+        "export", "--db", str(db_path), "--output", str(tmp_path / "game.json"),
+        "--catalog-output", str(catalog_path), "--catalog-date", catalog_date,
+    ]) == 0
+    assert json.loads(catalog_path.read_text(encoding="utf-8"))[0]["age"] == expected_age
+
+
 def test_export_refreshes_game_eligibility_before_writing_catalog(tmp_path, capsys):
     db_path = tmp_path / "players.sqlite3"
     output_path = tmp_path / "players.json"
