@@ -127,8 +127,15 @@ Docker 层由内容摘要寻址，未变化的层可由 registry 去重；工作
 当游戏目录变化或候选仍有 critical 时，工作流使用独立的
 `automation/player-data-refresh-<run-id>-<attempt>` 分支创建 Draft PR，并提交包含
 快照 digest 和质量计数的 `player-data-candidate.json`。冲突不会丢失，也不会污染
-canonical `latest`。人工在 PR 中修改 reviewed JSON 后，
-`Review and promote player data candidate` 工作流直接恢复候选 SQLite、重放决策、
+canonical `latest`。
+PR 正文会按稳定选手 ID 汇总新增、删除、修改人数，并显示字段前后值与比较基线。
+正文每类最多展示 25 行，完整字段变更保存在 Actions artifact 的 `catalog-review.md`
+中（保留 14 天）；后续提交的最新摘要在候选回放检查的 Actions Summary 中查看。
+本地可运行 `uv run --project scraper --frozen python -m cs_guess_scraper.catalog_review
+--base origin/main --output scraper/data/catalog-review.md
+--preview scraper/data/catalog-review-preview.md`，无需重新抓取数据。
+人工在 PR 中修改 reviewed JSON 后，`Review and promote player data candidate`
+工作流直接恢复候选 SQLite、重放决策、
 重新导出并执行 `quality --fail-on-critical`，不会重新请求 Liquipedia、PandaScore、
 BALLDONTLIE 或 bo3。质量检查通过后再将 PR 标记为 ready 并合并；merge 到 `main`
 后，同一个轻量 workflow 会再次重放已合并的决策，并把通过门禁的 corrected

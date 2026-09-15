@@ -184,6 +184,15 @@ jobs:
             "| Warnings | \(.dataQuality.summary.warnings) |"
           ' scraper/data/sync-report.json >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Compare candidate catalog with repository baseline
+        shell: bash
+        run: |
+          uv run --project scraper --frozen python -m cs_guess_scraper.catalog_review \
+            --base "$GITHUB_SHA" \
+            --output scraper/data/catalog-review.md \
+            --preview scraper/data/catalog-review-preview.md
+          cat scraper/data/catalog-review-preview.md >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload review reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -197,6 +206,8 @@ jobs:
             scraper/data/sync-report.json
             scraper/data/data-quality-report.json
             scraper/data/audit-report.json
+            scraper/data/catalog-review.md
+            scraper/data/catalog-review-preview.md
             src/data/players.generated.json
             src/data/players.generated.meta.json
 
@@ -334,6 +345,10 @@ jobs:
             echo "- Snapshot: \`${SNAPSHOT_REFERENCE}\`"
             echo "- Workflow: ${workflow_url}"
             echo
+            cat scraper/data/catalog-review-preview.md
+            echo
+            echo "Full field values and all changed rows: download the player-data-review-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT} artifact from the workflow above (14-day retention)."
+            echo
             echo "The run-specific snapshot preserves the fetched SQLite database and audit reports."
             echo "Edit the reviewed JSON decisions in this PR, then use the fast candidate-review check to replay them without fetching provider data again."
             echo "Keep this PR as a draft until the candidate-review quality gate passes."
@@ -343,6 +358,6 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --base main \
             --head "$branch" \
-            --title "data: review player catalog candidate" \
+            --title "data: review player catalog $(date --utc +%Y-%m-%d) (${guessable} players)" \
             --body-file "$body_file" \
             --draft
