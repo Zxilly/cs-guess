@@ -935,6 +935,7 @@ def run_sync(
     if catalog_output_path is not None:
         catalog = build_app_catalog(
             records,
+            today=datetime.fromisoformat(report["finishedAt"]).date(),
             previous_catalog=read_previous_catalog(catalog_output_path),
         )
         _write_json(catalog_output_path, catalog)

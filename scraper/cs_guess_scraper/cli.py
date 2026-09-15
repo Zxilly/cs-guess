@@ -6,6 +6,7 @@ import argparse
 import json
 import sys
 from collections.abc import Sequence
+from datetime import date, datetime
 from pathlib import Path
 
 from .app_catalog import build_app_catalog, read_previous_catalog
@@ -167,6 +168,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     export = subparsers.add_parser("export", help="export game records")
+    export.add_argument(
+        "--catalog-date",
+        type=date.fromisoformat,
+        help="UTC date for catalog ages (YYYY-MM-DD); defaults to the export date",
+    )
     export.add_argument("--db", type=Path, default=Path("data/cs_guess.sqlite"))
     export.add_argument(
         "--output",
@@ -423,18 +429,20 @@ def main(argv: Sequence[str] | None = None) -> int:
                 store.export_game_records() if args.catalog_output is not None else []
             )
         _write_json(args.output, records)
+        exported_at = _now()
         if args.catalog_output is not None:
             _write_json(
                 args.catalog_output,
                 build_app_catalog(
                     catalog_records,
+                    today=args.catalog_date or datetime.fromisoformat(exported_at).date(),
                     previous_catalog=read_previous_catalog(args.catalog_output),
                 ),
             )
         if args.catalog_metadata_output is not None:
             _write_json(
                 args.catalog_metadata_output,
-                {"updatedAt": _now()},
+                {"updatedAt": exported_at},
             )
         _print_json(
             {

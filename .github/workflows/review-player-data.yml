@@ -7,6 +7,9 @@ on:
       - scraper/*.reviewed.json
       - scraper/reviewed-*.json
       - scraper/cs_guess_scraper/catalog_review.py
+      - scraper/cs_guess_scraper/cli.py
+      - scraper/cs_guess_scraper/app_catalog.py
+      - scraper/cs_guess_scraper/pipeline.py
       - .github/workflows/review-player-data.yml
       - src/data/players.generated.json
       - src/data/players.generated.meta.json
@@ -14,6 +17,10 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/review-player-data.yml
+      - scraper/cs_guess_scraper/cli.py
+      - scraper/cs_guess_scraper/app_catalog.py
+      - scraper/cs_guess_scraper/pipeline.py
       - scraper/player-data-candidate.json
       - scraper/*.reviewed.json
       - scraper/reviewed-*.json
@@ -78,7 +85,8 @@ jobs:
           container_id=$(docker create "$snapshot" /bin/true)
           trap 'docker rm --force "$container_id" >/dev/null 2>&1 || true' EXIT
           if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
-            docker cp "${container_id}:/snapshot/." .
+            mkdir -p scraper/data
+            docker cp "${container_id}:/snapshot/scraper/data/." scraper/data/
           else
             mkdir -p scraper/data
             docker cp "${container_id}:/snapshot/scraper/data/cs_guess.sqlite" scraper/data/cs_guess.sqlite
@@ -93,6 +101,7 @@ jobs:
             --quarantines scraper/source-quarantines.reviewed.json \
             --separations scraper/identity-separations.reviewed.json
           uv run --project scraper --frozen cs-guess-scraper export \
+            --catalog-date "$(jq --exit-status --raw-output '.updatedAt | split("T")[0]' src/data/players.generated.meta.json)" \
             --db scraper/data/cs_guess.sqlite \
             --output scraper/data/players.game.json \
             --catalog-output src/data/players.generated.json \
