@@ -10,6 +10,7 @@ on:
       - scraper/cs_guess_scraper/cli.py
       - scraper/cs_guess_scraper/app_catalog.py
       - scraper/cs_guess_scraper/pipeline.py
+      - scraper/cs_guess_scraper/store.py
       - .github/workflows/review-player-data.yml
       - src/data/players.generated.json
       - src/data/players.generated.meta.json
@@ -21,6 +22,7 @@ on:
       - scraper/cs_guess_scraper/cli.py
       - scraper/cs_guess_scraper/app_catalog.py
       - scraper/cs_guess_scraper/pipeline.py
+      - scraper/cs_guess_scraper/store.py
       - scraper/player-data-candidate.json
       - scraper/*.reviewed.json
       - scraper/reviewed-*.json

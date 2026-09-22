@@ -1905,8 +1905,19 @@ class PlayerStore:
             "departed_team_claims_retired": 0,
         }
         with self.connection:
+            for row in self.connection.execute("SELECT id FROM teams"):
+                result["conflicts_created"] += self._merge_team_fields(str(row["id"]))
+            result["departed_team_claims_retired"] = self._retire_departed_team_claims()
             while True:
                 pass_merges = 0
+
+                # Identity matching needs the selected biography and one current
+                # team, including evidence moved by the previous identity pass.
+                self._coalesce_current_tenures()
+                for row in self.connection.execute("SELECT id FROM players"):
+                    player_id = str(row["id"])
+                    result["conflicts_created"] += self._merge_player_fields(player_id)
+                    result["conflicts_created"] += self._select_current_team(player_id)
 
                 exact_merges, conflicts_created = (
                     self._merge_exact_name_birth_date_identities()
@@ -1951,13 +1962,8 @@ class PlayerStore:
 
             self._coalesce_current_tenures()
             result["conflicts_created"] += self._merge_major_appearances()
-            for row in self.connection.execute("SELECT id FROM teams"):
-                result["conflicts_created"] += self._merge_team_fields(str(row["id"]))
-            result["departed_team_claims_retired"] = self._retire_departed_team_claims()
             for row in self.connection.execute("SELECT id FROM players"):
                 player_id = str(row["id"])
-                result["conflicts_created"] += self._merge_player_fields(player_id)
-                result["conflicts_created"] += self._select_current_team(player_id)
                 if self._refresh_guessability(player_id):
                     result["guessable"] += 1
             identity_reviews, conflicts_created = self._queue_identity_reviews()

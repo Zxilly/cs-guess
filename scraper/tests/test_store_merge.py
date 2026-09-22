@@ -1445,6 +1445,102 @@ def test_merge_all_repeats_identity_passes_until_stable(
     assert result["conflicts_created"] == 1
 
 
+def test_merge_all_selects_current_team_before_matching_provider_identities(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        liquipedia_id = store.upsert_source_player(
+            "liquipedia",
+            {
+                "external_id": "Brn$",
+                "nickname": "brn$",
+                "full_name": "Bruno de Araújo",
+                "country_code": "BR",
+                "birth_date": "2006-01-22",
+                "roles": ["rifler"],
+                "current_team": {"external_id": "Yawara", "name": "Yawara E-Sports"},
+            },
+        )
+        pandascore_id = store.upsert_source_player(
+            "pandascore",
+            {
+                "external_id": "37318",
+                "nickname": "brn$",
+                "full_name": "Bruno Araújo",
+                "country_code": "BR",
+                "image_url": "https://example.test/brn.webp",
+                "current_team": {"external_id": "ps-yawara", "name": "Yawara Esports"},
+            },
+        )
+        store.link_source_player(pandascore_id, "balldontlie", "5268")
+        store.upsert_source_player(
+            "balldontlie",
+            {
+                "external_id": "5268",
+                "nickname": "brn$",
+                "full_name": "Bruno Araújo",
+                "current_team": {"external_id": "bdl-yawara", "name": "Yawara"},
+            },
+        )
+
+        first = store.merge_all()
+        first_records = [
+            {key: value for key, value in record.items() if key != "updatedAt"}
+            for record in store.export_game_records()
+        ]
+        second = store.merge_all()
+        second_records = [
+            {key: value for key, value in record.items() if key != "updatedAt"}
+            for record in store.export_game_records()
+        ]
+
+        assert store.resolve_player_id("pandascore", "37318") == liquipedia_id
+        assert store.resolve_player_id("balldontlie", "5268") == liquipedia_id
+        assert store.data_quality_report()["summary"]["criticalIssues"] == 0
+
+    assert first["high_confidence_identity_merges"] == 1
+    assert first["identity_reviews"] == 0
+    assert first_records[0]["imageUrl"] == "https://example.test/brn.webp"
+    assert first_records == second_records
+    assert second["players_merged"] == 0
+
+
+def test_merge_all_refreshes_biography_before_matching_provider_identities(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        profile = {
+            "external_id": "example-player",
+            "nickname": "example",
+            "full_name": "Example Player",
+            "birth_date": "2000-01-01",
+        }
+        liquipedia_id = store.upsert_source_player("liquipedia", profile)
+        store.upsert_source_player(
+            "pandascore",
+            {
+                **profile,
+                "external_id": "123",
+                "full_name": "Example Middle Player",
+                "country_code": "BR",
+            },
+        )
+        store.merge_all()
+        store.upsert_source_player("liquipedia", {**profile, "country_code": "BR"})
+
+        first = store.merge_all()
+        first_records = [
+            {key: value for key, value in record.items() if key != "updatedAt"}
+            for record in store.export_game_records(guessable_only=False)
+        ]
+        second = store.merge_all()
+
+        assert store.resolve_player_id("pandascore", "123") == liquipedia_id
+        assert [
+            {key: value for key, value in record.items() if key != "updatedAt"}
+            for record in store.export_game_records(guessable_only=False)
+        ] == first_records
+
+    assert first["high_confidence_identity_merges"] == 1
+    assert second["players_merged"] == 0
+
+
 def test_nickname_and_current_team_match_is_queued_not_auto_merged(tmp_path):
     with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
         first_id = store.upsert_source_player(
