@@ -339,3 +339,26 @@ cargo build --release
 The tests cover validation, HTTP create/join/cancel, rule-aware matchmaking,
 BO3 scoring, token handling, hidden-mode redaction, reconnect, idempotent
 guesses, and concurrent room creation.
+
+### Settlement receipts and deadlines
+
+Daily completions must include the `date` returned by the attempt endpoint.
+The `(anonymousId, date)` pair identifies the persisted attempt, including its
+original answer and deadline even after Shanghai midnight. A completion without
+an owned attempt is rejected. Older clients that omit `date` must refresh before
+submitting; the server never guesses the intended day.
+
+The first completion is evaluated at server receipt time. At or after the issued
+180-second deadline it is a loss, regardless of `timedOut` or a correct answer in
+the trace. There is no offline/network grace period. A completion committed before
+the deadline can be retried afterwards and returns its saved history receipt with
+the latest profile summary, without changing counters or draw credits.
+
+SQLite stores a permanent `(anonymous_id, round_id)` receipt in the same
+transaction as progression. The 100 recent IDs and 50 history entries in profile
+JSON are only bounded caches. Initial migration imports retained legacy history
+and IDs. For expired legacy solo/daily attempts whose outcomes were already evicted, it
+records an explicit unknown tombstone: completion is rejected without changing
+counters or inventing an outcome. Existing rounds/history are not deleted and
+unexpired legacy rounds remain playable. No migration can reconstruct outcomes
+already discarded by the previous bounded ledger.

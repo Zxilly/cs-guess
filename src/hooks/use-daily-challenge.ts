@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import useSWRImmutable from "swr/immutable";
 import useSWRMutation from "swr/mutation";
 
@@ -28,6 +28,8 @@ function shanghaiDateKey(now = new Date()) {
 
 export function useDailyChallenge() {
   const { profile } = useAnonymousProfile();
+  // A mounted game keeps its issued attempt across Shanghai midnight.
+  const [attemptDate] = useState(shanghaiDateKey);
   const anonymousId = profile.anonymousId;
   const syncToken = profile.syncToken;
   const {
@@ -39,7 +41,7 @@ export function useDailyChallenge() {
     [
       "daily-challenge-attempt",
       anonymousId,
-      shanghaiDateKey(),
+      attemptDate,
     ],
     async () => {
       await ensureAnonymousProfileReady();
@@ -64,6 +66,7 @@ export function useDailyChallenge() {
         arg,
       }: {
         arg: {
+          date: string;
           guessIds: readonly string[];
           timedOut: boolean;
         };
@@ -71,6 +74,7 @@ export function useDailyChallenge() {
     ) => {
       const remote = await completeDailyChallenge(
         profile,
+        arg.date,
         arg.guessIds,
         arg.timedOut,
       );
@@ -79,9 +83,11 @@ export function useDailyChallenge() {
     },
   );
   const submitCompletion = useCallback(
-    (guessIds: readonly string[], timedOut: boolean) =>
-      triggerCompletion({ guessIds, timedOut }),
-    [triggerCompletion],
+    (guessIds: readonly string[], timedOut: boolean) => {
+      if (!challenge) return Promise.reject(new Error("daily challenge was not started"));
+      return triggerCompletion({ date: challenge.date, guessIds, timedOut });
+    },
+    [challenge, triggerCompletion],
   );
 
   function retry() {

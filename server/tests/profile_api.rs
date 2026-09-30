@@ -195,6 +195,7 @@ async fn profile_api_uses_authenticated_domain_operations() {
     let mystery_player_id = challenge["mysteryPlayer"]["id"].as_str().unwrap();
     let completion_payload = json!({
         "anonymousId": ANONYMOUS_ID,
+        "date": challenge_date,
         "guessIds": [mystery_player_id],
         "timedOut": false,
     });
