@@ -78,9 +78,11 @@ impl SoloRound {
                 "solo round deadline has not elapsed".to_owned(),
             ));
         }
-        let result = if winning_index.is_some() {
+        let result = if now_unix_ms >= self.deadline_unix_ms {
+            "loss"
+        } else if winning_index.is_some() {
             "win"
-        } else if timed_out || guess_ids.len() == self.max_guesses {
+        } else if guess_ids.len() == self.max_guesses {
             "loss"
         } else {
             return Err(AppError::BadRequest(
@@ -103,5 +105,30 @@ impl SoloRound {
                 opponent_score: u32::from(result == "loss"),
             }),
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn server_deadline_controls_both_timeout_flags() {
+        let round = SoloRound {
+            round_id: "solo:hard:deadline-test".to_owned(),
+            round_number: 1,
+            difficulty: Difficulty::Hard,
+            mystery_player: catalog_player_by_id("donk").unwrap().clone(),
+            deadline_unix_ms: 180_000,
+            max_guesses: 8,
+        };
+        assert_eq!(round.settlement(vec!["donk".to_owned()], false, 179_999).unwrap().result, "win");
+        assert!(round.settlement(vec![], true, 179_999).is_err());
+        for now in [180_000, 180_001] {
+            for timed_out in [false, true] {
+                assert_eq!(round.settlement(vec!["donk".to_owned()], timed_out, now).unwrap().result, "loss");
+                assert_eq!(round.settlement(vec![], timed_out, now).unwrap().result, "loss");
+            }
+        }
     }
 }

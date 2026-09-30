@@ -154,6 +154,7 @@ describe("daily challenge API", () => {
         anonymousId: "anonymous-daily-test",
         syncToken: "daily_test_sync_token_abcdefghijklmnopqrstuvwxyz",
       },
+      "2026-09-29",
       ["donk"],
       false,
     );
@@ -161,6 +162,7 @@ describe("daily challenge API", () => {
     const [, request] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(JSON.parse(String(request.body))).toEqual({
       anonymousId: "anonymous-daily-test",
+      date: "2026-09-29",
       guessIds: ["donk"],
       timedOut: false,
     });

@@ -100,6 +100,7 @@ impl DailyChallengeAttempt {
 #[serde(rename_all = "camelCase")]
 pub struct CompleteDailyChallengeRequest {
     pub anonymous_id: String,
+    pub date: String,
     #[serde(default)]
     pub guess_ids: Vec<String>,
     #[serde(default)]
@@ -175,6 +176,8 @@ impl DailyChallenge {
         &self,
         guess_ids: Vec<String>,
         timed_out: bool,
+        deadline_unix_ms: u64,
+        now_unix_ms: u64,
     ) -> Result<AuthoritativeRoundSettlement, AppError> {
         if guess_ids.len() > STANDARD_MAX_GUESSES {
             return Err(AppError::BadRequest(
@@ -183,7 +186,7 @@ impl DailyChallenge {
         }
         let mut unique_guesses = std::collections::HashSet::with_capacity(guess_ids.len());
         for guess_id in &guess_ids {
-            if catalog_player_by_id(guess_id).is_none() {
+            if guess_id != &self.mystery_player_id && catalog_player_by_id(guess_id).is_none() {
                 return Err(AppError::BadRequest(
                     "daily challenge contains an unknown guess".to_owned(),
                 ));
@@ -203,9 +206,16 @@ impl DailyChallenge {
                 "daily challenge cannot continue after the correct guess".to_owned(),
             ));
         }
-        let result = if winning_index.is_some() {
+        if timed_out && now_unix_ms < deadline_unix_ms {
+            return Err(AppError::BadRequest(
+                "daily challenge deadline has not elapsed".to_owned(),
+            ));
+        }
+        let result = if now_unix_ms >= deadline_unix_ms {
+            "loss"
+        } else if winning_index.is_some() {
             "win"
-        } else if timed_out || guess_ids.len() == STANDARD_MAX_GUESSES {
+        } else if guess_ids.len() == STANDARD_MAX_GUESSES {
             "loss"
         } else {
             return Err(AppError::BadRequest(
@@ -258,4 +268,28 @@ mod tests {
         assert_eq!(player.team, "无队伍");
         assert_eq!(player.team_logo_url, None);
     }
+    #[test]
+    fn daily_attempt_keeps_its_date_and_deadline_across_shanghai_midnight() {
+        let challenge = super::DailyChallenge {
+            date: "2026-09-29".to_owned(),
+            round_number: 272,
+            mystery_player_id: "donk".to_owned(),
+            mystery_player: super::catalog_player_by_id("donk").unwrap().clone(),
+            catalog_version: "test".to_owned(),
+        };
+        // 23:59:59 +08:00, followed by 00:00:01 the next day.
+        let started = 1_790_697_599_000;
+        let deadline = started + 180_000;
+        let settled = challenge.settlement(vec!["donk".to_owned()], false, deadline, started + 2_000).unwrap();
+        assert_eq!(settled.round_id, "daily:2026-09-29");
+        assert_eq!(settled.result, "win");
+        assert!(challenge.settlement(vec![], true, deadline, deadline - 1).is_err());
+        for now in [deadline, deadline + 1] {
+            for timed_out in [false, true] {
+                assert_eq!(challenge.settlement(vec!["donk".to_owned()], timed_out, deadline, now).unwrap().result, "loss");
+                assert_eq!(challenge.settlement(vec![], timed_out, deadline, now).unwrap().result, "loss");
+            }
+        }
+    }
+
 }
