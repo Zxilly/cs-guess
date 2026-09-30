@@ -29,6 +29,7 @@ def test_app_catalog_derives_age_country_name_and_stable_public_fields():
     assert catalog == [
         {
             "id": "zywoo",
+            "catalogIdentity": {"canonicalId": "internal-random-id", "sourceIds": []},
             "nickname": "ZywOo",
             "name": "Mathieu Herbaut",
             "team": "Team Vitality",
@@ -291,3 +292,89 @@ def test_catalog_treats_departed_ex_roster_labels_as_unattached():
 
     assert catalog[0]["team"] == "无队伍"
     assert "teamLogoUrl" not in catalog[0]
+
+
+def _identity_record(**overrides):
+    return {
+        "id": "canonical-player", "nickname": "chshekin",
+        "fullName": "Test Player", "countryCode": "RU", "birthDate": "2000-01-01",
+        "currentTeam": None, "role": "Rifler", "majorAppearances": 0,
+        **overrides,
+    }
+
+
+def test_legacy_renamed_player_keeps_issued_id_using_unambiguous_alias():
+    previous = [{"id": "chshekin", "nickname": "chshekin", "name": "Test Player", "countryCode": "RU"}]
+    [player] = build_app_catalog(
+        [_identity_record(nickname="laser", aliases=["chshekin"])],
+        previous_catalog=previous,
+    )
+    assert player["id"] == "chshekin"
+    assert player["nickname"] == "laser"
+    assert player["catalogIdentity"]["canonicalId"] == "canonical-player"
+
+
+def test_persisted_canonical_identity_survives_mutable_display_fields():
+    previous = build_app_catalog([_identity_record()])
+    [player] = build_app_catalog(
+        [_identity_record(nickname="laser", fullName="Corrected Name", countryCode="DE")],
+        previous_catalog=previous,
+    )
+    assert player["id"] == "chshekin"
+
+
+def test_provider_identity_survives_canonical_database_rebuild():
+    source_ids = [{"source": "pandascore", "externalId": "123"}]
+    previous = build_app_catalog([_identity_record(sourceIds=source_ids)])
+    [player] = build_app_catalog(
+        [_identity_record(id="rebuilt-player", nickname="laser", sourceIds=source_ids)],
+        previous_catalog=previous,
+    )
+    assert player["id"] == "chshekin"
+    assert player["catalogIdentity"]["canonicalId"] == "rebuilt-player"
+
+
+def test_new_player_cannot_steal_previous_public_id_before_original_is_seen():
+    old = _identity_record()
+    previous = build_app_catalog([old])
+    newcomer = _identity_record(id="new-player", fullName="Different Person", countryCode="FR")
+    renamed = _identity_record(nickname="laser")
+    forward = build_app_catalog([newcomer, renamed], previous_catalog=previous)
+    reverse = build_app_catalog([renamed, newcomer], previous_catalog=previous)
+    by_canonical = lambda rows: {row["catalogIdentity"]["canonicalId"]: row["id"] for row in rows}
+    assert by_canonical(forward) == by_canonical(reverse)
+    assert forward[0]["id"] != "chshekin"
+    assert forward[1]["id"] == "chshekin"
+
+
+def test_ambiguous_legacy_alias_identity_requires_review():
+    import pytest
+    previous = [
+        {"id": "old-a", "nickname": "alias-a", "name": "Test Player", "countryCode": "RU"},
+        {"id": "old-b", "nickname": "alias-b", "name": "Test Player", "countryCode": "RU"},
+    ]
+    with pytest.raises(ValueError, match="ambiguous previous identity"):
+        build_app_catalog([_identity_record(nickname="laser", aliases=["alias-a", "alias-b"])], previous_catalog=previous)
+
+
+def test_conflicting_canonical_and_provider_identity_requires_review():
+    import pytest
+    previous = build_app_catalog([
+        _identity_record(id="a", nickname="first", sourceIds=[{"source": "pandascore", "externalId": "1"}]),
+        _identity_record(id="b", nickname="second", sourceIds=[{"source": "pandascore", "externalId": "2"}]),
+    ])
+    with pytest.raises(ValueError, match="ambiguous previous identity"):
+        build_app_catalog([_identity_record(id="a", sourceIds=[{"source": "pandascore", "externalId": "2"}])], previous_catalog=previous)
+
+
+def test_one_previous_player_cannot_be_claimed_by_two_current_records():
+    import pytest
+    previous = build_app_catalog([_identity_record()])
+    with pytest.raises(ValueError, match="multiple records claim"):
+        build_app_catalog([_identity_record(), _identity_record(nickname="laser")], previous_catalog=previous)
+
+
+def test_same_alias_with_different_person_does_not_reuse_old_id():
+    previous = [{"id": "chshekin", "nickname": "chshekin", "name": "Other Person", "countryCode": "RU"}]
+    [player] = build_app_catalog([_identity_record(nickname="laser", aliases=["chshekin"])], previous_catalog=previous)
+    assert player["id"] == "laser"

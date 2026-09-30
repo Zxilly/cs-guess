@@ -290,6 +290,7 @@ def test_complete_player_exports_current_team_tenures_and_multiple_roles(tmp_pat
     record = records[0]
     assert record["schemaVersion"] == 1
     assert record["id"] == player_id
+    assert record["sourceIds"] == [{"source": "liquipedia", "externalId": "ZywOo"}]
     assert record["countryCode"] == "FR"
     assert record["birthDate"] == "2000-11-09"
     assert "age" not in record
