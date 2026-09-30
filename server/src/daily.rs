@@ -280,16 +280,33 @@ mod tests {
         // 23:59:59 +08:00, followed by 00:00:01 the next day.
         let started = 1_790_697_599_000;
         let deadline = started + 180_000;
-        let settled = challenge.settlement(vec!["donk".to_owned()], false, deadline, started + 2_000).unwrap();
+        let settled = challenge
+            .settlement(vec!["donk".to_owned()], false, deadline, started + 2_000)
+            .unwrap();
         assert_eq!(settled.round_id, "daily:2026-09-29");
         assert_eq!(settled.result, "win");
-        assert!(challenge.settlement(vec![], true, deadline, deadline - 1).is_err());
+        assert!(
+            challenge
+                .settlement(vec![], true, deadline, deadline - 1)
+                .is_err()
+        );
         for now in [deadline, deadline + 1] {
             for timed_out in [false, true] {
-                assert_eq!(challenge.settlement(vec!["donk".to_owned()], timed_out, deadline, now).unwrap().result, "loss");
-                assert_eq!(challenge.settlement(vec![], timed_out, deadline, now).unwrap().result, "loss");
+                assert_eq!(
+                    challenge
+                        .settlement(vec!["donk".to_owned()], timed_out, deadline, now)
+                        .unwrap()
+                        .result,
+                    "loss"
+                );
+                assert_eq!(
+                    challenge
+                        .settlement(vec![], timed_out, deadline, now)
+                        .unwrap()
+                        .result,
+                    "loss"
+                );
             }
         }
     }
-
 }

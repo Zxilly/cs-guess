@@ -18,8 +18,8 @@ use crate::{
     },
     error::AppError,
     profile::{
-        AuthoritativeRoundSettlement, CreateProfileRequest, ProfileCompletionResponse, ProfileState, StartIdentityDrawRequest,
-        validate_anonymous_id, validate_sync_token,
+        AuthoritativeRoundSettlement, CreateProfileRequest, ProfileCompletionResponse,
+        ProfileState, StartIdentityDrawRequest, validate_anonymous_id, validate_sync_token,
     },
     protocol::Difficulty,
     solo::{SOLO_ROUND_SECONDS, SoloRound},
@@ -263,13 +263,12 @@ impl DatabaseStore {
         .execute(&mut *transaction)
         .await
         .map_err(database_error)?;
-        let state_json: String = sqlx::query_scalar(
-            "SELECT state_json FROM profiles WHERE anonymous_id = ?",
-        )
-        .bind(anonymous_id)
-        .fetch_one(&mut *transaction)
-        .await
-        .map_err(database_error)?;
+        let state_json: String =
+            sqlx::query_scalar("SELECT state_json FROM profiles WHERE anonymous_id = ?")
+                .bind(anonymous_id)
+                .fetch_one(&mut *transaction)
+                .await
+                .map_err(database_error)?;
         let mut profile: ProfileState =
             serde_json::from_str(&state_json).map_err(|_| AppError::Internal)?;
         if inserted.rows_affected() == 1 {
@@ -812,7 +811,9 @@ mod tests {
             mystery_player: catalog_player_by_id("donk").unwrap().clone(),
             deadline_unix_ms: u64::MAX,
             max_guesses: 8,
-        }.settlement(vec!["donk".to_owned()], false, 1).unwrap()
+        }
+        .settlement(vec!["donk".to_owned()], false, 1)
+        .unwrap()
     }
 
     #[tokio::test]
@@ -827,10 +828,20 @@ mod tests {
         let token = "profile_sync_token_abcdefghijklmnopqrstuvwxyz";
         store.save_profile(profile.clone(), token).await.unwrap();
         let first = winning_round("solo:hard:first");
-        store.settle_profile_round(&id, first.clone()).await.unwrap();
-        let receipt = store.completed_profile_round(&id, token, &first.round_id).await.unwrap().unwrap();
+        store
+            .settle_profile_round(&id, first.clone())
+            .await
+            .unwrap();
+        let receipt = store
+            .completed_profile_round(&id, token, &first.round_id)
+            .await
+            .unwrap()
+            .unwrap();
         for index in 0..105 {
-            store.settle_profile_round(&id, winning_round(&format!("solo:hard:{index}"))).await.unwrap();
+            store
+                .settle_profile_round(&id, winning_round(&format!("solo:hard:{index}")))
+                .await
+                .unwrap();
         }
         let before = store.load_profile(&id, token).await.unwrap();
         assert!(!before.recorded_rounds.contains(&first.round_id));
@@ -844,11 +855,24 @@ mod tests {
         );
         assert_eq!(left.unwrap(), before);
         assert_eq!(right.unwrap(), before);
-        let replay = restarted.completed_profile_round(&id, token, &first.round_id).await.unwrap().unwrap();
+        let replay = restarted
+            .completed_profile_round(&id, token, &first.round_id)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(replay.history_entry, receipt.history_entry);
         assert_eq!(replay.profile.draw_credits, profile.draw_credits + 106);
         assert_eq!(replay.profile.stats.wins, profile.stats.wins + 106);
-        assert!(matches!(restarted.completed_profile_round(&id, "wrong_profile_token_abcdefghijklmnop", &first.round_id).await, Err(AppError::Unauthorized)));
+        assert!(matches!(
+            restarted
+                .completed_profile_round(
+                    &id,
+                    "wrong_profile_token_abcdefghijklmnop",
+                    &first.round_id
+                )
+                .await,
+            Err(AppError::Unauthorized)
+        ));
         restarted.pool.close().await;
         let _ = std::fs::remove_file(&path);
     }
@@ -863,10 +887,24 @@ mod tests {
         store.save_profile(profile.clone(), token).await.unwrap();
         sqlx::raw_sql("CREATE TRIGGER reject_profile_write BEFORE UPDATE ON profiles BEGIN SELECT RAISE(ABORT, 'test failure'); END;").execute(&store.pool).await.unwrap();
         let settlement = winning_round("solo:hard:rollback");
-        assert!(store.settle_profile_round(&id, settlement.clone()).await.is_err());
-        assert!(store.completed_profile_round(&id, token, &settlement.round_id).await.unwrap().is_none());
+        assert!(
+            store
+                .settle_profile_round(&id, settlement.clone())
+                .await
+                .is_err()
+        );
+        assert!(
+            store
+                .completed_profile_round(&id, token, &settlement.round_id)
+                .await
+                .unwrap()
+                .is_none()
+        );
         assert_eq!(store.load_profile(&id, token).await.unwrap(), profile);
-        sqlx::query("DROP TRIGGER reject_profile_write").execute(&store.pool).await.unwrap();
+        sqlx::query("DROP TRIGGER reject_profile_write")
+            .execute(&store.pool)
+            .await
+            .unwrap();
         let saved = store.settle_profile_round(&id, settlement).await.unwrap();
         assert_eq!(saved.stats.wins, profile.stats.wins + 1);
     }
@@ -883,22 +921,59 @@ mod tests {
         store.save_profile(profile.clone(), token).await.unwrap();
         for (round_id, deadline) in [("solo:hard:unknown", 1_i64), ("solo:hard:active", i64::MAX)] {
             sqlx::query("INSERT INTO solo_rounds VALUES (?, ?, 1, 'hard', 'donk', ?, 0)")
-                .bind(round_id).bind(&id).bind(deadline).execute(&store.pool).await.unwrap();
+                .bind(round_id)
+                .bind(&id)
+                .bind(deadline)
+                .execute(&store.pool)
+                .await
+                .unwrap();
         }
-        sqlx::query("DELETE FROM settlement_migrations").execute(&store.pool).await.unwrap();
+        sqlx::query("DELETE FROM settlement_migrations")
+            .execute(&store.pool)
+            .await
+            .unwrap();
         store.initialize().await.unwrap();
-        let receipt = store.completed_profile_round(&id, token, &known.round_id).await.unwrap().unwrap();
-        assert_eq!(receipt.history_entry, profile.completion_response(&known.round_id).history_entry);
-        assert!(matches!(store.completed_profile_round(&id, token, "solo:hard:unknown").await, Err(AppError::BadRequest(_))));
-        assert!(store.completed_profile_round(&id, token, "solo:hard:active").await.unwrap().is_none());
+        let receipt = store
+            .completed_profile_round(&id, token, &known.round_id)
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(
+            receipt.history_entry,
+            profile.completion_response(&known.round_id).history_entry
+        );
+        assert!(matches!(
+            store
+                .completed_profile_round(&id, token, "solo:hard:unknown")
+                .await,
+            Err(AppError::BadRequest(_))
+        ));
+        assert!(
+            store
+                .completed_profile_round(&id, token, "solo:hard:active")
+                .await
+                .unwrap()
+                .is_none()
+        );
         assert_eq!(store.load_profile(&id, token).await.unwrap(), profile);
-        let rounds: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM solo_rounds").fetch_one(&store.pool).await.unwrap();
+        let rounds: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM solo_rounds")
+            .fetch_one(&store.pool)
+            .await
+            .unwrap();
         assert_eq!(rounds, 2);
         // Rerunning initialization must not seal rounds created after the migration.
         sqlx::query("INSERT INTO solo_rounds VALUES ('solo:hard:new', ?, 1, 'hard', 'donk', 1, 0)")
-            .bind(&id).execute(&store.pool).await.unwrap();
+            .bind(&id)
+            .execute(&store.pool)
+            .await
+            .unwrap();
         store.initialize().await.unwrap();
-        assert!(store.completed_profile_round(&id, token, "solo:hard:new").await.unwrap().is_none());
+        assert!(
+            store
+                .completed_profile_round(&id, token, "solo:hard:new")
+                .await
+                .unwrap()
+                .is_none()
+        );
     }
-
 }

@@ -122,12 +122,27 @@ mod tests {
             deadline_unix_ms: 180_000,
             max_guesses: 8,
         };
-        assert_eq!(round.settlement(vec!["donk".to_owned()], false, 179_999).unwrap().result, "win");
+        assert_eq!(
+            round
+                .settlement(vec!["donk".to_owned()], false, 179_999)
+                .unwrap()
+                .result,
+            "win"
+        );
         assert!(round.settlement(vec![], true, 179_999).is_err());
         for now in [180_000, 180_001] {
             for timed_out in [false, true] {
-                assert_eq!(round.settlement(vec!["donk".to_owned()], timed_out, now).unwrap().result, "loss");
-                assert_eq!(round.settlement(vec![], timed_out, now).unwrap().result, "loss");
+                assert_eq!(
+                    round
+                        .settlement(vec!["donk".to_owned()], timed_out, now)
+                        .unwrap()
+                        .result,
+                    "loss"
+                );
+                assert_eq!(
+                    round.settlement(vec![], timed_out, now).unwrap().result,
+                    "loss"
+                );
             }
         }
     }
