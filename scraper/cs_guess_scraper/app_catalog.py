@@ -126,11 +126,24 @@ def _previous_matches(
             if exact:
                 candidates = exact
             else:
-                aliases = {nickname, *(str(a).strip().casefold() for a in record.get("aliases", []) if str(a).strip())}
-                candidates = {str(old["id"]) for old in legacy if aliases.intersection(
-                    {str(old.get("nickname", "")).casefold(),
-                     *(str(a).strip().casefold() for a in old.get("aliases", []) if str(a).strip())}
-                )}
+                aliases = {
+                    str(alias).strip().casefold()
+                    for alias in record.get("aliases", [])
+                    if str(alias).strip()
+                }
+                # Search aliases also include legal/native names. An alias
+                # shared by two rows is not independent identity evidence:
+                # require a bridge to one of their actual nicknames instead.
+                candidates = {
+                    str(old["id"])
+                    for old in legacy
+                    if str(old.get("nickname", "")).casefold() in aliases
+                    or nickname in {
+                        str(alias).strip().casefold()
+                        for alias in old.get("aliases", [])
+                        if str(alias).strip()
+                    }
+                }
         if len(candidates) > 1:
             raise ValueError(f"ambiguous previous identity for {record['nickname']}: {sorted(candidates)}")
         public_id = next(iter(candidates), None)

@@ -314,6 +314,57 @@ def test_legacy_renamed_player_keeps_issued_id_using_unambiguous_alias():
     assert player["catalogIdentity"]["canonicalId"] == "canonical-player"
 
 
+def test_legacy_renamed_player_can_match_an_alias_in_the_previous_catalog():
+    previous = [{
+        "id": "chshekin", "nickname": "chshekin", "name": "Test Player",
+        "countryCode": "RU", "aliases": ["laser"],
+    }]
+    [player] = build_app_catalog(
+        [_identity_record(nickname="laser")],
+        previous_catalog=previous,
+    )
+    assert player["id"] == "chshekin"
+
+
+def test_legacy_shared_search_alias_cannot_transfer_an_unrelated_player_id():
+    for shared_alias in ("Test Player", "Илья Осипов"):
+        previous = [{
+            "id": "other-player", "nickname": "other-player",
+            "name": "Test Player", "countryCode": "RU",
+            "aliases": [shared_alias],
+        }]
+        [player] = build_app_catalog(
+            [_identity_record(nickname="laser", aliases=[shared_alias])],
+            previous_catalog=previous,
+        )
+        assert player["id"] == "laser"
+
+
+def test_legacy_rename_is_not_ambiguous_due_to_shared_native_name_alias():
+    previous = [
+        {
+            "id": "m0nesy", "nickname": "m0nesy", "name": "Ilya Osipov",
+            "countryCode": "RU", "aliases": ["m0", "Илья Осипов"],
+        },
+        {
+            "id": "vopsick", "nickname": "vopsick", "name": "Ilya Osipov",
+            "countryCode": "RU", "aliases": ["Илья Осипов"],
+        },
+    ]
+    records = [
+        _identity_record(
+            id="first-player", nickname="renamed-m0nesy", fullName="Ilya Osipov",
+            aliases=["m0nesy", "Илья Осипов"],
+        ),
+        _identity_record(
+            id="second-player", nickname="vopsick", fullName="Ilya Osipov",
+            aliases=["Илья Осипов"],
+        ),
+    ]
+    catalog = build_app_catalog(records, previous_catalog=previous)
+    assert [player["id"] for player in catalog] == ["m0nesy", "vopsick"]
+
+
 def test_persisted_canonical_identity_survives_mutable_display_fields():
     previous = build_app_catalog([_identity_record()])
     [player] = build_app_catalog(
