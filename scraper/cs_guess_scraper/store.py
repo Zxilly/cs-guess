@@ -3680,6 +3680,14 @@ class PlayerStore:
                 {
                     "schemaVersion": 1,
                     "id": player_id,
+                    "sourceIds": [
+                        {"source": row["source"], "externalId": row["external_id"]}
+                        for row in self.connection.execute(
+                            "SELECT source, external_id FROM player_source_ids "
+                            "WHERE player_id = ? ORDER BY source, external_id",
+                            (player_id,),
+                        )
+                    ],
                     "nickname": player["canonical_nickname"],
                     "aliases": aliases,
                     "fullName": player["full_name"],
