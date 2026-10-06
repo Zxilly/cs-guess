@@ -136,6 +136,7 @@ type GameRole = "AWPer" | "Rifler" | "IGL" | "Entry";
 interface PlayerGameRecord {
   schemaVersion: 1;
   id: string;
+  sourceIds: Array<{ source: string; externalId: string }>;
   nickname: string;
   fullName: string;
   imageUrl?: string;

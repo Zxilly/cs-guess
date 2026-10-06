@@ -33,5 +33,47 @@
         "url": "https://liquipedia.net/counterstrike/Mizi"
       }
     ]
+  },
+  {
+    "target": {
+      "source": "balldontlie",
+      "external_id": "3468"
+    },
+    "canonical": {
+      "source": "pandascore",
+      "external_id": "27719"
+    },
+    "reason": "BALLDONTLIE attached INFINITE Talent team evidence for Romanian Adrian Alexandru Dusmanu to French Lucas/Lukas Guilloton. Keep the French player separate and detach the mixed provider evidence.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "url": "https://www.hltv.org/stats/players/21713/lks"
+      },
+      {
+        "source": "hltv",
+        "url": "https://www.hltv.org/matches/2398606/infinite-talent-vs-95-vikings-tipsport-open-cup-2"
+      }
+    ]
+  },
+  {
+    "target": {
+      "source": "balldontlie",
+      "external_id": "2949"
+    },
+    "canonical": {
+      "source": "pandascore",
+      "external_id": "25845"
+    },
+    "reason": "BALLDONTLIE attached Diamant team evidence for Slovenian Jakob Pertinac to Mexican Jorge Gamboa. Keep the Mexican player separate and detach the mixed provider evidence.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "url": "https://www.hltv.org/player/12331/destro"
+      },
+      {
+        "source": "hltv",
+        "url": "https://www.hltv.org/player/25652/destro"
+      }
+    ]
   }
 ]
