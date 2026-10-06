@@ -157,5 +157,47 @@
       "external_id": "67345"
     },
     "basis": "Lee'Roy Blondeau is a French player, while Cristian Quijada is Chilean; their legal names, countries, and birth data are distinct despite sharing the leeroy nickname and a normalized current-team identity."
+  },
+  {
+    "left": {
+      "source": "pandascore",
+      "external_id": "27719"
+    },
+    "right": {
+      "source": "pandascore",
+      "external_id": "61539"
+    },
+    "basis": "Lucas/Lukas Guilloton is French, while Adrian Alexandru Dusmanu is Romanian. Their shared LKS nickname does not identify one person.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "url": "https://www.hltv.org/stats/players/21713/lks"
+      },
+      {
+        "source": "hltv",
+        "url": "https://www.hltv.org/matches/2398606/infinite-talent-vs-95-vikings-tipsport-open-cup-2"
+      }
+    ]
+  },
+  {
+    "left": {
+      "source": "pandascore",
+      "external_id": "25845"
+    },
+    "right": {
+      "source": "pandascore",
+      "external_id": "55121"
+    },
+    "basis": "Jorge Gamboa is Mexican, while Jakob Pertinac is Slovenian. Their shared destro nickname does not identify one person.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "url": "https://www.hltv.org/player/12331/destro"
+      },
+      {
+        "source": "hltv",
+        "url": "https://www.hltv.org/player/25652/destro"
+      }
+    ]
   }
 ]

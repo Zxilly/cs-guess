@@ -6,9 +6,9 @@
   "runAttempt": 1,
   "createdAt": "2026-09-28T11:33:26Z",
   "quality": {
-    "passed": false,
-    "criticalIssues": 1,
-    "openConflicts": 4,
+    "passed": true,
+    "criticalIssues": 0,
+    "openConflicts": 0,
     "warnings": 4
   }
 }

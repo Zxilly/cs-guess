@@ -68,6 +68,93 @@ def _historical_team_display_name(value: object) -> str:
     return _team_display_name(name)
 
 
+def _source_ids(record: Mapping[str, Any]) -> list[dict[str, str]]:
+    """Keep provider identities deterministic across canonical database rebuilds."""
+    return [
+        {"source": source, "externalId": external_id}
+        for source, external_id in sorted({
+            (str(item["source"]), str(item["externalId"]))
+            for item in record.get("sourceIds", [])
+            if isinstance(item, Mapping) and item.get("source")
+            and item.get("externalId") is not None
+        })
+    ]
+
+
+def _identity_keys(identity: Mapping[str, Any]) -> set[tuple[str, str]]:
+    keys = {(item["source"], item["externalId"]) for item in _source_ids(identity)}
+    if identity.get("canonicalId"):
+        keys.add(("canonical", str(identity["canonicalId"])))
+    return keys
+
+
+def _previous_matches(
+    source: list[Mapping[str, Any]], previous: list[Mapping[str, Any]],
+) -> list[Mapping[str, Any] | None]:
+    by_key: dict[tuple[str, str], set[str]] = {}
+    by_id: dict[str, Mapping[str, Any]] = {}
+    for old in previous:
+        public_id = str(old["id"])
+        if public_id in by_id:
+            raise ValueError(f"duplicate previous public ID: {public_id}")
+        by_id[public_id] = old
+        identity = old.get("catalogIdentity", {})
+        if isinstance(identity, Mapping):
+            for key in _identity_keys(identity):
+                by_key.setdefault(key, set()).add(public_id)
+
+    matches: list[Mapping[str, Any] | None] = []
+    claimed: set[str] = set()
+    for record in source:
+        identity = {"canonicalId": record["id"], "sourceIds": _source_ids(record)}
+        candidates: set[str] = set()
+        for key in _identity_keys(identity):
+            candidates.update(by_key.get(key, ()))
+        if not candidates:
+            # Bootstrap catalogs emitted before identity metadata was available.
+            # Alias matching requires the same full name and country, and must
+            # be one-to-one. Never guess through contradictory stable identities.
+            legacy = [
+                old for old in previous
+                if not old.get("catalogIdentity")
+                and str(old.get("name", "")).casefold() == str(record["fullName"]).casefold()
+                and str(old.get("countryCode", "")).upper() == str(record["countryCode"]).upper()
+            ]
+            nickname = str(record["nickname"]).casefold()
+            exact = {str(old["id"]) for old in legacy
+                     if str(old.get("nickname", "")).casefold() == nickname}
+            if exact:
+                candidates = exact
+            else:
+                aliases = {
+                    str(alias).strip().casefold()
+                    for alias in record.get("aliases", [])
+                    if str(alias).strip()
+                }
+                # Search aliases also include legal/native names. An alias
+                # shared by two rows is not independent identity evidence:
+                # require a bridge to one of their actual nicknames instead.
+                candidates = {
+                    str(old["id"])
+                    for old in legacy
+                    if str(old.get("nickname", "")).casefold() in aliases
+                    or nickname in {
+                        str(alias).strip().casefold()
+                        for alias in old.get("aliases", [])
+                        if str(alias).strip()
+                    }
+                }
+        if len(candidates) > 1:
+            raise ValueError(f"ambiguous previous identity for {record['nickname']}: {sorted(candidates)}")
+        public_id = next(iter(candidates), None)
+        if public_id in claimed:
+            raise ValueError(f"multiple records claim previous public ID: {public_id}")
+        if public_id is not None:
+            claimed.add(public_id)
+        matches.append(by_id[public_id] if public_id is not None else None)
+    return matches
+
+
 def build_app_catalog(
     records: Iterable[Mapping[str, Any]],
     *,
@@ -77,15 +164,9 @@ def build_app_catalog(
     """Create frontend/server rows while preserving already-issued public IDs."""
 
     source = list(records)
-    previous_by_identity = {
-        (
-            str(record.get("nickname", "")).casefold(),
-            str(record.get("name", "")).casefold(),
-            str(record.get("countryCode", "")).upper(),
-        ): record
-        for record in previous_catalog
-        if record.get("id")
-    }
+    previous = [record for record in previous_catalog if record.get("id")]
+    previous_matches = _previous_matches(source, previous)
+    reserved_ids = {str(record["id"]) for record in previous}
     bases = [_slug(str(record["nickname"])) for record in source]
     duplicate_bases = {
         base for base, count in Counter(bases).items() if count > 1
@@ -93,33 +174,27 @@ def build_app_catalog(
     effective_today = today or datetime.now(timezone.utc).date()
     catalog: list[dict[str, Any]] = []
     used_ids: set[str] = set()
-    for record, base in zip(source, bases, strict=True):
+    for record, base, previous_record in zip(source, bases, previous_matches, strict=True):
         full_name = str(record["fullName"])
         country_code = str(record["countryCode"]).upper()
         current_team = record["currentTeam"]
-        identity = (
-            str(record["nickname"]).casefold(),
-            full_name.casefold(),
-            country_code,
-        )
-        previous_record = previous_by_identity.get(identity)
         if not isinstance(current_team, Mapping):
             current_team = {"name": UNATTACHED_TEAM}
         previous_id = (
             str(previous_record["id"]) if previous_record is not None else None
         )
         public_id = previous_id if previous_id not in used_ids else None
-        if public_id is None and base not in duplicate_bases and base not in used_ids:
+        if public_id is None and base not in duplicate_bases and base not in used_ids and base not in reserved_ids:
             public_id = base
         if public_id is None:
             public_id = "-".join(
                 (base, country_code.casefold(), _slug(full_name))
             )
-        if public_id in used_ids:
+        if public_id in used_ids or (previous_id is None and public_id in reserved_ids):
             public_id = "-".join(
                 (public_id, _slug(str(record["birthDate"])))
             )
-        if public_id in used_ids:
+        if public_id in used_ids or (previous_id is None and public_id in reserved_ids):
             raise ValueError(
                 f"app catalog cannot create a stable unique ID for {record['nickname']}"
             )
@@ -146,6 +221,10 @@ def build_app_catalog(
             historical_teams.append(historical_name)
         catalog_record = {
             "id": public_id,
+            "catalogIdentity": {
+                "canonicalId": str(record["id"]),
+                "sourceIds": _source_ids(record),
+            },
             "nickname": str(record["nickname"]),
             "name": full_name,
             "team": team_name,

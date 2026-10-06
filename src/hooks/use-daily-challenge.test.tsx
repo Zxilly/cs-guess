@@ -12,6 +12,7 @@ import {
 
 const profileMocks = vi.hoisted(() => ({
   ensureReady: vi.fn(),
+  acceptCompletion: vi.fn(),
   profile: {
     anonymousId: "anonymous-daily-cache-test",
     syncToken: "profile_sync_token_abcdefghijklmnopqrstuvwxyz",
@@ -19,17 +20,20 @@ const profileMocks = vi.hoisted(() => ({
 }));
 const dailyMocks = vi.hoisted(() => ({
   load: vi.fn(),
+  complete: vi.fn(),
   loadMetadata: vi.fn(),
 }));
 
 vi.mock("@/hooks/use-anonymous-profile", () => ({
   ensureAnonymousProfileReady: profileMocks.ensureReady,
+  acceptAuthoritativeProfileCompletion: profileMocks.acceptCompletion,
   useAnonymousProfile: () => ({ profile: profileMocks.profile }),
 }));
 
 vi.mock("@/lib/daily-challenge-api", () => ({
   loadCurrentDailyChallengeMetadata: dailyMocks.loadMetadata,
   startCurrentDailyChallenge: dailyMocks.load,
+  completeDailyChallenge: dailyMocks.complete,
 }));
 
 let container: HTMLDivElement;
@@ -69,6 +73,7 @@ afterEach(() => {
   act(() => root.unmount());
   container.remove();
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 describe("useDailyChallenge request cache", () => {
@@ -108,4 +113,33 @@ describe("useDailyChallenge request cache", () => {
     expect(profileMocks.ensureReady).not.toHaveBeenCalled();
     expect(container.textContent).toBe("211");
   });
+  it("keeps the issued attempt and submits its date after Shanghai midnight", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-09-29T15:59:59Z"));
+    dailyMocks.load.mockResolvedValue({ date: "2026-09-29", roundNumber: 272 });
+    dailyMocks.complete.mockResolvedValue({ profile: profileMocks.profile });
+    let submit: ReturnType<typeof useDailyChallenge>["submitCompletion"];
+    function CompletionProbe({ label }: { label: string }) {
+      const { challenge, submitCompletion } = useDailyChallenge();
+      submit = submitCompletion;
+      return <output>{label}:{challenge?.date}</output>;
+    }
+    const cache = new Map();
+    const render = (label: string) => root.render(
+      <SWRConfig value={{ provider: () => cache }}>
+        <CompletionProbe label={label} />
+      </SWRConfig>,
+    );
+    await act(async () => { render("before"); });
+    await act(async () => { await Promise.resolve(); });
+    vi.setSystemTime(new Date("2026-09-29T16:00:01Z"));
+    await act(async () => { render("after"); });
+    await act(async () => { await submit!(["donk"], false); });
+    expect(dailyMocks.load).toHaveBeenCalledOnce();
+    expect(container.textContent).toBe("after:2026-09-29");
+    expect(dailyMocks.complete).toHaveBeenCalledWith(
+      profileMocks.profile, "2026-09-29", ["donk"], false,
+    );
+  });
+
 });

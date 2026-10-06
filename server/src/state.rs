@@ -399,35 +399,42 @@ impl AppState {
         sync_token: &str,
         request: CompleteDailyChallengeRequest,
     ) -> Result<ProfileCompletionResponse, AppError> {
-        self.inner
-            .database
-            .load_profile(&request.anonymous_id, sync_token)
-            .await?;
-        let challenge = self.current_daily_challenge().await?;
-        if request.timed_out {
-            let deadline = self
-                .inner
-                .database
-                .daily_attempt_deadline(&request.anonymous_id, &challenge.date)
-                .await?;
-            let now = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .map(|duration| duration.as_millis().try_into().unwrap_or(u64::MAX))
-                .unwrap_or(0);
-            if now < deadline {
-                return Err(AppError::BadRequest(
-                    "daily challenge deadline has not elapsed".to_owned(),
-                ));
-            }
-        }
-        let round_id = format!("daily:{}", challenge.date);
-        let settlement = challenge.settlement(request.guess_ids, request.timed_out)?;
-        let profile = self
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|duration| duration.as_millis().try_into().unwrap_or(u64::MAX))
+            .unwrap_or(0);
+        let round_id = format!("daily:{}", request.date);
+        if let Some(receipt) = self
             .inner
+            .database
+            .completed_profile_round(&request.anonymous_id, sync_token, &round_id)
+            .await?
+        {
+            return Ok(receipt);
+        }
+        // Both ownership and deadline come from the persisted attempt, never
+        // from the server's current date or the client's timeout flag.
+        let deadline = self
+            .inner
+            .database
+            .daily_attempt_deadline(&request.anonymous_id, &request.date)
+            .await?;
+        let challenge = self
+            .inner
+            .database
+            .load_daily_challenge(&request.date)
+            .await?;
+        let settlement =
+            challenge.settlement(request.guess_ids, request.timed_out, deadline, now)?;
+        self.inner
             .database
             .settle_profile_round(&request.anonymous_id, settlement)
             .await?;
-        Ok(profile.completion_response(&round_id))
+        self.inner
+            .database
+            .completed_profile_round(&request.anonymous_id, sync_token, &round_id)
+            .await?
+            .ok_or(AppError::Internal)
     }
 
     pub async fn start_daily_challenge_attempt(
@@ -470,22 +477,33 @@ impl AppState {
         sync_token: &str,
         request: CompleteSoloRoundRequest,
     ) -> Result<ProfileCompletionResponse, AppError> {
+        let now_unix_ms = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|duration| duration.as_millis().try_into().unwrap_or(u64::MAX))
+            .unwrap_or(0);
+        if let Some(receipt) = self
+            .inner
+            .database
+            .completed_profile_round(&request.anonymous_id, sync_token, round_id)
+            .await?
+        {
+            return Ok(receipt);
+        }
         let round = self
             .inner
             .database
             .load_solo_round(&request.anonymous_id, sync_token, round_id)
             .await?;
-        let now_unix_ms = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map(|duration| duration.as_millis().try_into().unwrap_or(u64::MAX))
-            .unwrap_or(0);
         let settlement = round.settlement(request.guess_ids, request.timed_out, now_unix_ms)?;
-        let profile = self
-            .inner
+        self.inner
             .database
             .settle_profile_round(&request.anonymous_id, settlement)
             .await?;
-        Ok(profile.completion_response(round_id))
+        self.inner
+            .database
+            .completed_profile_round(&request.anonymous_id, sync_token, round_id)
+            .await?
+            .ok_or(AppError::Internal)
     }
 
     pub fn set_ready(&self, value: bool) {

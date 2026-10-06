@@ -65,6 +65,7 @@ export async function startCurrentDailyChallenge(
 
 export async function completeDailyChallenge(
   profile: Pick<AnonymousProfile, "anonymousId" | "syncToken">,
+  date: string,
   guessIds: readonly string[],
   timedOut: boolean,
 ): Promise<ServerProfileCompletion> {
@@ -78,6 +79,7 @@ export async function completeDailyChallenge(
       },
       body: JSON.stringify({
         anonymousId: profile.anonymousId,
+        date,
         guessIds,
         timedOut,
       }),
