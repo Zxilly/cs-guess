@@ -1368,5 +1368,28 @@
         "url": "https://bo3.gg/matches/vexar-vs-noir-verse-06-09-2026"
       }
     ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "Kon"
+    },
+    "duplicate": {
+      "source": "pandascore",
+      "external_id": "52114"
+    },
+    "basis": "The Chinese Kon in PandaScore 52114 and Liquipedia Kon share the DQZS roster identity with no conflicting biographical fields. HLTV 23809 and bo3 51016 independently identify the DQZS player as Haosen Jiang (Jiang Haosen); preserve the complete Liquipedia identity and both provider IDs.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "23809",
+        "url": "https://www.hltv.org/player/23809/kon"
+      },
+      {
+        "source": "bo3",
+        "external_id": "51016",
+        "url": "https://bo3.gg/players/kon-cs"
+      }
+    ]
   }
 ]
