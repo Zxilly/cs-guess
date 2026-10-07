@@ -1,0 +1,54 @@
+name: Audit snapshot retention
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Refresh player data
+      - Review and promote player data candidate
+    types:
+      - completed
+
+# This workflow cannot delete package versions, even if the planner is wrong.
+permissions:
+  contents: read
+  packages: read
+  pull-requests: read
+
+concurrency:
+  group: snapshot-retention-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: Plan snapshot retention (no deletion)
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # workflow_run always uses trusted default-branch code, never PR code or
+      # artifacts. Candidate JSON from PRs is read as data, pinned to head SHA.
+      - name: Check out trusted audit code
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Test retention planner
+        run: python3 -m unittest discover -s scripts/tests -v
+
+      - name: Audit complete OCI snapshot graphs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/snapshot_retention.py --keep 8 --output snapshot-retention-plan.json
+
+      - name: Upload read-only retention report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: snapshot-retention-plan-${{ github.run_id }}-${{ github.run_attempt }}
+          path: snapshot-retention-plan.json
+          if-no-files-found: warn
+          retention-days: 30

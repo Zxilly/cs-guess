@@ -244,15 +244,9 @@ jobs:
           echo "digest=${digest}" >> "$GITHUB_OUTPUT"
           echo "reference=${SNAPSHOT_IMAGE}@${digest}" >> "$GITHUB_OUTPUT"
 
-      - name: Retain latest eight data snapshots
-        continue-on-error: true
-        uses: actions/delete-package-versions@25ad4af5be03aef10e0b3376b248688b7a44c40b # v5
-        with:
-          owner: ${{ github.repository_owner }}
-          package-name: cs-guess-data
-          package-type: container
-          min-versions-to-keep: 8
-          token: ${{ secrets.GITHUB_TOKEN }}
+      # Never delete GHCR package versions by count: OCI index children and
+      # attestations are separate versions. The read-only retention audit runs
+      # after this workflow completes, when the candidate PR has been created.
 
       - name: Write candidate review manifest
         shell: bash
