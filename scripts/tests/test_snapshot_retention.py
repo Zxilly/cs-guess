@@ -194,6 +194,52 @@ class PlanTests(unittest.TestCase):
                     "vnd.docker.reference.digest"] = value
                 self.assert_blocked(fixture)
 
+    def test_missing_docker_reference_reports_index_attestation_target_and_missing_digest(self):
+        for missing_kind in ("target", "attestation", "both"):
+            with self.subTest(missing_kind=missing_kind):
+                fixture = InventoryFixture()
+                root, target, attestation = fixture.roots[0], fixture.children[0], fixture.attestations[0]
+                removed = ({target} if missing_kind == "target" else
+                           {attestation} if missing_kind == "attestation" else {target, attestation})
+                fixture.rows = [row for row in fixture.rows if row["name"] not in removed]
+                for key in removed:
+                    del fixture.manifests[key]
+                with self.assertRaises(retention.UnsafeInventory) as error:
+                    fixture.plan()
+                message = str(error.exception)
+                self.assertIn(f"index={root}", message)
+                self.assertIn(f"attestation={attestation}", message)
+                self.assertIn(f"target={target}", message)
+                self.assertIn("missing=" + ", ".join(sorted(removed)), message)
+
+    def test_missing_index_children_reports_parent_and_each_missing_digest(self):
+        fixture = InventoryFixture()
+        missing = [sha("missing-child-a"), sha("missing-child-b")]
+        fixture.manifests[fixture.roots[0]]["manifests"].extend(descriptor(key) for key in missing)
+        with self.assertRaises(retention.UnsafeInventory) as error:
+            fixture.plan()
+        self.assertIn(f"index={fixture.roots[0]}", str(error.exception))
+        self.assertIn("missing=" + ", ".join(sorted(missing)), str(error.exception))
+
+    def test_missing_oci_subject_reports_referring_manifest(self):
+        fixture = InventoryFixture()
+        subject = sha("missing-subject")
+        attestation = fixture.attestations[0]
+        fixture.manifests[attestation]["subject"] = descriptor(subject)
+        with self.assertRaises(retention.UnsafeInventory) as error:
+            fixture.plan()
+        self.assertIn(subject, str(error.exception))
+        self.assertIn(f"manifest={attestation}", str(error.exception))
+
+    def test_incomplete_manifest_inventory_reports_missing_and_unexpected_digests(self):
+        fixture = InventoryFixture()
+        missing, unexpected = fixture.children[0], sha("unexpected-manifest")
+        fixture.manifests[unexpected] = fixture.manifests.pop(missing)
+        with self.assertRaises(retention.UnsafeInventory) as error:
+            fixture.plan()
+        self.assertIn(f"missing={missing}", str(error.exception))
+        self.assertIn(f"unexpected={unexpected}", str(error.exception))
+
     def test_docker_v2_manifest_and_index_supported(self):
         fixture = InventoryFixture()
         fixture.manifests[fixture.roots[-1]]["mediaType"] = DOCKER_INDEX
