@@ -97,7 +97,9 @@ def plan_retention(rows, manifests, protected_refs, keep=8):
     """Count logical snapshot roots; retain every manifest reachable from a live root."""
     require(type(keep) is int and keep >= 1, "Retention count must be positive")
     versions = parse_versions(rows)
-    require(set(manifests) == set(versions), "Incomplete manifest inventory")
+    require(set(manifests) == set(versions),
+            "Incomplete manifest inventory: missing=" + ", ".join(sorted(versions.keys() - manifests.keys()))
+            + "; unexpected=" + ", ".join(sorted(manifests.keys() - versions.keys())))
     graph = {key: set() for key in versions}
     for key, manifest in manifests.items():
         require(isinstance(manifest, dict) and type(manifest.get("schemaVersion")) is int
@@ -114,8 +116,11 @@ def plan_retention(rows, manifests, protected_refs, keep=8):
                 require(isinstance(annotations, dict), "Invalid descriptor annotations")
                 if "vnd.docker.reference.digest" in annotations:
                     target = digest(annotations["vnd.docker.reference.digest"])
-                    require(child_digest in graph and target in graph,
-                            "Missing Docker attestation reference")
+                    missing = sorted({child_digest, target} - graph.keys())
+                    require(not missing,
+                            f"Missing Docker attestation reference: index={key}; "
+                            f"attestation={child_digest}; target={target}; "
+                            f"missing={', '.join(missing)}")
                     graph[child_digest].add(target)
                     graph[target].add(child_digest)
         elif media_type in MANIFEST_TYPES:
@@ -128,12 +133,13 @@ def plan_retention(rows, manifests, protected_refs, keep=8):
             raise UnsafeInventory(f"Unsupported manifest media type: {key}")
         if "subject" in manifest:
             subject = descriptor(manifest["subject"])
-            require(subject in graph, f"Missing OCI subject: {subject}")
+            require(subject in graph, f"Missing OCI subject: {subject}; manifest={key}")
             # A retained image also retains its external attestation/signature.
             graph[key].add(subject)
             graph[subject].add(key)
     for key in graph:
-        require(graph[key] <= graph.keys(), f"Missing index children: {key}")
+        missing = sorted(graph[key] - graph.keys())
+        require(not missing, f"Missing index children: index={key}; missing={', '.join(missing)}")
 
     latest = {key for key, value in versions.items() if "latest" in value["tags"]}
     require(len(latest) == 1, "Exactly one latest snapshot is required")
