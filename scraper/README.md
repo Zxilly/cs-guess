@@ -125,8 +125,9 @@ provider ID 重放，并把核验链接写入 source record，避免不可追溯
 工作流先从 `ghcr.io/<owner>/cs-guess-data:latest` 恢复规范 SQLite 数据库。每次同步
 都会把数据库、生成目录和审计报告保存为不可变的
 `run-<run-id>-<attempt>` OCI 候选快照；只有零 critical 的候选才会更新 `latest`。
-Docker 层由内容摘要寻址，未变化的层可由 registry 去重；工作流最多保留最近 8 个
-完整快照。
+Docker 层由内容摘要寻址，未变化的层可由 registry 去重。旧的按 package version
+计数删除已停用：OCI index、平台 manifest 和 attestation 在 GHCR 中是不同的 version，
+不能把保留 8 个 version 当作保留 8 个完整快照。当前只生成保留计划，不执行删除。
 
 当游戏目录变化或候选仍有 critical 时，工作流使用独立的
 `automation/player-data-refresh-<run-id>-<attempt>` 分支创建 Draft PR，并提交包含
@@ -152,11 +153,46 @@ snapshot 提升为 canonical `latest`，同样不会重新抓取 provider。需�
 - 仓库 Actions 设置中的 “Allow GitHub Actions to create and approve pull requests”。
 
 首次发布后可在 package settings 中把 `cs-guess-data` 设为 public；该包只包含公开
-来源数据与派生报告。保持 private 时，8 版上限用于约束 GitHub Packages 存储增长。
+来源数据与派生报告。当前未启用自动删除，存储会继续增长；请查看只读保留审计报告，
+不要手工按 version 数量删除未打标签的 child manifests。
 
 同步报告、质量报告和完整审计会作为短期 Actions artifact 保留，完整可恢复状态则
 保存在 GHCR。Copilot 不参与自动身份合并；AI 只能在人工触发的独立审查流程中
 根据结构化冲突报告提出候选修正，修正仍需引用证据并经 PR 审核。
+
+### 快照保留审计（仅 dry-run）
+
+`Audit snapshot retention` 在刷新或候选回放成功结束后运行，也可手动运行。
+独立 job 只有 `contents: read`、`packages: read` 和 `pull-requests: read` 权限，
+脚本没有 DELETE 请求、删除模式或启用删除的参数。审计失败不会阻断数据发布，
+会产生失败的审计 run 和 `snapshot-retention-plan.json` 报告，候选删除列表清空。
+
+计划默认保留最新 8 个不同 digest 的逻辑快照（`run-<id>-<attempt>` 或
+`reviewed-<40 位 commit SHA>`），并额外保护：
+
+- `latest`、默认分支的 candidate，以及所有开放 PR（包括 Draft 和 fork）的 candidate
+- 上述 root 的递归 OCI index children，包括平台 manifest、SBOM 和 provenance
+- OCI subject 双向关联的 attestation / signature，以及多个 root 共享的 children
+- 未识别的 tag，以及不能明确归属到已知快照的无标签 manifest
+
+快照按 GHCR `created_at` 排序，同一 digest 的多个 tag 只计一个快照。
+保护项可以令实际保留数量超过 8。只有明确属于过期快照、且不被任何保护 root
+引用的 manifest version 才会出现在信息性候选列表中；不是清空所有无标签版本。
+完整读取 package 和开放 PR 分页，按不可变 head SHA 读取候选，校验 registry 内容
+摘要及 tag 对应关系，再次读取 package inventory、PR heads 和默认分支 SHA。
+权限不足、404、未知 schema、缺失 children、分页异常或观察到并发发布变化时，
+一律阻断计划并保留全部。历史上已经损坏的图也会阻断，需要独立人工处理。
+
+只读审计不能锁住 registry：报告生成后仍可能出现新发布或 PR，稳定的两次读取
+不保证后续删除安全。将来如要启用删除，需要另外审查和批准执行器，所有发布和
+清理共用写入锁、删除前重新验证保护图，并先移除过期 root、重新计算剩余引用后
+才处理专属于它的 children；当前报告不能直接作为删除执行清单。
+
+本地离线回归测试：`python3 -m unittest discover -s scripts/tests -v`。
+读取真实 inventory 需要具备 package 和仓库读取权限的 `GH_TOKEN`、
+`GITHUB_ACTOR` 及 `GITHUB_REPOSITORY`，运行
+`python3 scripts/snapshot_retention.py --output snapshot-retention-plan.json`。
+不要把 token 写进命令行、报告或仓库文件。
 
 ## 已发布选手 ID 的兼容性
 

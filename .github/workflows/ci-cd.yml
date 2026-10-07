@@ -78,6 +78,9 @@ jobs:
         with:
           enable-cache: true
 
+      - name: Test snapshot retention safety
+        run: python3 -m unittest discover -s scripts/tests -v
+
       - name: Test
         run: uv run --project scraper --frozen pytest
 
