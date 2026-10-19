@@ -30,5 +30,77 @@
       }
     ],
     "basis": "ProSettings lists Adrian \"AdrieN\" Mucha's complete birthday; HLTV independently matches the same Polish los kogutos player and a compatible age."
+  },
+  {
+    "player": {
+      "source": "liquipedia",
+      "external_id": "XELLOW"
+    },
+    "overrides": {
+      "current_team_departures": [
+        {
+          "team": {
+            "source": "liquipedia",
+            "external_id": "Aimclub (Romanian team)"
+          },
+          "ended_on": "2026-06-22",
+          "reviewed_on": "2026-10-19"
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "url": "https://www.hltv.org/team/6810/aimclub",
+        "supports": [
+          "current_team_departure"
+        ]
+      },
+      {
+        "url": "https://www.hltv.org/team/7187/nexus",
+        "supports": [
+          "current_team_departure"
+        ]
+      },
+      {
+        "url": "https://www.hltv.org/player/9626/xellow",
+        "supports": [
+          "current_team"
+        ]
+      }
+    ],
+    "basis": "HLTV records XELLOW returning from his Aimclub loan to Nexus on 2026-06-22 and leaving Nexus on 2026-06-28; his current profile lists no team. Ignore the stale undated Aimclub claim while preserving historical memberships and any explicitly dated later rejoin."
+  },
+  {
+    "player": {
+      "source": "liquipedia",
+      "external_id": "SaMey"
+    },
+    "overrides": {
+      "current_team_departures": [
+        {
+          "team": {
+            "source": "liquipedia",
+            "external_id": "Walczaki"
+          },
+          "ended_on": "2026-09-03",
+          "reviewed_on": "2026-10-19"
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "url": "https://www.hltv.org/team/13808/walczaki",
+        "supports": [
+          "current_team_departure"
+        ]
+      },
+      {
+        "url": "https://www.hltv.org/player/20245/samey",
+        "supports": [
+          "current_team"
+        ]
+      }
+    ],
+    "basis": "HLTV records SaMey leaving Walczaki on 2026-09-03, matching his dated Liquipedia tenure, and his current profile lists no team. Ignore the stale Walczaki claim for the ended stint while preserving its history and any explicitly dated later rejoin."
   }
 ]

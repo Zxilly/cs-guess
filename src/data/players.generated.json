@@ -131274,7 +131274,7 @@
     },
     "nickname": "SaMey",
     "name": "Dawid Stańczak",
-    "team": "Walczaki",
+    "team": "无队伍",
     "nationality": "Poland",
     "countryCode": "PL",
     "age": 26,
@@ -131282,6 +131282,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "Walczaki",
       "ESC Gaming",
       "Friendly Campers",
       "los kogutos",
@@ -131298,7 +131299,6 @@
     "aliases": [
       "Dawid Stańczak"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/23286/image/webp-30a2dfa3f15fb8c3bdb9d6ba09a2e390.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/29514/image/webp-838ffce7d7e12ab67c789be6584e0f53.webp"
   },
   {
@@ -165853,7 +165853,7 @@
     },
     "nickname": "XELLOW",
     "name": "Adrian Guță",
-    "team": "Aimclub",
+    "team": "无队伍",
     "nationality": "Romania",
     "countryCode": "RO",
     "age": 26,
@@ -165861,6 +165861,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "Aimclub",
       "Nexus Gaming",
       "sprout",
       "ECSTATIC",
@@ -165870,7 +165871,6 @@
     "aliases": [
       "Adrian Guță"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/10014/image/webp-24dab649d975d1c5afb792867c9538db.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/25382/sa_we0uc_m.png"
   },
   {

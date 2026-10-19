@@ -637,6 +637,7 @@ class PlayerStore:
             "country_code",
             "status",
             "is_coach",
+            "current_team_departures",
         }
         result = {"applied": 0, "already_applied": 0}
         with self.connection:
@@ -663,6 +664,10 @@ class PlayerStore:
                     raise ValueError(
                         "reviewed player override has unsupported fields: "
                         + ", ".join(sorted(unknown_fields))
+                    )
+                if "current_team_departures" in values:
+                    self._validate_reviewed_team_departures(
+                        values["current_team_departures"]
                     )
                 birth_date = values.get("birth_date")
                 if birth_date is not None:
@@ -726,6 +731,211 @@ class PlayerStore:
                     )
                 result["applied"] += 1
         return result
+
+    def _validate_reviewed_team_departures(self, departures: Any) -> None:
+        if not isinstance(departures, list) or not departures:
+            raise TypeError("current_team_departures must be a non-empty list")
+        for departure in departures:
+            if not isinstance(departure, Mapping) or set(departure) != {
+                "team",
+                "ended_on",
+                "reviewed_on",
+            }:
+                raise TypeError(
+                    "reviewed team departure requires team, ended_on, and reviewed_on"
+                )
+            team = departure["team"]
+            if not isinstance(team, Mapping) or set(team) != {
+                "source",
+                "external_id",
+            }:
+                raise TypeError(
+                    "reviewed team departure requires a team provider reference"
+                )
+            if not all(
+                str(team[key] or "").strip() for key in ("source", "external_id")
+            ):
+                raise ValueError(
+                    "reviewed team departure requires a team provider reference"
+                )
+            for field in ("ended_on", "reviewed_on"):
+                value = departure[field]
+                try:
+                    parsed_date = date.fromisoformat(str(value))
+                except ValueError as error:
+                    raise ValueError(
+                        f"reviewed team departure {field} must be YYYY-MM-DD"
+                    ) from error
+                if parsed_date.isoformat() != value:
+                    raise ValueError(
+                        f"reviewed team departure {field} must be YYYY-MM-DD"
+                    )
+            if departure["ended_on"] > departure["reviewed_on"]:
+                raise ValueError(
+                    "reviewed team departure ended_on must not follow reviewed_on"
+                )
+            if self.connection.execute(
+                "SELECT 1 FROM team_source_ids WHERE source = ? AND external_id = ?",
+                (str(team["source"]), str(team["external_id"])),
+            ).fetchone() is None:
+                raise ValueError("reviewed team departure team reference is unresolved")
+
+    def _reviewed_team_departure_cutoffs(
+        self, player_id: str
+    ) -> dict[tuple[str, ...], str]:
+        reviews = self._latest_player_evidence(player_id, "current_team_departures")
+        manual = next((row for row in reviews if row["source"] == "manual"), None)
+        if manual is None:
+            return {}
+        departures = manual["value"]
+        self._validate_reviewed_team_departures(departures)
+        ended_by_signature: dict[tuple[str, ...], str] = {}
+        for departure in departures:
+            team = departure["team"]
+            row = self.connection.execute(
+                """
+                SELECT t.canonical_name FROM teams t
+                JOIN team_source_ids s ON s.team_id = t.id
+                WHERE s.source = ? AND s.external_id = ?
+                """,
+                (str(team["source"]), str(team["external_id"])),
+            ).fetchone()
+            signature = team_name_identity_signature(row["canonical_name"])
+            ended_by_signature[signature] = max(
+                ended_by_signature.get(signature, ""), departure["ended_on"]
+            )
+        return ended_by_signature
+
+    def _is_reviewed_team_rejoin(self, tenure: sqlite3.Row, ended_on: str) -> bool:
+        if not tenure["is_current"] or tenure["start_precision"] != "day":
+            return False
+        start_value = tenure["start_value"]
+        try:
+            start_date = date.fromisoformat(str(start_value))
+        except ValueError:
+            return False
+        if start_date.isoformat() != start_value or start_value <= ended_on:
+            return False
+
+        # A pinned snapshot must not gain a new affiliation merely because it
+        # is replayed later. The *same source record* must confirm this precise
+        # current stint on or after its start. Coalescing can move unrelated,
+        # newer undated evidence onto this tenure; that is not confirmation.
+        # It can also move matching evidence onto another tenure of this player
+        # before a refetch recreates this stint, so do not require its original ID.
+        # fetched_at intentionally advances on an unchanged payload refetch.
+        for row in self.connection.execute(
+            """
+            SELECT DISTINCT sr.fetched_at
+            FROM field_evidence start
+            JOIN source_records sr ON sr.id = start.source_record_id
+            JOIN player_team_tenures evidence_tenure ON evidence_tenure.id = start.entity_id
+            WHERE start.entity_type = 'team_tenure' AND evidence_tenure.player_id = ?
+              AND start.field_name = 'start_value'
+              AND start.normalized_value_json = ?
+              AND sr.record_type = 'team_history'
+              AND EXISTS (
+                  SELECT 1 FROM field_evidence precision
+                  WHERE precision.entity_type = 'team_tenure'
+                    AND precision.entity_id = start.entity_id
+                    AND precision.source_record_id = sr.id
+                    AND precision.field_name = 'start_precision'
+                    AND precision.normalized_value_json = '"day"'
+              )
+              AND EXISTS (
+                  SELECT 1 FROM field_evidence current
+                  WHERE current.entity_type = 'team_tenure'
+                    AND current.entity_id = start.entity_id
+                    AND current.source_record_id = sr.id
+                    AND current.field_name = 'is_current'
+                    AND current.normalized_value_json = 'true'
+              )
+              AND EXISTS (
+                  SELECT 1 FROM field_evidence team
+                  WHERE team.entity_type = 'team_tenure'
+                    AND team.entity_id = start.entity_id
+                    AND team.source_record_id = sr.id
+                    AND team.field_name = 'team_id'
+                    AND team.normalized_value_json = ?
+              )
+            """,
+            (tenure["player_id"], _json(start_value), _json(tenure["team_id"])),
+        ):
+            try:
+                observed_at = datetime.fromisoformat(str(row["fetched_at"]))
+            except ValueError:
+                continue
+            if observed_at.tzinfo is not None:
+                observed_at = observed_at.astimezone(timezone.utc)
+            if start_date <= observed_at.date():
+                return True
+        return False
+
+    def _reviewed_departed_team_ids(self, player_id: str) -> set[str]:
+        """Filter only cited departures, preserving precise later rejoin evidence."""
+        ended_by_signature = self._reviewed_team_departure_cutoffs(player_id)
+        if not ended_by_signature:
+            return set()
+        rejoined_team_ids: set[str] = set()
+        for tenure in self.connection.execute(
+            """
+            SELECT pt.*, t.canonical_name FROM player_team_tenures pt
+            JOIN teams t ON t.id = pt.team_id
+            WHERE pt.player_id = ? AND pt.is_current = 1
+            """,
+            (player_id,),
+        ):
+            signature = team_name_identity_signature(tenure["canonical_name"])
+            ended_on = ended_by_signature.get(signature)
+            if ended_on is not None and self._is_reviewed_team_rejoin(tenure, ended_on):
+                rejoined_team_ids.add(str(tenure["team_id"]))
+        return {
+            str(row["id"])
+            for row in self.connection.execute("SELECT id, canonical_name FROM teams")
+            if team_name_identity_signature(row["canonical_name"]) in ended_by_signature
+            and str(row["id"]) not in rejoined_team_ids
+        }
+
+    def _retire_reviewed_team_departures(self) -> int:
+        """Retire normalized stale stints while retaining all provider evidence.
+
+        This precedes coalescing so an undated refetch cannot replace a dated
+        later rejoin. No departure is inferred from missing scraped team data.
+        """
+        retired = 0
+        for row in self.connection.execute(
+            """
+            SELECT DISTINCT fe.entity_id FROM field_evidence fe
+            JOIN source_records sr ON sr.id = fe.source_record_id
+            WHERE fe.entity_type = 'player'
+              AND fe.field_name = 'current_team_departures'
+              AND sr.source = 'manual'
+            """
+        ):
+            player_id = str(row["entity_id"])
+            cutoffs = self._reviewed_team_departure_cutoffs(player_id)
+            for tenure in list(self.connection.execute(
+                """
+                SELECT pt.*, t.canonical_name FROM player_team_tenures pt
+                JOIN teams t ON t.id = pt.team_id
+                WHERE pt.player_id = ? AND pt.is_current = 1
+                """,
+                (player_id,),
+            )):
+                ended_on = cutoffs.get(
+                    team_name_identity_signature(tenure["canonical_name"])
+                )
+                if ended_on is None or self._is_reviewed_team_rejoin(tenure, ended_on):
+                    continue
+                cursor = self.connection.execute(
+                    """
+                    UPDATE player_team_tenures SET is_current = 0, is_primary = 0
+                    WHERE id = ?
+                    """,
+                    (tenure["id"],),
+                )
+                retired += int(cursor.rowcount)
+        return retired
 
     def apply_reviewed_role_overrides(
         self,
@@ -1903,6 +2113,7 @@ class PlayerStore:
             "identity_reviews": 0,
             "guessable": 0,
             "departed_team_claims_retired": 0,
+            "reviewed_team_claims_retired": 0,
         }
         with self.connection:
             for row in self.connection.execute("SELECT id FROM teams"):
@@ -1910,6 +2121,9 @@ class PlayerStore:
             result["departed_team_claims_retired"] = self._retire_departed_team_claims()
             while True:
                 pass_merges = 0
+                result["reviewed_team_claims_retired"] += (
+                    self._retire_reviewed_team_departures()
+                )
 
                 # Identity matching needs the selected biography and one current
                 # team, including evidence moved by the previous identity pass.
@@ -3272,13 +3486,13 @@ class PlayerStore:
 
     def _select_current_team(self, player_id: str) -> int:
         evidence = self._latest_player_evidence(player_id, "current_team_id")
+        departed_team_ids = self._reviewed_departed_team_ids(player_id)
+        evidence = [row for row in evidence if row["value"] not in departed_team_ids]
         selected, candidates = choose_evidence("current_team_id", evidence)
         self.connection.execute(
             "UPDATE player_team_tenures SET is_primary = 0 WHERE player_id = ?",
             (player_id,),
         )
-        if selected is None:
-            return 0
         self.connection.execute(
             """
             UPDATE field_evidence
@@ -3286,8 +3500,10 @@ class PlayerStore:
             WHERE entity_type = 'player' AND entity_id = ?
               AND field_name = 'current_team_id'
             """,
-            (selected["id"], player_id),
+            (selected["id"] if selected is not None else None, player_id),
         )
+        if selected is None:
+            return 0
         tenure = self.connection.execute(
             """
             SELECT id FROM player_team_tenures

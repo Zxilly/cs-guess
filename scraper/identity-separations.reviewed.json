@@ -199,5 +199,31 @@
         "url": "https://www.hltv.org/player/25652/destro"
       }
     ]
+  },
+  {
+    "left": {
+      "source": "pandascore",
+      "external_id": "23769"
+    },
+    "right": {
+      "source": "liquipedia",
+      "external_id": "Flaw"
+    },
+    "basis": "Kale P is Australian, while Adam Gustafsson is Swedish. Their distinct names and provider profiles identify different people; the shared flaw nickname and provider-reported Sokerorg team do not establish one identity.",
+    "evidence": [
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/flaw"
+      },
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/flaw-cs-go"
+      },
+      {
+        "source": "hltv",
+        "external_id": "13075",
+        "url": "https://www.hltv.org/player/13075/flaw"
+      }
+    ]
   }
 ]
