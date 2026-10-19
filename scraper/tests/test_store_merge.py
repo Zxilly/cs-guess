@@ -1,8 +1,10 @@
 import sqlite3
+from datetime import datetime
 from pathlib import Path
 
 import pytest
 
+import cs_guess_scraper.store as store_module
 from cs_guess_scraper.store import PlayerStore
 
 SCHEMA_PATH = Path(__file__).parents[1] / "schema.sql"
@@ -677,6 +679,421 @@ def test_reviewed_player_override_rejects_partial_birth_date(tmp_path):
                     }
                 ]
             )
+
+
+def _reviewed_departure_player(store):
+    player_id = store.upsert_source_player(
+        "liquipedia",
+        {
+            "external_id": "departed",
+            "nickname": "departed",
+            "full_name": "Departed Player",
+            "country_code": "SE",
+            "birth_date": "1990-01-01",
+            "roles": ["rifler"],
+            "current_team": None,
+            "team_history": [{
+                "team": {"external_id": "Old", "name": "Old Esports"},
+                "from": "2025-01-01",
+                "from_precision": "day",
+                "to": "2025-07-01",
+                "to_precision": "day",
+                "current": False,
+            }],
+        },
+    )
+    store.link_source_player(player_id, "bo3", "100")
+    stale = {
+        "external_id": "100",
+        "nickname": "departed",
+        "full_name": "Departed Player",
+        "country_code": "SE",
+        "current_team": {"external_id": "old", "name": "Old"},
+    }
+    store.upsert_source_player("bo3", stale)
+    review = {
+        "player": {"source": "liquipedia", "external_id": "departed"},
+        "overrides": {"current_team_departures": [{
+            "team": {"source": "liquipedia", "external_id": "Old"},
+            "ended_on": "2025-07-01",
+            "reviewed_on": "2025-07-15",
+        }]},
+        "evidence": [{"url": "https://example.com/verified-departure"}],
+        "basis": "Reviewed end of the old affiliation, not a missing team field.",
+    }
+    return player_id, stale, review
+
+
+def test_reviewed_team_departure_is_replayable_without_deleting_source_evidence(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id, stale, review = _reviewed_departure_player(store)
+        store.merge_all()
+        assert store.export_game_records()[0]["currentTeam"] is not None
+        provider_records = list(store.connection.execute(
+            "SELECT * FROM source_records WHERE source != 'manual' ORDER BY id"
+        ))
+        provider_evidence = list(store.connection.execute(
+            """SELECT fe.id, fe.entity_type, fe.entity_id, fe.field_name,
+                      fe.source_record_id, fe.normalized_value_json
+               FROM field_evidence fe JOIN source_records sr ON sr.id = fe.source_record_id
+               WHERE sr.source != 'manual' ORDER BY fe.id"""
+        ))
+        first = store.apply_reviewed_player_overrides([review])
+        merge = store.merge_all()
+        record = store.export_game_records()[0]
+        assert record["currentTeam"] is None
+        assert record["fullName"] == "Departed Player"
+        assert record["birthDate"] == "1990-01-01"
+        assert record["teamHistory"]
+        assert all(not tenure["current"] for tenure in record["teamHistory"])
+        assert any(tenure.get("to") == "2025-07-01" for tenure in record["teamHistory"])
+        assert list(store.connection.execute(
+            "SELECT * FROM source_records WHERE source != 'manual' ORDER BY id"
+        )) == provider_records
+        assert list(store.connection.execute(
+            """SELECT fe.id, fe.entity_type, fe.entity_id, fe.field_name,
+                      fe.source_record_id, fe.normalized_value_json
+               FROM field_evidence fe JOIN source_records sr ON sr.id = fe.source_record_id
+               WHERE sr.source != 'manual' ORDER BY fe.id"""
+        )) == provider_evidence
+        assert not store.connection.execute(
+            "SELECT 1 FROM field_evidence WHERE entity_id = ? "
+            "AND field_name = 'current_team_id' AND is_selected = 1", (player_id,)
+        ).fetchone()
+        second = store.apply_reviewed_player_overrides([review])
+        assert store.merge_all()["reviewed_team_claims_retired"] == 0
+        store.upsert_source_player("bo3", stale)
+        assert store.merge_all()["reviewed_team_claims_retired"] == 1
+        assert store.export_game_records()[0]["currentTeam"] is None
+
+    assert first == {"applied": 1, "already_applied": 0}
+    assert second == {"applied": 0, "already_applied": 1}
+    assert merge["reviewed_team_claims_retired"] == 1
+
+
+@pytest.mark.parametrize("name", ["New Team", "Old Academy", "Old NXT"])
+def test_reviewed_team_departure_preserves_unrelated_rosters(tmp_path, name):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id, _, review = _reviewed_departure_player(store)
+        store.link_source_player(player_id, "pandascore", "200")
+        store.upsert_source_player("pandascore", {
+            "external_id": "200", "nickname": "departed",
+            "current_team": {"external_id": "new", "name": name},
+        })
+        store.apply_reviewed_player_overrides([review])
+        store.merge_all()
+        assert store.export_game_records()[0]["currentTeam"]["name"] == name
+
+
+@pytest.mark.parametrize("from_date,precision,expected", [
+    ("2025-08-01", "day", True),
+    ("2025-07-01", "day", False),
+    ("2025-06-01", "day", False),
+    ("2025-08", "month", False),
+    ("2025-08-40", "day", False),
+    ("9999-08-01", "day", False),
+])
+def test_reviewed_team_departure_allows_only_precise_later_rejoin(
+    tmp_path, from_date, precision, expected
+):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        _, stale, review = _reviewed_departure_player(store)
+        store.apply_reviewed_player_overrides([review])
+        store.merge_all()
+        store.upsert_source_player("bo3", {
+            **stale,
+            "team_history": [{
+                "team": stale["current_team"],
+                "from": from_date, "from_precision": precision, "current": True,
+            }],
+        })
+        store.merge_all()
+        current = store.export_game_records()[0]["currentTeam"]
+        assert (current is not None) is expected
+
+
+def test_reviewed_team_departure_keeps_rejoin_when_stale_claim_is_refetched(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id, stale, review = _reviewed_departure_player(store)
+        store.apply_reviewed_player_overrides([review])
+        store.link_source_player(player_id, "pandascore", "200")
+        store.upsert_source_player("pandascore", {
+            "external_id": "200", "nickname": "departed",
+            "current_team": {"external_id": "old", "name": "Old"},
+            "team_history": [{
+                "team": {"external_id": "old", "name": "Old"},
+                "from": "2025-08-01", "from_precision": "day", "current": True,
+            }],
+        }, {"fetched_at": "2025-08-01T00:00:00Z"})
+        store.upsert_source_player(
+            "bo3", stale, {"fetched_at": "2026-01-01T00:00:00Z"}
+        )
+        store.merge_all()
+        first = store.export_game_records()[0]
+        store.merge_all()
+        second = store.export_game_records()[0]
+        assert first["currentTeam"] == second["currentTeam"]
+        assert first["currentTeam"] is not None
+        current_stints = [item for item in first["teamHistory"] if item["current"]]
+        assert len(current_stints) == 1
+        assert current_stints[0]["from"] == "2025-08-01"
+
+
+def test_reviewed_team_departure_blocks_higher_priority_stale_alias_after_rejoin(
+    tmp_path,
+):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id, stale, review = _reviewed_departure_player(store)
+        store.link_source_player(player_id, "pandascore", "200")
+        store.upsert_source_player("pandascore", {
+            **stale, "external_id": "200",
+        })
+        stale_team_id = store.connection.execute(
+            "SELECT team_id FROM team_source_ids "
+            "WHERE source = 'pandascore' AND external_id = 'old'"
+        ).fetchone()[0]
+        rejoined_team = {"external_id": "rejoined-old", "name": "Old Esports"}
+        store.upsert_source_player("bo3", {
+            **stale,
+            "current_team": rejoined_team,
+            "team_history": [{
+                "team": rejoined_team,
+                "from": "2025-08-01", "from_precision": "day", "current": True,
+            }],
+        })
+        rejoined_team_id = store.connection.execute(
+            "SELECT team_id FROM team_source_ids "
+            "WHERE source = 'bo3' AND external_id = 'rejoined-old'"
+        ).fetchone()[0]
+        assert stale_team_id != rejoined_team_id
+        store.apply_reviewed_player_overrides([review])
+        for _ in range(2):
+            store.merge_all()
+            record = store.export_game_records()[0]
+            assert record["currentTeam"]["id"] == rejoined_team_id
+            current_stints = [item for item in record["teamHistory"] if item["current"]]
+            assert len(current_stints) == 1
+            assert current_stints[0]["from"] == "2025-08-01"
+
+
+def _freeze_store_clock(monkeypatch, instant):
+    fixed = datetime.fromisoformat(instant)
+
+    class FixedDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return fixed.astimezone(tz) if tz is not None else fixed.replace(tzinfo=None)
+
+    monkeypatch.setattr(store_module, "datetime", FixedDatetime)
+
+
+def test_reviewed_team_departure_replay_does_not_age_future_claim_into_rejoin(
+    tmp_path, monkeypatch,
+):
+    for clock_date in ("2025-06-15", "2025-07-15", "2025-08-15"):
+        _freeze_store_clock(monkeypatch, f"{clock_date}T00:00:00+00:00")
+        with PlayerStore(tmp_path / f"{clock_date}.sqlite3", schema_path=SCHEMA_PATH) as store:
+            _, stale, review = _reviewed_departure_player(store)
+            store.upsert_source_player("bo3", {
+                **stale,
+                "team_history": [{
+                    "team": stale["current_team"],
+                    "from": "2025-08-01", "from_precision": "day", "current": True,
+                }],
+            }, {"fetched_at": "2025-07-15T00:00:00Z"})
+            store.apply_reviewed_player_overrides([review])
+            store.merge_all()
+            record = store.export_game_records()[0]
+            assert record["currentTeam"] is None
+            assert all(not item["current"] for item in record["teamHistory"])
+
+
+def test_reviewed_team_rejoin_requires_matching_stint_to_be_refetched(
+    tmp_path, monkeypatch,
+):
+    _freeze_store_clock(monkeypatch, "2025-09-15T00:00:00+00:00")
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        _, stale, review = _reviewed_departure_player(store)
+        rejoin = {
+            **stale,
+            "team_history": [{
+                "team": stale["current_team"],
+                "from": "2025-08-01", "from_precision": "day", "current": True,
+            }],
+        }
+        store.upsert_source_player(
+            "bo3", rejoin, {"fetched_at": "2025-07-15T00:00:00Z"}
+        )
+        store.apply_reviewed_player_overrides([review])
+        store.merge_all()
+        assert store.export_game_records()[0]["currentTeam"] is None
+        record_count = store.connection.execute(
+            "SELECT COUNT(*) FROM source_records"
+        ).fetchone()[0]
+        store.upsert_source_player(
+            "bo3", rejoin, {"fetched_at": "2025-08-15T00:00:00Z"}
+        )
+        assert store.connection.execute(
+            "SELECT COUNT(*) FROM source_records"
+        ).fetchone()[0] == record_count
+        assert store.connection.execute(
+            "SELECT observed_at FROM field_evidence "
+            "WHERE field_name = 'start_value' AND normalized_value_json = '\"2025-08-01\"'"
+        ).fetchone()[0] == "2025-07-15T00:00:00Z"
+        store.merge_all()
+        record = store.export_game_records()[0]
+        assert record["currentTeam"] is not None
+        assert any(item["current"] and item.get("from") == "2025-08-01"
+                   for item in record["teamHistory"])
+
+
+def test_reviewed_team_rejoin_ignores_newer_coalesced_undated_evidence(
+    tmp_path, monkeypatch,
+):
+    _freeze_store_clock(monkeypatch, "2025-09-15T00:00:00+00:00")
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id, stale, review = _reviewed_departure_player(store)
+        store.upsert_source_player("bo3", {
+            **stale,
+            "team_history": [{
+                "team": stale["current_team"],
+                "from": "2025-08-01", "from_precision": "day", "current": True,
+            }],
+        }, {"fetched_at": "2025-07-15T00:00:00Z"})
+        store.link_source_player(player_id, "pandascore", "200")
+        store.upsert_source_player("pandascore", {
+            **stale, "external_id": "200",
+        }, {"fetched_at": "2025-08-15T00:00:00Z"})
+        store.merge_all()
+        assert store.export_game_records()[0]["currentTeam"] is not None
+        store.apply_reviewed_player_overrides([review])
+        store.merge_all()
+        assert store.export_game_records()[0]["currentTeam"] is None
+
+
+def test_reviewed_team_rejoin_refetch_finds_evidence_moved_to_older_tenure(
+    tmp_path, monkeypatch,
+):
+    _freeze_store_clock(monkeypatch, "2025-09-15T00:00:00+00:00")
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id, stale, review = _reviewed_departure_player(store)
+        rejoin = {
+            **stale,
+            "team_history": [{
+                "team": stale["current_team"],
+                "from": "2025-08-01", "from_precision": "day", "current": True,
+            }],
+        }
+        store.upsert_source_player(
+            "bo3", rejoin, {"fetched_at": "2025-07-15T00:00:00Z"}
+        )
+        original_id = store.connection.execute(
+            "SELECT id FROM player_team_tenures WHERE player_id = ? "
+            "AND start_value = '2025-08-01'", (player_id,)
+        ).fetchone()[0]
+        store.link_source_player(player_id, "pandascore", "200")
+        store.upsert_source_player("pandascore", {
+            **stale, "external_id": "200",
+            "team_history": [{
+                "team": stale["current_team"],
+                "from": "2025-01-01", "from_precision": "day", "current": True,
+            }],
+        }, {"fetched_at": "2025-07-20T00:00:00Z"})
+        store.merge_all()
+        assert store.connection.execute(
+            "SELECT 1 FROM player_team_tenures WHERE id = ?", (original_id,)
+        ).fetchone() is None
+        moved_evidence = list(store.connection.execute(
+            "SELECT id, entity_id, observed_at FROM field_evidence "
+            "WHERE field_name = 'start_value' AND normalized_value_json = '\"2025-08-01\"'"
+        ))
+        assert moved_evidence and all(row["entity_id"] != original_id for row in moved_evidence)
+        store.apply_reviewed_player_overrides([review])
+        store.merge_all()
+        assert store.export_game_records()[0]["currentTeam"] is None
+        record_count = store.connection.execute(
+            "SELECT COUNT(*) FROM source_records"
+        ).fetchone()[0]
+        store.upsert_source_player(
+            "bo3", rejoin, {"fetched_at": "2025-08-15T00:00:00Z"}
+        )
+        assert store.connection.execute(
+            "SELECT 1 FROM player_team_tenures WHERE id = ?", (original_id,)
+        ).fetchone() is not None
+        assert store.connection.execute(
+            "SELECT COUNT(*) FROM source_records"
+        ).fetchone()[0] == record_count
+        assert list(store.connection.execute(
+            "SELECT id, entity_id, observed_at FROM field_evidence "
+            "WHERE field_name = 'start_value' AND normalized_value_json = '\"2025-08-01\"'"
+        )) == moved_evidence
+        for _ in range(2):
+            store.merge_all()
+            record = store.export_game_records()[0]
+            assert record["currentTeam"] is not None
+            assert [item.get("from") for item in record["teamHistory"] if item["current"]] == [
+                "2025-08-01"
+            ]
+
+
+def test_reviewed_team_rejoin_does_not_borrow_another_players_confirmation(
+    tmp_path, monkeypatch,
+):
+    _freeze_store_clock(monkeypatch, "2025-09-15T00:00:00+00:00")
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id, stale, review = _reviewed_departure_player(store)
+        rejoin = {
+            **stale,
+            "team_history": [{
+                "team": stale["current_team"],
+                "from": "2025-08-01", "from_precision": "day", "current": True,
+            }],
+        }
+        store.upsert_source_player(
+            "bo3", rejoin, {"fetched_at": "2025-07-15T00:00:00Z"}
+        )
+        other_id = store.upsert_source_player("bo3", {
+            **rejoin, "external_id": "other", "nickname": "other",
+            "full_name": "Unrelated Player", "country_code": "FR",
+            "birth_date": "1991-01-01", "roles": ["rifler"],
+        }, {"fetched_at": "2025-08-15T00:00:00Z"})
+        assert other_id != player_id
+        store.apply_reviewed_player_overrides([review])
+        store.merge_all()
+        records = {record["id"]: record for record in store.export_game_records()}
+        assert records[player_id]["currentTeam"] is None
+        assert records[other_id]["currentTeam"] is not None
+
+
+@pytest.mark.parametrize("departures,exception,match", [
+    (None, TypeError, "non-empty list"),
+    ([], TypeError, "non-empty list"),
+    ([None], TypeError, "team, ended_on, and reviewed_on"),
+    ([{"team": "Old", "ended_on": "2025-07-01", "reviewed_on": "2025-07-15"}],
+     TypeError, "provider reference"),
+    ([{"team": {"source": "liquipedia", "external_id": "Old"},
+       "ended_on": "2025-02-30", "reviewed_on": "2025-07-15"}], ValueError, "YYYY-MM-DD"),
+    ([{"team": {"source": "liquipedia", "external_id": "Old"},
+       "ended_on": "2025-07", "reviewed_on": "2025-07-15"}], ValueError, "YYYY-MM-DD"),
+    ([{"team": {"source": "liquipedia", "external_id": "Old"},
+       "ended_on": "2025-07-01"}], TypeError, "reviewed_on"),
+    ([{"team": {"source": "liquipedia", "external_id": "Old"},
+       "ended_on": "2025-07-01", "reviewed_on": "2025-02-30"}], ValueError, "YYYY-MM-DD"),
+    ([{"team": {"source": "liquipedia", "external_id": "Old"},
+       "ended_on": "2025-07-01", "reviewed_on": "2025-07"}], ValueError, "YYYY-MM-DD"),
+    ([{"team": {"source": "liquipedia", "external_id": "Old"},
+       "ended_on": "2025-07-01", "reviewed_on": "2025-06-30"}], ValueError, "must not follow"),
+    ([{"team": {"source": "liquipedia", "external_id": "missing"},
+       "ended_on": "2025-07-01", "reviewed_on": "2025-07-15"}], ValueError, "unresolved"),
+])
+def test_reviewed_team_departure_validates_structure_and_references(
+    tmp_path, departures, exception, match
+):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        _, _, review = _reviewed_departure_player(store)
+        review["overrides"]["current_team_departures"] = departures
+        with pytest.raises(exception, match=match):
+            store.apply_reviewed_player_overrides([review])
 
 
 def test_partial_birth_date_is_retained_but_not_marked_guessable(tmp_path):

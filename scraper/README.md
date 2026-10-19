@@ -115,6 +115,16 @@ ID 重放并写入选手审计轨迹；没有可靠来源的缺失角色在游�
 不会篡改原始角色记录。
 `reviewed-player-overrides.json` 保存有明确外部证据的生日等字段修正，同样按
 provider ID 重放，并把核验链接写入 source record，避免不可追溯的手工改库。
+已核实的离队可使用 `overrides.current_team_departures`，其值为
+`[{"team":{"source":"liquipedia","external_id":"Team title"},"ended_on":"YYYY-MM-DD","reviewed_on":"YYYY-MM-DD"}]`。
+必须提供可解析的队伍 provider ID、完整离队日期、核验日期及核验链接，离队日不得晚于
+核验日；只排除该选手对该队伍的
+过期当前归属，保留原始来源证据、履历与其他个人信息，不从缺失的队伍字段推断离队。
+队伍名称只按已有保守规则匹配同组织的通用后缀，不合并 Academy、NXT 等不同阵容。
+重新采集无日期的旧归属不能取消修正；精确开始日期晚于离队日，且同一来源任期记录
+在开始日或之后采集确认的新任期可恢复该队伍归属。重放使用来源采集日期，不使用运行时
+时钟；原样重新采集会更新来源记录的采集日期。若没有其他受支持的当前队伍，目录显示
+“无队伍”，履历仍保留。
 来源优先级、清洗规则和后续候选见
 [SOURCE_EVALUATION.md](SOURCE_EVALUATION.md)。数据模型见
 [DATA_MODEL.md](DATA_MODEL.md)，SQLite 结构见 [schema.sql](schema.sql)。
