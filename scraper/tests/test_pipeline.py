@@ -636,3 +636,77 @@ def test_unreviewed_title_case_variant_reuses_existing_player(tmp_path):
 
     assert result["requested"] == 0
     assert player_id
+
+
+def test_sync_registers_platform_correction_before_fresh_source_matching(tmp_path):
+    bad = "e96c714b-455b-43ea-a519-c3ab93e250f4"
+    good = "ac784f9e-2975-4e9d-b3bc-f2b4a2e8c83b"
+    steam = "76561198874893271"
+    review = {
+        "player": {"source": "liquipedia", "external_id": "tired73"},
+        "overrides": {"platform_id_corrections": [{
+            "source": "faceit", "incorrect_external_id": bad,
+            "correct_external_id": good, "expected_steam_id": steam,
+        }]},
+        "evidence": [{"url": f"https://www.faceit.com/api/users/v1/users/{good}"}],
+    }
+
+    class Players:
+        def iter_player_pages(self):
+            # Legitimate rejected-ID owner is fetched first, before the reviewed player.
+            for title, steam_id, faceit_id in (
+                ("swirn", "76561199094651964", bad), ("tired73", steam, bad),
+            ):
+                yield {
+                    "title": title,
+                    "wikitext": "{{Infobox player\n|id=" + title
+                    + "\n|name=" + title + " Person\n|country=Russia"
+                    + "\n|birth_date=2000-01-01\n|steam64ID=" + steam_id
+                    + "\n|faceitdb=" + faceit_id + "\n}}",
+                }
+
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        run_sync(store, liquipedia_client=Players(), include_majors=False,
+                 reviewed_player_overrides=[review])
+        target = store.resolve_player_id("liquipedia", "tired73")
+        other = store.resolve_player_id("liquipedia", "swirn")
+        assert target != other
+        assert store.resolve_player_id("steam", steam) == target
+        assert store.resolve_player_id("faceit", good) == target
+        assert store.resolve_player_id("faceit", bad) == other
+        assert store.audit(target)["player"]["full_name"] == "tired73 Person"
+        assert store.audit(other)["player"]["full_name"] == "swirn Person"
+
+
+def test_sync_corrects_restored_snapshot_before_another_player_import(tmp_path):
+    bad = "e96c714b-455b-43ea-a519-c3ab93e250f4"
+    good = "ac784f9e-2975-4e9d-b3bc-f2b4a2e8c83b"
+    steam = "76561198874893271"
+    review = {
+        "player": {"source": "liquipedia", "external_id": "tired73"},
+        "overrides": {"platform_id_corrections": [{
+            "source": "faceit", "incorrect_external_id": bad,
+            "correct_external_id": good, "expected_steam_id": steam,
+        }]},
+        "evidence": [{"url": f"https://www.faceit.com/api/users/v1/users/{good}"}],
+    }
+
+    class OtherPlayer:
+        def iter_cs_players(self):
+            yield {
+                "source_id": "swirn", "nickname": "swirn", "full_name": "Other Person",
+                "platform_ids": {"steam": "76561199094651964", "faceit": bad},
+            }
+
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        target = store.upsert_source_player("liquipedia", {
+            "external_id": "tired73", "nickname": "tired73", "full_name": "Reviewed Person",
+            "platform_ids": {"steam": steam, "faceit": bad},
+        })
+        run_sync(store, pandascore_client=OtherPlayer(), include_majors=False,
+                 reviewed_player_overrides=[review])
+        other = store.resolve_player_id("pandascore", "swirn")
+        assert target != other
+        assert store.resolve_player_id("faceit", bad) == other
+        assert store.resolve_player_id("faceit", good) == target
+        assert store.audit(target)["player"]["full_name"] == "Reviewed Person"

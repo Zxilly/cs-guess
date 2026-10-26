@@ -68,6 +68,10 @@ class PlayerStore:
         self.db_path = str(db_path)
         self.schema_path = Path(schema_path)
         self._connection: sqlite3.Connection | None = None
+        self._registered_platform_corrections: list[
+            tuple[tuple[str, str], Mapping[str, Any]]
+        ] = []
+        self._persisted_platform_corrections: list[Mapping[str, Any]] | None = None
         self.init()
 
     def init(self) -> Self:
@@ -342,7 +346,10 @@ class PlayerStore:
             (source, external_id),
         ).fetchone()
         platform_player_ids: set[str] = set()
-        platform_ids = parsed.get("platform_ids") or {}
+        platform_ids = self._filtered_platform_ids(
+            source, external_id, parsed.get("platform_ids"),
+            str(existing["player_id"]) if existing else None,
+        )
         if existing is None and isinstance(platform_ids, Mapping):
             for platform_source in ("steam", "faceit"):
                 platform_external_id = platform_ids.get(platform_source)
@@ -638,6 +645,7 @@ class PlayerStore:
             "status",
             "is_coach",
             "current_team_departures",
+            "platform_id_corrections",
         }
         result = {"applied": 0, "already_applied": 0}
         with self.connection:
@@ -668,6 +676,10 @@ class PlayerStore:
                 if "current_team_departures" in values:
                     self._validate_reviewed_team_departures(
                         values["current_team_departures"]
+                    )
+                if "platform_id_corrections" in values:
+                    self._validate_reviewed_platform_corrections(
+                        values["platform_id_corrections"]
                     )
                 birth_date = values.get("birth_date")
                 if birth_date is not None:
@@ -701,6 +713,10 @@ class PlayerStore:
                     evidence_urls.append(url)
 
                 player_id = self.resolve_player_id(source, external_id)
+                if "platform_id_corrections" in values:
+                    self._apply_reviewed_platform_corrections(
+                        player_id, values["platform_id_corrections"], evidence_urls
+                    )
                 audit_override = {
                     "player": dict(player_ref),
                     "overrides": dict(values),
@@ -730,7 +746,165 @@ class PlayerStore:
                         observed_at=observed_at,
                     )
                 result["applied"] += 1
+        self._persisted_platform_corrections = None
         return result
+
+    @staticmethod
+    def _validate_reviewed_platform_corrections(corrections: Any) -> None:
+        if not isinstance(corrections, list) or not corrections:
+            raise TypeError("platform_id_corrections must be a non-empty list")
+        seen: set[str] = set()
+        for correction in corrections:
+            if not isinstance(correction, Mapping) or set(correction) != {
+                "source", "incorrect_external_id", "correct_external_id",
+                "expected_steam_id",
+            }:
+                raise TypeError("reviewed platform correction requires exact ID fields")
+            if correction["source"] != "faceit":
+                raise ValueError("reviewed platform corrections support FACEIT only")
+            for key in ("incorrect_external_id", "correct_external_id"):
+                value = correction[key]
+                try:
+                    valid = isinstance(value, str) and str(uuid.UUID(value)) == value
+                except ValueError:
+                    valid = False
+                if not valid:
+                    raise ValueError("reviewed FACEIT IDs must be canonical UUIDs")
+            old_id = correction["incorrect_external_id"]
+            if old_id == correction["correct_external_id"] or old_id in seen:
+                raise ValueError("reviewed FACEIT correction must replace a unique ID")
+            seen.add(old_id)
+            steam = correction["expected_steam_id"]
+            if not (
+                isinstance(steam, str) and len(steam) == 17
+                and steam.isascii() and steam.isdecimal()
+                and 76561197960265728 < int(steam) <= 76561202255233023
+            ):
+                raise ValueError("expected_steam_id must be an individual Steam64 ID")
+
+    def register_reviewed_platform_id_corrections(
+        self, overrides: list[Mapping[str, Any]],
+    ) -> None:
+        """Register cited exclusions before source import, including a fresh rebuild.
+
+        Existing targets are corrected before any provider can match their stale
+        ID; fresh targets only get exclusions until their Steam ID is imported.
+        """
+        rules = []
+        applicable_overrides = []
+        for override in overrides:
+            values = override.get("overrides")
+            if not isinstance(values, Mapping) or "platform_id_corrections" not in values:
+                continue
+            corrections = values["platform_id_corrections"]
+            self._validate_reviewed_platform_corrections(corrections)
+            player = override.get("player")
+            if not isinstance(player, Mapping) or not all(
+                isinstance(player.get(key), str) and player[key].strip()
+                for key in ("source", "external_id")
+            ):
+                raise ValueError("reviewed platform correction requires a player reference")
+            evidence = override.get("evidence")
+            if not isinstance(evidence, list) or not evidence or not all(
+                isinstance(item, Mapping) and str(item.get("url") or "").strip()
+                for item in evidence
+            ):
+                raise ValueError("reviewed platform correction requires cited evidence")
+            ref = (player["source"], player["external_id"])
+            rules.extend((ref, dict(correction)) for correction in corrections)
+            if self.connection.execute(
+                "SELECT 1 FROM player_source_ids WHERE source = ? AND external_id = ?",
+                ref,
+            ).fetchone():
+                applicable_overrides.append(override)
+        self._registered_platform_corrections = rules
+        # A restored, unreviewed snapshot may still assign the rejected UUID to
+        # this player. Correct it before another provider can match through it.
+        # Existing ambiguous Steam identities fail closed, rather than silently
+        # trying to reverse a previous cross-player merge.
+        if applicable_overrides:
+            self.apply_reviewed_player_overrides(applicable_overrides)
+
+    def _filtered_platform_ids(
+        self, source: str, external_id: str, raw_ids: Any, player_id: str | None,
+    ) -> dict[str, Any]:
+        platform_ids = dict(raw_ids) if isinstance(raw_ids, Mapping) else {}
+        if self._persisted_platform_corrections is None:
+            self._persisted_platform_corrections = []
+            for row in self.connection.execute(
+                """
+                SELECT fe.normalized_value_json FROM field_evidence fe
+                JOIN source_records sr ON sr.id = fe.source_record_id
+                WHERE fe.entity_type = 'player'
+                  AND fe.field_name = 'platform_id_corrections'
+                  AND sr.source = 'manual'
+                """
+            ):
+                self._persisted_platform_corrections.extend(
+                    json.loads(row["normalized_value_json"])
+                )
+        rules = [(None, item) for item in self._persisted_platform_corrections]
+        rules.extend(self._registered_platform_corrections)
+        if not rules:
+            return platform_ids
+        owned_steam_ids = {
+            str(row["external_id"]) for row in self.connection.execute(
+                "SELECT external_id FROM player_source_ids "
+                "WHERE player_id = ? AND source = 'steam'", (player_id,),
+            )
+        } if player_id else set()
+        for ref, correction in rules:
+            expected = correction["expected_steam_id"]
+            matches = (
+                ref == (source, external_id)
+                or platform_ids.get("steam") == expected
+                or expected in owned_steam_ids
+            )
+            if not matches:
+                continue
+            if platform_ids.get("steam") and platform_ids["steam"] != expected:
+                raise ValueError("reviewed platform correction Steam identity mismatch")
+            if platform_ids.get("faceit") == correction["incorrect_external_id"]:
+                del platform_ids["faceit"]
+        return platform_ids
+
+    def _apply_reviewed_platform_corrections(
+        self, player_id: str, corrections: list[Mapping[str, Any]], evidence_urls: list[str],
+    ) -> None:
+        for correction in corrections:
+            expected = correction["expected_steam_id"]
+            steam_ids = {
+                str(row["external_id"]) for row in self.connection.execute(
+                    "SELECT external_id FROM player_source_ids "
+                    "WHERE player_id = ? AND source = 'steam'", (player_id,),
+                )
+            }
+            if steam_ids != {expected}:
+                raise ValueError("reviewed platform correction requires one matching Steam ID")
+            replacement = correction["correct_external_id"]
+            owner = self.connection.execute(
+                "SELECT player_id FROM player_source_ids "
+                "WHERE source = 'faceit' AND external_id = ?", (replacement,),
+            ).fetchone()
+            if owner and owner["player_id"] != player_id:
+                raise ValueError("reviewed FACEIT replacement belongs to another player")
+            self.connection.execute(
+                "DELETE FROM player_source_ids WHERE player_id = ? "
+                "AND source = 'faceit' AND external_id = ?",
+                (player_id, correction["incorrect_external_id"]),
+            )
+            self.connection.execute(
+                """
+                INSERT INTO player_source_ids
+                    (player_id, source, external_id, source_url, last_seen_at)
+                VALUES (?, 'faceit', ?, ?, ?)
+                ON CONFLICT(source, external_id) DO UPDATE SET
+                    source_url = excluded.source_url
+                """,
+                (player_id, replacement, next(
+                    (url for url in evidence_urls if replacement in url), evidence_urls[0]
+                ), _now()),
+            )
 
     def _validate_reviewed_team_departures(self, departures: Any) -> None:
         if not isinstance(departures, list) or not departures:
@@ -4113,7 +4287,9 @@ class PlayerStore:
                     fetched_at=fetched_at,
                 )
 
-        platform_ids = parsed.get("platform_ids") or {}
+        platform_ids = self._filtered_platform_ids(
+            source, player_external_id, parsed.get("platform_ids"), player_id,
+        )
         if isinstance(platform_ids, Mapping):
             for platform_source in ("steam", "faceit"):
                 platform_external_id = platform_ids.get(platform_source)

@@ -785,6 +785,7 @@ def run_sync(
 ) -> dict[str, Any]:
     """Synchronize configured sources, merge identities, and export game data."""
 
+    store.register_reviewed_platform_id_corrections(reviewed_player_overrides or [])
     reviewed_liquipedia_titles: dict[str, set[str]] = {}
     for review in reviewed_major_appearances or []:
         player = review.get("player")

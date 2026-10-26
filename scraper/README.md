@@ -230,3 +230,38 @@ Liquipedia `StRoGo` 的历史修订 `3446846`（9 月 21 日采集）核对昵�
 Ivan Shurpatov、生日 2002-07-06 及原 RU，确认其身份不变。
 所有 3,457 个原 ID 均保留且一对一；`chshekin` 改名为 `laser` 仍沿用原 ID。
 新目录写入 `catalogIdentity` 后再次回放结果完全一致，后续不再依赖这次旧格式迁移。
+
+已核实的错误 FACEIT 跨平台关联可在 `reviewed-player-overrides.json` 中使用
+`overrides.platform_id_corrections`，例如：
+
+```json
+{
+  "player": {"source": "liquipedia", "external_id": "Example"},
+  "overrides": {
+    "platform_id_corrections": [{
+      "source": "faceit",
+      "incorrect_external_id": "11111111-1111-4111-8111-111111111111",
+      "correct_external_id": "22222222-2222-4222-8222-222222222222",
+      "expected_steam_id": "76561198000000001"
+    }]
+  },
+  "evidence": [{"url": "https://example.com/verified-platform-identities"}],
+  "basis": "独立来源将正确 FACEIT 账户绑定到该选手既有 Steam64 ID。"
+}
+```
+
+此项仅支持 FACEIT UUID 更正，必须附核验链接；目标选手必须恰好拥有预期的
+Steam64 ID，且新 UUID 不得属于其他规范选手。不会自动合并身份、转移他人的 ID、
+改动昵称/公开目录 ID 或 Major 统计。旧关联从生效的 `player_source_ids` 中移除，
+原始来源记录及带引用的人工修正证据仍保留。
+`run_sync` 在采集前注册规则，并先修正已存在的目标，避免其他来源通过旧 UUID
+误并入该选手；全新数据库按 provider reference 在身份匹配前排除错误 UUID，
+之后仅在 Steam 身份验证成功时分配新 UUID。重放可重复执行；后续来源再次提供旧
+UUID 时，已审核选手/匹配 Steam 的记录也不会恢复该错误关联。目标已有多个或
+不匹配的 Steam ID、新 UUID 已被别人拥有时明确失败，不猜测如何拆分既有混合身份。
+
+目录队史只对明确核实的同组织品牌做展示去重：`1w Team`、`1win Team`、
+`1WIN` 的沿革见 [Liquipedia](https://liquipedia.net/counterstrike/1w_Team)。
+保留原始队伍记录和显示名称，不把同一组织的旧品牌重复列为当前队伍之外的队史；
+`EAC` 与其全称 `Esport Academy Copenhagen` 也只按这个明确对应关系去重。
+`1WIN Academy`、`EAC Extra`、`EAC Rising` 等不同阵容不会被归并。

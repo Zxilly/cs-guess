@@ -303,6 +303,50 @@ def _identity_record(**overrides):
     }
 
 
+def test_reviewed_brand_alias_is_not_a_departed_current_team():
+    [player] = build_app_catalog([_identity_record(
+        currentTeam={"name": "1WIN"},
+        teamHistory=[
+            {"team": {"name": "1w Team"}, "current": False},
+            {"team": {"name": "1win Team"}, "current": False},
+            {"team": {"name": "1WIN Academy"}, "current": False},
+            {"team": {"name": "1w Team Academy"}, "current": False},
+            {"team": {"name": "TDK"}, "current": False},
+        ],
+    )])
+    assert player["team"] == "1WIN"
+    assert player["historicalTeams"] == ["1WIN Academy", "1w Team Academy", "TDK"]
+
+
+def test_reviewed_brand_alias_deduplicates_history_without_rewriting_display():
+    [player] = build_app_catalog([_identity_record(
+        currentTeam={"name": "Another Team"},
+        teamHistory=[
+            {"team": {"name": "1w Team"}, "current": False},
+            {"team": {"name": "1WIN"}, "current": False},
+            {"team": {"name": "1win Team"}, "current": False},
+            {"team": {"name": "1WIN Academy"}, "current": False},
+        ],
+    )])
+    assert player["team"] == "Another Team"
+    assert player["historicalTeams"] == ["1w Team", "1WIN Academy"]
+
+
+def test_reviewed_eac_abbreviation_keeps_distinct_rosters():
+    [player] = build_app_catalog([_identity_record(
+        currentTeam={"name": "Esport Academy Copenhagen"},
+        teamHistory=[
+            {"team": {"name": "EAC"}, "current": False},
+            {"team": {"name": "EAC Extra"}, "current": False},
+            {"team": {"name": "EAC Rising"}, "current": False},
+            {"team": {"name": "Esport Academy Copenhagen Academy"}, "current": False},
+        ],
+    )])
+    assert player["historicalTeams"] == [
+        "EAC Extra", "EAC Rising", "Esport Academy Copenhagen Academy",
+    ]
+
+
 def test_legacy_renamed_player_keeps_issued_id_using_unambiguous_alias():
     previous = [{"id": "chshekin", "nickname": "chshekin", "name": "Test Player", "countryCode": "RU"}]
     [player] = build_app_catalog(
