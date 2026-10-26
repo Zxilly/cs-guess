@@ -68,6 +68,21 @@ def _historical_team_display_name(value: object) -> str:
     return _team_display_name(name)
 
 
+def _reviewed_team_display_key(value: str) -> str:
+    # Explicit same-organization branding only; never strip Academy/NXT names.
+    # https://liquipedia.net/counterstrike/1w_Team documents the former
+    # 1win Team / 1win names. Keep displayed text and provider records intact.
+    folded = value.casefold()
+    if folded in {"1w team", "1win team", "1win"}:
+        return "1win"
+    # EAC's full organization name is Esport Academy Copenhagen; this is
+    # not permission to collapse its distinct EXTRA/Rising academy rosters.
+    # https://liquipedia.net/counterstrike/Esport_Academy_Copenhagen
+    if folded in {"eac", "esport academy copenhagen"}:
+        return "esport academy copenhagen"
+    return folded
+
+
 def _source_ids(record: Mapping[str, Any]) -> list[dict[str, str]]:
     """Keep provider identities deterministic across canonical database rebuilds."""
     return [
@@ -203,7 +218,7 @@ def build_app_catalog(
         historical_teams: list[str] = []
         historical_team_keys = {
             UNATTACHED_TEAM.casefold(),
-            team_name.casefold(),
+            _reviewed_team_display_key(team_name),
         }
         for tenure in record.get("teamHistory", []):
             if not isinstance(tenure, Mapping) or tenure.get("current") is True:
@@ -214,7 +229,7 @@ def build_app_catalog(
             historical_name = _historical_team_display_name(
                 historical_team.get("name", "")
             )
-            historical_key = historical_name.casefold()
+            historical_key = _reviewed_team_display_key(historical_name)
             if historical_key in historical_team_keys:
                 continue
             historical_team_keys.add(historical_key)

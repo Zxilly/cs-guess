@@ -6639,7 +6639,7 @@
     },
     "nickname": "anber",
     "name": "Andreas Brandt",
-    "team": "EAC",
+    "team": "无队伍",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 20,
@@ -6647,7 +6647,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Esport Academy Copenhagen",
+      "EAC",
       "AaB Esport",
       "ALGO Esports",
       "HEROIC Academy",
@@ -6657,7 +6657,6 @@
     "aliases": [
       "Andreas Brandt"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/23942/image/webp-0545a1f3170cde695778a169559e973f.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/36587/image/webp-bc71672fb2724064847630295c6c6a9b.webp"
   },
   {
@@ -13877,7 +13876,6 @@
     "majorAppearances": 2,
     "majorWins": 0,
     "historicalTeams": [
-      "1w Team",
       "TDK",
       "PARIVISION",
       "Nemiga Gaming",
@@ -16194,7 +16192,7 @@
     },
     "nickname": "Bloody",
     "name": "Zain Talha",
-    "team": "Legion",
+    "team": "Alter Ego",
     "nationality": "Pakistan",
     "countryCode": "PK",
     "age": 21,
@@ -16202,13 +16200,13 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Alter Ego",
+      "Legion",
       "st4rboys"
     ],
     "aliases": [
       "زین طلحہ"
     ],
-    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/137344/legion_pakistani_2025_allmode.png"
+    "teamLogoUrl": "https://files.bo3.gg/uploads/team/4170/image/webp-5286adf6a88fa070ea8c355e5adbe22e.webp"
   },
   {
     "id": "bloodyelf",
@@ -47673,7 +47671,7 @@
     },
     "nickname": "Fessor",
     "name": "Frederik Sørensen",
-    "team": "EAC",
+    "team": "无队伍",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 25,
@@ -47702,7 +47700,6 @@
     "aliases": [
       "Frederik Sørensen"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/23942/image/webp-0545a1f3170cde695778a169559e973f.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/24295/image/webp-c5c71c1a48e1d1bbcacc9b53e4109f44.webp"
   },
   {
@@ -47984,7 +47981,7 @@
     },
     "nickname": "FinigaN",
     "name": "Vladislav Usov",
-    "team": "Fire Flux Esports",
+    "team": "无队伍",
     "nationality": "Russian Federation",
     "countryCode": "RU",
     "age": 27,
@@ -47992,6 +47989,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
+      "Fire Flux Esports",
       "GUN5 Esports",
       "K23",
       "avangar",
@@ -48004,7 +48002,6 @@
     "aliases": [
       "Владислав Усов"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/16724/image/webp-7e9a100e6e710f53b8811a24897cda74.webp",
     "imageUrl": "https://cdn-api.pandascore.co/images/player/image/23699/rq_zd3wd_y.png"
   },
   {
@@ -84460,7 +84457,6 @@
     "historicalTeams": [
       "Color",
       "1w Team",
-      "1win Team",
       "Aurora Gaming",
       "VP.Prodigy",
       "Natus Vincere Junior",
@@ -101870,7 +101866,7 @@
     },
     "nickname": "n1Xen",
     "name": "Mikkel Borlund",
-    "team": "EAC",
+    "team": "无队伍",
     "nationality": "Denmark",
     "countryCode": "DK",
     "age": 23,
@@ -101878,7 +101874,7 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "Esport Academy Copenhagen",
+      "EAC",
       "AaB Esport",
       "Copenhagen Wolves",
       "WOPA Esport",
@@ -101891,7 +101887,6 @@
     "aliases": [
       "Mikkel Borlund"
     ],
-    "teamLogoUrl": "https://files.bo3.gg/uploads/team/23942/image/webp-0545a1f3170cde695778a169559e973f.webp",
     "imageUrl": "https://files.bo3.gg/uploads/player/28633/image/webp-8a9789f45b22f7cfcab80951d3d4be49.webp"
   },
   {
@@ -152916,7 +152911,7 @@
         },
         {
           "source": "faceit",
-          "externalId": "e96c714b-455b-43ea-a519-c3ab93e250f4"
+          "externalId": "ac784f9e-2975-4e9d-b3bc-f2b4a2e8c83b"
         },
         {
           "source": "liquipedia",
@@ -166168,7 +166163,7 @@
     },
     "nickname": "xenization",
     "name": "Turbold Amarzaya",
-    "team": "Eruption",
+    "team": "无队伍",
     "nationality": "Mongolia",
     "countryCode": "MN",
     "age": 21,
@@ -166176,12 +166171,12 @@
     "majorAppearances": 0,
     "majorWins": 0,
     "historicalTeams": [
-      "100RA"
+      "100RA",
+      "Eruption"
     ],
     "aliases": [
       "Амарзаяагийн Төрболд"
     ],
-    "teamLogoUrl": "https://cdn-api.pandascore.co/images/team/image/132488/eruption_2023_lightmode.png",
     "imageUrl": "https://files.bo3.gg/uploads/player/72633/image/webp-fb9fa486f34d3a90f54ba592e1579aec.webp"
   },
   {

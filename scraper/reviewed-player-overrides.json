@@ -102,5 +102,334 @@
       }
     ],
     "basis": "HLTV records SaMey leaving Walczaki on 2026-09-03, matching his dated Liquipedia tenure, and his current profile lists no team. Ignore the stale Walczaki claim for the ended stint while preserving its history and any explicitly dated later rejoin."
+  },
+  {
+    "player": {
+      "source": "liquipedia",
+      "external_id": "Anber"
+    },
+    "overrides": {
+      "current_team_departures": [
+        {
+          "team": {
+            "source": "liquipedia",
+            "external_id": "Esport Academy Copenhagen"
+          },
+          "ended_on": "2026-10-20",
+          "reviewed_on": "2026-10-26"
+        },
+        {
+          "team": {
+            "source": "bo3",
+            "external_id": "23942"
+          },
+          "ended_on": "2026-10-20",
+          "reviewed_on": "2026-10-26"
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "url": "https://x.com/TeamEAC/status/2112595745463324926",
+        "supports": [
+          "current_team_departure"
+        ]
+      },
+      {
+        "url": "https://www.dust2.dk/nyheder/79097/eac-fritstiller-hele-mandskabet",
+        "supports": [
+          "current_team_departure"
+        ]
+      },
+      {
+        "url": "https://www.dust2.dk/nyheder/79117/eac-extra-bliver-forfremmet",
+        "supports": [
+          "current_team"
+        ]
+      }
+    ],
+    "basis": "EAC announced immediate termination of all five first-team contracts on 2026-10-20. Its former EXTRA roster was separately promoted on 2026-10-21; that promotion does not retain the released players. Liquipedia and bo3 use distinct team records (Esport Academy Copenhagen and EAC), so cite both provider identities explicitly rather than globally equating academy roster names. Preserve history and any explicitly dated later rejoin."
+  },
+  {
+    "player": {
+      "source": "liquipedia",
+      "external_id": "Fessor"
+    },
+    "overrides": {
+      "current_team_departures": [
+        {
+          "team": {
+            "source": "liquipedia",
+            "external_id": "Esport Academy Copenhagen"
+          },
+          "ended_on": "2026-10-20",
+          "reviewed_on": "2026-10-26"
+        },
+        {
+          "team": {
+            "source": "bo3",
+            "external_id": "23942"
+          },
+          "ended_on": "2026-10-20",
+          "reviewed_on": "2026-10-26"
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "url": "https://x.com/TeamEAC/status/2112595745463324926",
+        "supports": [
+          "current_team_departure"
+        ]
+      },
+      {
+        "url": "https://www.dust2.dk/nyheder/79097/eac-fritstiller-hele-mandskabet",
+        "supports": [
+          "current_team_departure"
+        ]
+      },
+      {
+        "url": "https://www.dust2.dk/nyheder/79117/eac-extra-bliver-forfremmet",
+        "supports": [
+          "current_team"
+        ]
+      }
+    ],
+    "basis": "EAC announced immediate termination of all five first-team contracts on 2026-10-20. Its former EXTRA roster was separately promoted on 2026-10-21; that promotion does not retain the released players. Liquipedia and bo3 use distinct team records (Esport Academy Copenhagen and EAC), so cite both provider identities explicitly rather than globally equating academy roster names. Preserve history and any explicitly dated later rejoin."
+  },
+  {
+    "player": {
+      "source": "liquipedia",
+      "external_id": "N1Xen"
+    },
+    "overrides": {
+      "current_team_departures": [
+        {
+          "team": {
+            "source": "liquipedia",
+            "external_id": "Esport Academy Copenhagen"
+          },
+          "ended_on": "2026-10-20",
+          "reviewed_on": "2026-10-26"
+        },
+        {
+          "team": {
+            "source": "bo3",
+            "external_id": "23942"
+          },
+          "ended_on": "2026-10-20",
+          "reviewed_on": "2026-10-26"
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "url": "https://x.com/TeamEAC/status/2112595745463324926",
+        "supports": [
+          "current_team_departure"
+        ]
+      },
+      {
+        "url": "https://www.dust2.dk/nyheder/79097/eac-fritstiller-hele-mandskabet",
+        "supports": [
+          "current_team_departure"
+        ]
+      },
+      {
+        "url": "https://www.dust2.dk/nyheder/79117/eac-extra-bliver-forfremmet",
+        "supports": [
+          "current_team"
+        ]
+      }
+    ],
+    "basis": "EAC announced immediate termination of all five first-team contracts on 2026-10-20. Its former EXTRA roster was separately promoted on 2026-10-21; that promotion does not retain the released players. Liquipedia and bo3 use distinct team records (Esport Academy Copenhagen and EAC), so cite both provider identities explicitly rather than globally equating academy roster names. Preserve history and any explicitly dated later rejoin."
+  },
+  {
+    "player": {
+      "source": "liquipedia",
+      "external_id": "FinigaN"
+    },
+    "overrides": {
+      "current_team_departures": [
+        {
+          "team": {
+            "source": "liquipedia",
+            "external_id": "Fire Flux Esports"
+          },
+          "ended_on": "2026-01-09",
+          "reviewed_on": "2026-10-26"
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "url": "https://www.hltv.org/team/12960/fire-flux",
+        "supports": [
+          "current_team_departure",
+          "current_team"
+        ]
+      },
+      {
+        "url": "https://liquipedia.net/counterstrike/Fire_Flux_Esports",
+        "supports": [
+          "current_team_departure"
+        ]
+      },
+      {
+        "url": "https://www.hltv.org/player/17305/finigan",
+        "supports": [
+          "current_team"
+        ]
+      },
+      {
+        "url": "https://www.hltv.org/matches/2399098/fire-flux-vs-ex-6666-nodwin-clutch-series-13",
+        "supports": [
+          "temporary_substitute_not_roster_rejoin"
+        ]
+      }
+    ],
+    "basis": "Fire Flux released its previous lineup on 2026-01-09, matching FinigaN's dated Liquipedia tenure and HLTV team history. His current HLTV profile lists no team. The 2026-10-19 Fire Flux appearance is explicitly labelled Substitute, not a new permanent roster stint. Exclude the undated current-team claim while preserving historical and match evidence, and allow any explicitly dated later rejoin."
+  },
+  {
+    "player": {
+      "source": "liquipedia",
+      "external_id": "Xenization"
+    },
+    "overrides": {
+      "current_team_departures": [
+        {
+          "team": {
+            "source": "liquipedia",
+            "external_id": "Eruption"
+          },
+          "ended_on": "2026-01-28",
+          "reviewed_on": "2026-10-26"
+        },
+        {
+          "team": {
+            "source": "liquipedia",
+            "external_id": "100RA"
+          },
+          "ended_on": "2026-04-20",
+          "reviewed_on": "2026-10-26"
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "url": "https://www.hltv.org/team/12097/eruption",
+        "supports": [
+          "current_team_departure"
+        ]
+      },
+      {
+        "url": "https://www.hltv.org/team/13718/100ra",
+        "supports": [
+          "current_team_departure"
+        ]
+      },
+      {
+        "url": "https://www.hltv.org/player/24125/xenization",
+        "supports": [
+          "current_team"
+        ]
+      }
+    ],
+    "basis": "HLTV records xenization transferring from Eruption to 100RA on 2026-01-28 and leaving 100RA on 2026-04-20; his current profile lists no team. These dates agree with the more precise and month-precision Liquipedia history respectively. Exclude both obsolete affiliations, preserving history and any explicitly dated later rejoin."
+  },
+  {
+    "player": {
+      "source": "liquipedia",
+      "external_id": "Bloody"
+    },
+    "overrides": {
+      "current_team_departures": [
+        {
+          "team": {
+            "source": "liquipedia",
+            "external_id": "Legion (Pakistani team)"
+          },
+          "ended_on": "2026-10-26",
+          "reviewed_on": "2026-10-26"
+        },
+        {
+          "team": {
+            "source": "liquipedia",
+            "external_id": "Legion"
+          },
+          "ended_on": "2026-10-26",
+          "reviewed_on": "2026-10-26"
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "url": "https://liquipedia.net/counterstrike/index.php?title=Bloody&oldid=3463242",
+        "supports": [
+          "current_team_departure",
+          "current_team"
+        ]
+      },
+      {
+        "url": "https://www.dust2.in/news/78968/pokemon-bloody-to-miss-alter-egos-upcoming-event-in-china",
+        "supports": [
+          "current_team"
+        ]
+      },
+      {
+        "url": "https://www.dust2.in/news/78649/visa-issues-shut-down-alter-egos-frag-university-dreams",
+        "supports": [
+          "current_team"
+        ]
+      },
+      {
+        "url": "https://www.dust2.us/matches/2399892/alter-ego-vs-ground-z-off-chops-winner",
+        "supports": [
+          "current_team"
+        ]
+      }
+    ],
+    "basis": "The reviewed Liquipedia Bloody revision3463242 (modified2026-10-26T08:13:08Z, fetched2026-10-26T08:56:24.195887Z) explicitly ends the Legion (Pakistani team) tenure on2026-10-26 and identifies Alter Ego as current. Independent October7/17 reporting describes his ongoing Alter Ego loan, and the October26 DFRAG lineup confirms the same Zain Talha. The later-fetched undated PandaScore59728 affiliation still names Legion137344 and wrongly outranks current Alter Ego. Scope this cutoff to the two exact Legion provider identities for this player, preserve tenure history and any explicitly dated later rejoin; do not infer an earlier departure day or globally equate unrelated Legion teams."
+  },
+  {
+    "player": {
+      "source": "liquipedia",
+      "external_id": "Tired73"
+    },
+    "overrides": {
+      "platform_id_corrections": [
+        {
+          "source": "faceit",
+          "incorrect_external_id": "e96c714b-455b-43ea-a519-c3ab93e250f4",
+          "correct_external_id": "ac784f9e-2975-4e9d-b3bc-f2b4a2e8c83b",
+          "expected_steam_id": "76561198874893271"
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "url": "https://www.faceit.com/api/users/v1/users/ac784f9e-2975-4e9d-b3bc-f2b4a2e8c83b",
+        "supports": [
+          "correct_platform_identity",
+          "matching_steam_account"
+        ]
+      },
+      {
+        "url": "https://www.faceit.com/api/users/v1/users/e96c714b-455b-43ea-a519-c3ab93e250f4",
+        "supports": [
+          "incorrect_platform_identity",
+          "different_steam_account"
+        ]
+      },
+      {
+        "url": "https://liquipedia.net/counterstrike/Tired73",
+        "supports": [
+          "nickname",
+          "full_name",
+          "steam_account"
+        ]
+      }
+    ],
+    "basis": "FACEIT's own account API identifies the imported e96c714b UUID as swirn with CS2 Steam ID 76561199094651964, not tired73. The ac784f9e UUID has CS2 Steam ID 76561198874893271, exactly matching tired73's existing stable Steam identity; its current handle nxstep67 is not used as the identity proof. Replace only this disproven FACEIT association, preserve the canonical/public IDs and original provider evidence, and prevent stale refetches from restoring it. Verified 2026-10-26."
   }
 ]

@@ -2989,3 +2989,165 @@ def test_identity_merge_rekeys_major_evidence_before_resolving_conflict(tmp_path
 
     assert report["major_appearances_total"] == 1
     assert report["major_appearances"][0]["participation_kind"] == "participant"
+
+
+_BAD_FACEIT = "e96c714b-455b-43ea-a519-c3ab93e250f4"
+_GOOD_FACEIT = "ac784f9e-2975-4e9d-b3bc-f2b4a2e8c83b"
+_REVIEWED_STEAM = "76561198874893271"
+
+
+def _platform_correction_review():
+    return {
+        "player": {"source": "liquipedia", "external_id": "tired73"},
+        "overrides": {"platform_id_corrections": [{
+            "source": "faceit",
+            "incorrect_external_id": _BAD_FACEIT,
+            "correct_external_id": _GOOD_FACEIT,
+            "expected_steam_id": _REVIEWED_STEAM,
+        }]},
+        "evidence": [
+            {"url": f"https://www.faceit.com/api/users/v1/users/{_BAD_FACEIT}"},
+            {"url": f"https://www.faceit.com/api/users/v1/users/{_GOOD_FACEIT}"},
+        ],
+        "basis": "Independent platform API ties only the replacement to the Steam ID.",
+    }
+
+
+def _platform_correction_player(store):
+    parsed = {
+        "external_id": "tired73", "nickname": "tired73",
+        "full_name": "Reviewed Player", "country_code": "RU",
+        "birth_date": "2007-01-01", "roles": ["rifler"],
+        "platform_ids": {"steam": _REVIEWED_STEAM, "faceit": _BAD_FACEIT},
+    }
+    return store.upsert_source_player("liquipedia", parsed), parsed
+
+
+def test_reviewed_platform_correction_preserves_identity_raw_evidence_and_replays(tmp_path):
+    from cs_guess_scraper.app_catalog import build_app_catalog
+
+    path = tmp_path / "players.sqlite3"
+    review = _platform_correction_review()
+    with PlayerStore(path, schema_path=SCHEMA_PATH) as store:
+        player_id, parsed = _platform_correction_player(store)
+        store.merge_all()
+        [before] = build_app_catalog(store.export_game_records())
+        raw_before = [tuple(row) for row in store.connection.execute(
+            "SELECT id, payload_sha256 FROM source_records WHERE source = 'liquipedia'"
+        )]
+        first = store.apply_reviewed_player_overrides([review])
+        second = store.apply_reviewed_player_overrides([review])
+        store.merge_all()
+        [after] = build_app_catalog(store.export_game_records())
+        assert first == {"applied": 1, "already_applied": 0}
+        assert second == {"applied": 0, "already_applied": 1}
+        assert after["id"] == before["id"]
+        assert after["catalogIdentity"]["canonicalId"] == player_id
+        for field in ("majorAppearances", "majorWins", "nickname", "name"):
+            assert after[field] == before[field]
+        assert store.resolve_player_id("faceit", _GOOD_FACEIT) == player_id
+        assert store.connection.execute(
+            "SELECT player_id FROM player_source_ids WHERE source='faceit' AND external_id=?",
+            (_BAD_FACEIT,),
+        ).fetchone() is None
+        assert [tuple(row) for row in store.connection.execute(
+            "SELECT id, payload_sha256 FROM source_records WHERE source = 'liquipedia'"
+        )] == raw_before
+        assert len([entry for entry in store.audit(player_id)["evidence"]
+                    if entry["field_name"] == "platform_id_corrections"]) == 1
+        assert store.connection.execute(
+            "SELECT source_url FROM player_source_ids WHERE source='faceit' AND external_id=?",
+            (_GOOD_FACEIT,),
+        ).fetchone()[0].endswith(_GOOD_FACEIT)
+
+    # Persisted audit policy works after reopening, even without registering JSON again.
+    with PlayerStore(path, schema_path=SCHEMA_PATH) as store:
+        assert store.upsert_source_player("liquipedia", parsed) == player_id
+        assert store.connection.execute(
+            "SELECT player_id FROM player_source_ids WHERE source='faceit' AND external_id=?",
+            (_BAD_FACEIT,),
+        ).fetchone() is None
+        assert store.apply_reviewed_player_overrides([review])["already_applied"] == 1
+
+
+def test_reviewed_platform_correction_filters_before_new_source_identity_match(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id, parsed = _platform_correction_player(store)
+        store.apply_reviewed_player_overrides([_platform_correction_review()])
+        other = store.upsert_source_player("liquipedia", {
+            "external_id": "swirn", "nickname": "swirn",
+            "platform_ids": {"steam": "76561199094651964", "faceit": _BAD_FACEIT},
+        })
+        parsed["external_id"] = "new-provider-id"
+        assert store.upsert_source_player("bo3", parsed) == player_id
+        assert store.resolve_player_id("faceit", _BAD_FACEIT) == other
+        assert store.resolve_player_id("faceit", _GOOD_FACEIT) == player_id
+        assert not store.connection.execute(
+            "SELECT id FROM merge_conflicts WHERE resolution_status = 'open'"
+        ).fetchall()
+
+
+def test_reviewed_platform_correction_refuses_stealing_replacement(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id, _ = _platform_correction_player(store)
+        other = store.upsert_source_player("bo3", {
+            "external_id": "other", "nickname": "other",
+            "platform_ids": {"faceit": _GOOD_FACEIT},
+        })
+        with pytest.raises(ValueError, match="belongs to another player"):
+            store.apply_reviewed_player_overrides([_platform_correction_review()])
+        assert store.resolve_player_id("faceit", _BAD_FACEIT) == player_id
+        assert store.resolve_player_id("faceit", _GOOD_FACEIT) == other
+        assert not store.connection.execute(
+            "SELECT id FROM source_records WHERE source='manual'"
+        ).fetchall()
+
+
+@pytest.mark.parametrize("steam_ids", [[], ["76561199094651964"],
+                         [_REVIEWED_STEAM, "76561199094651964"]])
+def test_reviewed_platform_correction_requires_unambiguous_matching_steam(tmp_path, steam_ids):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        player_id = store.upsert_source_player("liquipedia", {
+            "external_id": "tired73", "nickname": "tired73",
+        })
+        for steam_id in steam_ids:
+            store.link_source_player(player_id, "steam", steam_id)
+        with pytest.raises(ValueError, match="one matching Steam ID"):
+            store.apply_reviewed_player_overrides([_platform_correction_review()])
+
+
+@pytest.mark.parametrize("field,value", [
+    ("source", "steam"), ("incorrect_external_id", "not-a-uuid"),
+    ("correct_external_id", None), ("correct_external_id", _BAD_FACEIT),
+    ("expected_steam_id", 76561198874893271),
+    ("expected_steam_id", " 76561198874893271"),
+    ("expected_steam_id", "99999999999999999"),
+])
+def test_reviewed_platform_correction_rejects_malformed_ids(tmp_path, field, value):
+    review = _platform_correction_review()
+    review["overrides"]["platform_id_corrections"][0][field] = value
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        _platform_correction_player(store)
+        with pytest.raises(ValueError):
+            store.register_reviewed_platform_id_corrections([review])
+        with pytest.raises(ValueError):
+            store.apply_reviewed_player_overrides([review])
+
+
+def test_registered_platform_correction_rejects_changed_steam_before_import(tmp_path):
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        store.register_reviewed_platform_id_corrections([_platform_correction_review()])
+        with pytest.raises(ValueError, match="Steam identity mismatch"):
+            store.upsert_source_player("liquipedia", {
+                "external_id": "tired73", "nickname": "tired73",
+                "platform_ids": {"steam": "76561199094651964", "faceit": _BAD_FACEIT},
+            })
+        assert store.connection.execute("SELECT COUNT(*) FROM players").fetchone()[0] == 0
+
+
+def test_registered_platform_correction_requires_evidence(tmp_path):
+    review = _platform_correction_review()
+    review["evidence"] = []
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        with pytest.raises(ValueError, match="cited evidence"):
+            store.register_reviewed_platform_id_corrections([review])
