@@ -3151,3 +3151,34 @@ def test_registered_platform_correction_requires_evidence(tmp_path):
     with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
         with pytest.raises(ValueError, match="cited evidence"):
             store.register_reviewed_platform_id_corrections([review])
+
+
+def test_reviewed_haz_page_rename_preserves_existing_identity(tmp_path):
+    import json
+
+    mappings = json.loads((SCHEMA_PATH.parent / "identity-merges.reviewed.json").read_text())
+    mapping = next(item for item in mappings
+                   if item["duplicate"] == {"source": "liquipedia", "external_id": "HaZ"})
+    assert mapping["survivor"] == {
+        "source": "liquipedia", "external_id": "HaZ (Swedish player)",
+    }
+    with PlayerStore(tmp_path / "players.sqlite3", schema_path=SCHEMA_PATH) as store:
+        old_id = store.upsert_source_player("liquipedia", {
+            "external_id": "HaZ (Swedish player)", "nickname": "HaZ",
+            "full_name": "Eric Holm", "country_code": "SE", "birth_date": "1987-10-28",
+        })
+        store.upsert_source_player("liquipedia", {
+            "external_id": "HaZ", "nickname": "HaZ", "full_name": "Eric Holm",
+            "country_code": "SE", "birth_date": "1987-10-28",
+        })
+        store.apply_reviewed_identity_merges([mapping])
+        assert store.resolve_player_id("liquipedia", "HaZ") == old_id
+        assert store.resolve_player_id("liquipedia", "HaZ (Swedish player)") == old_id
+        assert store.apply_reviewed_identity_merges([mapping])["already_merged"] == 1
+
+    catalog = json.loads((SCHEMA_PATH.parent.parent / "src/data/players.generated.json").read_text())
+    players = [p for p in catalog if p["nickname"] == "HaZ" and p["name"] == "Eric Holm"]
+    assert len(players) == 1
+    assert players[0]["id"] == "haz"
+    assert {p["externalId"] for p in players[0]["catalogIdentity"]["sourceIds"]
+            if p["source"] == "liquipedia"} == {"HaZ", "HaZ (Swedish player)"}

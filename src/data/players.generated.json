@@ -59746,49 +59746,14 @@
     "teamLogoUrl": "https://files.bo3.gg/uploads/team/23052/image/webp-0da982a37b264cc2325c1b0887d4bf43.webp"
   },
   {
-    "id": "haz-se-eric-holm",
-    "catalogIdentity": {
-      "canonicalId": "player_4e39b7af69a044ef80606333de331c7c",
-      "sourceIds": [
-        {
-          "source": "liquipedia",
-          "externalId": "HaZ"
-        }
-      ]
-    },
-    "nickname": "HaZ",
-    "name": "Eric Holm",
-    "team": "无队伍",
-    "nationality": "Sweden",
-    "countryCode": "SE",
-    "age": 39,
-    "role": "Unknown",
-    "majorAppearances": 0,
-    "majorWins": 0,
-    "historicalTeams": [
-      "Cotch",
-      "eSahara",
-      "Next-Evo",
-      "fm!TOXiC",
-      "Team Dignitas",
-      "Blight Gaming",
-      "Promise Keepers",
-      "Vitriolic Gaming",
-      "Crack Clan",
-      "Stockholm Magnetik",
-      "Eyeballers_(Counter-Strike_team)",
-      "Son of Asna",
-      "CheckSix.swe"
-    ],
-    "aliases": [
-      "Eric Holm"
-    ]
-  },
-  {
     "id": "haz",
     "catalogIdentity": {
       "canonicalId": "player_5225e4dfcb594addbcb1c83b00293e12",
       "sourceIds": [
+        {
+          "source": "liquipedia",
+          "externalId": "HaZ"
+        },
         {
           "source": "liquipedia",
           "externalId": "HaZ (Swedish player)"

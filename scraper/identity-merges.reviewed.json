@@ -1391,5 +1391,28 @@
         "url": "https://bo3.gg/players/kon-cs"
       }
     ]
+  },
+  {
+    "survivor": {
+      "source": "liquipedia",
+      "external_id": "HaZ (Swedish player)"
+    },
+    "duplicate": {
+      "source": "liquipedia",
+      "external_id": "HaZ"
+    },
+    "basis": "Liquipedia page-title migration duplicated Eric Holm (Sweden, born 1987-10-28): the prior HaZ (Swedish player) revision 3348200 and new HaZ revision 3464416 have the same legal name, birth date and all 13 career teams. Preserve the existing canonical player and public catalog ID haz, retaining both source titles. Verified against the 2026-11-02 candidate database and Eric Holm career record.",
+    "evidence": [
+      {
+        "source": "liquipedia",
+        "external_id": "HaZ (Swedish player)",
+        "url": "https://liquipedia.net/counterstrike/HaZ_(Swedish_player)"
+      },
+      {
+        "source": "liquipedia",
+        "external_id": "HaZ",
+        "url": "https://liquipedia.net/counterstrike/HaZ"
+      }
+    ]
   }
 ]
