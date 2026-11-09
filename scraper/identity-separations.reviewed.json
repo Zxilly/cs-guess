@@ -225,5 +225,37 @@
         "url": "https://www.hltv.org/player/13075/flaw"
       }
     ]
+  },
+  {
+    "left": {
+      "source": "pandascore",
+      "external_id": "20768"
+    },
+    "right": {
+      "source": "pandascore",
+      "external_id": "68861"
+    },
+    "basis": "Alexander Diaz (formerly zander, now zanz; HLTV 9876, born 1996-09-23) and Alexander Shirah (HLTV 26979, age 21) are distinct US players. HLTV records Shirah playing for Crimson Vortex in November 2026, while Diaz has Take Flyte and Rugratz history. The shared nickname and provider current-team attribution do not establish identity; preserve both provider records separately.",
+    "evidence": [
+      {
+        "source": "hltv",
+        "external_id": "9876",
+        "url": "https://www.hltv.org/player/9876/zanz"
+      },
+      {
+        "source": "hltv",
+        "external_id": "26979",
+        "url": "https://www.hltv.org/player/26979/zander"
+      },
+      {
+        "source": "liquipedia",
+        "external_id": "Zanz",
+        "url": "https://liquipedia.net/counterstrike/Zanz"
+      },
+      {
+        "source": "bo3",
+        "url": "https://bo3.gg/players/zander"
+      }
+    ]
   }
 ]
