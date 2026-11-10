@@ -184,3 +184,10 @@ jobs:
 
           echo "Production did not report revision ${EXPECTED_VERSION}." >&2
           exit 1
+
+  indexnow:
+    name: Notify search engines
+    needs: deploy
+    permissions:
+      contents: read
+    uses: ./.github/workflows/indexnow.yml
