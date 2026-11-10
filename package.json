@@ -14,7 +14,7 @@
     "lint": "oxlint .",
     "test": "vitest run",
     "test:frontend": "vitest run",
-    "test:built": "node --test scripts/seo-built.test.mjs",
+    "test:built": "node --test scripts/seo-built.check.mjs",
     "test:layout": "playwright test",
     "typecheck": "tsc -b",
     "test:server": "cargo test --manifest-path server/Cargo.toml",
