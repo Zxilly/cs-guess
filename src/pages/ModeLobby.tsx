@@ -17,6 +17,7 @@ import { Suspense, useEffect, useState } from "react";
 import { Link } from "react-router";
 
 import { AppHeader } from "@/components/AppHeader";
+import { GameGuideLink } from "@/components/GameGuideLink";
 import { InfoTip } from "@/components/InfoTip";
 import { PageIntro } from "@/components/PageIntro";
 import { PanelHeader } from "@/components/PanelHeader";
@@ -318,6 +319,7 @@ export function ModeLobby() {
         </div>
 
         <footer className="mt-7 flex flex-col items-center justify-between gap-2 border-t border-foreground/15 pt-5 sm:flex-row">
+          <GameGuideLink />
           <p className="inline-flex min-h-11 items-center gap-2 px-2 font-mono text-xs tracking-[0.04em] text-muted-foreground">
             <ClockCounterClockwiseIcon className="size-4" weight="regular" />
             <span>{t`数据更新时间`}</span>

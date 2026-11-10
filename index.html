@@ -5,20 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="CS Guess — Daily Counter-Strike pro player guessing challenge"
+      content="Guess Counter-Strike pro players from team, nationality, age, role and Major clues. Play the daily challenge, solo practice, matchmaking or private rooms."
     />
     <meta name="theme-color" content="#f8f8f5" />
-    <title>CS Guess — Daily Player Guessing</title>
+    <title>CS Guess — Counter-Strike Player Guessing Game</title>
+    <link rel="canonical" href="https://cs-guess.zxilly.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="CS Guess — Counter-Strike Player Guessing Game" />
+    <meta property="og:description" content="Guess professional Counter-Strike players from their team, nationality, age, role and Major history. Daily challenges, solo practice and multiplayer." />
+    <meta property="og:url" content="https://cs-guess.zxilly.com/" />
+    <meta name="twitter:card" content="summary" />
+    <script>
+      // Static CDN hosting can serve this shell without the Rust response headers.
+      if (/^\/(?:identity|solo|quick|matching|room|stats|play)(?:\/|$)/.test(location.pathname)) {
+        const robots = document.createElement("meta");
+        robots.name = "robots";
+        robots.content = "noindex, follow";
+        document.head.append(robots);
+      }
+    </script>
     <script
       async
       data-production-only
       src="https://trail.learningman.top/script.js"
       data-website-id="f71a1500-e0a4-4200-9c8c-e36a35cbf37b"
       data-domains="cs-guess.zxilly.com"
+      data-exclude-search="true"
+      data-exclude-hash="true"
     ></script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main style="max-width: 48rem; margin: 4rem auto; padding: 1.5rem; font-family: system-ui, sans-serif; line-height: 1.7">
+        <h1>CS Guess — Counter-Strike player guessing game</h1>
+        <p>Guess the mystery professional player using team, nationality, age, role, Major appearance and Major win clues. Choose a daily challenge, solo practice, matchmaking or a private room.</p>
+        <p>The game is loading. Choose a player identity to start; your existing identity is restored in this browser.</p>
+        <nav aria-label="Game guides"><a href="/guide/">How to play</a> · <a href="/guide/zh/" lang="zh-CN">CS 选手猜谜玩法</a> · <a href="https://github.com/Zxilly/cs-guess">GitHub</a></nav>
+        <noscript><p>JavaScript is required to play. You can read the game guides without JavaScript.</p></noscript>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

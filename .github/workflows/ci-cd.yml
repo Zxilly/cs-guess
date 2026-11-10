@@ -45,6 +45,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Verify public search pages
+        run: pnpm test:built
+
   server:
     name: Verify server
     runs-on: ubuntu-latest

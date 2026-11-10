@@ -13,6 +13,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 
 import { AppHeader } from "@/components/AppHeader";
+import { GameGuideLink } from "@/components/GameGuideLink";
 import {
   IdentityDrawDialog,
   type IdentityDrawPendingAction,
@@ -627,6 +628,9 @@ export function IdentityPage() {
             </div>
           </Card>
         </div>
+        <footer className="mt-7 border-t border-foreground/15 pt-5">
+          <GameGuideLink />
+        </footer>
       </main>
 
       {displayedDraw ? (

@@ -6,6 +6,8 @@ An open-source guessing game for Counter-Strike esports fans.
 
 [Play CS Guess](https://cs-guess.zxilly.com)
 
+[How to play](https://cs-guess.zxilly.com/guide/) · [中文玩法说明](https://cs-guess.zxilly.com/guide/zh/)
+
 Inspired by [BLAST Counter-Strikle](https://blast.tv/counter-strikle).
 
 Guess the mystery professional player and use the result of each attempt to
@@ -55,3 +57,12 @@ pnpm build
 - [Server protocol and configuration](server/README.md)
 
 Bug reports and contributions are welcome.
+
+The public guides in `public/guide/` are static HTML and are copied by Vite without
+initializing a game or fetching daily answers. `public/sitemap.xml` lists the homepage
+and both guides. The server serves guide directories directly and marks gameplay,
+API and health responses as `noindex`. The SPA shell also applies this signal on
+direct visits to game routes when served by a static CDN. HTML pages declare the
+public frontend as canonical; no Host-based rule is used because a CDN can rewrite
+the upstream Host header. Umami is restricted to the production frontend hostname
+and omits query strings and hashes.

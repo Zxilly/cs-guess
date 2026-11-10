@@ -188,6 +188,10 @@ async fn ready(State(state): State<AppState>) -> Response {
 
 async fn apply_api_cache_policy(request: Request<Body>, next: Next) -> Response {
     let path = request.uri().path();
+    let is_game_page = matches!(
+        path,
+        "/identity" | "/solo" | "/quick" | "/matching" | "/room" | "/stats"
+    ) || path.starts_with("/play/");
     let is_api = path == "/v1" || path.starts_with("/v1/");
     let is_health = path.starts_with("/health/");
     let is_private = request.method() != Method::GET
@@ -208,6 +212,12 @@ async fn apply_api_cache_policy(request: Request<Body>, next: Next) -> Response 
     };
 
     let mut response = next.run(request).await;
+    if is_api || is_health || is_game_page {
+        response.headers_mut().insert(
+            HeaderName::from_static("x-robots-tag"),
+            HeaderValue::from_static("noindex, follow"),
+        );
+    }
     if let Some(cache_policy) = cache_policy {
         response.headers_mut().insert(CACHE_CONTROL, cache_policy);
     }
@@ -781,16 +791,22 @@ async fn frontend_or_not_found(State(state): State<AppState>, request: Request<B
     }
 
     let static_dir = &state.config().static_dir;
-    let is_static_file = path != "/"
-        && std::path::Path::new(path.trim_start_matches('/'))
-            .extension()
-            .is_some();
+    let is_guide = path == "/guide" || path.starts_with("/guide/");
+    let is_static_file = is_guide
+        || path != "/"
+            && std::path::Path::new(path.trim_start_matches('/'))
+                .extension()
+                .is_some();
 
     if is_static_file {
         return match ServeDir::new(static_dir).oneshot(request).await {
             Ok(response) => {
                 let mut response = response.map(Body::new);
-                let cache_policy = if path.starts_with("/assets/") {
+                let cache_policy = if is_guide {
+                    HeaderValue::from_static(
+                        "public, max-age=0, s-maxage=60, stale-while-revalidate=300",
+                    )
+                } else if path.starts_with("/assets/") {
                     HeaderValue::from_static("public, max-age=31536000, immutable")
                 } else {
                     HeaderValue::from_static("public, max-age=604800")
@@ -838,6 +854,9 @@ mod tests {
         let static_dir = std::env::temp_dir().join(format!("cs-guess-static-{}", Uuid::new_v4()));
         fs::create_dir_all(static_dir.join("assets")).unwrap();
         fs::create_dir_all(static_dir.join("audio")).unwrap();
+        fs::create_dir_all(static_dir.join("guide/zh")).unwrap();
+        fs::write(static_dir.join("guide/index.html"), "<h1>How to play</h1>").unwrap();
+        fs::write(static_dir.join("guide/zh/index.html"), "<h1>玩法说明</h1>").unwrap();
         fs::write(
             static_dir.join("index.html"),
             "<!doctype html><title>CS Guess</title>",
@@ -871,6 +890,39 @@ mod tests {
             let body = response.into_body().collect().await.unwrap().to_bytes();
             assert!(body.windows(8).any(|value| value == b"CS Guess"));
         }
+
+        for uri in ["/guide/", "/guide/zh/"] {
+            let response = service
+                .clone()
+                .oneshot(Request::get(uri).body(Body::empty()).unwrap())
+                .await
+                .unwrap();
+            assert_eq!(response.status(), StatusCode::OK);
+            assert!(!response.headers().contains_key("x-robots-tag"));
+            let body = response.into_body().collect().await.unwrap().to_bytes();
+            assert!(body.starts_with(b"<h1>"));
+        }
+
+        let homepage = service
+            .clone()
+            .oneshot(
+                Request::get("/")
+                    .header(header::HOST, "api.cs-guess.zxilly.com")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(homepage.status(), StatusCode::OK);
+        // A CDN may use this origin Host for the public frontend as well.
+        assert!(!homepage.headers().contains_key("x-robots-tag"));
+
+        let game = service
+            .clone()
+            .oneshot(Request::get("/play/daily").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+        assert_eq!(game.headers()["x-robots-tag"], "noindex, follow");
 
         let asset = service
             .clone()
