@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "snapshot": "ghcr.io/zxilly/cs-guess-data@sha256:c751aa0d61187485a6faff03e070af6c7f17e582eb88d62def4bb4a12c8abcfd",
-  "workflowUrl": "https://github.com/Zxilly/cs-guess/actions/runs/42609678021",
-  "runId": 42609678021,
+  "snapshot": "ghcr.io/zxilly/cs-guess-data@sha256:c56e9700f2d91962edb8c02ce1ee0556fac97d73b144eca1d4d541f0d96c70fa",
+  "workflowUrl": "https://github.com/Zxilly/cs-guess/actions/runs/43856390966",
+  "runId": 43856390966,
   "runAttempt": 1,
-  "createdAt": "2026-11-09T13:22:15Z",
+  "createdAt": "2026-11-16T12:54:06Z",
   "quality": {
-    "passed": false,
-    "criticalIssues": 1,
-    "openConflicts": 2,
+    "passed": true,
+    "criticalIssues": 0,
+    "openConflicts": 0,
     "warnings": 4
   }
 }
